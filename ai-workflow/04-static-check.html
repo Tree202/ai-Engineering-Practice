@@ -472,7 +472,7 @@ def format_price(cents: int) -&gt; str:   # 改后:返回 "免费"
   <br><br>
   实测把 <code>strict</code> 拼成 <code>strictt</code>:
   <pre style="margin:9px 0"><code>pyproject.toml: [mypy]: Unrecognized option: strictt = True
-Success: no issues found in 8 source files</code></pre>
+Success: no issues found in 10 source files</code></pre>
   <p style="margin:9px 0 0"><strong>严格模式根本没开,报的却是 Success。</strong>
   这是一个「假绿」—— 而假绿比直接报错危险得多,因为它让你放松警惕。</p>
 </div>

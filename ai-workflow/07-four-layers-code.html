@@ -488,7 +488,7 @@ pytest: SyntaxError: bytes can only contain ASCII literal characters</span></pre
 
 <h2 id="l4">五、第 &#9315; 层:E2E</h2>
 
-<p><strong>示意代码 · 默认跳过 · 准备段:要开一个真浏览器</strong> · 项目文件中另有一条不用 fixture 的「写法二」测试,原理相同</p>
+<p><strong>真实代码 · 没装浏览器驱动时整个文件跳过,装上就真跑 · 准备段:要开一个真浏览器</strong> · 项目文件中另有一条不用 fixture 的「写法二」测试,原理相同</p>
 
 <pre><code># 文件:tests/e2e/test_checkout_e2e.py
 """第 4 层:E2E 测试(金字塔最顶上,数量最少、最慢、最容易「假失败」)。
@@ -558,7 +558,7 @@ def test_用户可以从首页一路下单成功(page: Page) -&gt; None:
   <code>page.wait_for_timeout</code> 和 <code>time.sleep</code> 才是官方明确劝退的「硬等待」。
 </div>
 
-<h3>它默认跳过的样子</h3>
+<h3>没装浏览器驱动时,它跳过的样子</h3>
 
 <pre><code>cd &lt;你的项目&gt;/myshop && .venv/bin/python -m pytest -rs -q</code></pre>
 

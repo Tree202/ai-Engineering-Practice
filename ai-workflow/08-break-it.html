@@ -198,7 +198,7 @@
 <span class="c-ok">All checks passed!</span>
 
 <span class="c-cmd">$ .venv/bin/python -m mypy</span>
-<span class="c-ok">Success: no issues found in 8 source files</span>
+<span class="c-ok">Success: no issues found in 10 source files</span>
 
 <span class="c-cmd">$ .venv/bin/python -m pytest tests/test_price.py</span>
 <span class="c-bad">3 failed, 2 passed in 0.04s</span></pre>
@@ -257,7 +257,7 @@ E         + ¥0.5</span></pre>
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
 <pre><span class="c-cmd">$ ruff check .</span>   <span class="c-ok">All checks passed!</span>
-<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 8 source files</span>
+<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 10 source files</span>
 
 <span class="c-cmd">$ pytest</span>
 <span class="c-bad">==================== 8 failed, 9 passed, 1 skipped in 3.65s ====================</span></pre>
@@ -335,7 +335,7 @@ E         + ¥0.5</span></pre>
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
 <pre><span class="c-cmd">$ ruff check .</span>   <span class="c-ok">All checks passed!</span>
-<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 8 source files</span>
+<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 10 source files</span>
 
 <span class="c-cmd">$ pytest</span>
 tests/test_price.py::test_普通价格 <span class="c-bad">FAILED</span>
@@ -536,7 +536,7 @@ get_order 结果: <span class="c-bad">LookupError: 订单 1 不存在</span></pr
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
 <pre><span class="c-cmd">$ ruff check .</span>   <span class="c-ok">All checks passed!</span>
-<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 8 source files</span>
+<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 10 source files</span>
 
 <span class="c-cmd">$ pytest</span>
 <span class="c-bad">FAILED tests/test_api.py::test_下单之后能用_GET_查回来 - assert 404 == 200
@@ -590,6 +590,27 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
   因为同连接里没提交的数据照样读得到。
   <br><br>
   <strong>这个 bug 就漏了。</strong>
+</div>
+
+<div class="box note">
+  <b class="t">附注:装上浏览器驱动之后,五次实验长什么样(Windows 实测)</b>
+  配套项目后来补了一个最小网页(<code>web.py</code>,第 <a class="pg" href="06-myshop.html">6</a> 页),
+  装上 playwright 后那条 E2E 不再跳过:基线变成 <code>19 passed</code>(两条 E2E 真跑),
+  mypy 报 <code>10 source files</code>。本页五次实验在 Windows 上重跑的新数字:
+  <br><br>
+  <span style="font-family:var(--mono);font-size:12.5px">
+  &#9312; 3 failed, 2 passed(只跑 test_price,不变)&nbsp;·&nbsp;
+  &#9313; 10 failed, 9 passed&nbsp;·&nbsp;
+  &#9314; 8 failed, 11 passed&nbsp;·&nbsp;
+  &#9315; 1 failed, 18 passed&nbsp;·&nbsp;
+  &#9316; 3 failed, 16 passed</span>
+  <br><br>
+  真正值得记的是这个:<strong>实验④⑤里,两条 E2E 全绿</strong>。
+  尤其实验⑤的静默数据丢失 —— 页面显示的是
+  <code>create_order</code> 的返回值,看上去完全正常,
+  <strong>开真浏览器点完整流程也抓不到</strong>;
+  能抓住它的只有第二层那条「换个连接读回来」。
+  金字塔最贵的那层上了,结论不变:<strong>上层全绿不代表下层没问题。</strong>
 </div>
 
 <h2 id="sum">七、五次横向对比</h2>
