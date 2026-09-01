@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,10 +108,10 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 16 页 · 难度 ★★★ · 前置:第 14、15 页 · 门禁的前置</span>
+<span class="kicker">第 16 页 · 难度 ★★★ · 前置:第 <a class="pg" href="14-workflow.html">14</a>、<a class="pg" href="15-team-roles.html">15</a> 页 · 门禁的前置</span>
 <h1>流水线:8 道关卡与本地/云端</h1>
 <p class="lede">
-代码从你手里到生产,要过八道关。<strong>这一页建立的坐标系,是理解第 17–19 页「质量门禁」的前提</strong> ——
+代码从你手里到生产,要过八道关。<strong>这一页建立的坐标系,是理解第 <a class="pg" href="17-quality-gate.html">17</a>–<a class="pg" href="19-gate-demo.html">19</a> 页「质量门禁」的前提</strong> ——
 不懂流水线,不可能懂门禁。
 </p>
 
@@ -162,7 +162,7 @@
     大错。<strong>用流水线当调试工具是最慢最贵的开发方式</strong> ——
     一个来回 10 分钟,而本地一个来回 3 秒。</p>
     <p><strong>误区 2:「流水线红了 = 我的代码有问题」。</strong>
-    不一定 —— 也可能是环境问题、依赖服务挂了、或者别人的改动。第 19 页有一次真实的故障排查实录。</p>
+    不一定 —— 也可能是环境问题、依赖服务挂了、或者别人的改动。第 <a class="pg" href="19-gate-demo.html">19</a> 页有一次真实的故障排查实录。</p>
   </div></div>
 </div>
 
@@ -454,7 +454,7 @@ b27d579 docs: 好代码应该被放行     <span class="c-dim">&larr; 坏代码�
   </div></div>
 
   <div class="step"><div class="n">&#9314; 位置</div><div class="c">
-    <p>它是<strong>流水线的排序原则</strong>,和第 5 页的测试金字塔<strong>方向一致</strong> ——
+    <p>它是<strong>流水线的排序原则</strong>,和第 <a class="pg" href="05-pyramid.html">5</a> 页的测试金字塔<strong>方向一致</strong> ——
     金字塔从下往上跑,流水线也从便宜往贵排。</p>
   </div></div>
 
@@ -592,7 +592,7 @@ jobs:
   </table>
   </div>
   <p style="margin:9px 0 0"><strong>上面那份配置没有加 <code>paths</code> 过滤 —— 这恰好避开了这个死锁,是个安全的入门默认。</strong>
-  第 17 页讲门禁时会再回到这个问题。</p>
+  第 <a class="pg" href="17-quality-gate.html">17</a> 页讲门禁时会再回到这个问题。</p>
 </div>
 
 <h3>本页知识点回顾</h3>
@@ -639,5 +639,6 @@ jobs:
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

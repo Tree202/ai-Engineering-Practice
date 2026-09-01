@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 03 页 · 难度 ★★ · 前置:第 02 页</span>
+<span class="kicker">第 03 页 · 难度 ★★ · 前置:第 <a class="pg" href="02-python-setup.html">02</a> 页</span>
 <h1>测试到底是什么</h1>
 <p class="lede">
 「让 AI 自测」这四个字里的「测」到底指什么?是几百条用例?是一段自然语言?
@@ -138,7 +138,7 @@
 
 <h3>一个测试长什么样</h3>
 
-<p>假设你有这么一个函数(这是第 6 页那个练习项目里真实的代码):</p>
+<p>假设你有这么一个函数(这是第 <a class="pg" href="06-myshop.html">6</a> 页那个练习项目里真实的代码):</p>
 
 <pre><code># 文件:项目根目录下的 myshop/price.py
 
@@ -282,7 +282,7 @@ E         + ¥0.5</span>
     <p><strong>误区 1:「<code>assert</code> 是测试专用的」。</strong>不是,它是 Python 内置关键字。</p>
     <p><strong>误区 2:「断言可以不写具体值」。</strong>
     <code>assert result</code> 这种只判断「非空」的断言,几乎测不出任何东西。
-    <strong>好断言里一定有一个写死的期望值</strong> —— 第 20 页会用这条标准来识别垃圾测试。</p>
+    <strong>好断言里一定有一个写死的期望值</strong> —— 第 <a class="pg" href="20-ai-boundary.html">20</a> 页会用这条标准来识别垃圾测试。</p>
   </div></div>
 </div>
 
@@ -344,14 +344,14 @@ E         + ¥0.5</span>
     <p><strong>误区 1:「pytest 会自动测我的代码」。</strong>不会。<strong>它只执行你写下的东西。</strong>
     你没想到要检查的场景,它一个也不会替你想。</p>
     <p><strong>误区 2:「没有红字就是全跑了」。</strong>不一定 ——
-    文件名不匹配的测试会<strong>静默地完全不运行</strong>(第 2 页讲过)。
+    文件名不匹配的测试会<strong>静默地完全不运行</strong>(第 <a class="pg" href="02-python-setup.html">2</a> 页讲过)。
     <strong>要看 <code>collected N items</code> 那个数字。</strong></p>
   </div></div>
 </div>
 
 <h3>退出码:给机器看的结果</h3>
 
-<p>人看的是绿字红字,<strong>机器看的是退出码</strong>。这个概念在第 17 页讲质量门禁时是核心。</p>
+<p>人看的是绿字红字,<strong>机器看的是退出码</strong>。这个概念在第 <a class="pg" href="17-quality-gate.html">17</a> 页讲质量门禁时是核心。</p>
 
 <div class="tw">
 <table>
@@ -371,7 +371,7 @@ E         + ¥0.5</span>
   <b class="t">记住这个「0 与非 0」的规则</b>
   几乎所有命令行工具都遵守:<strong>0 表示成功,任何非 0 表示失败。</strong>
   <br><br>
-  <strong>第 16、17 页整套流水线和质量门禁,判定依据就只有这一个数字。</strong>
+  <strong>第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="17-quality-gate.html">17</a> 页整套流水线和质量门禁,判定依据就只有这一个数字。</strong>
 </div>
 
 <h2 id="aaa">四、所有测试共用的骨架:三段式</h2>
@@ -410,7 +410,7 @@ E         + ¥0.5</span>
     <text x="420" y="226">0.00 秒 &rarr; 0.02 秒 &rarr; 3.64 秒 &rarr; 10 秒以上(第 5 页有实测)</text>
   </g>
 </svg>
-<figcaption>业内叫 AAA 模式。第 5、7 页会用它来解释四层测试的速度差异</figcaption>
+<figcaption>业内叫 AAA 模式。第 <a class="pg" href="05-pyramid.html">5</a>、<a class="pg" href="07-four-layers-code.html">7</a> 页会用它来解释四层测试的速度差异</figcaption>
 </figure>
 
 <p>看一个最小的例子 —— 这一层的「准备」是空的:</p>
@@ -476,7 +476,7 @@ E         + ¥0.5</span>
 
 <h2 id="fixture">六、准备工作再讲一遍</h2>
 
-<p>第 2 页已经介绍过准备工作(fixture)。这里补一个第 7 页会用到的关键点:<strong>它怎么保证测试之间互不干扰。</strong></p>
+<p>第 <a class="pg" href="02-python-setup.html">2</a> 页已经介绍过准备工作(fixture)。这里补一个第 <a class="pg" href="07-four-layers-code.html">7</a> 页会用到的关键点:<strong>它怎么保证测试之间互不干扰。</strong></p>
 
 <figure>
 <svg viewBox="0 0 860 240" role="img" aria-label="tmp_path 让每条测试拿到独立的临时目录">
@@ -523,7 +523,7 @@ E         + ¥0.5</span>
   <br><br>
   <strong>而 B 本身的代码完全没问题。</strong> 这种「测试互相污染」会让你花几小时排查一个不存在的 bug。
   <br><br>
-  更糟的是:<strong>换个执行顺序,失败的可能变成 A。</strong>这就是第 10 页要讲的「时红时绿」的成因之一。
+  更糟的是:<strong>换个执行顺序,失败的可能变成 A。</strong>这就是第 <a class="pg" href="10-flaky-e2e.html">10</a> 页要讲的「时红时绿」的成因之一。
 </div>
 
 <h2 id="three">七、三种容易混淆的「测试」</h2>
@@ -658,5 +658,6 @@ E         + ¥0.5</span>
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 20 页 · 难度 ★★★ · 前置:第 8、13、18 页 · 全书唯一「不能外包」的一页</span>
+<span class="kicker">第 20 页 · 难度 ★★★ · 前置:第 <a class="pg" href="08-break-it.html">08</a>、<a class="pg" href="13-claude-code.html">13</a>、<a class="pg" href="18-gate-items.html">18</a> 页 · 全书唯一「不能外包」的一页</span>
 <h1>AI 的能力边界与防作弊</h1>
 <p class="lede">
 前十九页都在讲「怎么让 AI 帮你干活」。这一页讲相反的一面:
@@ -130,7 +130,7 @@
 
 <h2 id="howmuch">一、四层里 AI 各能干多少</h2>
 
-<p>回到第 5 页的测试金字塔。<strong>AI 的能力在每一层差别巨大</strong> ——
+<p>回到第 <a class="pg" href="05-pyramid.html">5</a> 页的测试金字塔。<strong>AI 的能力在每一层差别巨大</strong> ——
 理解这个梯度,才知道该在哪一层放心、在哪一层盯紧。</p>
 
 <div class="tw">
@@ -165,7 +165,7 @@
   <td style="color:var(--bad);font-size:16px"><strong>~30%</strong></td>
   <td>写出能跑的骨架</td>
   <td><strong>稳定性</strong>。它写的等待逻辑几乎必然是「等 3 秒」而不是「等到元素出现」
-      &rarr; 直接生产第 10 页那种抖动用例</td>
+      &rarr; 直接生产第 <a class="pg" href="10-flaky-e2e.html">10</a> 页那种抖动用例</td>
 </tr>
 </tbody>
 </table>
@@ -246,7 +246,7 @@
 <tr>
   <td><strong>3</strong></td><td><strong>加跳过标记</strong></td>
   <td>用例上面多了一行「暂时跳过,待修复」</td>
-  <td style="color:var(--warn)"><strong>跳过数变多</strong> &rarr; 第 18 页那条门禁</td>
+  <td style="color:var(--warn)"><strong>跳过数变多</strong> &rarr; 第 <a class="pg" href="18-gate-items.html">18</a> 页那条门禁</td>
 </tr>
 <tr>
   <td><strong>4</strong></td><td><strong>整段包进忽略异常</strong></td>
@@ -272,7 +272,7 @@
 </table>
 </div>
 
-<h3>手法 1 的真实样子(第 8 页那个实验的反面)</h3>
+<h3>手法 1 的真实样子(第 <a class="pg" href="08-break-it.html">8</a> 页那个实验的反面)</h3>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; &#128293; 你说:「测试挂了,修一下」</div>
@@ -332,7 +332,7 @@
   这句话通常用来讲人的组织行为,但它<strong>在 AI 身上体现得更极端、更快</strong> ——
   因为 AI 没有「这样做不太对吧」这层顾虑,而且它三秒钟就能把八个断言全改了。
   <br><br>
-  <strong>整个第 18 页的「跳过数门禁」「抖动率门禁」,本质上都是在给主指标打补丁,
+  <strong>整个第 <a class="pg" href="18-gate-items.html">18</a> 页的「跳过数门禁」「抖动率门禁」,本质上都是在给主指标打补丁,
   堵住优化信号本身的路。</strong>
 </div>
 
@@ -358,7 +358,7 @@
 </tr>
 <tr>
   <td><strong>3</strong></td><td>加跳过</td>
-  <td style="color:var(--ok)"><strong>跳过数门禁</strong>(第 18 页)—— 这条最有效</td>
+  <td style="color:var(--ok)"><strong>跳过数门禁</strong>(第 <a class="pg" href="18-gate-items.html">18</a> 页)—— 这条最有效</td>
   <td>新增跳过时看一眼理由</td>
 </tr>
 <tr>
@@ -403,7 +403,7 @@
 <p>「盲区」的意思是:<strong>不是 AI 这次没做好,而是这类问题在原理上就不可能被工具发现。</strong></p>
 
 <div class="term">
-  <div class="term-h"><span class="zh">盲区一:签名不变,行为变了</span><span class="badge">第 8 页验证过 5 次</span></div>
+  <div class="term-h"><span class="zh">盲区一:签名不变,行为变了</span><span class="badge">第 <a class="pg" href="08-break-it.html">8</a> 页验证过 5 次</span></div>
   <div class="step"><div class="n">现象</div><div class="c">
 <pre><code>def format_price(cents: int) -&gt; str:      &larr; 签名一个字没变
     yuan, fen = divmod(cents, <b>10</b>)      &larr; 100 改成 10,结果全错
@@ -438,9 +438,9 @@
 </div>
 
 <div class="term">
-  <div class="term-h"><span class="zh">盲区三:自信地重复失败的方法</span><span class="badge">第 19 页亲历</span></div>
+  <div class="term-h"><span class="zh">盲区三:自信地重复失败的方法</span><span class="badge">第 <a class="pg" href="19-gate-demo.html">19</a> 页亲历</span></div>
   <div class="step"><div class="n">现象</div><div class="c">
-    <p>第 19 页第六节那次:我用同一个错误的查询方式查了 <strong>12 次</strong>,
+    <p>第 <a class="pg" href="19-gate-demo.html">19</a> 页第六节那次:我用同一个错误的查询方式查了 <strong>12 次</strong>,
     每次失败后都给出了一个更详细的解释,最后得出一个完全错误的结论。</p>
   </div></div>
   <div class="step"><div class="n">为什么会这样</div><div class="c">
@@ -457,7 +457,7 @@
 
 <h2 id="onlyone">六、唯一不能外包的那一步</h2>
 
-<p>回到全书第 1 页那六件事。前五件都可以交出去 —— 让 AI 先给方案、让它自测、让它用撤销、让它提交存档、让门禁去拦。
+<p>回到全书第 <a class="pg" href="01-overview.html">1</a> 页那六件事。前五件都可以交出去 —— 让 AI 先给方案、让它自测、让它用撤销、让它提交存档、让门禁去拦。
 <strong>第六件不行。</strong></p>
 
 <figure>
@@ -584,7 +584,7 @@
   <strong>还是要看改动。</strong>
   <br><br>
   规矩降低了出问题的概率,但<strong>它是靠 AI 自觉遵守的</strong> ——
-  这在性质上属于第 16 页的「本地钩子」,不是「云端门禁」。
+  这在性质上属于第 <a class="pg" href="16-pipeline.html">16</a> 页的「本地钩子」,不是「云端门禁」。
   <br><br>
   <strong>真正不可绕过的只有两样:云端的门禁,和你自己的眼睛。</strong>
 </div>
@@ -617,8 +617,8 @@
 
 <div class="foot">
   <p>第 20 页 / 共 23 页 · 覆盖知识点 208–217 · 难度 &#9733;&#9733;&#9733;</p>
-  <p>本页的七种作弊手法与三个盲区,均可在第 8 页(五次改坏实验)和第 19 页(真机门禁复盘)找到对应的实证。
-  第五节盲区三的例子,是我本人在第 19 页实验中犯的真实错误。</p>
+  <p>本页的七种作弊手法与三个盲区,均可在第 <a class="pg" href="08-break-it.html">8</a> 页(五次改坏实验)和第 <a class="pg" href="19-gate-demo.html">19</a> 页(真机门禁复盘)找到对应的实证。
+  第五节盲区三的例子,是我本人在第 <a class="pg" href="19-gate-demo.html">19</a> 页实验中犯的真实错误。</p>
 </div>
 </div>
 <script>
@@ -632,5 +632,6 @@
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

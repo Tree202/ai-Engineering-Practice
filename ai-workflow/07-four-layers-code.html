@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 07 页 · 难度 ★★★ · 前置:第 03、05、06 页</span>
+<span class="kicker">第 07 页 · 难度 ★★★ · 前置:第 <a class="pg" href="03-test-basics.html">03</a>、<a class="pg" href="05-pyramid.html">05</a>、<a class="pg" href="06-myshop.html">06</a> 页</span>
 <h1>四层测试代码逐行讲</h1>
 <p class="lede">
 把四个测试文件的完整代码摊开。重点不在语法,在<strong>每一层的「准备」段是怎么一步步变重的</strong> ——
@@ -191,7 +191,7 @@ def test_负数要报错() -&gt; None:
 </div>
 
 <div class="box note">
-  <b class="t">&#128161; 第 8 页会证明:这五条各有各的不可替代性</b>
+  <b class="t">&#128161; 第 <a class="pg" href="08-break-it.html">8</a> 页会证明:这五条各有各的不可替代性</b>
   五次改坏实验里,<strong>每一次立功的都是不同的测试</strong>。
   留任何一条、砍掉其余,都会漏掉别的 bug。
 </div>
@@ -654,5 +654,6 @@ tests/test_price.py .....                                       [100%]
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

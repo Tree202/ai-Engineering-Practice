@@ -46,7 +46,7 @@
     }
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth;scroll-padding-top:78px}
+  html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
        font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);
@@ -89,6 +89,8 @@
   .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
   .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
   figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figure svg a{cursor:pointer}figure svg a:hover rect{stroke-width:2.8}
+  figure svg a:focus-visible rect{stroke:var(--accent);stroke-width:2.8}
   figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
   .st{font-family:var(--sans)}
   ul,ol{padding-left:24px}li{margin:6px 0}
@@ -151,7 +153,7 @@
   <b class="t">读这套教程需要什么</b>
   <strong>不需要</strong>会 Python、不需要用过 git、不需要写过测试、不需要懂 CI/CD。
   <br>
-  <strong>需要</strong>一台 macOS / Linux / Windows 电脑、一个终端窗口(命令以 macOS 写法为基准,Windows 对照见第 2 页)、以及愿意亲手敲命令。
+  <strong>需要</strong>一台 macOS / Linux / Windows 电脑、一个终端窗口(命令以 macOS 写法为基准,Windows 对照见第 <a class="pg" href="02-python-setup.html">2</a> 页)、以及愿意亲手敲命令。
   <br><br>
   每个新名词按固定 5 步讲:<strong>① 一句话定义 → ② 生活化类比 → ③ 它在体系中的位置 → ④ 最小可运行例子 → ⑤ 常见误区</strong>。
   术语第一次出现写成「中文(English)」,之后只用中文。
@@ -180,9 +182,9 @@
   <b class="t">本教程发现的三份「官方文档自己写错了」</b>
   这不是吹毛求疵,是你照抄会踩坑的地方:
   <ul style="margin-bottom:0">
-    <li><strong>SonarSource 官方示例的代码注释写反了</strong> —— 说某参数会让构建变「黄」,实际是变「红」。网上大量教程照抄了这个错误(第 17 页)</li>
-    <li><strong>Coverage 插件官方 README 至今用着一个不存在的参数</strong> —— 因为它的默认值恰好等于那个参数的效果,错了多年没人发现(第 18 页)</li>
-    <li><strong>GitHub 官方教程页的版本号比它自己的代码仓库落后两个大版本</strong>(第 16 页)</li>
+    <li><strong>SonarSource 官方示例的代码注释写反了</strong> —— 说某参数会让构建变「黄」,实际是变「红」。网上大量教程照抄了这个错误(第 <a class="pg" href="17-quality-gate.html">17</a> 页)</li>
+    <li><strong>Coverage 插件官方 README 至今用着一个不存在的参数</strong> —— 因为它的默认值恰好等于那个参数的效果,错了多年没人发现(第 <a class="pg" href="18-gate-items.html">18</a> 页)</li>
+    <li><strong>GitHub 官方教程页的版本号比它自己的代码仓库落后两个大版本</strong>(第 <a class="pg" href="16-pipeline.html">16</a> 页)</li>
   </ul>
   <br>
   <strong>这三个例子本身就是一课:为什么要自己实测,而不是抄博客。</strong>
@@ -279,7 +281,7 @@
 <!-- ================================================================ -->
 <h2 id="pages">全部 23 页</h2>
 
-<div class="sec">第一部分 · 打地基(第 1–4 页)</div>
+<div class="sec">第一部分 · 打地基(第 <a class="pg" href="01-overview.html">1</a>–<a class="pg" href="04-static-check.html">4</a> 页)</div>
 <div class="cards">
   <a class="card" href="01-overview.html">
     <div class="no">01 / overview</div>
@@ -307,7 +309,7 @@
   </a>
 </div>
 
-<div class="sec">第二部分 · 测试体系(第 5–10 页)</div>
+<div class="sec">第二部分 · 测试体系(第 <a class="pg" href="05-pyramid.html">5</a>–<a class="pg" href="10-flaky-e2e.html">10</a> 页)</div>
 <div class="cards">
   <a class="card" href="05-pyramid.html">
     <div class="no">05 / pyramid</div>
@@ -347,7 +349,7 @@
   </a>
 </div>
 
-<div class="sec">第三部分 · 存档与撤销(第 11–12 页)</div>
+<div class="sec">第三部分 · 存档与撤销(第 <a class="pg" href="11-git-basics.html">11</a>–<a class="pg" href="12-git-undo.html">12</a> 页)</div>
 <div class="cards">
   <a class="card" href="11-git-basics.html">
     <div class="no">11 / git-basics</div>
@@ -363,7 +365,7 @@
   </a>
 </div>
 
-<div class="sec">第四部分 · 工具与流程(第 13–14 页)</div>
+<div class="sec">第四部分 · 工具与流程(第 <a class="pg" href="13-claude-code.html">13</a>–<a class="pg" href="14-workflow.html">14</a> 页)</div>
 <div class="cards">
   <a class="card" href="13-claude-code.html">
     <div class="no">13 / claude-code</div>
@@ -379,7 +381,7 @@
   </a>
 </div>
 
-<div class="sec">第五部分 · 放大到团队(第 15–16 页)</div>
+<div class="sec">第五部分 · 放大到团队(第 <a class="pg" href="15-team-roles.html">15</a>–<a class="pg" href="16-pipeline.html">16</a> 页)</div>
 <div class="cards">
   <a class="card" href="15-team-roles.html">
     <div class="no">15 / team-roles</div>
@@ -395,7 +397,7 @@
   </a>
 </div>
 
-<div class="sec">第六部分 · 质量门禁(第 17–19 页)· 本版重点</div>
+<div class="sec">第六部分 · 质量门禁(第 <a class="pg" href="17-quality-gate.html">17</a>–<a class="pg" href="19-gate-demo.html">19</a> 页)· 本版重点</div>
 <div class="cards">
   <a class="card hot" href="17-quality-gate.html">
     <div class="no">17 / quality-gate</div>
@@ -417,7 +419,7 @@
   </a>
 </div>
 
-<div class="sec">第七部分 · 收尾(第 20–22 页)</div>
+<div class="sec">第七部分 · 收尾(第 <a class="pg" href="20-ai-boundary.html">20</a>–<a class="pg" href="22-cheatsheet.html">22</a> 页)</div>
 <div class="cards">
   <a class="card" href="20-ai-boundary.html">
     <div class="no">20 / ai-boundary</div>
@@ -480,97 +482,122 @@
 <p>想跳读的话,先看这张图确认你要跳的那页依赖了什么。</p>
 
 <figure>
-<svg viewBox="0 0 900 520" role="img" aria-label="23 页之间的依赖关系图">
-  <defs>
-    <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/>
-    </marker>
-  </defs>
-  <g class="st" font-size="12" text-anchor="middle">
-    <rect x="362" y="12" width="176" height="32" rx="9" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
-    <text x="450" y="33" font-weight="700" fill="var(--plan)">01 全景(无依赖)</text>
-
-    <rect x="362" y="62" width="176" height="32" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2"/>
-    <text x="450" y="83" font-weight="700" fill="var(--ok)">02 Python 环境</text>
-
-    <rect x="206" y="112" width="148" height="32" rx="9" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
-    <text x="280" y="133" font-weight="700" fill="var(--info)">03 测试是什么</text>
-    <rect x="546" y="112" width="148" height="32" rx="9" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
-    <text x="620" y="133" font-weight="700" fill="var(--info)">04 静态检查</text>
-    <rect x="726" y="112" width="160" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="806" y="133" font-weight="700" fill="var(--ink)">11 git 基础</text>
-
-    <rect x="362" y="162" width="176" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
-    <text x="450" y="183" font-weight="700" fill="var(--warn)">05 金字塔</text>
-    <rect x="26" y="162" width="148" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="100" y="183" font-weight="700" fill="var(--ink)">06 myshop</text>
-    <rect x="726" y="162" width="160" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="806" y="183" font-weight="700" fill="var(--ink)">12 git 回退</text>
-
-    <rect x="206" y="212" width="148" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
-    <text x="280" y="233" font-weight="700" fill="var(--warn)">07 四层代码</text>
-    <rect x="546" y="212" width="148" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
-    <text x="620" y="233" font-weight="700" fill="var(--warn)">10 E2E / flaky</text>
-
-    <rect x="206" y="262" width="148" height="32" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
-    <text x="280" y="283" font-weight="700" fill="var(--bad)">08 改坏实验</text>
-    <rect x="726" y="262" width="160" height="32" rx="9" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
-    <text x="806" y="283" font-weight="700" fill="var(--plan)">13 Claude Code</text>
-
-    <rect x="206" y="312" width="148" height="32" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
-    <text x="280" y="333" font-weight="700" fill="var(--bad)">09 局部vs全量</text>
-
-    <rect x="420" y="312" width="220" height="32" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2.2"/>
-    <text x="530" y="333" font-weight="800" fill="var(--ok)">14 七步流程实战(汇总)</text>
-
-    <rect x="300" y="362" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="375" y="383" font-weight="700" fill="var(--ink)">15 岗位工具</text>
-    <rect x="470" y="362" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="545" y="383" font-weight="700" fill="var(--ink)">16 流水线</text>
-
-    <rect x="300" y="412" width="150" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
-    <text x="375" y="433" font-weight="800" fill="var(--warn)">17 门禁概念</text>
-    <rect x="470" y="412" width="150" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
-    <text x="545" y="433" font-weight="800" fill="var(--warn)">18 门禁检查项</text>
-    <rect x="640" y="412" width="150" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
-    <text x="715" y="433" font-weight="800" fill="var(--warn)">19 门禁实战</text>
-
-    <rect x="120" y="470" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="195" y="491" font-weight="700" fill="var(--ink)">20 AI 边界</text>
-    <rect x="290" y="470" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
-    <text x="365" y="491" font-weight="700" fill="var(--ink)">21 固化流程</text>
-    <rect x="460" y="470" width="150" height="32" rx="9" fill="var(--sunk)" stroke="var(--rule)" stroke-width="1.5"/>
-    <text x="535" y="491" fill="var(--faint)">22 速查(独立)</text>
-  </g>
-
-  <g stroke="var(--faint)" stroke-width="1.2" marker-end="url(#ar2)" fill="none" opacity=".72">
-    <path d="M 450 44 L 450 60"/>
-    <path d="M 410 94 L 285 110"/>
-    <path d="M 490 94 L 615 110"/>
-    <path d="M 510 94 L 795 110"/>
-    <path d="M 305 144 L 425 160"/>
-    <path d="M 595 144 L 475 160"/>
-    <path d="M 280 144 L 280 210"/>
-    <path d="M 410 194 L 305 210"/>
-    <path d="M 490 194 L 595 210"/>
-    <path d="M 140 194 L 245 210"/>
-    <path d="M 806 144 L 806 160"/>
-    <path d="M 806 194 L 806 260"/>
-    <path d="M 280 244 L 280 260"/>
-    <path d="M 280 294 L 280 310"/>
-    <path d="M 750 294 L 620 314"/>
-    <path d="M 354 328 L 418 328"/>
-    <path d="M 500 344 L 400 360"/>
-    <path d="M 545 344 L 545 360"/>
-    <path d="M 375 394 L 375 410"/>
-    <path d="M 545 394 L 545 410"/>
-    <path d="M 450 428 L 468 428"/>
-    <path d="M 620 428 L 638 428"/>
-    <path d="M 330 444 L 220 468"/>
-    <path d="M 500 344 L 380 468"/>
-  </g>
-</svg>
-<figcaption>箭头方向 = 「先读这个」。第 14 页是汇总页;17→18→19 必须按顺序读</figcaption>
+<svg viewBox="0 0 900 520" role="list" aria-label="22 个内容页之间的依赖关系图,方块可点">
+<defs><marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+<g stroke="var(--faint)" stroke-width="1.2" marker-end="url(#ar2)" fill="none" opacity=".72">
+<path d="M 450 44 L 450 62"/>
+<path d="M 374 94 L 342 112"/>
+<path d="M 354 128 L 546 128"/>
+<path d="M 558 144 L 526 162"/>
+<path d="M 362 178 L 174 178"/>
+<path d="M 162 194 L 218 212"/>
+<path d="M 280 244 L 280 262"/>
+<path d="M 280 294 L 280 312"/>
+<path d="M 354 228 L 546 228"/>
+<path d="M 526 94 L 738 112"/>
+<path d="M 806 144 L 806 162"/>
+<path d="M 806 194 L 806 262"/>
+<path d="M 354 328 L 420 328"/>
+<path d="M 738 294 L 628 312"/>
+<path d="M 432 344 L 438 362"/>
+<path d="M 450 378 L 470 378"/>
+<path d="M 482 394 L 438 412"/>
+<path d="M 450 428 L 470 428"/>
+<path d="M 620 428 L 640 428"/>
+<path d="M 482 444 L 258 470"/>
+<path d="M 270 486 L 290 486"/>
+</g>
+<g class="st" font-size="12" text-anchor="middle">
+<a href="01-overview.html" aria-label="第 01 页 全景(无依赖)">
+<rect x="362" y="12" width="176" height="32" rx="9" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
+<text x="450" y="33" font-weight="700" fill="var(--plan)">01 全景(无依赖)</text>
+</a>
+<a href="02-python-setup.html" aria-label="第 02 页 Python 环境">
+<rect x="362" y="62" width="176" height="32" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2.0"/>
+<text x="450" y="83" font-weight="700" fill="var(--ok)">02 Python 环境</text>
+</a>
+<a href="03-test-basics.html" aria-label="第 03 页 测试是什么">
+<rect x="206" y="112" width="148" height="32" rx="9" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+<text x="280" y="133" font-weight="700" fill="var(--info)">03 测试是什么</text>
+</a>
+<a href="04-static-check.html" aria-label="第 04 页 静态检查">
+<rect x="546" y="112" width="148" height="32" rx="9" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+<text x="620" y="133" font-weight="700" fill="var(--info)">04 静态检查</text>
+</a>
+<a href="05-pyramid.html" aria-label="第 05 页 金字塔">
+<rect x="362" y="162" width="176" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+<text x="450" y="183" font-weight="700" fill="var(--warn)">05 金字塔</text>
+</a>
+<a href="06-myshop.html" aria-label="第 06 页 myshop">
+<rect x="26" y="162" width="148" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="100" y="183" font-weight="700" fill="var(--rule2)">06 myshop</text>
+</a>
+<a href="07-four-layers-code.html" aria-label="第 07 页 四层代码">
+<rect x="206" y="212" width="148" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+<text x="280" y="233" font-weight="700" fill="var(--warn)">07 四层代码</text>
+</a>
+<a href="08-break-it.html" aria-label="第 08 页 改坏实验">
+<rect x="206" y="262" width="148" height="32" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+<text x="280" y="283" font-weight="700" fill="var(--bad)">08 改坏实验</text>
+</a>
+<a href="09-partial-vs-full.html" aria-label="第 09 页 局部vs全量">
+<rect x="206" y="312" width="148" height="32" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+<text x="280" y="333" font-weight="700" fill="var(--bad)">09 局部vs全量</text>
+</a>
+<a href="10-flaky-e2e.html" aria-label="第 10 页 E2E / flaky">
+<rect x="546" y="212" width="148" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+<text x="620" y="233" font-weight="700" fill="var(--warn)">10 E2E / flaky</text>
+</a>
+<a href="11-git-basics.html" aria-label="第 11 页 git 基础">
+<rect x="726" y="112" width="160" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="806" y="133" font-weight="700" fill="var(--rule2)">11 git 基础</text>
+</a>
+<a href="12-git-undo.html" aria-label="第 12 页 git 回退">
+<rect x="726" y="162" width="160" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="806" y="183" font-weight="700" fill="var(--rule2)">12 git 回退</text>
+</a>
+<a href="13-claude-code.html" aria-label="第 13 页 Claude Code">
+<rect x="726" y="262" width="160" height="32" rx="9" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
+<text x="806" y="283" font-weight="700" fill="var(--plan)">13 Claude Code</text>
+</a>
+<a href="14-workflow.html" aria-label="第 14 页 七步流程实战(汇总)">
+<rect x="420" y="312" width="220" height="32" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2.2"/>
+<text x="530" y="333" font-weight="700" fill="var(--ok)">14 七步流程实战(汇总)</text>
+</a>
+<a href="15-team-roles.html" aria-label="第 15 页 岗位工具">
+<rect x="300" y="362" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="375" y="383" font-weight="700" fill="var(--rule2)">15 岗位工具</text>
+</a>
+<a href="16-pipeline.html" aria-label="第 16 页 流水线">
+<rect x="470" y="362" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="545" y="383" font-weight="700" fill="var(--rule2)">16 流水线</text>
+</a>
+<a href="17-quality-gate.html" aria-label="第 17 页 门禁概念">
+<rect x="300" y="412" width="150" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
+<text x="375" y="433" font-weight="700" fill="var(--warn)">17 门禁概念</text>
+</a>
+<a href="18-gate-items.html" aria-label="第 18 页 门禁检查项">
+<rect x="470" y="412" width="150" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
+<text x="545" y="433" font-weight="700" fill="var(--warn)">18 门禁检查项</text>
+</a>
+<a href="19-gate-demo.html" aria-label="第 19 页 门禁实战">
+<rect x="640" y="412" width="150" height="32" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
+<text x="715" y="433" font-weight="700" fill="var(--warn)">19 门禁实战</text>
+</a>
+<a href="20-ai-boundary.html" aria-label="第 20 页 AI 边界">
+<rect x="120" y="470" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="195" y="491" font-weight="700" fill="var(--rule2)">20 AI 边界</text>
+</a>
+<a href="21-automation.html" aria-label="第 21 页 固化流程">
+<rect x="290" y="470" width="150" height="32" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+<text x="365" y="491" font-weight="700" fill="var(--rule2)">21 固化流程</text>
+</a>
+<a href="22-cheatsheet.html" aria-label="第 22 页 速查(独立)">
+<rect x="460" y="470" width="150" height="32" rx="9" fill="var(--sunk)" stroke="var(--rule)" stroke-width="1.5"/>
+<text x="535" y="491" font-weight="700" fill="var(--rule)">22 速查(独立)</text>
+</a>
+</g></svg>
+<figcaption>箭头方向 = 「先读这个」·<strong>点任意方块直接跳过去</strong>。第 <a class="pg" href="14-workflow.html">14</a> 页是汇总页,测试线与 git 线在这里汇合;17→18→19 必须按顺序读</figcaption>
 </figure>
 
 <!-- ================================================================ -->
@@ -582,15 +609,15 @@
 <tbody>
 <tr><td><strong>只读不敲</strong></td><td style="color:var(--bad)">❌ 最没用的读法。全书有五个「亲手把代码改坏」的实验,不动手等于没读</td></tr>
 <tr><td><strong>边读边敲</strong></td><td style="color:var(--ok)">✅ 推荐。所有代码块都是完整的、可直接复制的,路径写全了,没有省略号</td></tr>
-<tr><td><strong>先跳到第 22 页</strong></td><td>如果你只是想查一条命令怎么写</td></tr>
-<tr><td><strong>抄第 22 页的提示词模板</strong></td><td style="color:var(--ok)">✅ 每条约束都有原因,第 14、20 页解释为什么</td></tr>
+<tr><td><strong>先跳到第 <a class="pg" href="22-cheatsheet.html">22</a> 页</strong></td><td>如果你只是想查一条命令怎么写</td></tr>
+<tr><td><strong>抄第 <a class="pg" href="22-cheatsheet.html">22</a> 页的提示词模板</strong></td><td style="color:var(--ok)">✅ 每条约束都有原因,第 <a class="pg" href="14-workflow.html">14</a>、<a class="pg" href="20-ai-boundary.html">20</a> 页解释为什么</td></tr>
 </tbody>
 </table>
 </div>
 
 <div class="box good">
   <b class="t">一件建议先做的事</b>
-  第 2 页会带你在自己电脑上建好练习项目。<strong>先把那一页做完</strong>,后面每页都能立刻验证。
+  第 <a class="pg" href="02-python-setup.html">2</a> 页会带你在自己电脑上建好练习项目。<strong>先把那一页做完</strong>,后面每页都能立刻验证。
   <br><br>
   项目路径:<code>D:\ext.zhaoliuliu3\Desktop\claude_AI\myshop</code>(通用写法 <code>&lt;你的项目&gt;/myshop</code>)
 </div>
@@ -628,5 +655,6 @@
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

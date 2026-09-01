@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 15 页 · 难度 ★★★ · 前置:第 05、14 页</span>
+<span class="kicker">第 15 页 · 难度 ★★★ · 前置:第 <a class="pg" href="05-pyramid.html">05</a>、<a class="pg" href="14-workflow.html">14</a> 页</span>
 <h1>岗位分工与工具选择</h1>
 <p class="lede">
 前面十四页都是「你一个人怎么干」。从这一页开始放大到团队:
@@ -201,7 +201,7 @@
       <strong>VS Code</strong> + 类型检查插件 / 规范检查插件</td>
 </tr>
 <tr><td><strong>命令行</strong></td><td><code>mypy</code>、<code>ruff</code>、<code>pyright</code>、<code>flake8</code>、<code>black</code></td></tr>
-<tr><td><strong>提交前钩子</strong></td><td><code>pre-commit</code> 框架(第 16 页讲)</td></tr>
+<tr><td><strong>提交前钩子</strong></td><td><code>pre-commit</code> 框架(第 <a class="pg" href="16-pipeline.html">16</a> 页讲)</td></tr>
 <tr>
   <td><strong>AI</strong></td>
   <td>能自己跑、自己修。<em>类型错误是它修得最准的一类</em>,因为报错精确到行号+原因</td>
@@ -242,7 +242,7 @@
 <thead><tr><th style="width:22%">场景</th><th>工具</th></tr></thead>
 <tbody>
 <tr><td><strong>框架</strong></td><td><strong>pytest</strong>(Python 主流)、<code>unittest</code>(标准库)</td></tr>
-<tr><td><strong>覆盖率</strong></td><td><code>pytest-cov</code> / <code>coverage</code>(第 18 页详讲)</td></tr>
+<tr><td><strong>覆盖率</strong></td><td><code>pytest-cov</code> / <code>coverage</code>(第 <a class="pg" href="18-gate-items.html">18</a> 页详讲)</td></tr>
 <tr>
   <td><strong>编辑器</strong></td>
   <td><strong>PyCharm 的测试运行器</strong> —— 行号旁点绿三角<strong>只跑光标所在的那一条</strong>,
@@ -250,7 +250,7 @@
 </tr>
 <tr>
   <td><strong>AI</strong></td>
-  <td>能写能跑;但<strong>断言必须人审</strong> —— 它会照着实现写测试,把 bug 固化成预期(第 20 页详解)</td>
+  <td>能写能跑;但<strong>断言必须人审</strong> —— 它会照着实现写测试,把 bug 固化成预期(第 <a class="pg" href="20-ai-boundary.html">20</a> 页详解)</td>
 </tr>
 </tbody>
 </table>
@@ -415,7 +415,7 @@
   <b class="t">这是云端流水线相对本地优势最大的一层</b>
   <strong>流水线环境可以随手拉起十个容器,你的笔记本不行。</strong>
   <br><br>
-  第 16 页会讲清楚「什么在本地跑、什么在云端跑」的完整分界。
+  第 <a class="pg" href="16-pipeline.html">16</a> 页会讲清楚「什么在本地跑、什么在云端跑」的完整分界。
 </div>
 
 <h2 id="trend">七、行业趋势:测试岗在消失吗</h2>
@@ -507,7 +507,7 @@
     <li><strong>静态检查</strong> —— 一小时配置,永久受益</li>
     <li><strong>存档系统</strong> —— 零成本,只要纪律</li>
     <li><strong>单元测试</strong> —— 跟着改动慢慢长</li>
-    <li><strong>云端流水线</strong> —— 五分钟配一个,从此本地不绕过(第 16 页)</li>
+    <li><strong>云端流水线</strong> —— 五分钟配一个,从此本地不绕过(第 <a class="pg" href="16-pipeline.html">16</a> 页)</li>
     <li>其他的,等你真的需要了再说</li>
   </ol>
 </div>
@@ -544,7 +544,7 @@
 
 <div class="foot">
   <p>第 15 页 / 共 23 页 · 覆盖知识点 153–161 · 难度 &#9733;&#9733;&#9733;</p>
-  <p>本页为行业实践综述,不含需要核实的具体命令。工具的具体参数见第 16、18 页。</p>
+  <p>本页为行业实践综述,不含需要核实的具体命令。工具的具体参数见第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="18-gate-items.html">18</a> 页。</p>
 </div>
 </div>
 <script>
@@ -558,5 +558,6 @@
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 10 页 · 难度 ★★★ · 前置:第 05、07 页</span>
+<span class="kicker">第 10 页 · 难度 ★★★ · 前置:第 <a class="pg" href="05-pyramid.html">05</a>、<a class="pg" href="07-four-layers-code.html">07</a> 页</span>
 <h1>端到端测试与「时红时绿」</h1>
 <p class="lede">
 金字塔最顶上那一层。它是唯一能回答「用户真的能用吗」的测试,
@@ -305,7 +305,7 @@ expect(page.get_by_text("下单成功")).to_be_visible()</code></pre></td>
 <tr>
   <td><strong>测试互相污染</strong></td>
   <td>测试 A 往数据库塞了条数据,测试 B 查询时读到了,断言的数量对不上
-      <br><em>(第 3 页那个「测试隔离」讲的就是防这个)</em></td>
+      <br><em>(第 <a class="pg" href="03-test-basics.html">3</a> 页那个「测试隔离」讲的就是防这个)</em></td>
 </tr>
 <tr><td><strong>并行顺序不定</strong></td><td>多个测试并发跑,每次执行顺序不同</td></tr>
 <tr><td><strong>外部依赖</strong></td><td>第三方服务挂了、跨零点导致日期变了、时区、随机数</td></tr>
@@ -421,12 +421,12 @@ expect(page.get_by_text("下单成功")).to_be_visible()</code></pre></td>
 <h3>另一条思路:让不稳定本身变成可度量的</h3>
 
 <div class="box note">
-  <b class="t">&#128161; 第 18 页会讲一个进阶做法</b>
+  <b class="t">&#128161; 第 <a class="pg" href="18-gate-items.html">18</a> 页会讲一个进阶做法</b>
   与其禁止,不如<strong>把「不稳定率」本身变成一条门禁</strong>:
   <br><br>
   <em>「重跑之后才通过的用例超过 2%,就判定这套测试本身不可信」</em>
   <br><br>
-  这叫<strong>让门禁监控自己</strong>。实测有现成的工具能做到这件事 —— 第 18 页给命令。
+  这叫<strong>让门禁监控自己</strong>。实测有现成的工具能做到这件事 —— 第 <a class="pg" href="18-gate-items.html">18</a> 页给命令。
 </div>
 
 <h3>写 E2E 时降低不稳定的两个技巧</h3>
@@ -491,5 +491,6 @@ expect(page.get_by_text("下单成功")).to_be_visible()</code></pre></td>
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>

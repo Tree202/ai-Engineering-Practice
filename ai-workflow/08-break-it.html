@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 08 页 · 难度 ★★★ · 前置:第 04、06、07 页 · 全程真机</span>
+<span class="kicker">第 08 页 · 难度 ★★★ · 前置:第 <a class="pg" href="04-static-check.html">04</a>、<a class="pg" href="06-myshop.html">06</a>、<a class="pg" href="07-four-layers-code.html">07</a> 页 · 全程真机</span>
 <h1>五次故意改坏实验</h1>
 <p class="lede">
 把好代码故意改坏五次,看哪些哨兵会响。<strong>五次全部在真机上跑过,输出一字未改。</strong>
@@ -159,7 +159,7 @@
       <li>跑检查,<strong>看该响的响了没有</strong></li>
       <li><strong>改回来</strong></li>
     </ol>
-    <p>第 3 步用一条命令完成(第 12 页会讲这条命令):</p>
+    <p>第 3 步用一条命令完成(第 <a class="pg" href="12-git-undo.html">12</a> 页会讲这条命令):</p>
 <pre><code>cd &lt;你的项目&gt;/myshop && git checkout -- .</code></pre>
     <p>意思是「把所有文件恢复成上次存档的样子」—— 就像游戏里读档。</p>
   </div></div>
@@ -451,7 +451,7 @@ divmod(-2, 100) = (-1, 98)</code></pre>
 <span class="c-ok">&#9989; 被 order.py 自己的检查挡住了: 单价不能为负数</span></pre>
 </div>
 
-<p>因为 <code>order.py</code> <strong>有自己独立的校验</strong>(第 6 页那段代码里的 <code>if unit_cents &lt; 0</code>)。</p>
+<p>因为 <code>order.py</code> <strong>有自己独立的校验</strong>(第 <a class="pg" href="06-myshop.html">6</a> 页那段代码里的 <code>if unit_cents &lt; 0</code>)。</p>
 
 <figure>
 <svg viewBox="0 0 780 300" role="img" aria-label="纵深防御:一道关卡破了还有另一道">
@@ -585,7 +585,7 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 </div>
 
 <div class="box note">
-  <b class="t">这也证明了「换连接读回来」技巧（第 5 页给结论,第 7 页给代码）的价值</b>
+  <b class="t">这也证明了「换连接读回来」技巧（第 <a class="pg" href="05-pyramid.html">5</a> 页给结论,第 <a class="pg" href="07-four-layers-code.html">7</a> 页给代码）的价值</b>
   如果那条测试当初图省事,在<strong>同一个连接</strong>里查询,<strong>它会全绿</strong> ——
   因为同连接里没提交的数据照样读得到。
   <br><br>
@@ -628,7 +628,7 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 <tbody>
 <tr>
   <td><strong>1</strong></td><td><strong>静态检查五战五败</strong></td>
-  <td>五次改的都是「行为」,而它只看「形状」。<strong>这不是配置问题</strong>,是第 4 页讲的结构性盲区</td>
+  <td>五次改的都是「行为」,而它只看「形状」。<strong>这不是配置问题</strong>,是第 <a class="pg" href="04-static-check.html">4</a> 页讲的结构性盲区</td>
 </tr>
 <tr>
   <td><strong>2</strong></td><td><strong>红的条数 &ne; 危害程度</strong></td>
@@ -758,5 +758,6 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_depmap.js" defer></script>
 </body>
 </html>
