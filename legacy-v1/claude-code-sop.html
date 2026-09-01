@@ -1,0 +1,2468 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Code 标准作业流程 · Python 实战</title>
+<style>
+  /* ============================================================
+     配色:深色是基底(未标记的 root 和 data-theme="dark" 都落这里)
+     data-theme="light" 强制浅色
+     data-theme="system" 跟随操作系统(靠下面的媒体查询)
+     两份浅色调色板必须保持一致
+     ============================================================ */
+  :root {
+    color-scheme: dark;
+    --paper:        #13151B;
+    --paper-raised: #1B1E26;
+    --paper-sunk:   #0E1015;
+    --ink:          #E9EBF1;
+    --ink-soft:     #ABB1C2;
+    --ink-faint:    #7C8394;
+    --rule:         #2A2E39;
+    --rule-strong:  #414755;
+    --accent:       #91AFE2;
+    --accent-soft:  #1E2634;
+    --code-bg:      #1E222B;
+
+    --ok:      #6FBF8B;
+    --ok-soft: #17251C;
+    --warn:    #DCAC4C;
+    --warn-soft:#241E12;
+    --bad:     #DD7A5F;
+    --bad-soft:#25170F;
+    --info:    #5AB3AB;
+    --info-soft:#0F2321;
+    --plan:    #A895DA;
+    --plan-soft:#1D1830;
+
+    --serif: Georgia, "Songti SC", "SimSun", "Noto Serif CJK SC", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+            "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  /* 浅色 —— 第 1 份:用户明确选择 */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --paper:        #F8F9FB;
+    --paper-raised: #FFFFFF;
+    --paper-sunk:   #EEF0F5;
+    --ink:          #16181F;
+    --ink-soft:     #464B59;
+    --ink-faint:    #767C8C;
+    --rule:         #DFE2EA;
+    --rule-strong:  #C3C9D6;
+    --accent:       #2E4A7D;
+    --accent-soft:  #E8EDF6;
+    --code-bg:      #F0F2F7;
+
+    --ok:      #2C7A4B;
+    --ok-soft: #E6F4EB;
+    --warn:    #96700F;
+    --warn-soft:#FBF2DC;
+    --bad:     #A8452F;
+    --bad-soft:#FBEAE5;
+    --info:    #1F6B65;
+    --info-soft:#E2F2F0;
+    --plan:    #5B4A94;
+    --plan-soft:#EEE9F8;
+  }
+
+  /* 浅色 —— 第 2 份:跟随系统且系统是浅色时。必须与第 1 份完全一致 */
+  @media (prefers-color-scheme: light) {
+    :root[data-theme="system"] {
+      color-scheme: light;
+      --paper:        #F8F9FB;
+      --paper-raised: #FFFFFF;
+      --paper-sunk:   #EEF0F5;
+      --ink:          #16181F;
+      --ink-soft:     #464B59;
+      --ink-faint:    #767C8C;
+      --rule:         #DFE2EA;
+      --rule-strong:  #C3C9D6;
+      --accent:       #2E4A7D;
+      --accent-soft:  #E8EDF6;
+      --code-bg:      #F0F2F7;
+
+      --ok:      #2C7A4B;
+      --ok-soft: #E6F4EB;
+      --warn:    #96700F;
+      --warn-soft:#FBF2DC;
+      --bad:     #A8452F;
+      --bad-soft:#FBEAE5;
+      --info:    #1F6B65;
+      --info-soft:#E2F2F0;
+      --plan:    #5B4A94;
+      --plan-soft:#EEE9F8;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 顶栏 ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .topbar-in {
+    max-width: 1180px; margin: 0 auto; padding: 10px 24px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .brand { font-weight: 700; font-size: 15px; letter-spacing: .02em; }
+  .brand span { color: var(--ink-faint); font-weight: 400; }
+  .navlinks { display: flex; gap: 4px; flex-wrap: wrap; margin-left: auto; }
+  .navlinks a {
+    color: var(--ink-soft); text-decoration: none; font-size: 13px;
+    padding: 5px 11px; border-radius: 7px; border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .navlinks a:hover { background: var(--accent-soft); color: var(--ink); }
+  .navlinks a.here { border-color: var(--rule-strong); color: var(--ink); background: var(--paper-raised); }
+
+  .themer { display: flex; gap: 2px; background: var(--paper-sunk);
+            border: 1px solid var(--rule); border-radius: 9px; padding: 3px; }
+  .themer button {
+    font: inherit; font-size: 12px; padding: 4px 10px; cursor: pointer;
+    background: transparent; color: var(--ink-faint);
+    border: 0; border-radius: 6px; line-height: 1.5;
+  }
+  .themer button:hover { color: var(--ink); }
+  .themer button[aria-pressed="true"] { background: var(--accent); color: var(--paper); font-weight: 600; }
+
+  /* ---------- 版面 ---------- */
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 44px 24px 120px; }
+  .prose { max-width: 74ch; }
+
+  h1 { font-size: 34px; line-height: 1.3; margin: 0 0 10px; letter-spacing: -.01em; }
+  h2 {
+    font-size: 25px; margin: 68px 0 18px; padding-top: 22px;
+    border-top: 2px solid var(--rule); line-height: 1.35;
+  }
+  h3 { font-size: 19px; margin: 38px 0 12px; }
+  h4 { font-size: 16px; margin: 26px 0 8px; color: var(--ink-soft); }
+  p  { margin: 14px 0; }
+  a  { color: var(--accent); }
+
+  .lede { font-size: 17px; color: var(--ink-soft); max-width: 70ch; }
+  .kicker {
+    display: inline-block; font-size: 12px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-faint);
+    border: 1px solid var(--rule-strong); border-radius: 999px;
+    padding: 3px 12px; margin-bottom: 16px;
+  }
+
+  code { font-family: var(--mono); font-size: .89em;
+         background: var(--code-bg); padding: 2px 6px; border-radius: 5px; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--rule);
+    border-radius: 11px; padding: 16px 18px; overflow-x: auto;
+    font-family: var(--mono); font-size: 13px; line-height: 1.65; margin: 16px 0;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  /* 终端框 */
+  .term {
+    background: var(--paper-sunk); border: 1px solid var(--rule);
+    border-radius: 11px; overflow: hidden; margin: 18px 0;
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-bottom: 1px solid var(--rule);
+    background: var(--paper-raised); font-size: 12px; color: var(--ink-faint);
+    font-family: var(--mono);
+  }
+  .term-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rule-strong); }
+  .term pre { margin: 0; border: 0; border-radius: 0; background: transparent; }
+  .term .t-cmd  { color: var(--accent); font-weight: 600; }
+  .term .t-ok   { color: var(--ok); }
+  .term .t-bad  { color: var(--bad); }
+  .term .t-dim  { color: var(--ink-faint); }
+  .term .t-warn { color: var(--warn); }
+
+  /* 表格 */
+  .tablewrap { overflow-x: auto; margin: 20px 0; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 500px; }
+  th, td { border: 1px solid var(--rule); padding: 10px 13px; text-align: left; vertical-align: top; }
+  th { background: var(--paper-raised); font-weight: 600; font-size: 13.5px; }
+  tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--paper-raised) 45%, transparent); }
+  td code, th code { font-size: .88em; }
+
+  /* 提示框 */
+  .box {
+    border-left: 3px solid var(--rule-strong); border-radius: 0 11px 11px 0;
+    background: var(--paper-raised); padding: 15px 20px; margin: 22px 0;
+  }
+  .box > :first-child { margin-top: 0; }
+  .box > :last-child { margin-bottom: 0; }
+  .box .box-t { font-weight: 700; font-size: 14px; margin-bottom: 6px; display: block; }
+  .box.trap  { border-color: var(--bad);  background: var(--bad-soft); }
+  .box.trap .box-t { color: var(--bad); }
+  .box.key   { border-color: var(--warn); background: var(--warn-soft); }
+  .box.key .box-t { color: var(--warn); }
+  .box.good  { border-color: var(--ok);   background: var(--ok-soft); }
+  .box.good .box-t { color: var(--ok); }
+  .box.note  { border-color: var(--info); background: var(--info-soft); }
+  .box.note .box-t { color: var(--info); }
+
+  /* 步骤卡片 */
+  .step {
+    border: 1px solid var(--rule); border-radius: 15px;
+    background: var(--paper-raised); padding: 4px 26px 24px; margin: 30px 0;
+  }
+  .step-head {
+    display: flex; align-items: center; gap: 14px;
+    margin: 22px 0 4px; padding-bottom: 14px; border-bottom: 1px solid var(--rule);
+  }
+  .step-num {
+    flex: none; width: 44px; height: 44px; border-radius: 12px;
+    display: grid; place-items: center; font-weight: 800; font-size: 17px;
+    background: var(--accent); color: var(--paper); font-family: var(--mono);
+  }
+  .step-title { font-size: 20px; font-weight: 700; line-height: 1.3; }
+  .step-sub { font-size: 13px; color: var(--ink-faint); margin-top: 2px; }
+  .step[data-m="git"]  .step-num { background: var(--ok); }
+  .step[data-m="plan"] .step-num { background: var(--plan); }
+  .step[data-m="test"] .step-num { background: var(--info); }
+  .step[data-m="eye"]  .step-num { background: var(--warn); }
+  .step[data-m="fork"] .step-num { background: var(--bad); }
+
+  .tag {
+    display: inline-block; font-size: 11.5px; padding: 2px 9px; border-radius: 999px;
+    border: 1px solid currentColor; margin-left: 6px; vertical-align: middle;
+    font-weight: 600; letter-spacing: .02em;
+  }
+  .tag.git  { color: var(--ok); }
+  .tag.plan { color: var(--plan); }
+  .tag.test { color: var(--info); }
+  .tag.eye  { color: var(--warn); }
+  .tag.fork { color: var(--bad); }
+
+  /* 目录 */
+  .toc {
+    border: 1px solid var(--rule); border-radius: 15px;
+    background: var(--paper-raised); padding: 20px 26px; margin: 30px 0 10px;
+  }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 34px; }
+  .toc li { margin: 5px 0; break-inside: avoid; }
+  .toc a { text-decoration: none; color: var(--ink-soft); font-size: 14.5px; }
+  .toc a:hover { color: var(--accent); text-decoration: underline; }
+  @media (max-width: 720px) { .toc ol { columns: 1; } }
+
+  figure { margin: 26px 0; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 13px; color: var(--ink-faint); margin-top: 10px; text-align: center; }
+
+  .svg-t  { font-family: var(--sans); }
+  .svg-m  { font-family: var(--mono); }
+
+  ul, ol { padding-left: 24px; }
+  li { margin: 7px 0; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 20px 0; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .big-num { font-family: var(--mono); font-weight: 700; font-size: 1.15em; }
+  .fast { color: var(--ok); }
+  .slow { color: var(--bad); }
+
+  hr { border: 0; border-top: 1px solid var(--rule); margin: 40px 0; }
+
+  .footer { margin-top: 90px; padding-top: 26px; border-top: 1px solid var(--rule);
+            color: var(--ink-faint); font-size: 13.5px; }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 28px 16px 80px; }
+    h1 { font-size: 27px; } h2 { font-size: 21px; } h3 { font-size: 17px; }
+    .step { padding: 4px 16px 20px; }
+    pre { font-size: 12px; }
+  }
+</style>
+<script>
+  // 在首次绘制前定好主题,避免闪一下白屏
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem('cc-theme'); } catch (e) {}
+    document.documentElement.setAttribute('data-theme', t || 'dark');
+  })();
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">Claude Code 实战 <span>· Python</span></div>
+    <nav class="navlinks">
+      <a class="here" href="claude-code-sop.html">① 标准作业流程</a>
+      <a href="claude-code-testing.html">② 测试体系</a>
+      <a href="claude-code-pipeline.html">③ 工程落地</a>
+      <a href="claude-code-glossary.html">④ 速查手册</a>
+    </nav>
+    <div class="themer" role="group" aria-label="主题切换">
+      <button type="button" data-set="light"  aria-pressed="false">浅色</button>
+      <button type="button" data-set="dark"   aria-pressed="true">深色</button>
+      <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<span class="kicker">第一册 · 主线</span>
+<h1>用 Python 项目完整走一遍<br>Claude Code 标准作业流程</h1>
+<p class="lede">
+从「电脑上什么都没装」开始,到「一个带四层测试的真实 Python 项目、七步流程走完、每一步都有安全网」为止。
+本页所有命令与输出<strong>都是在 macOS 上真实运行过的</strong>,没有一条是编的。
+</p>
+
+<div class="box note">
+  <span class="box-t">这一册解决什么问题</span>
+  AI 写代码有两种失控:<strong>方向错了</strong>(它理解偏了,做了另一件事)和<strong>实现错了</strong>(方向对,但代码有 bug)。
+  单靠「你自己盯着」挡不住,因为它写得比你读得快。所以需要一套流程,在四个不同的时间点各设一道网。
+</div>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:10px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#four">四种方法:四道网</a></li>
+    <li><a href="#env">环境准备(你这台机器的现状)</a></li>
+    <li><a href="#proj">示例项目 myshop</a></li>
+    <li><a href="#s0">步骤 0 · 建安全网</a></li>
+    <li><a href="#s12">步骤 1–2 · Plan 模式</a></li>
+    <li><a href="#s3">步骤 3 · 做第一步 + 自测</a></li>
+    <li><a href="#s4">步骤 4 · 你自己看 diff</a></li>
+    <li><a href="#s5">步骤 5 · 三层撤销阶梯</a></li>
+    <li><a href="#s6">步骤 6 · 循环</a></li>
+    <li><a href="#s7">步骤 7 · 最后总审</a></li>
+    <li><a href="#card">完整流程速查卡</a></li>
+    <li><a href="#auto">进阶:把流程固化下来</a></li>
+  </ol>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="four">一、四种方法:四道网</h2>
+
+<p>先认识四个工具。它们不是「四选一」,而是<strong>按时间轴排开的四道网</strong>——分别拦截不同时刻发生的不同问题。</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr>
+  <th style="width:14%"></th>
+  <th style="width:21.5%"><span style="color:var(--plan)">Plan 模式</span></th>
+  <th style="width:21.5%"><span style="color:var(--info)">让它自测</span></th>
+  <th style="width:21.5%"><span style="color:var(--bad)">/rewind</span></th>
+  <th style="width:21.5%"><span style="color:var(--ok)">git 小步提交</span></th>
+</tr></thead>
+<tbody>
+<tr><th>时间点</th><td>动手前</td><td>动手中</td><td>出事后(会话内)</td><td>出事后(持久)</td></tr>
+<tr><th>性质</th><td>预防</td><td>检测</td><td>撤销</td><td>撤销 + 定位</td></tr>
+<tr><th>防的是</th><td>方向 / 范围错</td><td>实现有 bug</td><td>刚才那几轮改坏了</td><td>任何时候的任何问题</td></tr>
+<tr><th>成本</th><td>几分钟 + token</td><td>token + 时间</td><td>零</td><td>一点纪律</td></tr>
+<tr><th>可靠性</th><td>高(硬性只读)</td><td>中(会作弊,要盯)</td><td>中(不持久、不管副作用)</td><td><strong>最高</strong></td></tr>
+<tr><th>能不能省</th><td>小任务可省</td><td>尽量别省</td><td>可省(有 git 兜底)</td><td><strong>绝对不能省</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>把它们放到时间轴上</h3>
+
+<figure>
+<svg viewBox="0 0 900 300" role="img" aria-label="四种方法在时间轴上的位置,git 横跨全程">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g class="svg-t" fill="currentColor" color="var(--rule-strong)">
+    <line x1="40" y1="150" x2="855" y2="150" stroke="var(--rule-strong)" stroke-width="2" marker-end="url(#ar)"/>
+  </g>
+  <!-- 阶段标记 -->
+  <g class="svg-t" font-size="13" fill="var(--ink-faint)" text-anchor="middle">
+    <line x1="180" y1="140" x2="180" y2="160" stroke="var(--rule-strong)" stroke-width="2"/>
+    <line x1="420" y1="140" x2="420" y2="160" stroke="var(--rule-strong)" stroke-width="2"/>
+    <line x1="660" y1="140" x2="660" y2="160" stroke="var(--rule-strong)" stroke-width="2"/>
+    <text x="180" y="180">动手前</text>
+    <text x="420" y="180">动手中</text>
+    <text x="660" y="180">出事后</text>
+    <text x="840" y="180" text-anchor="end">时间</text>
+  </g>
+  <!-- Plan -->
+  <g>
+    <rect x="105" y="88" width="150" height="42" rx="10" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
+    <text x="180" y="114" class="svg-t" font-size="14" font-weight="700" fill="var(--plan)" text-anchor="middle">Plan 模式</text>
+  </g>
+  <!-- 自测 -->
+  <g>
+    <rect x="345" y="88" width="150" height="42" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <text x="420" y="114" class="svg-t" font-size="14" font-weight="700" fill="var(--info)" text-anchor="middle">让它自测</text>
+  </g>
+  <!-- rewind -->
+  <g>
+    <rect x="585" y="88" width="150" height="42" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+    <text x="660" y="114" class="svg-t" font-size="14" font-weight="700" fill="var(--bad)" text-anchor="middle">/rewind</text>
+  </g>
+  <!-- git 横跨 -->
+  <g>
+    <rect x="60" y="212" width="790" height="46" rx="12" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+    <text x="455" y="233" class="svg-t" font-size="14" font-weight="700" fill="var(--ok)" text-anchor="middle">git 小步提交 —— 唯一横跨全程的一道网</text>
+    <text x="455" y="250" class="svg-t" font-size="11.5" fill="var(--ink-faint)" text-anchor="middle">
+      动手前:开分支铺网 · 动手中:每步存档 · 出事后:定位 + 回退
+    </text>
+  </g>
+  <g stroke="var(--ok)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".55">
+    <line x1="180" y1="150" x2="180" y2="212"/>
+    <line x1="420" y1="150" x2="420" y2="212"/>
+    <line x1="660" y1="150" x2="660" y2="212"/>
+  </g>
+  <!-- 顶部标注 -->
+  <g class="svg-t" font-size="12" fill="var(--ink-faint)" text-anchor="middle">
+    <text x="180" y="66">预防</text>
+    <text x="420" y="66">检测</text>
+    <text x="660" y="66">撤销</text>
+  </g>
+</svg>
+<figcaption>前三个只在自己那一格里有效,漏了就是漏了;git 是唯一贯穿全程的</figcaption>
+</figure>
+
+<div class="box key">
+  <span class="box-t">最容易看漏的一点</span>
+  表格里「时间点」这一行,标的是<strong>「它什么时候救你」,不是「你什么时候操作它」</strong>。
+  前三个方法这两件事重合,唯独 git 是分开的:<strong>你必须在动手前就铺好,它却要到出事后才兑现价值</strong>。
+  <br><br>
+  类比:游戏存档。存档<em>发挥作用</em>的时刻是你死掉之后,但你必须<em>在死之前</em>存。没人会说「存档是死后才做的事」。
+  这也是它的成本被写成「一点纪律」而不是「几分钟」的原因——纪律的意思正是:在还看不到收益的时候就付出。
+</div>
+
+<!-- ==================================================== -->
+<h2 id="env">二、环境准备(你这台机器的现状)</h2>
+
+<p>我实际检查过你的电脑,现状是这样的:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:22%">项目</th><th style="width:30%">你的机器</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td>系统</td><td>macOS 15.7.4(Apple Silicon)</td><td>✅ 没问题</td></tr>
+<tr><td><strong>Python</strong></td><td><strong>3.9.6</strong>(系统自带)</td><td>⚠️ 偏旧,而且是系统 Python,<strong>不能直接 pip install</strong></td></tr>
+<tr><td>pip</td><td>21.2.4</td><td>⚠️ 旧,但装在 venv 里就无所谓</td></tr>
+<tr><td><strong>pytest / mypy / ruff</strong></td><td><strong>一个都没装</strong></td><td>下面带你装</td></tr>
+<tr><td>Homebrew</td><td>6.0.15 ✅</td><td>想升级 Python 的话很方便</td></tr>
+<tr><td>git</td><td>2.39.5 ✅</td><td>够用</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">第一个必须理解的概念:为什么不能直接 pip install</span>
+  macOS 自带的那个 <code>python3</code> 是<strong>系统在用的</strong>。你往它里面装包,可能污染系统环境,而且不同项目需要不同版本的库,迟早打架。
+  <br><br>
+  正确做法是给<strong>每个项目单独建一个「虚拟环境」(venv)</strong>——相当于给这个项目开一个独立的小房间,装什么都只影响这个房间。
+  房间就是项目目录下的一个 <code>.venv</code> 文件夹,不要了直接删掉即可,不留痕迹。
+</div>
+
+<div class="box good">
+  <span class="box-t">✅ 这个项目已经真的建在你电脑上了</span>
+  路径:<code>~/Desktop/claude_data/learn_claude/myshop/</code>
+  <br><br>
+  虚拟环境建好了、三个工具装好了、17 条测试全绿、git 仓库也初始化并提交了第一版。
+  <strong>下面这些步骤你不用再做一遍</strong>——照着读,理解每一步在干嘛就行。
+  想自己从零走一遍的话,换个目录名重做即可。
+  <pre style="margin:10px 0 0"><code>cd ~/Desktop/claude_data/learn_claude/myshop
+.venv/bin/python -m pytest</code></pre>
+</div>
+
+<h3>第 1 步:建项目目录和虚拟环境</h3>
+
+<pre><code>mkdir -p ~/Desktop/claude_data/learn_claude/myshop &amp;&amp; cd $_</code></pre>
+
+<pre><code>python3 -m venv .venv</code></pre>
+
+<p>这条命令在项目里建了个 <code>.venv/</code> 文件夹,里面是一个专属于本项目的 Python。之后所有的包都装进这里。</p>
+
+<h3>第 2 步:装三个工具</h3>
+
+<pre><code>.venv/bin/python -m pip install pytest mypy ruff</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 真实输出(约 25 秒)</div>
+<pre><span class="t-dim">Downloading ruff-0.16.3-py3-none-macosx_11_0_arm64.whl (10.5 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.5/10.5 MB 6.4 MB/s  0:00:02
+Installing collected packages: typing_extensions, tomli, ruff, pygments,
+  pluggy, pathspec, packaging, mypy_extensions, iniconfig, mypy,
+  exceptiongroup, pytest</span>
+
+<span class="t-ok">Successfully installed mypy-1.19.1 pytest-8.4.2 ruff-0.16.3 ...</span></pre>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:14%">工具</th><th style="width:26%">干什么</th><th>为什么需要它</th></tr></thead>
+<tbody>
+<tr><td><code>pytest</code></td><td>跑测试</td><td>执行你写的测试文件,告诉你哪条过了哪条挂了</td></tr>
+<tr><td><code>mypy</code></td><td>静态类型检查</td><td>不运行代码,只检查「类型对不对」。秒级,覆盖 100% 代码</td></tr>
+<tr><td><code>ruff</code></td><td>代码规范检查</td><td>抓未使用的变量、import 顺序、常见 bug 陷阱。极快</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <span class="box-t">Python 和 JavaScript 的一个重要差别</span>
+  JS 项目有 <code>package.json</code>,里面的 <code>"scripts"</code> 段定义了 <code>npm test</code> 这种统一入口。
+  <strong>Python 没有这个东西</strong>——没有一条放之四海皆准的「跑测试」命令。你得直接敲工具名:
+  <br><br>
+  <code>.venv/bin/python -m pytest</code> &nbsp;·&nbsp; <code>.venv/bin/python -m mypy</code> &nbsp;·&nbsp; <code>.venv/bin/python -m ruff check .</code>
+  <br><br>
+  所以别人教程里的 <code>pnpm test</code>,在 Python 世界对应的就是上面这几条。记住它们,后面全流程都在用。
+</div>
+
+<h3>第 3 步:一个 pyproject.toml 配好三个工具</h3>
+
+<p>在项目根目录建 <code>pyproject.toml</code>。这一个文件同时是 pytest、mypy、ruff 三者的配置文件:</p>
+
+<pre><code>[project]
+name = "myshop"
+version = "0.1.0"
+requires-python = "&gt;=3.9"
+dependencies = []            # 主代码只用标准库,不装任何第三方包
+
+# ---------------- pytest:跑测试 ----------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]        # 只去 tests/ 里找测试,别扫整个项目
+pythonpath = ["."]           # ← 这一行是新手救命稻草,见下面的红框
+addopts = "-v"               # 每条测试单独打一行,看得更清楚
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+# ---------------- mypy:静态类型检查 ----------------
+[tool.mypy]
+python_version = "3.9"
+files = ["myshop", "tests"]
+strict = true                # 严格模式:所有函数都必须写类型标注
+
+# ---------------- ruff:规范 + 常见 bug ----------------
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+# E=风格  F=真错误(未使用变量等)  I=import 排序  B=常见 bug 陷阱
+select = ["E", "F", "I", "B"]</code></pre>
+
+<div class="box trap">
+  <span class="box-t">99% 的初学者会卡在这里:ModuleNotFoundError</span>
+  你写了 <code>from myshop.price import format_price</code>,一跑 pytest 就报:
+  <br><br>
+  <code style="color:var(--bad)">ModuleNotFoundError: No module named 'myshop'</code>
+  <br><br>
+  <strong>原因:</strong>pytest 是从 <code>tests/</code> 目录里跑的,项目根目录不在 Python 的搜索路径里,所以它找不到 <code>myshop</code> 这个包。
+  <br><br>
+  <strong>教科书答案</strong>是 <code>pip install -e .</code>(把项目装成一个包),但对新手太重。
+  <strong>本教程的答案</strong>就是上面那一行 <code>pythonpath = ["."]</code>(pytest 7+ 支持)——零安装、一行解决。
+  <br><br>
+  另外 <code>myshop/</code> 目录里要有一个 <code>__init__.py</code>(哪怕是空文件),它是「这个文件夹是一个 Python 包」的标志。
+</div>
+
+<h3>第 4 步:关于 Python 3.9 的两个提醒</h3>
+
+<div class="box key">
+  <span class="box-t">3.9 能不能用?能,但要注意两点</span>
+  <strong>① 新语法不能用。</strong><code>str | None</code> 这种写法是 3.10+ 才有的,3.9 上运行会报错,要写成 <code>Optional[str]</code>。
+  本教程的所有代码都是 3.9 兼容的,你可以直接抄。
+  <br><br>
+  <strong>② ruff 的 UP 规则会和 3.9 打架。</strong>如果你在 <code>select</code> 里加了 <code>"UP"</code>(升级建议),
+  ruff 会催你把 <code>Dict[str, Any]</code> 改成 <code>dict[str, Any]</code>,但那在 3.9 运行时会炸。
+  所以上面的配置只选了 <code>["E","F","I","B"]</code>,3.9 上零冲突。
+  <br><br>
+  想升级到新版 Python 的话,你装了 Homebrew,一条命令的事:<code>brew install python@3.13</code>。但<strong>不升级也完全能走完本教程</strong>。
+</div>
+
+<h3>第 5 步:五个你一定会撞上的概念</h3>
+
+<p>这五个东西,后面每一页都在用。<strong>不先讲清楚,你会以为是自己抄错了。</strong></p>
+
+<h4>概念 1:venv 和 activate —— 为什么命令前面老是 <code>.venv/bin/</code></h4>
+
+<div class="box note">
+  <span class="box-t">比喻:每个项目自己的一整套厨具</span>
+  系统 Python 是<strong>公共厨房那口锅</strong>,几个项目抢着用,版本互相打架。
+  venv 是<strong>这道菜专用的锅碗瓢盆</strong>,全放在项目里的 <code>.venv/</code> 文件夹。
+  不要了就把整个文件夹删掉,不影响任何人。
+</div>
+
+<p>有两种用法,效果一样:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:26%">用法</th><th style="width:37%">怎么写</th><th>特点</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>激活(activate)</strong></td>
+  <td><code>source .venv/bin/activate</code><br>之后直接 <code>pytest</code></td>
+  <td>命令短,但<strong>只在当前这个终端窗口有效</strong>,关掉就没了</td>
+</tr>
+<tr>
+  <td><strong>写全路径</strong></td>
+  <td><code>.venv/bin/python -m pytest</code></td>
+  <td>命令长,但<strong>在任何地方都一定对</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">为什么本教程和 CLAUDE.md 里都用全路径写法</span>
+  <strong>Claude Code 在 Bash 里跑命令,不会继承你终端的 activate 状态。</strong>
+  <br><br>
+  你在终端 activate 了,自己敲 <code>pytest</code> 好好的;但你让 AI 跑 <code>pytest</code>,
+  它那边可能根本没激活,于是报 <code>command not found</code>,或者用了系统 Python 跑出一堆诡异错误。
+  <br><br>
+  <strong>所以对 AI 下命令时,永远写 <code>.venv/bin/python -m pytest</code> 这种全路径形式。</strong>
+</div>
+
+<p>两个最常见的报错和诊断方法:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:38%">现象</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>装完了却 <code>command not found: pytest</code></td><td>没 activate,或者装到了别的 Python 里</td></tr>
+<tr><td>明明装了却 <code>ModuleNotFoundError: pytest</code></td><td>装到了另一个解释器里</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>一条命令诊断(两个路径都应该在 <code>.venv/bin/</code> 下面):</p>
+
+<pre><code>which python; which pytest</code></pre>
+
+<h4>概念 2:pytest 怎么找到你的测试</h4>
+
+<p>「AI 明明写了测试,跑出来却是 0 passed」——原因几乎总是这四条规则之一没满足:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:22%">规则</th><th style="width:32%">必须是</th><th>违反了会怎样</th></tr></thead>
+<tbody>
+<tr><td><strong>文件名</strong></td><td><code>test_*.py</code> 或 <code>*_test.py</code></td><td>整个文件被无视</td></tr>
+<tr><td><strong>函数名</strong></td><td>以 <code>test_</code> 开头</td><td>这个函数被无视</td></tr>
+<tr><td><strong>测试类名</strong></td><td>以 <code>Test</code> 开头</td><td>整个类被无视</td></tr>
+<tr><td><strong>测试类不能有 <code>__init__</code></strong></td><td>—</td><td>⚠️ <strong>静默跳过</strong>,只给一条很容易被忽略的 warning</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">最后一条是 AI 协作里的真陷阱</span>
+  AI 时不时会生成带 <code>__init__</code> 方法的测试类(它以为要初始化)。
+  pytest 会<strong>一声不吭地跳过整个类</strong>,你看到「测试通过」,其实一条都没跑。
+  <br><br>
+  防呆办法:跑完看一眼<strong>收集到几条</strong>(<code>collected N items</code>),
+  数字对不上就说明有东西被吞了。
+</div>
+
+<h4>概念 3:<code>__init__.py</code> 到底要不要建</h4>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:24%">位置</th><th style="width:16%">要不要</th><th>理由</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>myshop/</code>(源码包)</td>
+  <td style="color:var(--ok)"><strong>要</strong></td>
+  <td>它是「这个文件夹是一个 Python 包」的标志,<code>import myshop.price</code> 才成立。可以是空文件</td>
+</tr>
+<tr>
+  <td><code>tests/</code></td>
+  <td style="color:var(--warn)"><strong>默认不要</strong></td>
+  <td>只有当两个子目录里出现<strong>同名测试文件</strong>、pytest 报 <code>import file mismatch</code> 时,才加一个空的</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h4>概念 4:conftest.py —— pytest 自动加载的工具箱</h4>
+
+<p>三句话讲完:</p>
+
+<ol>
+<li>它是 pytest <strong>自动加载、不需要 import</strong> 的一个文件,作用范围是「它所在的目录及所有子目录」</li>
+<li>放在<strong>项目根目录</strong>时有个重要副作用:<strong>让根目录进入 Python 的搜索路径</strong>,于是 <code>from price import ...</code> 能用了</li>
+<li>共享的 fixture(见下)就放这儿</li>
+</ol>
+
+<div class="box key">
+  <span class="box-t">它和 <code>pythonpath = ["."]</code> 是同一个问题的两种解法</span>
+  都是为了解决 <code>ModuleNotFoundError</code>。实测对比:
+  <div class="tablewrap" style="margin-top:10px">
+  <table>
+  <tr><td style="width:52%">有 <code>conftest.py</code>,跑 <code>pytest</code></td><td style="color:var(--ok)">✅ 正常</td></tr>
+  <tr><td>删掉 <code>conftest.py</code>,跑 <code>pytest</code></td><td style="color:var(--bad)">❌ ModuleNotFoundError</td></tr>
+  <tr><td>删掉 <code>conftest.py</code>,跑 <code>python -m pytest</code></td><td style="color:var(--ok)">✅ 正常</td></tr>
+  </table>
+  </div>
+  <p style="margin-bottom:0"><strong>给初学者的判定规则:只要你的测试里出现 <code>from &lt;你自己的模块&gt; import ...</code>,
+  就必须三选一</strong>——① 配 <code>pythonpath = ["."]</code>,② 用 <code>python -m pytest</code>,③ 放个 <code>conftest.py</code>。
+  <strong>三个都不做 = 一定报错。</strong></p>
+</div>
+
+<div class="box trap">
+  <span class="box-t">顺带记住这个退出码</span>
+  <code>ModuleNotFoundError</code> 导致的失败,pytest 的退出码是 <strong>2</strong>(<code>Interrupted: N errors during collection</code>),
+  <strong>不是</strong> 5。5 是「一条测试都没收集到」。搞混了会对着错误的方向查半天。
+</div>
+
+<h4>概念 5:fixture —— 写在参数位置上的「自动准备工作」</h4>
+
+<div class="box note">
+  <span class="box-t">比喻:手术前的护士</span>
+  你(测试函数)只需要在参数里<strong>点个名</strong>说要 <code>tmp_path</code>,
+  护士就在你动手之前把干净的器械台准备好(建好临时目录);
+  你做完之后她负责收拾(自动清理)。
+  <strong>这些你一行代码都不用写,你只是喊了个名字。</strong>
+</div>
+
+<p>规则很简单:<strong>参数名 = fixture 名</strong>。pytest 按名字找到它、调用它、把返回值塞进你的参数里。</p>
+
+<pre><code>def test_订单真的落盘了(tmp_path):     # ← 只是写了个参数名
+    数据库 = str(tmp_path / "test.db")  # ← tmp_path 已经是一个准备好的临时目录了
+    ...</code></pre>
+
+<p>三个你会经常见到的内置 fixture:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:20%">名字</th><th style="width:40%">干什么</th><th>为什么重要</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>tmp_path</code></td>
+  <td>给每条测试一个<strong>全新的空临时目录</strong>,跑完自动删</td>
+  <td>这就是几条测试各写各的数据库、互不污染的原因</td>
+</tr>
+<tr>
+  <td><code>monkeypatch</code></td>
+  <td>临时改模块变量 / 环境变量,<strong>测试结束自动改回来</strong></td>
+  <td>用它把 <code>order.DB_PATH</code> 指向临时库,不碰真实数据</td>
+</tr>
+<tr>
+  <td><code>capsys</code></td>
+  <td>抓住 <code>print</code> 的输出</td>
+  <td>测「有没有打印正确的提示」时用</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <span class="box-t">自己写 fixture:<code>yield</code> 之前是准备,之后是收尾</span>
+  <pre style="margin:10px 0 0"><code>@pytest.fixture()
+def 服务器(tmp_path, monkeypatch):
+    monkeypatch.setattr(order, "DB_PATH", str(tmp_path / "api.db"))
+    服务 = api.make_server(port=0)      # ← 准备:启动服务器
+    线程 = threading.Thread(target=服务.serve_forever, daemon=True)
+    线程.start()
+
+    yield f"http://127.0.0.1:{服务.server_port}"   # ← 把地址交给测试用
+
+    服务.shutdown()                     # ← 收尾:不管测试成功失败都会执行
+    服务.server_close()</code></pre>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="proj">三、示例项目:myshop</h2>
+
+<p>我们要做一个迷你网上商店。它足够小(一眼看完),又足够真实(有跨模块调用、有数据库、有 HTTP 接口),
+正好能演示测试金字塔的四层。</p>
+
+<pre><code>myshop/
+├── .venv/                      ← 虚拟环境(不进 git)
+├── pyproject.toml              ← 三个工具的配置
+├── .gitignore                  ← 不存档黑名单
+├── myshop/                     ← 源代码
+│   ├── __init__.py             ← 标志「这是一个包」
+│   ├── price.py                ← 算价格(纯函数,不碰任何外部东西)
+│   ├── order.py                ← 下单(调用 price + 写 sqlite 数据库)
+│   └── api.py                  ← HTTP 接口(把请求翻译成函数调用)
+└── tests/                      ← 测试
+    ├── test_price.py           ← ① 单元测试      5 条
+    ├── test_order.py           ← ② 集成测试      4 条
+    ├── test_api.py             ← ③ 接口测试      5 条
+    └── e2e/
+        └── test_checkout_e2e.py ← ④ E2E 测试(示意)</code></pre>
+
+<h3>最底层:price.py —— 一个纯函数</h3>
+
+<pre><code>"""价格模块:全项目最「纯」的一块。
+
+纯 = 只做计算。不读数据库、不发网络请求、不看时间、不改全局变量。
+同样的输入永远得到同样的输出 —— 这种函数是单元测试最好啃的骨头。
+"""
+
+
+def format_price(cents: int) -&gt; str:
+    """把「分」换算成人类看的价格字符串。
+
+    1234 -&gt; "¥12.34"
+    """
+    if cents &lt; 0:
+        raise ValueError("价格不能为负数")
+    # divmod(1234, 100) 一次返回 (12, 34):12 块、34 分
+    yuan, fen = divmod(cents, 100)
+    # :02d 表示不足两位就在前面补 0,所以 5 分会变成 "05"
+    return f"¥{yuan}.{fen:02d}"</code></pre>
+
+<h3>中间层:order.py —— 跨模块 + 写数据库</h3>
+
+<p>完整代码见第二册,这里只看最关键的那几行——它演示了什么叫「集成」:</p>
+
+<pre><code>from myshop.price import format_price      # ← 依赖了另一个模块
+
+def create_order(item: str, unit_cents: int, qty: int, db_path=None) -&gt; Order:
+    # ---- 1. 先把所有校验做完 ----
+    if qty &lt;= 0:
+        raise ValueError("数量必须大于 0")
+    if unit_cents &lt; 0:
+        raise ValueError("单价不能为负数")
+
+    total_cents = unit_cents * qty
+
+    # ---- 2. 再把所有可能抛异常的计算做完 ----
+    # format_price 对负数会 raise。放在写库前面调用,
+    # 保证「要么整单成功,要么库里什么都没有」。
+    total_text = format_price(total_cents)     # ← 这一行就是「跨模块协作」
+
+    # ---- 3. 最后才动数据库 ----
+    init_db(path)
+    with closing(sqlite3.connect(path)) as conn:       # ← 真的写进数据库
+        cur = conn.execute(
+            "INSERT INTO orders (item, qty, total_cents) VALUES (?, ?, ?)",
+            (item, qty, total_cents),
+        )
+        order_id = cur.lastrowid or 0
+        conn.commit()
+
+    return {"id": order_id, "total_cents": total_cents, "total_text": total_text}</code></pre>
+
+<div class="box key">
+  <span class="box-t">注意这里的顺序 —— 它本身就是一课</span>
+  <strong>所有可能抛异常的事情,必须发生在 <code>INSERT</code> 之前。</strong>
+  <br><br>
+  如果把 <code>format_price</code> 挪到写库<em>之后</em>调用(这是很自然的写法,因为它只是"拼个显示文案"),
+  那么单价为负时就会<strong>先把订单写进数据库,然后才抛异常</strong>——库里留下一条不该存在的脏数据。
+  <br><br>
+  这个 bug 有多隐蔽?<strong>mypy 完全看不出来,而且如果你没写那条测试,全量 pytest 也抓不到。</strong>
+  实测证据见<a href="#twobugs">下一节</a>。
+</div>
+
+<div class="box note">
+  <span class="box-t">记住这个 <code>format_price</code></span>
+  它是全项目最小、最不起眼的一个函数,但<strong>它被两个上层模块引用着</strong>。
+  第 <a href="#s5">步骤 5</a> 那场事故的主角就是它——<em>一个函数的爆炸半径,和它的代码行数成反比</em>。
+</div>
+
+<h3>四层测试各自长什么样</h3>
+
+<p>先给你看真实的运行结果,这是最有说服力的东西:</p>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; .venv/bin/python -m pytest</div>
+<pre><span class="t-dim">============================= test session starts ==============================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0
+rootdir: /Users/daijie27/Desktop/claude_data/learn_claude/myshop
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 17 items / 1 skipped</span>
+
+tests/test_api.py::test_下单接口返回_201_和订单内容 <span class="t-ok">PASSED</span>        <span class="t-dim">[  5%]</span>
+tests/test_api.py::test_下单之后能用_GET_查回来 <span class="t-ok">PASSED</span>            <span class="t-dim">[ 11%]</span>
+tests/test_api.py::test_缺字段要返回_400 <span class="t-ok">PASSED</span>                   <span class="t-dim">[ 17%]</span>
+tests/test_api.py::test_数量为零要返回_400 <span class="t-ok">PASSED</span>                 <span class="t-dim">[ 23%]</span>
+tests/test_api.py::test_单价为负要返回_400 <span class="t-ok">PASSED</span>                 <span class="t-dim">[ 29%]</span>
+tests/test_api.py::test_请求体不是合法_JSON_要返回_400_而不是_500 <span class="t-ok">PASSED</span> <span class="t-dim">[ 35%]</span>
+tests/test_api.py::test_查不存在的订单要返回_404 <span class="t-ok">PASSED</span>           <span class="t-dim">[ 41%]</span>
+tests/test_order.py::test_下单会把总价算对并且带上价格文案 <span class="t-ok">PASSED</span> <span class="t-dim">[ 47%]</span>
+tests/test_order.py::test_订单真的落盘了_换个连接还读得到 <span class="t-ok">PASSED</span>  <span class="t-dim">[ 52%]</span>
+tests/test_order.py::test_下两单会拿到两个不同的订单号 <span class="t-ok">PASSED</span>     <span class="t-dim">[ 58%]</span>
+tests/test_order.py::test_数量为零应该被拦下来并且不写库 <span class="t-ok">PASSED</span>   <span class="t-dim">[ 64%]</span>
+tests/test_order.py::test_单价为负数也要被拦下来并且不写库 <span class="t-ok">PASSED</span> <span class="t-dim">[ 70%]</span>
+tests/test_price.py::test_普通价格 <span class="t-ok">PASSED</span>                         <span class="t-dim">[ 76%]</span>
+tests/test_price.py::test_零元是边界值 <span class="t-ok">PASSED</span>                     <span class="t-dim">[ 82%]</span>
+tests/test_price.py::test_不足一角要在前面补零 <span class="t-ok">PASSED</span>             <span class="t-dim">[ 88%]</span>
+tests/test_price.py::test_整数元不能丢掉小数位 <span class="t-ok">PASSED</span>             <span class="t-dim">[ 94%]</span>
+tests/test_price.py::test_负数要报错 <span class="t-ok">PASSED</span>                       <span class="t-dim">[100%]</span>
+
+<span class="t-ok">======================== 17 passed, 1 skipped in 3.66s =========================</span></pre>
+</div>
+
+<div class="box good">
+  <span class="box-t">这份输出来自你自己的机器</span>
+  项目已经真的搭在 <code>learn_claude/myshop/</code> 了。上面这段是在你电脑上跑出来的实际结果,
+  <strong>你现在就可以自己复现一遍</strong>:
+  <pre style="margin:10px 0 0"><code>cd ~/Desktop/claude_data/learn_claude/myshop
+.venv/bin/python -m pytest</code></pre>
+</div>
+
+<div class="box good">
+  <span class="box-t">中文测试名真的可以用</span>
+  <code>def test_零元是边界值()</code> 完全正常,pytest 输出里中文照常显示。
+  <strong>唯一的前提:函数名必须以 <code>test_</code> 开头</strong>,中文只能出现在 <code>test_</code> 后面。
+  写成 <code>def 测试_零元()</code> 是不会被 pytest 找到的。
+  <br><br>
+  对初学者来说这个非常值钱——测试名用中文写,你一眼就知道每条在测什么。
+</div>
+
+<h3>为什么金字塔是金字塔形:实测耗时</h3>
+
+<p>同一个项目,把三层分开跑,计时:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:16%">层级</th><th style="width:16%">条数</th><th style="width:18%">实测耗时</th><th style="width:14%">倍数</th><th>为什么慢</th></tr></thead>
+<tbody>
+<tr>
+  <td>⓪ ruff</td><td>—</td>
+  <td><span class="big-num fast">0.02 秒</span></td><td>—</td>
+  <td>不运行代码,只扫一遍文本</td>
+</tr>
+<tr>
+  <td>⓪ mypy</td><td>—</td>
+  <td><span class="big-num fast">0.27 秒</span></td><td>—</td>
+  <td>不运行代码,推导全项目的类型</td>
+</tr>
+<tr>
+  <td>① 单元测试</td><td>5 条</td>
+  <td><span class="big-num fast">0.00 秒</span></td><td>1×</td>
+  <td><strong>快到测不出来</strong>。只调一个纯函数,什么外部东西都不碰</td>
+</tr>
+<tr>
+  <td>② 集成测试</td><td>5 条</td>
+  <td><span class="big-num fast">0.02 秒</span></td><td>—</td>
+  <td>要真的建 sqlite 数据库、写入、再读出来</td>
+</tr>
+<tr>
+  <td>③ 接口测试</td><td>7 条</td>
+  <td><span class="big-num slow">3.64 秒</span></td><td><strong>≈180×</strong><br><span style="font-size:12px">(对比集成层)</span></td>
+  <td>每条都要真的<strong>启动一个 HTTP 服务器再关掉</strong></td>
+</tr>
+<tr>
+  <td>④ E2E</td><td>—</td>
+  <td><span class="big-num slow">10 秒+ / 条</span></td><td>1000×+</td>
+  <td>要开真浏览器,还要等页面加载、动画播完</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t">这组数字比任何说教都有力</span>
+  <strong>集成层 0.02 秒 vs 接口层 3.64 秒,差约 180 倍。</strong>
+  而单元测试那 5 条快到 pytest 都测不出耗时,直接显示 <code>0.00s</code>。
+  <br><br>
+  这就是为什么金字塔下宽上窄:底层便宜到可以「每改一行就跑一次」,顶层贵到「整个任务只跑一次」。
+  也是为什么<a href="#s3">步骤 3</a> 只跑底下两层——如果每步都跑接口测试,你一天做 20 步就要白等一分多钟,
+  而如果每步都跑 E2E,那就是几个小时。
+</div>
+
+<h3 id="twobugs">这个项目里藏着两个真 bug —— 以及它们教了我们什么</h3>
+
+<p>这个示例项目最初的版本有两个真实的 bug。它们已经修好了,但<strong>值得单独讲一讲,
+因为它们恰好演示了「全量测试也抓不到你压根没写的用例」</strong>。</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:16%">Bug</th><th style="width:34%">问题</th><th>后果</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>order.py</code></td>
+  <td><code>format_price</code> 在 <code>INSERT</code> <strong>之后</strong>才调用,
+      而且 <code>unit_cents</code> 从头到尾没校验</td>
+  <td>单价为负时:<strong>先把订单写进数据库,然后才抛异常</strong> —— 库里留下脏数据</td>
+</tr>
+<tr>
+  <td><code>api.py</code></td>
+  <td><code>json.loads</code> 写在 <code>try</code> <strong>外面</strong></td>
+  <td>一个畸形请求 → 未捕获异常 → 客户端拿到 <strong>500</strong>(而设计上该是 400),终端还刷一屏 traceback</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h4>为什么这两个 bug 特别有教学价值</h4>
+
+<p>我在你的机器上做了<strong>变异测试的手工版</strong>:把代码故意改回有 bug 的样子,看谁能抓住它。</p>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 把 order.py 改回有 bug 的版本之后</div>
+<pre><span class="t-cmd">$ .venv/bin/python -m mypy</span>
+<span class="t-ok">Success: no issues found in 8 source files</span>      <span class="t-dim">← mypy 完全瞎</span>
+
+<span class="t-cmd">$ .venv/bin/python -m pytest tests/test_order.py</span>
+<span class="t-bad">FAILED tests/test_order.py::test_单价为负数也要被拦下来并且不写库</span>
+
+<span class="t-dim">失败详情:</span>
+    with pytest.raises(LookupError):
+        get_order(1, db_path=数据库)     <span class="t-dim">← 本该「查不到」</span>
+
+myshop/order.py:99: in get_order
+    "total_text": format_price(row[3])
+cents = <span class="t-bad">-100</span>                             <span class="t-dim">← 却查到了一条 -100 的脏数据!</span>
+<span class="t-bad">E   ValueError: 价格不能为负数</span></pre>
+</div>
+
+<div class="box key">
+  <span class="box-t">看懂这个失败信息</span>
+  测试期望 <code>get_order(1)</code> 抛 <code>LookupError</code>(意思是「库里应该啥都没有」)。
+  结果它<strong>真的查到了一行</strong>,而且那行的 <code>total_cents = -100</code>——
+  <strong>脏数据真实存在到了「读回来都会炸」的程度。</strong>
+  <br><br>
+  三个结论:
+  <ol style="margin-bottom:0">
+    <li><strong>mypy 对这个 bug 一点用都没有</strong>——类型全对,顺序错了</li>
+    <li><strong>如果没写那条测试,全量 pytest 也抓不到</strong>——原版的 4 条集成测试全绿</li>
+    <li><strong>只有「你想到要测这个场景」才能发现它</strong></li>
+  </ol>
+</div>
+
+<div class="box good">
+  <span class="box-t">这就是「测试覆盖率」的真正含义</span>
+  <em>测试只能证明「你想到要检查的东西」是对的,不能证明「代码是对的」。</em>
+  <br><br>
+  所以<strong>步骤 4(你自己看 diff)永远不能省</strong>——
+  它是唯一能发现「这里应该还有个用例没写」的环节。机器只会跑你写下的东西。
+</div>
+
+<p>四层测试的完整代码、每一层「测什么 / 不测什么」的详细拆解,在
+<a href="claude-code-testing.html">第二册《测试体系》</a>。这一册我们专注走流程。</p>
+
+<!-- ==================================================== -->
+<h2 id="s0">四、步骤 0 · 建安全网 <span class="tag git">git 小步提交</span></h2>
+
+<div class="step" data-m="git">
+  <div class="step-head">
+    <div class="step-num">0</div>
+    <div>
+      <div class="step-title">建立安全网</div>
+      <div class="step-sub">全流程最容易被跳过、也最不能跳过的一步</div>
+    </div>
+  </div>
+
+<p><strong>做什么:</strong></p>
+
+<pre><code>git init</code></pre>
+
+<pre><code>git checkout -b feat/add-discount</code></pre>
+
+<pre><code>git status</code></pre>
+
+<h4>逐字拆解</h4>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:26%">部分</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>git</code></td><td>版本控制工具。<strong>把它想成游戏的存档系统</strong></td></tr>
+<tr><td><code>init</code></td><td>给这个项目装上存档系统(只需要做一次)</td></tr>
+<tr><td><code>checkout</code></td><td>切换到某条分支</td></tr>
+<tr><td><code>-b</code></td><td><code>--branch</code> 的缩写:<strong>新建</strong>一条分支并立刻切过去。不加 <code>-b</code> 就是切到已存在的分支</td></tr>
+<tr><td><code>feat/add-discount</code></td><td>分支名。<code>feat/</code> 是社区约定的前缀(feature,新功能),后面写实际功能名</td></tr>
+<tr><td><code>status</code></td><td>看当前进度面板:哪些改了、哪些勾选了、哪些是 git 不认识的新文件</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <span class="box-t">为什么非要新开一条分支</span>
+  让 <code>main</code> 保持绝对干净。AI 在新分支上怎么折腾都行,最坏情况是切回 <code>main</code> 把这条分支整个删掉,<code>main</code> 一行都没动过。
+  <br><br>
+  <strong>这一步把爆炸半径从「整个项目」缩到了「这条分支」。</strong>
+  <br><br>
+  更安全的新写法:<code>git switch -c feat/add-discount</code>(git 2.23+)。
+  老的 <code>checkout</code> 身兼两职(切分支 / 恢复文件),容易误操作;新版拆成了 <code>switch</code>(切分支)和 <code>restore</code>(恢复文件)。两者都行。
+</div>
+
+<h4>「干净」具体长什么样</h4>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; git status 的五种状态(实测)</div>
+<pre><span class="t-cmd">$ git status</span>
+On branch feat/add-discount
+<span class="t-ok">nothing to commit, working tree clean</span>     <span class="t-dim">← 这就是「干净」</span>
+
+<span class="t-dim">─────────── 简短版 git status -s 的对照 ───────────</span>
+<span class="t-cmd">$ git status -s</span>
+<span class="t-dim">(完全没有输出 —— 没输出就是好消息,不是命令卡住了)</span>
+
+<span class="t-warn">?? </span>ai_notes.py     <span class="t-dim">← ?? = git 完全不认识的新文件(最危险的一类)</span>
+<span class="t-warn"> M </span>app.py          <span class="t-dim">← 改了,但没 add(注意 M 前面那个空格!)</span>
+<span class="t-ok">M  </span>README.md       <span class="t-dim">← 改了,已经 add 了</span>
+<span class="t-ok">MM</span> both.py         <span class="t-dim">← 两种都有:add 过之后又改了</span>
+<span class="t-ok">A  </span>new.py          <span class="t-dim">← 新文件,已 add</span></pre>
+</div>
+
+<div class="box trap">
+  <span class="box-t"><code>-s</code> 输出的关键:左右两列</span>
+  <strong>左列 = 暂存区(add 过的),右列 = 工作区(还没 add 的)。</strong>
+  <code>M</code> 前面那个空格特别容易被忽略,而它恰恰是关键——<code>M&nbsp;</code> 和 <code>&nbsp;M</code> 是完全不同的两种状态。
+</div>
+
+<h4>为什么 <code>git status</code> 必须干净:一条隐藏的因果链</h4>
+
+<figure>
+<svg viewBox="0 0 880 190" role="img" aria-label="工作区不干净会导致步骤4失效的因果链">
+  <defs>
+    <marker id="ar2" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="var(--bad)"/>
+    </marker>
+  </defs>
+  <g class="svg-t" font-size="12.5" text-anchor="middle">
+    <rect x="10"  y="55" width="160" height="70" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.4"/>
+    <text x="90" y="82" fill="var(--ink)" font-weight="700">步骤 0 没做</text>
+    <text x="90" y="102" fill="var(--ink-soft)" font-size="11.5">工作区里还有你</text>
+    <text x="90" y="117" fill="var(--ink-soft)" font-size="11.5">上次没提交的改动</text>
+
+    <rect x="188" y="55" width="160" height="70" rx="11" fill="var(--paper-raised)" stroke="var(--rule-strong)" stroke-width="1.4"/>
+    <text x="268" y="88" fill="var(--ink)" font-weight="700">AI 又改了一堆</text>
+    <text x="268" y="108" fill="var(--ink-soft)" font-size="11.5">两拨改动混在一起</text>
+
+    <rect x="366" y="55" width="170" height="70" rx="11" fill="var(--paper-raised)" stroke="var(--rule-strong)" stroke-width="1.4"/>
+    <text x="451" y="82" fill="var(--ink)" font-weight="700">步骤 4 跑 git diff</text>
+    <text x="451" y="102" fill="var(--ink-soft)" font-size="11.5">分不清哪些是它改的</text>
+    <text x="451" y="117" fill="var(--ink-soft)" font-size="11.5">哪些是你自己的</text>
+
+    <rect x="554" y="55" width="160" height="70" rx="11" fill="var(--paper-raised)" stroke="var(--rule-strong)" stroke-width="1.4"/>
+    <text x="634" y="88" fill="var(--ink)" font-weight="700">信号被噪声淹没</text>
+    <text x="634" y="108" fill="var(--ink-soft)" font-size="11.5">你只能拉到底说「行吧」</text>
+
+    <rect x="732" y="55" width="138" height="70" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.8"/>
+    <text x="801" y="82" fill="var(--bad)" font-weight="800">步骤 4</text>
+    <text x="801" y="103" fill="var(--bad)" font-weight="800">等于没做</text>
+  </g>
+  <g stroke="var(--bad)" stroke-width="1.8" marker-end="url(#ar2)" opacity=".8">
+    <line x1="172" y1="90" x2="184" y2="90"/>
+    <line x1="350" y1="90" x2="362" y2="90"/>
+    <line x1="538" y1="90" x2="550" y2="90"/>
+    <line x1="716" y1="90" x2="728" y2="90"/>
+  </g>
+  <text x="440" y="165" class="svg-t" font-size="13" fill="var(--ink-faint)" text-anchor="middle">
+    步骤 0 不是走形式 —— 它在给步骤 4 建立干净的对比基线。基线脏了,后面所有 diff 都在读乱码。
+  </text>
+</svg>
+</figure>
+
+<p>如果 status 不干净,先处理掉再开工:要么提交(<code>git commit</code>),要么先收进抽屉(<code>git stash</code>)。</p>
+
+<h4>Python 项目必写的 .gitignore</h4>
+
+<p>Python 会自动生成大量垃圾文件。不写 <code>.gitignore</code> 的话,它们会全部进入 git,让你的 <code>git diff</code> 全是噪音——<strong>又一次让步骤 4 失效</strong>。</p>
+
+<pre><code># ---- Python 垃圾 ----
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 虚拟环境(几千个文件、几十 MB)----
+.venv/
+venv/
+
+# ---- 密钥,千万别提交 ----
+.env
+
+# ---- 数据库文件 ----
+*.db
+
+# ---- macOS ----
+.DS_Store</code></pre>
+
+<div class="box trap">
+  <span class="box-t">.gitignore 最大的陷阱:它管不了「已经被提交过」的文件</span>
+  如果你先提交了 <code>__pycache__</code>,之后再写 <code>.gitignore</code>,git 会继续跟踪它们。要清掉得:
+  <br><br>
+  <code>git rm -r --cached __pycache__</code> 然后 <code>git commit</code>
+  <br><br>
+  <strong><code>--cached</code> 这个词千万别漏!</strong>不加它就是把磁盘上的文件真删了。对 <code>.env</code> 这种文件漏加就是灾难。
+  <br><br>
+  <strong>正确顺序永远是:先写 .gitignore,再开始 add/commit。</strong>
+</div>
+
+<h4>存下第一个档</h4>
+
+<pre><code>git add -A</code></pre>
+
+<pre><code>git commit -m "chore: 初始化项目骨架"</code></pre>
+
+<div class="box good">
+  <span class="box-t">步骤 0 完成的标志</span>
+  <code>git status</code> 显示 <code>working tree clean</code>,并且 <code>git log --oneline</code> 至少有一条记录。
+  <br>现在,不管 AI 接下来做什么,你都有一个可以回去的点。
+</div>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="s12">五、步骤 1–2 · Plan 模式 <span class="tag plan">预防</span></h2>
+
+<div class="step" data-m="plan">
+  <div class="step-head">
+    <div class="step-num">1</div>
+    <div>
+      <div class="step-title">先规划,别写代码</div>
+      <div class="step-sub">防的是「方向错 / 范围错」</div>
+    </div>
+  </div>
+
+<h4>怎么进入 Plan 模式</h4>
+
+<p>在 Claude Code 的输入框里按 <strong><code>Shift + Tab</code></strong>,循环切换权限模式,直到看到 <code>plan</code>:</p>
+
+<figure>
+<svg viewBox="0 0 880 120" role="img" aria-label="Shift+Tab 权限模式循环顺序">
+  <defs>
+    <marker id="ar3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--ink-faint)"/>
+    </marker>
+  </defs>
+  <g class="svg-t" font-size="12.5" text-anchor="middle">
+    <rect x="18" y="34" width="140" height="46" rx="10" fill="var(--paper-raised)" stroke="var(--rule-strong)" stroke-width="1.4"/>
+    <text x="88" y="55" fill="var(--ink)" font-weight="700">default</text>
+    <text x="88" y="71" fill="var(--ink-faint)" font-size="11">显示为 Manual</text>
+
+    <rect x="198" y="34" width="140" height="46" rx="10" fill="var(--paper-raised)" stroke="var(--rule-strong)" stroke-width="1.4"/>
+    <text x="268" y="55" fill="var(--ink)" font-weight="700">acceptEdits</text>
+    <text x="268" y="71" fill="var(--ink-faint)" font-size="11">自动批准文件编辑</text>
+
+    <rect x="378" y="30" width="140" height="54" rx="10" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="2.2"/>
+    <text x="448" y="53" fill="var(--plan)" font-weight="800">plan ★</text>
+    <text x="448" y="71" fill="var(--ink-soft)" font-size="11">只读,不能改</text>
+
+    <rect x="558" y="34" width="150" height="46" rx="10" fill="var(--paper-raised)" stroke="var(--rule)" stroke-width="1.4" opacity=".65"/>
+    <text x="633" y="55" fill="var(--ink-soft)" font-weight="700">bypassPermissions</text>
+    <text x="633" y="71" fill="var(--ink-faint)" font-size="11">如果可用</text>
+
+    <rect x="748" y="34" width="110" height="46" rx="10" fill="var(--paper-raised)" stroke="var(--rule)" stroke-width="1.4" opacity=".65"/>
+    <text x="803" y="55" fill="var(--ink-soft)" font-weight="700">auto</text>
+    <text x="803" y="71" fill="var(--ink-faint)" font-size="11">如果可用</text>
+  </g>
+  <g stroke="var(--ink-faint)" stroke-width="1.5" marker-end="url(#ar3)">
+    <line x1="160" y1="57" x2="194" y2="57"/>
+    <line x1="340" y1="57" x2="374" y2="57"/>
+    <line x1="520" y1="57" x2="554" y2="57"/>
+    <line x1="710" y1="57" x2="744" y2="57"/>
+  </g>
+  <path d="M 803 88 L 803 104 L 88 104 L 88 84" fill="none" stroke="var(--ink-faint)"
+        stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#ar3)"/>
+  <text x="445" y="117" class="svg-t" font-size="11.5" fill="var(--ink-faint)" text-anchor="middle">再按一次回到 default</text>
+</svg>
+<figcaption>每按一次 Shift+Tab 循环到下一个模式(Windows 无 VT 模式时用 Alt+M)</figcaption>
+</figure>
+
+<div class="box trap">
+  <span class="box-t">别数「按几下」—— 你很可能数不对</span>
+  网上教程常说「按两下到 plan」。<strong>这对相当一部分人是错的</strong>:
+  <br><br>
+  官方文档写明,<strong>Pro / Max / Team 计划新开会话是从 <code>auto</code> 模式起步的</strong>。
+  从 auto 按第一下回到 <code>default</code>,然后才是 <code>default → acceptEdits → plan</code>——<strong>要按三下</strong>。
+  <br><br>
+  另外 <code>bypassPermissions</code> 只有用特定方式启动才进循环,并不是默认就有。
+  <br><br>
+  <strong>唯一稳妥的做法:按 Shift+Tab,一直按到状态栏出现 <code>⏸ plan mode on</code> 为止。</strong>
+  <em>认状态栏,不数按键次数。</em>
+</div>
+
+<div class="box note">
+  <span class="box-t">Plan 模式到底限制了什么</span>
+  在 Plan 模式下,Claude <strong>能读文件、能列目录,但不能编辑文件、不能运行命令</strong>——直到你明确批准计划为止。
+  <br><br>
+  这不是「它答应你不改」,而是<strong>工具层面的硬性限制</strong>。这就是对比表里它可靠性写「高」的原因:
+  不依赖模型自觉,依赖的是它压根拿不到写权限。
+</div>
+
+<h4>提示词</h4>
+
+<pre><code>读一下 @myshop/ 和 @tests/,搞清楚现状,
+给我「给订单加满减优惠」的实施方案,先别写代码。
+
+方案要说清楚:
+- 要改哪几个文件,每个文件改什么
+- 拆成几步,每步做完能独立验证
+- 每一步之后应该跑哪些测试
+- 有没有会影响到现有功能的地方</code></pre>
+
+<div class="box key">
+  <span class="box-t"><code>@</code> 是什么</span>
+  <code>@myshop/</code> 是「把这个目录的内容读进上下文」的语法。
+  比你手动复制粘贴代码方便得多,也比让它自己去猜文件在哪可靠得多。
+</div>
+
+<div class="box good">
+  <span class="box-t">Plan 阶段其实也有一种「自测」——但它不是跑测试</span>
+  「读一下 @myshop/,<strong>搞清楚现状</strong>」这句话,就是在要求它做<strong>前提校验</strong>:
+  确认 API 签名真的长那样、文件真的在那儿、现有实现真的是它以为的那样。
+  <br><br>
+  它防的是<strong>方案建立在幻觉之上</strong>——方案里写「调用 <code>order.apply_discount()</code>」,
+  而这个方法根本不存在。这种情况下,后面写多少代码、跑多少测试都是错的。
+</div>
+</div>
+
+<div class="step" data-m="plan">
+  <div class="step-head">
+    <div class="step-num">2</div>
+    <div>
+      <div class="step-title">审方案 → 提意见 → 批准</div>
+      <div class="step-sub">这是人工闸门,不能自动化</div>
+    </div>
+  </div>
+
+<p>它给出方案后,你要真的读一遍。<strong>看这四件事:</strong></p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:22%">看什么</th><th style="width:38%">警惕信号</th><th>你该说什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>方向对不对</strong></td>
+  <td>它理解的需求和你想的不是一回事</td>
+  <td>「你理解错了,我要的是 X 不是 Y」</td>
+</tr>
+<tr>
+  <td><strong>范围是不是超了</strong></td>
+  <td>出现「顺便重构一下」「统一优化」这类话</td>
+  <td>「这次只做 X,别碰其他文件」</td>
+</tr>
+<tr>
+  <td><strong>步子是不是太大</strong></td>
+  <td>一步就要改五个文件</td>
+  <td>「第 1 步拆成三步,每步做完我要能验证」</td>
+</tr>
+<tr>
+  <td><strong>有没有幻觉</strong></td>
+  <td>提到了你没见过的函数名 / 文件名</td>
+  <td>「<code>apply_discount</code> 在哪个文件?先确认它存在」</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>不满意就继续说,让它改方案。<strong>方案阶段改十次的成本,远低于代码阶段改一次。</strong>满意了再批准,它才开始动手。</p>
+
+<div class="box note">
+  <span class="box-t">小任务可以跳过步骤 1–2</span>
+  「把这个函数的报错信息改成中文」这种,直接说就行。
+  判断标准:<strong>如果你能一句话把要改的东西说清楚,就不需要 Plan。</strong>
+</div>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="s3">六、步骤 3 · 做第一步 + 自测 <span class="tag test">检测</span></h2>
+
+<div class="step" data-m="test">
+  <div class="step-head">
+    <div class="step-num">3</div>
+    <div>
+      <div class="step-title">让它做第一步,并且自带验证</div>
+      <div class="step-sub">这一步里其实有两件独立的事</div>
+    </div>
+  </div>
+
+<h4>先把这句话拆开</h4>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:36%">半句</th><th>在管什么</th></tr></thead>
+<tbody>
+<tr><td><strong>「实施方案第 1 步」</strong></td><td>管<strong>做多少</strong>(分量控制)</td></tr>
+<tr><td><strong>「改完跑 pytest 和 mypy,修到干净」</strong></td><td>管<strong>做完怎么验收</strong>(质量控制)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t">一个关键的时间差:指令下发 ≠ 验证执行</span>
+  很多人看到这句话会以为「还没写代码就要测试了?」。不是的。这一步的执行顺序是<strong>先改代码 → 再跑测试</strong>。
+  <br><br>
+  但<strong>验收标准要在派活的时候就一起给出</strong>,原因是:
+  <ul style="margin-bottom:0">
+    <li><strong>事前给</strong>:它带着「最后要过测试」这个约束去写代码,写的时候就在朝这个标准靠。</li>
+    <li><strong>事后追加</strong>:它已经进入「我做完了」的状态,你再让它跑测试,它的动机就变成了<em>用最小改动让红变绿</em>——这正是作弊的温床。</li>
+  </ul>
+</div>
+
+<h4>为什么只做「第一步」,不一口气做完</h4>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:26%">后果</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><strong>diff 大到你读不动</strong></td><td>一步 50 行你会认真看,五步 500 行你只会拉到底说「看着还行」。<strong>步骤 4 就这样悄悄失效了</strong></td></tr>
+<tr><td><strong>错误会叠加</strong></td><td>第 1 步的数据结构设计错了,后面四步全建在这个错误上。第 5 步才发现 = 前四步全废</td></tr>
+<tr><td><strong>回退粒度太粗</strong></td><td>五步做完才发现问题,只能整个推翻。分步提交才能精确回到「第 2 步做完」</td></tr>
+<tr><td><strong>上下文越长越容易漂</strong></td><td>连续工作五步,后面它会开始忘掉你最初的约束。每步停一下相当于重新对焦</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <span class="box-t">「一步」应该多大?</span>
+  判断标准只有一个:<strong>这一步做完,是不是能独立验证、独立提交?</strong>
+  <div class="grid2" style="margin-top:12px">
+    <div>
+      <strong style="color:var(--ok)">✅ 好的一步</strong>
+      <ul style="margin-top:6px">
+        <li>「给 <code>price.py</code> 加一个 <code>apply_discount</code> 函数并写单测」</li>
+        <li>「给 orders 表加 <code>discount_cents</code> 字段」</li>
+      </ul>
+    </div>
+    <div>
+      <strong style="color:var(--bad)">❌ 不好的一步</strong>
+      <ul style="margin-top:6px">
+        <li>「把整个价格体系重构一遍」</li>
+        <li>「做优惠券功能」</li>
+      </ul>
+    </div>
+  </div>
+  新手期<strong>宁可切得太碎</strong>。碎了最多多几轮对话,大了是你彻底失去控制。
+</div>
+
+<h4>提示词模板(可直接抄)</h4>
+
+<pre><code>实施方案第 1 步。
+
+改完自己跑这两条,修到全绿:
+  .venv/bin/python -m mypy
+  .venv/bin/python -m pytest tests/test_price.py
+
+约束:
+- 不许改动任何测试文件;不许 skip、注释掉或放宽断言
+- 如果你认为测试本身有问题,停下来告诉我,不要自己改
+- 不要改本步骤范围之外的文件
+- 把命令的真实输出贴给我,不要只说"通过了"
+
+做完第 1 步就停,等我检查,不要继续做第 2 步。</code></pre>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:40%">这条约束</th><th>在防什么</th></tr></thead>
+<tbody>
+<tr><td>不许改测试文件</td><td><strong>改断言让红变绿</strong> —— 最常见的作弊</td></tr>
+<tr><td>有问题先告诉我</td><td>给它一个诚实的出口,否则它只能硬来</td></tr>
+<tr><td>不改范围外文件</td><td>范围蔓延</td></tr>
+<tr><td>贴真实输出</td><td><strong>它没跑却声称跑过了</strong> —— 比你想的常见得多</td></tr>
+<tr><td>做完就停</td><td>防止它一路做到第 5 步</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>它执行时你会看到什么</h4>
+
+<p>这不是它「在心里检查了一遍」,而是<strong>真的调用 Bash 工具执行了 shell 命令</strong>:</p>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; Claude Code 会话里的真实过程</div>
+<pre><span class="t-dim">●</span> <span class="t-cmd">Bash(.venv/bin/python -m mypy)</span>
+  ⎿ <span class="t-bad">myshop/price.py:14: error: Incompatible return value type
+     (got "int", expected "str")  [return-value]
+    Found 1 error in 1 file (checked 8 source files)</span>
+
+<span class="t-dim">●</span> 我看到一个类型错误,正在修复...
+
+<span class="t-dim">●</span> <span class="t-cmd">Bash(.venv/bin/python -m mypy)</span>
+  ⎿ <span class="t-ok">Success: no issues found in 8 source files</span>
+
+<span class="t-dim">●</span> <span class="t-cmd">Bash(.venv/bin/python -m pytest tests/test_price.py)</span>
+  ⎿ <span class="t-ok">5 passed in 0.01s</span></pre>
+</div>
+
+<div class="box key">
+  <span class="box-t">为什么这比「你觉得对吗」可靠</span>
+  <strong>输出来自 mypy 和 pytest,不来自模型。</strong>编译器不会给 AI 面子,测试框架也不会。
+  <br><br>
+  这也解释了对比表里「让它自测」为什么是<strong>中(会作弊,要盯)</strong>而不是「低」:
+  <em>输出本身是硬的,作弊发生在「它改了什么」这一侧</em>。所以你要盯的不是输出,是 diff。
+</div>
+
+<h4>这一步跑哪几层测试?</h4>
+
+<figure>
+<svg viewBox="0 0 760 330" role="img" aria-label="测试金字塔与流程步骤的对应">
+  <g class="svg-t">
+    <!-- 金字塔 -->
+    <polygon points="380,20 455,88 305,88" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+    <polygon points="305,90 455,90 500,158 260,158" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <polygon points="260,160 500,160 545,228 215,228" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <polygon points="215,230 545,230 590,298 170,298" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+
+    <text x="380" y="70"  font-size="12.5" font-weight="700" fill="var(--bad)"  text-anchor="middle">E2E / 系统</text>
+    <text x="380" y="130" font-size="12.5" font-weight="700" fill="var(--warn)" text-anchor="middle">集成 / 接口</text>
+    <text x="380" y="200" font-size="12.5" font-weight="700" fill="var(--info)" text-anchor="middle">单元 / 组件</text>
+    <text x="380" y="270" font-size="12.5" font-weight="700" fill="var(--ok)"   text-anchor="middle">typecheck / lint</text>
+
+    <!-- 右侧标注 -->
+    <g font-size="12" fill="var(--ink-soft)">
+      <line x1="460" y1="58"  x2="600" y2="58"  stroke="var(--bad)"  stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="608" y="55" fill="var(--bad)" font-weight="700">步骤 7</text>
+      <text x="608" y="70" font-size="11">整个任务跑 1 次</text>
+
+      <line x1="505" y1="128" x2="600" y2="128" stroke="var(--warn)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="608" y="125" fill="var(--warn)" font-weight="700">步骤 5a</text>
+      <text x="608" y="140" font-size="11">每次提交前(全量)</text>
+
+      <line x1="550" y1="198" x2="600" y2="198" stroke="var(--info)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="608" y="195" fill="var(--info)" font-weight="700">步骤 3</text>
+      <text x="608" y="210" font-size="11">每一步都跑</text>
+
+      <line x1="595" y1="268" x2="600" y2="268" stroke="var(--ok)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <text x="608" y="265" fill="var(--ok)" font-weight="700">步骤 3</text>
+      <text x="608" y="280" font-size="11">每一步都跑</text>
+    </g>
+
+    <!-- 左侧速度标注 -->
+    <g font-size="11.5" fill="var(--ink-faint)" text-anchor="end">
+      <text x="290" y="58">10 秒+/条</text>
+      <text x="245" y="128">2.60 秒</text>
+      <text x="200" y="198">0.01 秒</text>
+      <text x="155" y="268">0.06 秒</text>
+    </g>
+    <text x="90" y="165" font-size="12" fill="var(--ink-faint)" text-anchor="middle" transform="rotate(-90 90 165)">
+      越往上越慢、越贵、越不稳
+    </text>
+  </g>
+</svg>
+<figcaption>步骤 3 只跑底下两层 —— 因为只有这两层快到可以「每步都跑」</figcaption>
+</figure>
+
+<p><strong>所以步骤 3 在 Python 里的具体命令是:</strong></p>
+
+<pre><code>.venv/bin/python -m mypy</code></pre>
+
+<pre><code>.venv/bin/python -m pytest tests/test_price.py</code></pre>
+
+<div class="box note">
+  <span class="box-t">注意这里跑的是「局部」</span>
+  <code>pytest tests/test_price.py</code> 只跑了你刚改的那块的测试,<strong>不是全量</strong>。
+  为什么不每步都跑全量?因为慢。为什么提交前又必须跑全量?
+  <a href="#s5">步骤 5a</a> 有一个真实事故会回答这个问题。
+</div>
+
+<h4>测试挂了长什么样</h4>
+
+<p>故意把 <code>price.py</code> 里的 <code>{fen:02d}</code> 改成 <code>{fen}</code>(去掉补零),再跑:</p>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; pytest 失败输出(真实)</div>
+<pre><span class="t-dim">___________________ test_不足一角要在前面补零 ____________________</span>
+
+    def test_不足一角要在前面补零() -&gt; None:
+        # 5 分不能显示成 "¥0.5",必须是 "¥0.05"
+&gt;       assert format_price(5) == "¥0.05"
+<span class="t-bad">E       AssertionError: assert '¥0.5' == '¥0.05'
+E
+E         - ¥0.05
+E         ?    -
+E         + ¥0.5</span>
+
+tests/test_price.py:26: AssertionError
+<span class="t-dim">======================== short test summary info ========================</span>
+<span class="t-bad">FAILED tests/test_price.py::test_零元是边界值
+FAILED tests/test_price.py::test_不足一角要在前面补零
+FAILED tests/test_price.py::test_整数元不能丢掉小数位</span>
+<span class="t-bad">=================== 3 failed, 2 passed in 0.04s ====================</span></pre>
+</div>
+
+<div class="box good">
+  <span class="box-t">pytest 最好用的地方</span>
+  它会自动对比字符串,用 <code>-</code> 和 <code>+</code> 标出差在哪。
+  上面那个 <code>?&nbsp;&nbsp;&nbsp;&nbsp;-</code> 就是在精确指出「这里少了一个字符」。
+  <strong>你完全不需要自己去猜哪里不一样。</strong>
+</div>
+
+<h4>止损规则</h4>
+
+<div class="box trap">
+  <span class="box-t">两条硬规则,防止它在坑里越挖越深</span>
+  <strong>① 红得超过五六个 → 停下来自己看一眼。</strong>
+  大面积飘红通常意味着方向性错误(改错文件了、依赖没装),让它闷头一个个修是纯浪费,还会把上下文塞满。
+  <br><br>
+  <strong>② 同一个测试改三轮还不绿 → 人工介入。</strong>
+  它会来回改同两个文件,每轮都说「这次应该好了」。每多一轮,改动越离谱,你的回退成本越高。
+</div>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="s4">七、步骤 4 · 你自己看 diff <span class="tag eye">唯一不能外包的一步</span></h2>
+
+<div class="step" data-m="eye">
+  <div class="step-head">
+    <div class="step-num">4</div>
+    <div>
+      <div class="step-title">你自己检查</div>
+      <div class="step-sub">四种方法之外的第五件事:你的眼睛</div>
+    </div>
+  </div>
+
+<p>在 Claude Code 的输入框里直接打:</p>
+
+<pre><code>!git diff</code></pre>
+
+<div class="box key">
+  <span class="box-t">开头那个 <code>!</code> 是什么</span>
+  在 Claude Code 输入框里,以 <code>!</code> 开头表示进入 <strong>Shell 模式</strong>:
+  这条命令<strong>直接执行,不经过模型</strong>,输出加入会话。
+  <br><br>
+  <strong>这个区别是步骤 4 的全部价值所在。</strong>
+  如果你让 AI 去跑 diff 再讲给你听,就等于<em>让它评价自己的作业</em>——下面那三个盲区又全回来了。
+  <code>!</code> 保证输出<strong>直接进你的眼睛</strong>。
+</div>
+
+<h4>diff 怎么读</h4>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; git diff(真实输出)</div>
+<pre><span class="t-dim">diff --git a/app.py b/app.py</span>
+<span class="t-dim">index 11b15b1..738c813 100644</span>
+<span class="t-dim">--- a/app.py          ← a = 改之前</span>
+<span class="t-dim">+++ b/app.py          ← b = 改之后</span>
+<span class="t-dim">@@ -1 +1,4 @@         ← 改动发生在第 1 行起</span>
+<span class="t-bad">-print("hello")       ← 减号红行 = 被删掉的旧内容</span>
+<span class="t-ok">+def greet(name):     ← 加号绿行 = 新加的内容</span>
+<span class="t-ok">+    return f"Hello, {name}!"</span>
+<span class="t-ok">+</span>
+<span class="t-ok">+print(greet("world"))</span></pre>
+</div>
+
+<div class="box trap">
+  <span class="box-t">头号坑:执行了 git add 之后,git diff 变成空白</span>
+  新手会以为改动丢了。其实是改动跑到<strong>暂存区</strong>去了。三条命令的分工:
+  <div class="tablewrap" style="margin-top:10px">
+  <table>
+  <tr><td><code>git diff</code></td><td>看<strong>还没 add</strong> 的改动</td></tr>
+  <tr><td><code>git diff --staged</code></td><td>看<strong>已经 add</strong>、待提交的改动</td></tr>
+  <tr><td><code>git diff HEAD</code></td><td><strong>两种全看</strong>(最全,推荐步骤 4 用这条)</td></tr>
+  </table>
+  </div>
+  另外:<strong>未跟踪的新文件不会出现在 git diff 里</strong>(git 还不认识它)。所以步骤 4 应该先 <code>git status</code> 再 <code>git diff</code>。
+</div>
+
+<h4>看 diff 到底在看什么:三个测试抓不到的盲区</h4>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:22%">盲区</th><th style="width:40%">具体表现</th><th>在 diff 里怎么发现</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>① 改测试作弊</strong></td>
+  <td>改断言值、加 <code>@pytest.mark.skip</code>、注释掉、把该测的 mock 掉、包个空 <code>try/except</code></td>
+  <td><strong>改动文件列表里出现 <code>tests/*.py</code></strong> —— 一眼就能看见</td>
+</tr>
+<tr>
+  <td><strong>② 范围蔓延</strong></td>
+  <td>你让它改 A,它顺手「优化」了 B、重命名了 C、删了一段它认为没用的代码</td>
+  <td>出现了你没要求改的文件</td>
+</tr>
+<tr>
+  <td><strong>③ 写了但没接上</strong></td>
+  <td>新建了函数但没有任何地方调用;加了配置项但没读取</td>
+  <td>只有新增、没有对应的调用点改动</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t">这三类的共同点</span>
+  <strong>它们都躲在「测试通过」和「做对了」之间的那条缝里。</strong>
+  测试全绿完全不代表这三件事没发生。<code>git diff</code> 是唯一能看进这条缝的工具。
+  <br><br>
+  反直觉但重要:<strong>测试越绿,越要看 diff</strong> —— 因为绿色会让你放松,而绿色恰恰不覆盖这三类。
+</div>
+
+<div class="box trap">
+  <span class="box-t">为什么说漏掉这一步「最危险」</span>
+  漏掉步骤 0(git),你丢的是安全网,但那是<strong>一次性的、看得见的损失</strong>。
+  <br><br>
+  漏掉步骤 4,你丢的是<strong>对自己代码库的所有权</strong>——这是个缓慢的、看不见的过程。
+  几个月后你面对一个自己完全看不懂的项目,而它已经在跑生产了。
+  <strong>前四种方法都可以外包给工具,只有这一步不能。</strong>
+</div>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="s5">八、步骤 5 · 三层撤销阶梯</h2>
+
+<p>看完 diff,你要做一个判断:<strong>损伤有多大?</strong>答案决定你走哪个分支。</p>
+
+<figure>
+<svg viewBox="0 0 880 330" role="img" aria-label="步骤5的三层撤销阶梯决策树">
+  <defs>
+    <marker id="ar4" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--ink-faint)"/>
+    </marker>
+  </defs>
+  <g class="svg-t" text-anchor="middle">
+    <rect x="335" y="12" width="210" height="46" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+    <text x="440" y="33" font-size="13.5" font-weight="700" fill="var(--warn)">步骤 4:看完 diff</text>
+    <text x="440" y="50" font-size="11.5" fill="var(--ink-soft)">损伤有多大?</text>
+
+    <!-- 5a -->
+    <rect x="20" y="105" width="200" height="88" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="120" y="128" font-size="13" font-weight="800" fill="var(--ok)">5a · 满意</text>
+    <text x="120" y="148" font-size="11.5" fill="var(--ink-soft)">跑全量 → 提交</text>
+    <text x="120" y="166" font-size="11" fill="var(--ink-faint)">mypy &amp;&amp; pytest</text>
+    <text x="120" y="182" font-size="11" fill="var(--ink-faint)">git add -A &amp;&amp; git commit</text>
+
+    <!-- 5b -->
+    <rect x="240" y="105" width="200" height="88" rx="11" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="340" y="128" font-size="13" font-weight="800" fill="var(--info)">5b · 小问题</text>
+    <text x="340" y="148" font-size="11.5" fill="var(--ink-soft)">直接说,让它改</text>
+    <text x="340" y="168" font-size="11" fill="var(--ink-faint)">零回退,成本最低</text>
+
+    <!-- 5c -->
+    <rect x="460" y="105" width="200" height="88" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="560" y="128" font-size="13" font-weight="800" fill="var(--bad)">5c · 方向错了</text>
+    <text x="560" y="148" font-size="11.5" fill="var(--ink-soft)">Esc Esc → /rewind</text>
+    <text x="560" y="168" font-size="11" fill="var(--ink-faint)">退会话,副作用不退</text>
+
+    <!-- 兜底 -->
+    <rect x="680" y="105" width="185" height="88" rx="11" fill="var(--paper-raised)" stroke="var(--rule-strong)" stroke-width="1.6"/>
+    <text x="772" y="128" font-size="13" font-weight="800" fill="var(--ink)">兜底 · 全烂了</text>
+    <text x="772" y="148" font-size="11.5" fill="var(--ink-soft)">git reset --hard</text>
+    <text x="772" y="166" font-size="11.5" fill="var(--ink-soft)">+ git clean -fd</text>
+    <text x="772" y="184" font-size="11" fill="var(--bad)">两步缺一不可</text>
+  </g>
+  <g stroke="var(--ink-faint)" stroke-width="1.4" marker-end="url(#ar4)" fill="none">
+    <path d="M 400 60 L 400 82 L 120 82 L 120 100"/>
+    <path d="M 420 60 L 420 82 L 340 82 L 340 100"/>
+    <path d="M 460 60 L 460 82 L 560 82 L 560 100"/>
+    <path d="M 480 60 L 480 82 L 772 82 L 772 100"/>
+  </g>
+  <!-- 成本轴 -->
+  <g class="svg-t">
+    <line x1="20" y1="232" x2="865" y2="232" stroke="var(--rule-strong)" stroke-width="1.5" marker-end="url(#ar4)" opacity=".6"/>
+    <text x="20" y="252" font-size="11.5" fill="var(--ink-faint)">成本 / 损失越来越大 →</text>
+    <text x="440" y="290" font-size="13" fill="var(--ink-soft)" text-anchor="middle" font-weight="600">
+      规则:从左往右走,能用左边的就别用右边的
+    </text>
+    <text x="440" y="312" font-size="11.5" fill="var(--ink-faint)" text-anchor="middle">
+      不要一看到问题就 rewind —— 大部分情况「直接说」就够了
+    </text>
+  </g>
+</svg>
+</figure>
+
+<h3 id="s5a">5a · 满意 → 跑全量 → 提交 <span class="tag git">git</span></h3>
+
+<div class="step" data-m="git">
+  <div class="step-head">
+    <div class="step-num">5a</div>
+    <div>
+      <div class="step-title">提交前必须跑全量</div>
+      <div class="step-sub">这里有一个真实事故</div>
+    </div>
+  </div>
+
+<pre><code>.venv/bin/python -m mypy &amp;&amp; .venv/bin/python -m pytest</code></pre>
+
+<p>注意:这次<strong>没有指定文件</strong>,是<strong>全量</strong>。为什么步骤 3 已经跑过一次了还要再跑?</p>
+
+<h4>一个只改了两行的下午</h4>
+
+<p>产品经理提了个需求,编号 #482,听起来人畜无害:</p>
+
+<blockquote style="border-left:3px solid var(--rule-strong);margin:18px 0;padding:4px 18px;color:var(--ink-soft)">
+「订单里 0 元的时候别显示 <code>¥0.00</code> 了,太冷冰冰。改成显示『免费』,用户看着开心。」
+</blockquote>
+
+<p>合理吗?非常合理。工作量大吗?看起来就两行:</p>
+
+<pre><code>def format_price(cents: int) -&gt; str:
+    """产品需求 #482:0 元时显示「免费」。"""
+    if cents == 0:          # ← 新增
+        return "免费"        # ← 新增
+    return f"¥{cents / 100:.2f}"</code></pre>
+
+<div class="box note">
+  <span class="box-t">说明:这一段的实测输出来自一个独立的精简复现项目</span>
+  你会发现这里的 <code>format_price</code> 用的是 <code>cents / 100</code>,
+  和前面 myshop 里的 <code>divmod</code> 版本写法不同——<strong>这不是你看漏了</strong>。
+  <br><br>
+  为了把这个事故复现得足够干净,我另外搭了一个只有 4 个文件的最小项目来跑。
+  <strong>两个版本的行为完全一样</strong>(都是把分转成 <code>¥12.34</code>),
+  下面所有的绿字红字都是那个项目里真实跑出来的。<em>事故的道理和用哪种写法无关。</em>
+</div>
+
+<p>AI 改完之后很负责任地想:「改了行为,得同步改测试啊。」于是把 <code>test_price.py</code> 里那条
+<code>assert format_price(0) == "¥0.00"</code> 改成了 <code>== "免费"</code>。</p>
+
+<p><strong>看,多专业。</strong>改了代码,顺手把对应的测试也维护了。</p>
+
+<h4>步骤 3:跑局部检查</h4>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 局部检查(真实输出)</div>
+<pre><span class="t-cmd">$ .venv/bin/python -m mypy price.py</span>
+<span class="t-ok">Success: no issues found in 1 source file</span>
+
+<span class="t-cmd">$ .venv/bin/python -m pytest tests/test_price.py -v</span>
+tests/test_price.py::test_normal_price <span class="t-ok">PASSED</span>       <span class="t-dim">[ 33%]</span>
+tests/test_price.py::test_zero_price <span class="t-ok">PASSED</span>         <span class="t-dim">[ 66%]</span>
+tests/test_price.py::test_large_price <span class="t-ok">PASSED</span>        <span class="t-dim">[100%]</span>
+
+<span class="t-ok">========================= 3 passed in 0.01s =========================</span></pre>
+</div>
+
+<p><strong>全绿。</strong>类型检查没意见,单元测试三条全过。</p>
+
+<div class="box trap">
+  <span class="box-t">这时候人的心理状态是最危险的</span>
+  证据看起来是充分的:你改了 A,你检查了 A,A 是绿的。手指已经放在 <code>git commit</code> 上了。
+</div>
+
+<h4>步骤 5a:跑全量</h4>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 全量(真实输出)</div>
+<pre><span class="t-cmd">$ .venv/bin/python -m mypy price.py order.py tests/</span>
+<span class="t-ok">Success: no issues found in 4 source files</span>          <span class="t-dim">← mypy 依然全绿!</span>
+
+<span class="t-cmd">$ .venv/bin/python -m pytest</span>
+collected 7 items
+
+tests/test_order.py <span class="t-ok">..</span><span class="t-bad">FF</span>                              <span class="t-dim">[ 57%]</span>
+tests/test_price.py <span class="t-ok">...</span>                             <span class="t-dim">[100%]</span>
+
+<span class="t-dim">============================ FAILURES =============================</span>
+<span class="t-dim">_____________________ test_full_discount_to_zero ___________________</span>
+&gt;       assert order["receipt"] == "应付 ¥0.00"
+<span class="t-bad">E       AssertionError: assert '应付 免费' == '应付 ¥0.00'</span>
+
+<span class="t-dim">_______________________ test_gift_line_item _______________________</span>
+&gt;       assert order["lines"][1] == "赠品·挂耳包 x2  ¥0.00"
+<span class="t-bad">E       AssertionError: assert '赠品·挂耳包 x2  免费' == '赠品·挂耳包 x2  ¥0.00'</span>
+
+<span class="t-bad">==================== 2 failed, 5 passed in 0.03s ==================</span></pre>
+</div>
+
+<h4>炸的是哪里</h4>
+
+<div class="grid2">
+<div class="box trap" style="margin:0">
+  <span class="box-t">引爆点 1:满减到 0 元</span>
+  用户拿 88 元券买 88 元咖啡豆,刚好减到 0。系统仍要出一张收款凭证:
+  <br><br>
+  <code>应付 ¥0.00</code> → <code>应付 免费</code>
+  <br><br>
+  「应付 免费」这句中文不通。更要命的是这行字要进<strong>对账单和财务流水</strong>——
+  财务系统那边可能正拿正则匹配 <code>¥[\d.]+</code>,现在匹配不到了。
+</div>
+<div class="box trap" style="margin:0">
+  <span class="box-t">引爆点 2:赠品行</span>
+  账单里单价 0 元的赠品行:
+  <br><br>
+  <code>赠品·挂耳包 x2&nbsp;&nbsp;¥0.00</code> → <code>赠品·挂耳包 x2&nbsp;&nbsp;免费</code>
+  <br><br>
+  <strong>需求 #482 说的是「订单总价为 0 时」。没有人说过赠品的单价行也要跟着变。</strong>
+  但 <code>format_price</code> 是共用的,它不知道自己这次是在服务总价还是某一行。
+</div>
+</div>
+
+<h4>为什么 mypy 完全无能为力</h4>
+
+<p>注意上面那个扎心的细节:<strong>全量 mypy 也是绿的</strong>,而且是在测试已经红了之后。不是「局部 mypy 绿、全量 mypy 红」,而是<strong>mypy 在任何范围下都发现不了这个问题</strong>。</p>
+
+<pre><code>def format_price(cents: int) -&gt; str:   # 改前
+def format_price(cents: int) -&gt; str:   # 改后 —— 签名一个字符都没变</code></pre>
+
+<div class="box key">
+  <span class="box-t">一句话概括这次事故</span>
+  <strong>类型没变(签名一致),行为变了(返回值内容不同)。</strong>
+  <br><br>
+  对 mypy 来说,<code>"¥0.00"</code> 和 <code>"免费"</code> 是<strong>完全等价的两个值</strong>——都是 <code>str</code> 这个类型的合法居民。它没有任何理由报警。
+  <ul style="margin-bottom:0">
+    <li><strong>类型系统</strong>管的是:调用方能不能安全地把返回值当字符串用?<strong>能</strong>。</li>
+    <li><strong>测试</strong>管的是:这个字符串的<strong>具体内容</strong>是不是业务上正确的那个?<strong>不是</strong>。</li>
+  </ul>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:46%">问题类型</th><th style="width:27%">mypy 能抓?</th><th style="width:27%">测试能抓?</th></tr></thead>
+<tbody>
+<tr><td>改了参数类型 / 数量</td><td style="color:var(--ok)">✅</td><td style="color:var(--ok)">✅</td></tr>
+<tr><td>改了返回类型</td><td style="color:var(--ok)">✅</td><td style="color:var(--ok)">✅</td></tr>
+<tr><td>拼错属性名、少传参数</td><td style="color:var(--ok)">✅</td><td style="color:var(--ok)">✅</td></tr>
+<tr><td><strong>签名不变、返回内容变了</strong></td><td style="color:var(--bad)"><strong>❌</strong></td><td style="color:var(--ok)">✅(前提:跑全量)</td></tr>
+<tr><td><strong>改了边界条件的行为</strong></td><td style="color:var(--bad)"><strong>❌</strong></td><td style="color:var(--ok)">✅(前提:跑全量)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>局部与全量:两个不同的问题</h4>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:20%"></th><th style="width:40%">步骤 3 · 局部</th><th style="width:40%">步骤 5a · 全量</th></tr></thead>
+<tbody>
+<tr><th>问的是</th><td><strong>我刚写的这段,自己立得住吗?</strong></td><td><strong>这次改动的爆炸半径有多大?</strong></td></tr>
+<tr><th>检查半径</th><td>你手指碰过的文件</td><td>整个仓库</td></tr>
+<tr><th>本次结果</th><td style="color:var(--ok)"><strong>3 passed</strong> ✅</td><td style="color:var(--bad)"><strong>2 failed, 5 passed</strong> ❌</td></tr>
+<tr><th>耗时</th><td>0.01 秒</td><td>0.03 秒</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t">为什么「我知道我改了什么」救不了你</span>
+  这次事故里,改动者从头到尾都很称职:改了行为、同步改了测试、跑了检查、全绿。
+  <br><br>
+  漏掉 <code>order.py</code> 不是因为粗心,而是因为——
+  <strong>你的注意力半径,天然等于你的编辑半径。</strong>
+  你改 <code>price.py</code> 的时候,脑子里的画面是「订单总价那一栏」;
+  你不会自动浮现出「三个月前有人在赠品行也调了这个函数」。
+  <br><br>
+  <strong>没有任何一方是不称职的。这就是为什么这类事故特别常见——它不需要谁犯错。</strong>
+</div>
+
+<h4>三条可以直接用的规则</h4>
+
+<ol>
+<li><strong>改底层 = 必跑全量。</strong>判断标准很简单:这个函数被别的文件 import 了吗?被 import 得越多,局部检查越不可信。<em>工具函数、格式化、序列化、常量、配置——全是重灾区。</em></li>
+<li><strong>「我顺手改了对应的测试」是危险信号,不是安心信号。</strong>改一个断言意味着你<strong>确认了行为变更</strong>,而行为变更就一定有波及面。这次事故里那份局部的绿色,是<em>改断言换来的</em>,不是代码变正确了。</li>
+<li><strong>别把 mypy 的绿灯当测试的替代品。</strong>类型检查只保证「接得上」,不保证「算得对」。这是类型系统<strong>结构性的盲区</strong>,调再严的 strict 模式也抓不到。</li>
+</ol>
+
+<div class="box good">
+  <span class="box-t">最后算一笔账</span>
+  <div class="tablewrap" style="margin:10px 0 0">
+  <table>
+  <tr><td style="width:50%">步骤 5a 跑一次全量</td><td><strong style="color:var(--ok)">0.03 秒</strong></td></tr>
+  <tr><td>漏掉之后:CI 红了回来重查</td><td style="color:var(--warn)">20 分钟 + 打断心流</td></tr>
+  <tr><td>更糟:上线后财务对账异常倒查</td><td style="color:var(--bad)">一个上午 + 一次线上事故复盘</td></tr>
+  </table>
+  </div>
+  <p style="margin-bottom:0"><strong>步骤 3 让你写得快,步骤 5a 让你不用回来。跳过 5a 省下的从来不是时间,只是把时间挪到了更贵的地方去花。</strong></p>
+</div>
+
+<h4>全绿之后,提交</h4>
+
+<pre><code>git add -A</code></pre>
+
+<pre><code>git commit -m "feat: 第1步 price 支持满减计算"</code></pre>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 小步提交的样子(真实)</div>
+<pre><span class="t-cmd">$ git log --oneline</span>
+<span class="t-warn">1a1b5c7</span> feat: 第3步 输出报告
+<span class="t-warn">31db09a</span> feat: 第2步 计算平均分
+<span class="t-warn">74412a5</span> feat: 第1步 读取分数
+
+<span class="t-cmd">$ git log --oneline --stat</span>
+<span class="t-warn">1a1b5c7</span> feat: 第3步 输出报告
+ report.py | 5 <span class="t-ok">+++++</span>
+ 1 file changed, 5 insertions(+)</pre>
+</div>
+
+<div class="box trap">
+  <span class="box-t">提交信息不要写「更新」「修改」「fix bug」</span>
+  三天后你自己也看不懂,回退时就抓瞎。
+  <strong>判断标准:一次提交要能用一句话讲清楚。讲不清就说明该拆成两次。</strong>
+</div>
+</div>
+
+<h3>5b · 小问题 → 直接说</h3>
+
+<p>结果方向对,只是细节不满意。<strong>不要动用任何撤销工具</strong>,直接说:</p>
+
+<pre><code>可以,但有两个小问题:
+1. 折扣金额应该在 order.py 里算,不要放在 price.py
+2. 那个变量名 d 改成 discount_cents
+
+改完还是跑一遍 mypy 和 pytest tests/test_price.py。</code></pre>
+
+<p>这是<strong>成本最低的一档</strong>,零回退。大部分情况都应该走这里。</p>
+
+<h3>5c · 方向错了 → Esc Esc</h3>
+
+<p>在<strong>空的输入框</strong>里连按两次 <code>Esc</code>,或者输入 <code>/rewind</code>,打开检查点菜单。</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:34%">情况</th><th>Esc Esc 的行为</th></tr></thead>
+<tbody>
+<tr><td>输入框是<strong>空的</strong></td><td>直接打开 rewind 菜单</td></tr>
+<tr><td>输入框<strong>有文字</strong></td><td>第一次 Esc 清空文字(按 ↑ 可恢复),第二次才打开菜单</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>菜单里选一个之前的提问点,然后选择怎么回退:</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:8%">#</th><th>选项</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>同时恢复<strong>代码和对话</strong></td></tr>
+<tr><td>2</td><td>只恢复<strong>对话</strong>(保留当前代码)</td></tr>
+<tr><td>3</td><td>只恢复<strong>代码</strong>(保留对话)</td></tr>
+<tr><td>4</td><td>从这一点压缩对话</td></tr>
+<tr><td>5</td><td>压缩到这一点之前的对话</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">/rewind 的射程与死角(这里最容易出人命)</span>
+  它<strong>只追踪 Claude 用文件编辑工具(Read/Write/Edit)做的改动</strong>。以下五种都<strong>不</strong>回退:
+  <ol style="margin-bottom:0">
+    <li><strong>bash 命令的副作用</strong> —— <code>rm</code>、<code>mv</code>、<code>pip install</code> 干过的事,回不来</li>
+    <li><strong>git 状态的改变</strong> —— 它 commit 过的东西还在</li>
+    <li><strong>子代理 / 后台任务做的编辑</strong> —— 官方文档明确点名了<strong>后台跑的 <code>/code-review --fix</code></strong>。
+        这条直接打到<a href="#s7">步骤 7</a>:<em>第 7 步用 <code>--fix</code> 改出来的东西,rewind 救不回来,只能靠 git。</em></li>
+    <li><strong>你自己在编辑器里手改的文件</strong> —— 它只认自己动过的</li>
+    <li><strong>数据库文件、已经发出去的网络请求</strong> —— 覆水难收</li>
+  </ol>
+</div>
+
+<div class="box key">
+  <span class="box-t">检查点的粒度是「你发的每一条消息」,不是「每一次文件编辑」</span>
+  这一点很多人误会。你不能精确回到「它改 <code>price.py</code> 的那一刻」,
+  只能回到<strong>你发某句话之前的那个状态</strong>。
+  <br><br>
+  另外两个限制:<strong>只保留最近 100 个检查点</strong>,并且<strong>随会话在 30 天后清除</strong>。
+  <br><br>
+  好消息:<strong>检查点是跨会话持久的</strong>——重启 Claude Code 之后依然可以 <code>/rewind</code>。
+  官方对它的定位原话是:<em>「不是版本控制的替代品」</em>。
+</div>
+
+<div class="box note">
+  <span class="box-t">rewind 和 git 的分工,用两个不同的比喻记</span>
+  <div class="tablewrap" style="margin-top:10px">
+  <table>
+  <thead><tr><th style="width:22%"></th><th style="width:39%">/rewind</th><th style="width:39%">git commit</th></tr></thead>
+  <tbody>
+  <tr><th>比喻</th><td><strong>文字冒险游戏的「回到上一句选择」</strong></td><td><strong>存档点</strong></td></tr>
+  <tr><th>记录方式</th><td>自动,你什么都不用做</td><td>手动,你得按存档键</td></tr>
+  <tr><th>粒度</th><td>你说的每一句话</td><td>你决定的每一个里程碑</td></tr>
+  <tr><th>有效范围</th><td>这一局游戏(会话)里</td><td>跨天、跨会话、跨机器</td></tr>
+  <tr><th>什么时候用</th><td>小改跑歪了</td><td>整条路线走错了</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<h3>兜底 · git 回退三件套</h3>
+
+<p>rewind 兜不住,或者已经 commit 过了,就得用 git。<strong>这里有本教程最重要的一个坑。</strong></p>
+
+<div class="box trap">
+  <span class="box-t">🔥 reset --hard 删不掉 AI 新建的文件</span>
+  AI 一顿操作新建了 5 个实验文件,你跑 <code>git reset --hard</code>,然后发现<strong>那 5 个文件原封不动地躺在目录里</strong>。
+  你以为「回退失败了」。
+  <br><br>
+  <strong>不是失败,是 reset 只管 git「认识」的文件。</strong>那些从没 <code>git add</code> 过的新文件(status 里显示 <code>??</code>),
+  git 压根不知道它们存在,自然也不会删。
+</div>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 完整实测:AI 改了 2 个文件 + 新建 3 个文件 1 个目录</div>
+<pre><span class="t-cmd">$ git status -s</span>
+<span class="t-warn"> M </span>report.py
+<span class="t-warn"> M </span>src/mod.py
+<span class="t-bad">?? </span>experiment_final_FINAL.py
+<span class="t-bad">?? </span>experiment_v1.py
+<span class="t-bad">?? </span>experiment_v2.py
+<span class="t-bad">?? </span>tmp_output/
+
+<span class="t-cmd">$ git reset --hard HEAD</span>
+HEAD is now at 622dcb3 docs: 用 -am 一步提交
+
+<span class="t-cmd">$ ls</span>
+experiment_final_FINAL.py  experiment_v1.py  experiment_v2.py  report.py  src  tmp_output
+<span class="t-bad">↑↑↑ 已跟踪文件的改动没了(对),但 AI 新建的 4 个东西一个都没删!</span>
+
+<span class="t-cmd">$ git clean -fdn</span>        <span class="t-dim">← -n 是预演,只说要删什么,不真删</span>
+Would remove experiment_final_FINAL.py
+Would remove experiment_v1.py
+Would remove experiment_v2.py
+Would remove tmp_output/
+
+<span class="t-cmd">$ git clean -fd</span>         <span class="t-dim">← 确认无误,真删</span>
+Removing experiment_final_FINAL.py
+Removing experiment_v1.py
+Removing experiment_v2.py
+Removing tmp_output/
+
+<span class="t-cmd">$ ls</span>
+report.py  src
+<span class="t-cmd">$ git status -s</span>
+<span class="t-ok">(空 = 彻底回到 AI 动手之前)</span></pre>
+</div>
+
+<div class="box good">
+  <span class="box-t">标准四步,背下来</span>
+  <ol style="margin-bottom:0">
+    <li><code>git status</code> —— 先看清 AI 到底动了什么</li>
+    <li><code>git reset --hard HEAD</code> —— 抹掉对已跟踪文件的所有改动</li>
+    <li><code>git clean -fdn</code> —— <strong>预演</strong>:看看还剩哪些新文件要删</li>
+    <li><code>git clean -fd</code> —— 确认无误再真删</li>
+  </ol>
+  <br>
+  <strong>口诀:先 reset 后 clean;clean 先 n 后 f。</strong>
+</div>
+
+<div class="box trap">
+  <span class="box-t">clean 的三个坑</span>
+  <strong>① 不加 <code>-d</code> 会漏掉新建的文件夹。</strong><code>git clean -n</code> 只列文件,不列目录,你会以为清干净了其实没有。
+  <br><br>
+  <strong>② <code>-x</code> 是核弹级选项,别乱加。</strong><code>git clean -fdx</code> 会把 <code>.gitignore</code> 忽略的东西一起删光——
+  实测直接蒸发了一个 9MB、569 个文件的 <code>.venv</code>,<code>.env</code> 里的密钥也会没。<strong>没有明确理由绝不要加 x。</strong>
+  <br><br>
+  <strong>③ 删掉的东西不进回收站、不进 git、reflog 也救不回。</strong>所以必须先 <code>-fdn</code> 预演。
+  预演清单里如果有你想留的(比如 AI 生成的一份不错的文档),先复制出来或者 <code>git add</code> 保住。
+</div>
+
+<div class="box note">
+  <span class="box-t">一个反直觉的细节</span>
+  新文件<strong>add 过和没 add 过,命运完全不同</strong>:
+  <br><br>
+  <code>git reset --hard</code> 会把<strong>已经 add 过的新文件连文件本身一起删掉</strong>(实测直接从磁盘消失),
+  但对没 add 过的新文件束手无策。
+  <br><br>
+  所以「AI 新建的文件」到底会不会被 reset 干掉,取决于它有没有被 add 过。这就是为什么两步都要做。
+</div>
+
+<h3>三档的选择规则</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:30%">损伤程度</th><th style="width:30%">用哪档</th><th>成本</th></tr></thead>
+<tbody>
+<tr><td>结果对,细节不满意</td><td><strong>5b 直接说</strong></td><td>零回退</td></tr>
+<tr><td>这一轮跑偏了</td><td><strong>5c Esc Esc / /rewind</strong></td><td>退会话,<strong>副作用不退</strong></td></tr>
+<tr><td>好几轮都烂了 / rewind 兜不住</td><td><strong>git reset --hard + clean -fd</strong></td><td>退到上一个提交</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>往下一档才换工具,不要一上来就 rewind。</strong>粒度正好对应对比表「防的是」那一行:实现有 bug → 刚才那几轮 → 任何时候的任何问题。</p>
+
+<!-- ==================================================== -->
+<h2 id="s6">九、步骤 6 · 循环 3–5</h2>
+
+<div class="step" data-m="test">
+  <div class="step-head">
+    <div class="step-num">6</div>
+    <div>
+      <div class="step-title">重复直到方案做完</div>
+      <div class="step-sub">节奏感比速度重要</div>
+    </div>
+  </div>
+
+<p>一轮完整的循环长这样:</p>
+
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>&nbsp; 一轮的实际对话</div>
+<pre><span class="t-cmd">你:</span> 实施方案第 2 步。改完跑 mypy 和 pytest tests/test_order.py,
+    修到绿。约束同上。做完停。
+
+<span class="t-dim">AI:</span> [改代码 → 跑 mypy → 有错自己修 → 跑 pytest → 全绿 → 停下]
+
+<span class="t-cmd">你:</span> !git status
+<span class="t-cmd">你:</span> !git diff HEAD            <span class="t-dim">← 步骤 4,你自己的眼睛</span>
+
+<span class="t-cmd">你:</span> 可以。跑一次全量再提交。
+
+<span class="t-dim">AI:</span> [mypy && pytest → 14 passed → git add -A && git commit]
+
+<span class="t-cmd">你:</span> 做第 3 步,同样的要求。</pre>
+</div>
+
+<div class="box good">
+  <span class="box-t">你会发现流程其实很轻</span>
+  真正花你时间的只有一件事:<strong>读 diff</strong>。其他全是模板化的指令。
+  <br><br>
+  而且每一步的 diff 都很小(因为你只让它做一步),读起来很快。
+  <strong>这就是「小步」的全部意义——它让唯一无法外包的那件事,变得做得动。</strong>
+</div>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="s7">十、步骤 7 · 最后总审</h2>
+
+<div class="step" data-m="eye">
+  <div class="step-head">
+    <div class="step-num">7</div>
+    <div>
+      <div class="step-title">整段变更的最终检查</div>
+      <div class="step-sub">E2E 在这里才第一次跑</div>
+    </div>
+  </div>
+
+<h4>① 跑真正的全套</h4>
+
+<pre><code>.venv/bin/python -m ruff check .</code></pre>
+
+<pre><code>.venv/bin/python -m mypy</code></pre>
+
+<pre><code>.venv/bin/python -m pytest</code></pre>
+
+<p>如果项目有 E2E:</p>
+
+<pre><code>.venv/bin/python -m pytest tests/e2e/</code></pre>
+
+<div class="box trap">
+  <span class="box-t">E2E 为什么只在这里跑一次</span>
+  E2E 天生 <strong>flaky</strong>(同样的代码有时绿有时红:网络抖动、动画没播完、元素还没渲染出来)。
+  <br><br>
+  <strong>人</strong>看到偶发失败的反应是:「这个老抽风,重跑一下。」
+  <br>
+  <strong>AI</strong> 看到的反应是:「红了,<em>一定是我刚才改坏的</em>,我来修。」
+  <br><br>
+  于是它开始修一个<strong>根本不存在的 bug</strong>,而且会越来越粗暴:加 <code>time.sleep(3)</code>、加重试、放宽断言、直接 skip。
+  <strong>最糟的是它「成功」了</strong>——红变绿,汇报「已修复」,但绿是因为它塞了个 3 秒等待。
+  <br><br>
+  所以 E2E 绝不进每步循环。详见 <a href="claude-code-testing.html">第二册</a>。
+</div>
+
+<p>跑 E2E 时的提示词要堵死它的四条歪路:</p>
+
+<pre><code>跑一次 pytest tests/e2e/。
+
+如果有失败:
+- 先原样重跑一遍,确认是偶发还是稳定复现
+- 不许用 sleep / 重试 / 放宽断言 / skip 的方式让它变绿
+- 稳定复现的话告诉我是哪条、错在哪一步,先别动手改</code></pre>
+
+<h4>② 通读完整 diff</h4>
+
+<pre><code>!git diff main...HEAD</code></pre>
+
+<p>这是从分支起点到现在的全部改动。<strong>这一遍要看的是「整体」</strong>:有没有互相矛盾的设计、有没有该删没删的临时代码、命名是否一致。</p>
+
+<h4>③ 让它自己再审一遍</h4>
+
+<pre><code>/review</code></pre>
+
+<div class="box note">
+  <span class="box-t">/review 是什么</span>
+  <code>/review</code> 是 <code>/code-review</code> 的别名,两者完全相同。它审查当前分支的改动,找逻辑错误、安全问题、可简化的地方。
+  <br><br>
+  常用变体:
+  <ul style="margin-bottom:0">
+    <li><code>/code-review --fix</code> —— 审完直接把问题改掉</li>
+    <li><code>/security-review</code> —— 专门查安全问题的独立命令</li>
+  </ul>
+</div>
+
+<div class="box key">
+  <span class="box-t">注意顺序:先你看,再让它看</span>
+  <strong>不要用 <code>/review</code> 代替步骤 ②。</strong>
+  它审的是「代码质量」,你审的是「这是不是我要的东西」——后者它永远不知道。
+  <br><br>
+  而且如果你先看它的 review 报告再看 diff,你的判断会被它的结论锚定。<strong>先形成自己的看法。</strong>
+</div>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="card">十一、完整流程速查卡</h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr>
+  <th style="width:7%">步骤</th><th style="width:23%">做什么</th>
+  <th style="width:34%">Python 具体命令</th><th style="width:18%">对应方法</th><th style="width:18%">能省吗</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>0</strong></td><td>建安全网</td>
+  <td><code>git checkout -b feat/xxx</code><br><code>git status</code></td>
+  <td><span style="color:var(--ok)">git 小步提交</span></td>
+  <td style="color:var(--bad)"><strong>绝对不能省</strong></td>
+</tr>
+<tr>
+  <td><strong>1</strong></td><td>Plan 模式规划</td>
+  <td><code>Shift+Tab</code> → plan<br><code>读一下 @myshop/,先别写代码</code></td>
+  <td><span style="color:var(--plan)">Plan 模式</span></td>
+  <td>小任务可省</td>
+</tr>
+<tr>
+  <td><strong>2</strong></td><td>审方案 → 批准</td>
+  <td>看方向 / 范围 / 步子 / 幻觉</td>
+  <td><span style="color:var(--plan)">Plan 模式</span></td>
+  <td>小任务可省</td>
+</tr>
+<tr>
+  <td><strong>3</strong></td><td>做第一步 + 自测</td>
+  <td><code>python -m mypy</code><br><code>python -m pytest tests/test_x.py</code></td>
+  <td><span style="color:var(--info)">让它自测</span></td>
+  <td style="color:var(--warn)">尽量别省</td>
+</tr>
+<tr>
+  <td><strong>4</strong></td><td><strong>你自己看 diff</strong></td>
+  <td><code>!git status</code><br><code>!git diff HEAD</code></td>
+  <td><span style="color:var(--warn)">你的眼睛</span></td>
+  <td style="color:var(--bad)"><strong>绝对不能省</strong></td>
+</tr>
+<tr>
+  <td><strong>5a</strong></td><td>满意 → 全量 → 提交</td>
+  <td><code>python -m mypy &amp;&amp; python -m pytest</code><br><code>git add -A &amp;&amp; git commit -m "..."</code></td>
+  <td><span style="color:var(--ok)">git 小步提交</span></td>
+  <td style="color:var(--bad)"><strong>绝对不能省</strong></td>
+</tr>
+<tr>
+  <td><strong>5b</strong></td><td>小问题 → 直接说</td>
+  <td>「改一下 X」</td>
+  <td>—(零回退)</td><td>—</td>
+</tr>
+<tr>
+  <td><strong>5c</strong></td><td>方向错 → 回退</td>
+  <td><code>Esc Esc</code> 或 <code>/rewind</code><br>兜底:<code>reset --hard</code> + <code>clean -fd</code></td>
+  <td><span style="color:var(--bad)">/rewind</span></td>
+  <td>可省(有 git)</td>
+</tr>
+<tr>
+  <td><strong>6</strong></td><td>循环 3–5</td><td>—</td><td>自测 ⇄ git</td><td>—</td>
+</tr>
+<tr>
+  <td><strong>7</strong></td><td>最后总审</td>
+  <td><code>ruff check . &amp;&amp; mypy &amp;&amp; pytest</code><br><code>pytest tests/e2e/</code> · <code>!git diff main...HEAD</code> · <code>/review</code></td>
+  <td>检测加强版</td>
+  <td>不建议省</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t">如果只记住三句话</span>
+  <ol style="margin-bottom:0">
+    <li><strong>Plan 管方向,自测管质量,rewind 管这一轮,git 管全场。</strong>流程只是把它们按「什么时候会出事」排了个序。</li>
+    <li><strong>新手最容易漏的是第 0 步和第 4 步。</strong>漏第 0 步是丢安全网(一次性、看得见);漏第 4 步是丢对代码库的所有权(缓慢、看不见,更致命)。</li>
+    <li><strong>局部检查回答「我写对了吗」,全量回答「我弄坏了谁」。</strong>后者只有跑全量才知道,而它只要 0.03 秒。</li>
+  </ol>
+</div>
+
+<!-- ==================================================== -->
+<h2 id="auto">十二、进阶:把流程固化下来</h2>
+
+<p>上面这套流程,每次都手打提示词很累。有三种办法把它固化。</p>
+
+<h3>① CLAUDE.md —— 每次对话自动加载的项目说明</h3>
+
+<p>在项目根目录建一个 <code>CLAUDE.md</code>,里面写项目的规矩。<strong>每次开新对话它都会自动读到</strong>,不用你再说一遍。</p>
+
+<pre><code># myshop 项目说明
+
+## 环境
+- Python 3.9,虚拟环境在 .venv/
+- 所有命令都要用 .venv/bin/python -m xxx 的形式
+
+## 每次改完代码必须跑
+    .venv/bin/python -m mypy
+    .venv/bin/python -m pytest
+
+## 硬性约束
+- 不许改动 tests/ 下的任何文件,除非我明确要求
+- 不许用 skip / 注释掉 / 放宽断言的方式让测试变绿
+- 测试本身有问题就停下来告诉我
+- 每次只做一步,做完停下等我检查
+- 报告结果时贴命令的真实输出,不要只说"通过了"</code></pre>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:34%">放在哪</th><th>影响范围</th></tr></thead>
+<tbody>
+<tr><td><code>~/.claude/CLAUDE.md</code></td><td>用户级,影响你<strong>所有</strong>项目</td></tr>
+<tr><td><code>./CLAUDE.md</code></td><td>项目级,团队共享(会进 git)</td></tr>
+<tr><td><code>./CLAUDE.local.md</code></td><td>本地私密,不进版本控制</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>不想手写的话,在项目里跑 <code>/init</code>,它会自动生成一份初始版本。</p>
+
+<h3>② 自定义 slash command —— 把重复指令变成一个词</h3>
+
+<p>建一个文件 <code>.claude/skills/check/SKILL.md</code>:</p>
+
+<pre><code># 检查代码
+
+按顺序跑这三条,任何一条失败就停下来报告:
+
+1. .venv/bin/python -m ruff check .
+2. .venv/bin/python -m mypy
+3. .venv/bin/python -m pytest
+
+把每条的真实输出贴出来。不许改测试文件。</code></pre>
+
+<p>之后在对话里打 <code>/check</code> 就等于把上面整段话说了一遍。</p>
+
+<h3>③ Hooks —— 让检查变成强制的</h3>
+
+<div class="box key">
+  <span class="box-t">这是最硬的一档</span>
+  前两种都还是「指令」,AI 理论上可以不照做。<strong>Hooks 是在 Claude Code 的固定生命周期点执行 shell 命令</strong>——
+  不依赖模型判断,是确定性的。
+  <br><br>
+  比如配置成「每次编辑了 <code>.py</code> 文件之后,自动跑一次 mypy」。这样「让它自测」就从<em>你要记得说</em>
+  变成了<em>系统强制执行</em>。
+  <br><br>
+  配置写在 <code>.claude/settings.json</code> 里。具体的事件名和字段格式各版本略有差异,
+  <strong>建议先查一下你这个版本的 hooks 文档</strong>再配,别照抄网上的旧写法。
+</div>
+
+<div class="box good">
+  <span class="box-t">给你的建议顺序</span>
+  <strong>先手打几轮,把流程跑熟</strong> → 觉得某句话每次都要说 → 写进 <code>CLAUDE.md</code> →
+  某组命令总是一起跑 → 做成 <code>/check</code> → 某个检查绝对不能漏 → 上 hook。
+  <br><br>
+  <strong>不要一上来就配一堆自动化。</strong>你得先知道自己需要什么,才知道该固化什么。
+</div>
+
+<div class="footer">
+  <p><strong>下一册:</strong> <a href="claude-code-testing.html">② 测试体系完全指南</a> ——
+  四层测试各自的完整 Python 代码、typecheck 与测试的分工、flaky 与 E2E、AI 到底能替你做多少。</p>
+  <p><a href="claude-code-pipeline.html">③ 工程落地</a> —— 每一层测试在公司里归谁做、用什么工具、
+  在本地还是云端、在 Jenkins 前还是 Jenkins 后。</p>
+  <p><a href="claude-code-glossary.html">④ 速查手册</a> —— 名词表、git 命令与报错速查、提示词模板库。</p>
+  <p style="margin-top:20px;color:var(--ink-faint)">
+    本页所有命令输出均在 macOS 15.7.4 / Python 3.9.6 / pytest 8.4.2 / mypy 1.19.1 / ruff 0.16.3 上实际运行获得。
+  </p>
+</div>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var btns = document.querySelectorAll('.themer button');
+
+    function paint(mode) {
+      root.setAttribute('data-theme', mode);
+      btns.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.set === mode));
+      });
+      try { localStorage.setItem('cc-theme', mode); } catch (e) {}
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem('cc-theme'); } catch (e) {}
+    paint(saved || 'dark');
+
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { paint(b.dataset.set); });
+    });
+  })();
+</script>
+
+</body>
+</html>

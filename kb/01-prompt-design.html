@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>01 · 提示词怎么写才不翻车 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="00-index.html">← 上一页</a>
+  <a href="02-skill-basics.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 01 章 · 难度 ★☆☆</span>
+  <h1>提示词怎么写才不翻车</h1>
+  <p class="lead">
+    你对 Claude 说的每一句话，都是「提示词」。但同样一件事，换个写法，结果可能天差地别。
+    这一章不讲任何软件功能，只讲一件事：<b>为什么你写的提示词没达到预期，以及怎么改。</b>
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">提示词里其实混了三种东西</a></li>
+      <li><a href="#s2">上下文窗口：为什么 Claude 会「忘」</a></li>
+      <li><a href="#s3">自动压缩：内容是怎么丢的</a></li>
+      <li><a href="#s4">反面案例：「输出长度不限制」为什么起反作用</a></li>
+      <li><a href="#s5">软约束 vs 硬约束</a></li>
+      <li><a href="#s6">防丢内容的三段式流程</a></li>
+      <li><a href="#s7">确认点：让它中途停一下</a></li>
+      <li><a href="#s8">要求它核对事实，而不是凭记忆</a></li>
+      <li><a href="#s9">讲解模板 5 步法</a></li>
+      <li><a href="#s10">「检索用英文、回答用中文」的正确写法</a></li>
+      <li><a href="#s11">生成离线网页的四条硬约束</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. 提示词里其实混了三种东西</h2>
+
+  <div class="concept">
+    <h3>提示词（Prompt）</h3>
+    <p class="term">prompt</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>你发给 Claude 的那段话，就是提示词。没有别的玄机。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像你给一个新来的实习生派活。他很聪明、执行力很强，但<b>他不知道你脑子里的默认设定</b>——
+        你没说"报表要用 A4 横版"，他就自己挑一个。提示词就是把你脑子里的默认设定写出来。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>提示词是最底层的东西。后面所有章节讲的功能（技能、输出风格、CLAUDE.md……），
+        本质都是<b>「把提示词存到不同的地方、在不同的时机自动发出去」</b>。
+        所以这一章是全部内容的前置知识。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">最简单的提示词</div>
+          <pre><code>帮我把这个函数改成异步的</code></pre>
+        </div>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>误区一：以为写得越长越好。</b>长不等于清楚，混乱的长提示词比简短的清楚提示词更糟。</p>
+        <p>❌ <b>误区二：以为它记得上次的偏好。</b>每开一个新会话，它对你的了解就归零一次。
+          除非你用后面章节讲的办法把偏好<b>存到文件里</b>。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <h3>关键洞察：拆开看，你的提示词里有三类内容</h3>
+
+  <p>拿一段真实的提示词举例。假设你每次都这么开头：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">一段典型的「什么都往里塞」的提示词</div>
+    <pre><code>我是初学者，正在学 Claude 的各种功能。
+你输出的结果用中文。
+遇到我没接触过的名词，先讲清概念和逻辑关系。
+把讲解生成 HTML，放到 ./kb/ 目录，文件名用 01-xxx.html。
+要支持浅色/深色/跟随系统三种主题，默认深色。
+现在，把我们刚才聊的内容整理成知识。</code></pre>
+  </div>
+
+  <p>这六行，其实是<b>三种性质完全不同</b>的东西：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>类型</th><th>特征</th><th>上例中的哪几句</th><th>该怎么办</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>恒定偏好</b></td>
+          <td>每次都一样，一年都不会变</td>
+          <td>「我是初学者」「用中文」「先讲概念」</td>
+          <td>存起来自动加载，别每次打</td>
+        </tr>
+        <tr>
+          <td><b>项目事实</b></td>
+          <td>跟这个项目绑定，换项目就变</td>
+          <td>「放到 ./kb/」「文件名 01-xxx」</td>
+          <td>写进项目配置文件</td>
+        </tr>
+        <tr>
+          <td><b>可复用工作流</b></td>
+          <td>一套固定步骤，偶尔才用一次</td>
+          <td>「主题切换要求」「整理成知识」</td>
+          <td>存成一条命令，用时再调</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 为什么要分开</span>
+    <p>混在一起有三个后果：<b>（1）</b>每次都要重打一遍，累；
+      <b>（2）</b>每次打得都不完全一样，输出结果就不稳定；
+      <b>（3）</b>它们占的位置不同——恒定偏好应该<b>一直在</b>，工作流应该<b>用时才加载</b>，
+      混在一起就没法分别优化。</p>
+    <p>第 02～05 章会告诉你这三类各自该放到哪个文件里。这一章先把「为什么」讲透。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. 上下文窗口：为什么 Claude 会「忘」</h2>
+
+  <div class="concept">
+    <h3>上下文窗口（Context Window）</h3>
+    <p class="term">context window</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>Claude 一次能「同时看见」的文字总量上限。超出这个量，早先的内容就必须被处理掉。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像一张有限大的<b>办公桌</b>。你跟它讨论的每句话、它读过的每个文件、每次命令的输出，
+        都是摊在桌上的一张纸。桌子摊满了，就必须把旧的纸收走——
+        <b>不是扔掉，而是压成一张便签</b>（这就是下一节的"压缩"）。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>上下文窗口是<b>物理限制</b>，是本页所有技巧的根本原因。
+        后面讲的「技能只在调用时才加载」「CLAUDE.md 建议 200 行以内」，都是在省这张桌子的空间。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <p>在 Claude Code 里随时可以查看桌子用了多少：</p>
+        <div class="codeblock">
+          <div class="cb-title">在会话中输入</div>
+          <pre><code>/context</code></pre>
+        </div>
+        <p>它会画一张彩色方格图，显示各部分各占多少，并给出优化建议。
+          超出上限时还会提示超了多少、用哪条命令能腾地方。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>「新会话它还记得上次的事」</b>——不记得。
+          官方原话是每个会话都从一个<b>全新的上下文窗口</b>开始。</p>
+        <p>❌ <b>「让它别忘就行了」</b>——这不是意愿问题，是容量问题。桌子满了就是满了。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 自动压缩：内容是怎么丢的</h2>
+
+  <div class="concept">
+    <h3>压缩 / 自动压缩（Compaction / Auto-compact）</h3>
+    <p class="term">/compact · auto-compact</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>上下文快满时，把前面的对话<b>摘要成一小段</b>，腾出空间继续聊。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>办公桌满了，你把桌上 50 页会议记录浓缩成 1 页纪要，然后把原件收进柜子。
+        <b>纪要保留了结论，但丢掉了细节。</b>那些"当时讨论过但没写进纪要"的细节，就找不回来了。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>压缩是<a href="#s2">上下文窗口</a>满了以后的必然结果。
+        它既是救命机制，也是<b>「内容丢失」的头号元凶</b>——下一节的反面案例就栽在这里。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">手动触发压缩，还能指定摘要重点</div>
+          <pre><code>/compact 重点保留所有文件路径和命令行</code></pre>
+        </div>
+        <p>不带参数就是普通摘要；带一句话可以告诉它"摘要时别丢掉什么"。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>把 <code>/compact</code> 和 <code>/clear</code> 搞混。</b>
+          <code>/compact</code> 是<b>压缩但继续这个对话</b>；
+          <code>/clear</code> 是<b>直接开一个全新的空对话</b>。</p>
+        <p>❌ <b>以为压缩后什么都没了。</b>不全是。有些东西会被<b>重新注入</b>——
+          项目根目录的 CLAUDE.md 会被重新读一遍塞回来，最近调用过的技能也会按预算重新附加。
+          详见第 05 章。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="上下文窗口填满后触发自动压缩导致细节丢失的流程">
+      <defs>
+        <marker id="ar1" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <!-- 阶段1 -->
+      <rect x="14" y="46" width="150" height="120" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="89" y="34" text-anchor="middle" fill="var(--muted)" font-size="12.5">① 对话进行中</text>
+      <rect x="26" y="128" width="126" height="14" rx="3" fill="var(--accent-line)" opacity=".55"/>
+      <rect x="26" y="110" width="126" height="14" rx="3" fill="var(--accent-line)" opacity=".55"/>
+      <rect x="26" y="92" width="126" height="14" rx="3" fill="var(--accent-line)" opacity=".55"/>
+      <text x="89" y="70" text-anchor="middle" fill="var(--text)" font-size="12">桌面还有空位</text>
+
+      <path d="M170 106 H206" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar1)"/>
+
+      <!-- 阶段2 -->
+      <rect x="212" y="46" width="150" height="120" rx="10" fill="var(--warn-bg)" stroke="var(--warn)"/>
+      <text x="287" y="34" text-anchor="middle" fill="var(--muted)" font-size="12.5">② 快满了</text>
+      <rect x="224" y="56" width="126" height="14" rx="3" fill="var(--warn)" opacity=".5"/>
+      <rect x="224" y="74" width="126" height="14" rx="3" fill="var(--warn)" opacity=".5"/>
+      <rect x="224" y="92" width="126" height="14" rx="3" fill="var(--warn)" opacity=".5"/>
+      <rect x="224" y="110" width="126" height="14" rx="3" fill="var(--warn)" opacity=".5"/>
+      <rect x="224" y="128" width="126" height="14" rx="3" fill="var(--warn)" opacity=".5"/>
+      <rect x="224" y="146" width="126" height="12" rx="3" fill="var(--warn)" opacity=".5"/>
+
+      <path d="M368 106 H404" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar1)"/>
+
+      <!-- 阶段3 -->
+      <rect x="410" y="46" width="150" height="120" rx="10" fill="var(--danger-bg)" stroke="var(--danger)"/>
+      <text x="485" y="34" text-anchor="middle" fill="var(--muted)" font-size="12.5">③ 触发自动压缩</text>
+      <text x="485" y="100" text-anchor="middle" fill="var(--danger)" font-size="26">⇩</text>
+      <text x="485" y="130" text-anchor="middle" fill="var(--text)" font-size="12">50 页 → 1 页纪要</text>
+
+      <path d="M566 106 H602" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar1)"/>
+
+      <!-- 阶段4 -->
+      <rect x="608" y="46" width="140" height="120" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="678" y="34" text-anchor="middle" fill="var(--muted)" font-size="12.5">④ 继续</text>
+      <rect x="620" y="60" width="116" height="16" rx="3" fill="var(--muted)" opacity=".4"/>
+      <text x="678" y="72" text-anchor="middle" fill="var(--text)" font-size="10.5">摘要</text>
+      <text x="678" y="112" text-anchor="middle" fill="var(--danger)" font-size="12.5">细节已丢失</text>
+      <text x="678" y="132" text-anchor="middle" fill="var(--muted)" font-size="11">后面写的内容</text>
+      <text x="678" y="148" text-anchor="middle" fill="var(--muted)" font-size="11">对不上前面了</text>
+
+      <text x="380" y="212" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        关键：④ 里丢的，正是你 ① 里想让它记住的那些细节
+      </text>
+    </svg>
+    <figcaption>图 1-1　内容是怎么在一次长任务里悄悄丢掉的</figcaption>
+  </figure>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 反面案例：「输出长度不限制」为什么起反作用</h2>
+
+  <p>这是初学者最常写、也最坑的一句话：</p>
+
+  <div class="callout danger">
+    <span class="label">🚫 反面教材</span>
+    <p>「你输出的内容长度和大小不限制，让初学者可以理解和明白。」</p>
+  </div>
+
+  <p>写这句话的人，意图是<b>「别偷懒，写详细点」</b>。但实际发生的是：</p>
+
+  <ol class="steps">
+    <li><b>Claude 照办，开始写超长内容</b><br>它确实会努力写长。</li>
+    <li><b>写到一半，上下文窗口满了</b><br>因为输出本身也占桌面空间。</li>
+    <li><b>触发自动压缩</b><br>前面已经写好的部分被摘要掉，细节没了。</li>
+    <li><b>后半段基于「摘要」继续写</b><br>结果就是：风格不一致、前后重复、甚至互相矛盾。</li>
+    <li><b>最终结果：内容反而丢了</b><br>你想要"不丢内容"，这句话恰恰导致丢内容。</li>
+  </ol>
+
+  <div class="vs">
+    <div class="bad">
+      <h4>❌ 这样写</h4>
+      <div class="codeblock">
+        <pre><code>你输出的内容长度和大小不限制</code></pre>
+      </div>
+      <p style="font-size:14px;margin-top:8px">鼓励它一口气吐出超长内容 → 撑爆上下文 → 压缩 → 丢内容。</p>
+    </div>
+    <div class="good">
+      <h4>✅ 改成这样</h4>
+      <div class="codeblock">
+        <pre><code>分文件写，每写完一个文件
+立刻存盘再写下一个，
+不要攒到最后一起输出。</code></pre>
+      </div>
+      <p style="font-size:14px;margin-top:8px">写一个落盘一个 → 已完成的内容进了硬盘，<b>不再依赖上下文</b> → 压缩也不怕。</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 核心原则</span>
+    <p><b>让成果尽早离开上下文，进入硬盘。</b>只要文件已经写到磁盘上了，
+      后面上下文怎么压缩都影响不到它。这一条是所有"长任务"提示词的通用解法。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. 软约束 vs 硬约束</h2>
+
+  <p>看这句话，它有什么问题？</p>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 有问题的写法</span>
+    <p>「输出的内容<b>不限于</b>：文字 表格 列表 图片 <b>等等</b>方式。」</p>
+  </div>
+
+  <p>问题在于：「不限于……等等」是<b>软约束</b>——它<b>允许</b>用表格，但<b>不要求</b>用表格。
+    Claude 全篇只用文字，也完全没有违反这句话。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>软约束</th><th>硬约束</th></tr></thead>
+      <tbody>
+        <tr><td><b>典型措辞</b></td><td>「不限于…」「可以…」「尽量…」「等等」「适当」</td><td>「必须」「每个 X 至少一个 Y」「不超过 N」</td></tr>
+        <tr><td><b>能否验证</b></td><td>不能。你没法判断它有没有做到</td><td>能。数一下就知道</td></tr>
+        <tr><td><b>实际效果</b></td><td>基本等于没写</td><td>会被照做</td></tr>
+        <tr><td><b>例子</b></td><td>「适当配点图表」</td><td>「每个概念至少配一张对比表格或一个可运行例子；每章至少一张流程图」</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 自检方法</span>
+    <p>写完一条要求，问自己一句：<b>「如果它完全没做，我能不能一眼看出来？」</b>
+      能 → 是硬约束，留着。不能 → 是软约束，改成能数数的版本。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. 防丢内容的三段式流程</h2>
+
+  <p>「知识内容不丢失」这六个字，是<b>愿望</b>，不是<b>机制</b>。
+    模型没有办法自己保证"我没丢"，因为它不知道完整的清单长什么样。</p>
+
+  <p>真正管用的是给它一个<b>可对照的清单</b>：</p>
+
+  <figure class="figure">
+    <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="盘点、生成、自检三段式流程">
+      <defs>
+        <marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <rect x="20" y="60" width="180" height="110" rx="12" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="110" y="46" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="600">第 1 步 · 盘点</text>
+      <text x="110" y="92" text-anchor="middle" fill="var(--text)" font-size="13">先列全部知识点</text>
+      <text x="110" y="114" text-anchor="middle" fill="var(--text)" font-size="13">做成编号清单</text>
+      <text x="110" y="144" text-anchor="middle" fill="var(--muted)" font-size="11.5">👤 这里停下，等你确认</text>
+
+      <path d="M206 115 H262" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar2)"/>
+
+      <rect x="268" y="60" width="180" height="110" rx="12" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="358" y="46" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="600">第 2 步 · 逐个生成</text>
+      <text x="358" y="92" text-anchor="middle" fill="var(--text)" font-size="13">一次写一个文件</text>
+      <text x="358" y="114" text-anchor="middle" fill="var(--text)" font-size="13">写完立刻存盘</text>
+      <text x="358" y="144" text-anchor="middle" fill="var(--muted)" font-size="11.5">💾 成果离开上下文</text>
+
+      <path d="M454 115 H510" stroke="var(--accent)" stroke-width="2" marker-end="url(#ar2)"/>
+
+      <rect x="516" y="60" width="180" height="110" rx="12" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="606" y="46" text-anchor="middle" fill="var(--ok)" font-size="13" font-weight="600">第 3 步 · 自检</text>
+      <text x="606" y="92" text-anchor="middle" fill="var(--text)" font-size="13">对着第 1 步的清单</text>
+      <text x="606" y="114" text-anchor="middle" fill="var(--text)" font-size="13">逐条打钩</text>
+      <text x="606" y="144" text-anchor="middle" fill="var(--muted)" font-size="11.5">✅ 漏了能查出来</text>
+
+      <path d="M606 178 V206 H110 V178" stroke="var(--muted)" stroke-width="1.5"
+            stroke-dasharray="5 4" fill="none" marker-end="url(#ar2)"/>
+      <text x="358" y="224" text-anchor="middle" fill="var(--muted)" font-size="12">
+        没有第 1 步的清单，第 3 步就无从对照
+      </text>
+    </svg>
+    <figcaption>图 1-2　防丢内容的三段式流程：清单是关键</figcaption>
+  </figure>
+
+  <div class="codeblock">
+    <div class="cb-title">可直接抄进你提示词的写法</div>
+    <pre><code>【流程 — 严格按顺序，不要跳步】
+第1步 盘点：列出全部知识点，做成表格（编号/知识点/难度/归入哪个文件）。
+      输出清单后停下，等我说"继续"再动手。这一步不生成任何文件。
+第3步 生成：一次写一个文件，写完立刻存盘再写下一个。
+      每写完回一行「✅ 01-xxx.html 已写入（覆盖第3、4、7条）」。
+第4步 自检：对照第1步清单逐条打钩，报告已覆盖 N 条、遗漏哪些。</code></pre>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 确认点：让它中途停一下</h2>
+
+  <div class="concept">
+    <h3>确认点（Checkpoint）</h3>
+    <p class="term">human-in-the-loop checkpoint</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>在提示词里明确写一句「做到这里<b>停下来</b>，等我说继续」。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>装修房子，你不会让工人一口气从拆墙干到刷漆才让你看。
+        你会在<b>「水电改造完、封墙之前」</b>去验收一次——因为封了墙再改，代价是十倍。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它是<a href="#s6">三段式流程</a>里第 1 步和第 2 步之间的那道闸门。
+        没有它，三段式就退化成「一口气干完」。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <pre><code>输出大纲后必须停下，等我说"继续"再写正文。
+这一步不要生成任何文件。</code></pre>
+        </div>
+        <p>注意这里写了两句：<b>「停下等我说继续」</b>定行为，
+          <b>「不要生成任何文件」</b>堵住最容易出事的那个口子。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>只写「先给我看看大纲」。</b>它可能给你看完大纲、然后接着就开始写了。
+          必须明确说<b>「停下」「等我说继续」</b>。</p>
+        <p>❌ <b>设太多确认点。</b>每一步都停，效率还不如自己写。
+          一般一个长任务设 1～2 个即可，设在<b>「改起来最贵」</b>的那一步之前。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 要求它核对事实，而不是凭记忆</h2>
+
+  <p>这一条对你尤其重要，因为你正在学的东西<b>更新极快</b>。</p>
+
+  <p>举一个本次对话里的真实例子。有一个用来切换回答风格的命令，早期版本叫
+    <code>/output-style</code>。如果凭记忆回答，就会告诉你用它。但查过文档才知道：</p>
+
+  <div class="callout danger">
+    <span class="label">🚫 已经不能用了</span>
+    <p><code>/output-style</code> 在 <b>v2.1.73 被废弃</b>，在 <b>v2.1.91 被删除</b>。
+      现在要用 <code>/config</code>，或直接改设置文件里的 <code>outputStyle</code> 字段。
+      （详见 <a href="04-output-style.html">第 04 章</a>）</p>
+  </div>
+
+  <p>凭记忆答 = 给你一条已经删掉的命令。所以提示词里要加这一段：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">核实要求（可直接抄）</div>
+    <pre><code>凡涉及命令、配置、路径的说法，先用英文关键词查官方文档核对，
+并标注版本要求；查不到或不确定的，明确标「⚠️ 待验证」，不要猜。</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>这句话的三个部分</th><th>各自解决什么问题</th></tr></thead>
+      <tbody>
+        <tr><td>「先查官方文档核对」</td><td>逼它去查，而不是从记忆里捞</td></tr>
+        <tr><td>「标注版本要求」</td><td>你能判断这条信息适不适用于你的版本</td></tr>
+        <tr><td>「查不到就标 ⚠️ 待验证，不要猜」</td><td><b>给它一个「我不知道」的出口</b>。没有出口，它就只能编</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 第三点最容易被忽略</span>
+    <p>只写「不要编造」是没用的——它不觉得自己在编。
+      必须<b>提供一个替代动作</b>：「不确定就标 ⚠️ 待验证」。
+      有了这个出口，它才有地方放那些拿不准的内容。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s9">9. 讲解模板 5 步法</h2>
+
+  <p>「讲得通俗易懂」也是软约束。把它换成一个<b>固定的填空模板</b>，质量会稳定得多：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>步骤</th><th>要求</th><th>解决什么</th></tr></thead>
+      <tbody>
+        <tr><td>1　一句话定义</td><td>不许用行话</td><td>先给一个抓手，别一上来就绕</td></tr>
+        <tr><td>2　生活化类比</td><td>一个具体场景</td><td>把陌生概念挂到已知经验上</td></tr>
+        <tr><td>3　在体系中的位置</td><td>和已讲名词是<b>包含 / 并列 / 替代 / 前置</b>哪种关系</td><td>防止学完一堆孤立名词、串不起来</td></tr>
+        <tr><td>4　最小可运行例子</td><td>能照抄就跑通</td><td>从"看懂了"到"会用了"</td></tr>
+        <tr><td>5　常见误区 1–2 个</td><td>初学者最容易踩的坑</td><td>提前拆掉雷</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 第 3 步是这个模板里最值钱的</span>
+    <p>初学者学不明白，多数时候不是因为某个名词没看懂，而是因为
+      <b>「一堆名词各自都懂，但不知道它们什么关系」</b>。
+      强制要求说清"包含/并列/替代/前置"，能直接解决这个问题。</p>
+    <p>你现在读的每一个概念卡，用的就是这个模板。</p>
+  </div>
+
+  <p>另外配一条术语书写规范，效果加成明显：</p>
+
+  <div class="codeblock">
+    <pre><code>术语首次出现写成「中文（English）」，之后只用中文。
+讲解顺序从易到难：后面只能依赖前面已经讲过的名词。</code></pre>
+  </div>
+
+  <p>第一句让你以后能自己去搜英文资料；第二句强制它排出一条不跳跃的学习路径。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s10">10. 「检索用英文、回答用中文」的正确写法</h2>
+
+  <p>初学者常写成这样：</p>
+
+  <div class="vs">
+    <div class="bad">
+      <h4>❌ 原句</h4>
+      <div class="codeblock">
+        <pre><code>我输入的内容全部转换为英文,
+你使用英文搜索分析。
+你输出的结果输出中文。</code></pre>
+      </div>
+      <p style="font-size:14px;margin-top:8px">
+        「全部转换为英文」字面意思是：<b>把你的中文整段翻译成英文再理解</b>。
+        多一道无意义的转换，还可能在翻译中丢掉语气和细节。</p>
+    </div>
+    <div class="good">
+      <h4>✅ 改成</h4>
+      <div class="codeblock">
+        <pre><code>回复我、以及正文：用中文。
+检索和查阅文档时：用英文关键词。
+不要把我的中文原话
+翻译后再理解。</code></pre>
+      </div>
+      <p style="font-size:14px;margin-top:8px">
+        把「用英文」精确限定在<b>检索这一个动作</b>上，其他环节不受影响。</p>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 为什么检索确实该用英文</span>
+    <p>技术文档的英文版通常<b>更全、更新更快</b>，中文版可能滞后几个版本甚至没有。
+      所以「查资料用英文、跟我说话用中文」是对的思路，只是原句表达过头了。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s11">11. 生成离线网页的四条硬约束</h2>
+
+  <p>如果你像本知识库这样，让 Claude 生成本地 HTML 文件，有四个坑几乎必踩：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>坑</th><th>会发生什么</th><th>该写的约束</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>引用了 CDN 上的 JS/CSS</td>
+          <td>断网就白屏；几年后链接失效同样白屏</td>
+          <td>不引任何外部 CDN、字体、图片</td>
+        </tr>
+        <tr>
+          <td>用 <code>&lt;img src="https://..."&gt;</code> 当配图</td>
+          <td>模型没法真的生成位图，链接多半是编的 → 一堆裂图</td>
+          <td>图示一律用手写<b>内联 SVG</b></td>
+        </tr>
+        <tr>
+          <td>代码块里写 <code>...</code> 省略</td>
+          <td>你复制过去跑不了，还得回来问</td>
+          <td>代码可直接复制，路径写完整，不写省略号</td>
+        </tr>
+        <tr>
+          <td>只说「要好看」</td>
+          <td>每次生成的配色都不一样，8 个文件 8 种风格</td>
+          <td>指定共用一套样式文件，或提供模板</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 内联 SVG 是什么</span>
+    <p>就是把图形<b>用代码直接写在 HTML 里</b>（<code>&lt;svg&gt;...&lt;/svg&gt;</code>），
+      不需要任何外部图片文件。本页上面那两张流程图，就是内联 SVG。
+      好处是：离线可看、能跟着深浅色主题变颜色、文字能被搜索到。</p>
+  </div>
+
+  <hr>
+
+  <h2>本章小结</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>问题</th><th>一句话解法</th></tr></thead>
+      <tbody>
+        <tr><td>每次都要重打一长段</td><td>把提示词拆成恒定偏好 / 项目事实 / 工作流，分别存到不同文件（第 02–05 章）</td></tr>
+        <tr><td>长任务做到后面就跑偏</td><td>写一个存一个，让成果尽早离开上下文</td></tr>
+        <tr><td>要求写了却没被执行</td><td>把软约束改成能数数的硬约束</td></tr>
+        <tr><td>内容莫名其妙少了几块</td><td>先出清单 → 逐个生成 → 对照清单自检</td></tr>
+        <tr><td>方向错了才发现，全白干</td><td>在「改起来最贵」的那步之前设一个确认点</td></tr>
+        <tr><td>给的命令是过时的</td><td>要求查文档核对 + 标版本 + 给「⚠️ 待验证」这个出口</td></tr>
+        <tr><td>讲解忽深忽浅</td><td>用固定的 5 步讲解模板</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">👉 下一步</span>
+    <p>你已经知道「提示词该怎么写」了。下一章解决「<b>写好了存到哪</b>」——
+      让你以后只打一个 <code>/kb</code> 就等于发出这一整段。</p>
+  </div>
+
+  <nav class="pager">
+    <a href="00-index.html" class="prev"><small>← 上一页</small>目录</a>
+    <a href="02-skill-basics.html" class="next"><small>下一页 →</small>02 · 技能入门</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

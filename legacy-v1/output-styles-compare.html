@@ -1,0 +1,526 @@
+<title>Claude Code 五种 Output Style 对比</title>
+<style>
+  /* Dark is the base: an unstamped root, and data-theme="dark", both land here.
+     data-theme="light" forces light; data-theme="system" defers to the OS via
+     the media query below. The two light palettes must stay in sync. */
+  :root {
+    color-scheme: dark;
+    --paper:        #13151B;
+    --paper-raised: #1B1E26;
+    --ink:          #E9EBF1;
+    --ink-soft:     #ABB1C2;
+    --ink-faint:    #7C8394;
+    --rule:         #2A2E39;
+    --rule-strong:  #414755;
+    --accent:       #91AFE2;
+    --accent-soft:  #1E2634;
+    --code-bg:      #1E222B;
+
+    --c-default:     #8A93A8;
+    --c-proactive:   #DD7A5F;
+    --c-explanatory: #5AB3AB;
+    --c-learning:    #A895DA;
+    --c-eli5:        #DCAC4C;
+
+    --serif: Georgia, "Songti SC", "SimSun", "Noto Serif CJK SC", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+            "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, "PingFang SC", monospace;
+  }
+
+  /* Light palette — copy 1 of 2: the explicit choice. */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --paper:        #F8F9FB;
+    --paper-raised: #FFFFFF;
+    --ink:          #16181F;
+    --ink-soft:     #464B59;
+    --ink-faint:    #767C8C;
+    --rule:         #DFE2EA;
+    --rule-strong:  #C3C9D6;
+    --accent:       #2E4A7D;
+    --accent-soft:  #E8EDF6;
+    --code-bg:      #EEF0F5;
+
+    --c-default:     #5A6478;
+    --c-proactive:   #A8452F;
+    --c-explanatory: #2E6F6B;
+    --c-learning:    #6D5BA6;
+    --c-eli5:        #A8761C;
+  }
+
+  /* Light palette — copy 2 of 2: "follow system" under a light OS.
+     Keep identical to copy 1. Under a dark OS, data-theme="system" matches
+     nothing here and falls through to the dark base above. */
+  @media (prefers-color-scheme: light) {
+    :root[data-theme="system"] {
+      color-scheme: light;
+      --paper:        #F8F9FB;
+      --paper-raised: #FFFFFF;
+      --ink:          #16181F;
+      --ink-soft:     #464B59;
+      --ink-faint:    #767C8C;
+      --rule:         #DFE2EA;
+      --rule-strong:  #C3C9D6;
+      --accent:       #2E4A7D;
+      --accent-soft:  #E8EDF6;
+      --code-bg:      #EEF0F5;
+
+      --c-default:     #5A6478;
+      --c-proactive:   #A8452F;
+      --c-explanatory: #2E6F6B;
+      --c-learning:    #6D5BA6;
+      --c-eli5:        #A8761C;
+    }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 64px 28px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+  }
+
+  .prose { max-width: 64ch; }
+
+  /* ---------- masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: 14px; }
+  .masthead-top {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .themetoggle { display: flex; border: 1px solid var(--rule-strong); flex: none; }
+  .themetoggle button {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    padding: 6px 14px;
+    background: none;
+    border: 0;
+    color: var(--ink-faint);
+    cursor: pointer;
+    line-height: 1.7;
+  }
+  .themetoggle button + button { border-left: 1px solid var(--rule-strong); }
+  .themetoggle button:hover { color: var(--ink); }
+  .themetoggle button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 4.6vw, 46px);
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .standfirst {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 17px;
+  }
+
+  /* ---------- section ---------- */
+  section { display: flex; flex-direction: column; gap: 22px; }
+  h2 {
+    font-family: var(--serif);
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+    margin: 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  h2 .num {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-faint);
+    letter-spacing: 0.08em;
+    margin-right: 14px;
+    vertical-align: 3px;
+  }
+  p { margin: 0; }
+  .prose p + p { margin-top: 14px; }
+
+  /* ---------- dials ---------- */
+  .dials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+  .dial {
+    padding: 20px 26px 22px 0;
+    border-top: 2px solid var(--rule-strong);
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .dial + .dial { padding-left: 26px; }
+  .dial-q {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .dial-name { font-family: var(--serif); font-size: 20px; }
+  .dial-who { font-size: 14.5px; color: var(--ink-soft); }
+  .dial-who b { font-weight: 600; color: var(--ink); }
+
+  /* ---------- table ---------- */
+  .scroller { overflow-x: auto; border-top: 2px solid var(--rule-strong); }
+  table { border-collapse: collapse; min-width: 1020px; width: 100%; }
+  thead th {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    font-weight: 400;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+    padding: 14px 20px 14px 0;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+  tbody td {
+    vertical-align: top;
+    padding: 24px 20px 24px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14.5px;
+    line-height: 1.72;
+    color: var(--ink-soft);
+  }
+  tbody tr:last-child td { border-bottom: none; }
+
+  col.c-name  { width: 168px; }
+  col.c-mech  { width: 196px; }
+  col.c-pro   { width: 248px; }
+  col.c-con   { width: 256px; }
+  col.c-when  { width: 188px; }
+
+  .sname { display: flex; flex-direction: column; gap: 7px; }
+  .sname .n {
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--ink);
+    display: flex; align-items: center; gap: 9px;
+  }
+  .chip {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--dot); flex: none;
+  }
+  .tag {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    border: 1px solid var(--rule-strong);
+    padding: 2px 7px;
+    align-self: flex-start;
+  }
+  .tag.custom { color: var(--c-eli5); border-color: var(--c-eli5); }
+
+  td b, .prose b { font-weight: 600; color: var(--ink); }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+
+  /* ---------- picker ---------- */
+  .picker { display: flex; flex-direction: column; }
+  .pick {
+    display: flex; align-items: baseline; gap: 18px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .pick:first-child { border-top: 2px solid var(--rule-strong); }
+  .pick-when { flex: 1 1 auto; font-size: 15.5px; }
+  .pick-use {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--pc);
+    white-space: nowrap;
+    flex: none;
+  }
+
+  /* ---------- notes ---------- */
+  ul.notes { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; max-width: 68ch; }
+  ul.notes li {
+    padding-left: 22px;
+    position: relative;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  ul.notes li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 12px;
+    width: 10px; height: 1px;
+    background: var(--rule-strong);
+  }
+
+  /* ---------- code block ---------- */
+  pre {
+    background: var(--code-bg);
+    border-left: 2px solid var(--c-eli5);
+    padding: 22px 24px;
+    overflow-x: auto;
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.68;
+    color: var(--ink);
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+    font-size: 13.5px;
+    color: var(--ink-faint);
+    max-width: 68ch;
+  }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  @media (max-width: 720px) {
+    .wrap { padding: 44px 20px 72px; gap: 48px; }
+    .dials { grid-template-columns: 1fr; }
+    .dial + .dial { padding-left: 0; }
+    .pick { flex-direction: column; gap: 4px; }
+  }
+</style>
+
+<script>
+  (function () {
+    var t;
+    try { t = localStorage.getItem("ccOutputStylesTheme"); } catch (e) {}
+    if (t !== "light" && t !== "system") t = "dark";
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead-top">
+      <div class="eyebrow">Claude Code · outputStyle</div>
+      <div class="themetoggle" role="group" aria-label="配色">
+        <button type="button" data-set="dark" aria-pressed="true">深色</button>
+        <button type="button" data-set="light" aria-pressed="false">浅色</button>
+        <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+      </div>
+    </div>
+    <h1>五种 Output Style 对比</h1>
+    <p class="standfirst">四种内置，一种自定义。它们改的都是系统提示词，但调的不是同一件事 —— 选错的代价通常不是"风格不喜欢"，而是该问你的时候没问、该说清的时候简化掉了。</p>
+  </header>
+
+  <section>
+    <h2><span class="num">01</span>它们其实是三个旋钮</h2>
+    <div class="prose">
+      <p>把五种摆在一条线上比较会失真。Proactive 和 Explanatory 根本不在争同一个东西 —— 一个管"要不要问你"，一个管"要不要讲给你听"。拆成三个旋钮才对得上：</p>
+    </div>
+    <div class="dials">
+      <div class="dial">
+        <div class="dial-q">Dial A — 自主度</div>
+        <div class="dial-name">要不要问你</div>
+        <div class="dial-who"><b>Default</b> 会在岔路口停下 · <b>Proactive</b> 自己做假设往前走</div>
+      </div>
+      <div class="dial">
+        <div class="dial-q">Dial B — 教学量</div>
+        <div class="dial-name">要不要教你</div>
+        <div class="dial-who"><b>Explanatory</b> 讲给你听 · <b>Learning</b> 留一段让你自己写</div>
+      </div>
+      <div class="dial">
+        <div class="dial-q">Dial C — 带宽</div>
+        <div class="dial-name">你现在能吸收多少</div>
+        <div class="dial-who"><b>ELI5</b> 是唯一一个拧这个旋钮的 —— 官方四种都没覆盖</div>
+      </div>
+    </div>
+    <div class="prose">
+      <p>Dial C 和前两个正交：它跟你的技术水平无关，只跟你此刻还剩多少脑力有关。资深工程师深夜十一点的带宽，可能比新人白天还低。这也是 ELI5 值得单独存在的理由。</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">02</span>逐项对比</h2>
+    <div class="scroller">
+      <table>
+        <colgroup>
+          <col class="c-name"><col class="c-mech"><col class="c-pro"><col class="c-con"><col class="c-when">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Style</th>
+            <th>核心机制</th>
+            <th>优点</th>
+            <th>真实代价</th>
+            <th>应用场景</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="sname">
+                <span class="n"><span class="chip" style="--dot: var(--c-default)"></span>Default</span>
+                <span class="tag">内置</span>
+              </div>
+            </td>
+            <td>原厂系统提示词，不追加任何东西</td>
+            <td>唯一被 Anthropic 大规模调优过的基准。<b>token 最省</b>，所有 skill 和 subagent 的行为假设都以它为准</td>
+            <td>做完了，但你不知道为什么。在陌生代码库里，它的"简洁"会变成<b>不透明</b></td>
+            <td>熟悉的仓库、赶工、CI、<code>-p</code> 非交互调用</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sname">
+                <span class="n"><span class="chip" style="--dot: var(--c-proactive)"></span>Proactive</span>
+                <span class="tag">内置</span>
+              </div>
+            </td>
+            <td>追加"立即执行、自主假设、行动优先"的指令</td>
+            <td>治"想太多"。机械任务和批量重构上，省掉大量来回确认</td>
+            <td>它砍掉的正是<b>"停下来问"</b> —— 而需求模糊时那恰恰最值钱。另外它<b>不改权限模式</b>，以为选了它就自主的人会配错</td>
+            <td>需求清晰 + 有 git 可回滚 + 任务机械</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sname">
+                <span class="n"><span class="chip" style="--dot: var(--c-explanatory)"></span>Explanatory</span>
+                <span class="tag">内置</span>
+              </div>
+            </td>
+            <td>在完成任务的间隙插入 Insights</td>
+            <td>讲的是<b>"这个项目一贯怎么做"</b> —— 代码库的既有惯例，是最难自己读出来的那部分</td>
+            <td>无条件插入，你已经懂的地方也讲。读久了开始跳过，然后连该读的也漏了。输出 token 明显上升</td>
+            <td>接手陌生仓库的前两周；review 别人的架构</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sname">
+                <span class="n"><span class="chip" style="--dot: var(--c-learning)"></span>Learning</span>
+                <span class="tag">内置</span>
+              </div>
+            </td>
+            <td>在代码里插 <code>TODO(human)</code> 标记，把关键片段留给你写</td>
+            <td>唯一一个改变<b>你</b>的行为、而不只是改变输出的 style。直接对抗"看它写完但自己写不出来"</td>
+            <td>会真的停下来等你，<b>打断 flow</b>。它挑的"strategic piece"未必是你想练的。完全不能用于后台或非交互运行</td>
+            <td>个人项目、学新语言、刻意练习</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="sname">
+                <span class="n"><span class="chip" style="--dot: var(--c-eli5)"></span>ELI5</span>
+                <span class="tag custom">自定义</span>
+              </div>
+            </td>
+            <td>锁死回答骨架（干了什么 → 成了没 → 下一步），加硬性简化规则</td>
+            <td>换了一根轴，管的是<b>当下带宽</b>而非技术水平。决策强制收敛成有限选项 + 它的倾向</td>
+            <td>"简化"会连<b>不确定性和坏消息一起简化掉</b>，除非显式豁免。而且它是<b>开关不是配置</b> —— 忘了关就一直停在 5 岁版</td>
+            <td>深夜、脑子不转、只想知道下一步该干嘛</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">03</span>怎么选</h2>
+    <div class="picker">
+      <div class="pick"><span class="pick-when">熟悉的活，只想省 token</span><span class="pick-use" style="--pc: var(--c-default)">Default</span></div>
+      <div class="pick"><span class="pick-when">需求清晰，只想快点做完，别再问了</span><span class="pick-use" style="--pc: var(--c-proactive)">Proactive</span></div>
+      <div class="pick"><span class="pick-when">陌生代码库，想搞懂它的惯例</span><span class="pick-use" style="--pc: var(--c-explanatory)">Explanatory</span></div>
+      <div class="pick"><span class="pick-when">自己的项目，想保持手感不退化</span><span class="pick-use" style="--pc: var(--c-learning)">Learning</span></div>
+      <div class="pick"><span class="pick-when">脑子不转了，只想知道下一步</span><span class="pick-use" style="--pc: var(--c-eli5)">ELI5</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="num">04</span>五种共用的规则</h2>
+    <ul class="notes">
+      <li><b>只作用于主对话。</b>subagent 跑自己的系统提示词，不受 output style 影响（<code>fork</code> 是唯一例外，它继承父会话完整提示词）。工作流越依赖 subagent，换 style 的实际影响越小 —— 你调的只是汇报层。</li>
+      <li><b>会话启动时读一次。</b>改完必须 <code>/clear</code> 或开新会话才生效。这也是 <code>/output-style</code> 命令被移除的原因：中途切换会打断 prompt caching。</li>
+      <li><b>桌面端没有选择菜单。</b>只能直接写 settings 文件的 <code>outputStyle</code> 字段；<code>/config</code> 在这里只会打开设置面板。终端 CLI 里 <code>/config</code> 才有 picker。</li>
+      <li><b>自定义 style 默认丢掉编码指令。</b>frontmatter 不写 <code>keep-coding-instructions: true</code>，Claude Code 内置的软件工程指令会被整个替换掉。</li>
+      <li><b>它是常驻税，不是按需加载。</b>写成两千字的人格设定，等于每个 session 开局就交一笔 token。要复杂流程该用 skill 或 subagent，output style 只管语气、角色、默认输出格式。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2><span class="num">05</span>ELI5 参考实现</h2>
+    <div class="prose">
+      <p>放在 <code>~/.claude/output-styles/eli5.md</code>。相比 Lydia Hallie 的原版，补了坏消息豁免、格式约束和选项逃生口 —— 前者防止"简化"把风险一起抹掉，后者防止被框进假选择。</p>
+    </div>
+<pre><code>---
+name: ELI5
+description: Simple words, short answers, clear next step
+keep-coding-instructions: true
+---
+
+It's been a long day and my brain is fried. Explain like I'm tired,
+not like I'm stupid: simplify the wording, never the substance.
+
+Small words, short sentences, short paragraphs. No tables, no nested
+lists. If you have to use a technical term, explain it right after.
+Only return what's actually necessary.
+
+Just tell me what you did, did it work, what do I do now.
+
+Never simplify bad news. If something failed, is unverified, or is
+risky, say so plainly — that part does not get shortened.
+
+If I have to decide something: 3 options max, the context I need to
+pick fast, and which one you'd go with. Always leave room for me to
+answer with something else entirely.
+
+Keep paths and commands exact. I have no brain cells left for the rest.</code></pre>
+  </section>
+
+  <footer>
+    内置四种的定义来自 Claude Code 官方文档；ELI5 基于 Lydia Hallie 公开的 <code>eli5.md</code> 改写。<code>/output-style</code> 命令已于 v2.1.91 移除，现统一通过 <code>outputStyle</code> 设置项切换。
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = Array.prototype.slice.call(document.querySelectorAll(".themetoggle button"));
+
+    function apply(mode) {
+      root.setAttribute("data-theme", mode);
+      buttons.forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b.dataset.set === mode));
+      });
+    }
+
+    var current = root.getAttribute("data-theme");
+    apply(current === "light" || current === "system" ? current : "dark");
+
+    buttons.forEach(function (b) {
+      b.addEventListener("click", function () {
+        apply(b.dataset.set);
+        try { localStorage.setItem("ccOutputStylesTheme", b.dataset.set); } catch (e) {}
+      });
+    });
+  })();
+</script>

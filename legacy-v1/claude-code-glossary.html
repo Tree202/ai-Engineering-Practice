@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>速查手册 · 名词 · 命令 · 提示词模板</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --paper:#13151B; --paper-raised:#1B1E26; --paper-sunk:#0E1015;
+    --ink:#E9EBF1; --ink-soft:#ABB1C2; --ink-faint:#7C8394;
+    --rule:#2A2E39; --rule-strong:#414755;
+    --accent:#91AFE2; --accent-soft:#1E2634; --code-bg:#1E222B;
+    --ok:#6FBF8B; --ok-soft:#17251C;
+    --warn:#DCAC4C; --warn-soft:#241E12;
+    --bad:#DD7A5F; --bad-soft:#25170F;
+    --info:#5AB3AB; --info-soft:#0F2321;
+    --plan:#A895DA; --plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --paper:#F8F9FB; --paper-raised:#FFFFFF; --paper-sunk:#EEF0F5;
+    --ink:#16181F; --ink-soft:#464B59; --ink-faint:#767C8C;
+    --rule:#DFE2EA; --rule-strong:#C3C9D6;
+    --accent:#2E4A7D; --accent-soft:#E8EDF6; --code-bg:#F0F2F7;
+    --ok:#2C7A4B; --ok-soft:#E6F4EB;
+    --warn:#96700F; --warn-soft:#FBF2DC;
+    --bad:#A8452F; --bad-soft:#FBEAE5;
+    --info:#1F6B65; --info-soft:#E2F2F0;
+    --plan:#5B4A94; --plan-soft:#EEE9F8;
+  }
+  @media (prefers-color-scheme: light) {
+    :root[data-theme="system"] {
+      color-scheme: light;
+      --paper:#F8F9FB; --paper-raised:#FFFFFF; --paper-sunk:#EEF0F5;
+      --ink:#16181F; --ink-soft:#464B59; --ink-faint:#767C8C;
+      --rule:#DFE2EA; --rule-strong:#C3C9D6;
+      --accent:#2E4A7D; --accent-soft:#E8EDF6; --code-bg:#F0F2F7;
+      --ok:#2C7A4B; --ok-soft:#E6F4EB;
+      --warn:#96700F; --warn-soft:#FBF2DC;
+      --bad:#A8452F; --bad-soft:#FBEAE5;
+      --info:#1F6B65; --info-soft:#E2F2F0;
+      --plan:#5B4A94; --plan-soft:#EEE9F8;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:80px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 88%,transparent);
+          backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .topbar-in{max-width:1180px;margin:0 auto;padding:10px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{font-weight:700;font-size:15px}.brand span{color:var(--ink-faint);font-weight:400}
+  .navlinks{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+  .navlinks a{color:var(--ink-soft);text-decoration:none;font-size:13px;padding:5px 11px;
+              border-radius:7px;border:1px solid transparent;white-space:nowrap}
+  .navlinks a:hover{background:var(--accent-soft);color:var(--ink)}
+  .navlinks a.here{border-color:var(--rule-strong);color:var(--ink);background:var(--paper-raised)}
+  .themer{display:flex;gap:2px;background:var(--paper-sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 10px;cursor:pointer;background:transparent;
+                 color:var(--ink-faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1180px;margin:0 auto;padding:44px 24px 120px}
+  h1{font-size:34px;line-height:1.3;margin:0 0 10px;letter-spacing:-.01em}
+  h2{font-size:25px;margin:64px 0 18px;padding-top:22px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:19px;margin:36px 0 12px}
+  h4{font-size:16px;margin:24px 0 8px;color:var(--ink-soft)}
+  p{margin:14px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--ink-soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+          color:var(--ink-faint);border:1px solid var(--rule-strong);border-radius:999px;
+          padding:3px 12px;margin-bottom:16px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code-bg);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:11px;padding:16px 18px;
+      overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;margin:16px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .tablewrap{overflow-x:auto;margin:20px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 13px;text-align:left;vertical-align:top}
+  th{background:var(--paper-raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--paper-raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule-strong);border-radius:0 11px 11px 0;background:var(--paper-raised);
+       padding:15px 20px;margin:22px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box .box-t{font-weight:700;font-size:14px;margin-bottom:6px;display:block}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap .box-t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key .box-t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good .box-t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note .box-t{color:var(--info)}
+  .toc{border:1px solid var(--rule);border-radius:15px;background:var(--paper-raised);padding:20px 26px;margin:30px 0 10px}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:34px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--ink-soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .card{border:1px solid var(--rule);border-radius:14px;background:var(--paper-raised);
+        padding:2px 22px 18px;margin:22px 0}
+  .card-t{font-weight:700;font-size:15px;margin:18px 0 4px;color:var(--accent);
+          padding-bottom:10px;border-bottom:1px solid var(--rule)}
+  .danger{color:var(--bad);font-weight:700}
+  .safe{color:var(--ok);font-weight:700}
+  .footer{margin-top:90px;padding-top:26px;border-top:1px solid var(--rule);color:var(--ink-faint);font-size:13.5px}
+  @media(max-width:640px){
+    .wrap{padding:28px 16px 80px}h1{font-size:27px}h2{font-size:21px}h3{font-size:17px}
+    pre{font-size:12px}.card{padding:2px 15px 16px}
+  }
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('cc-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">Claude Code 实战 <span>· Python</span></div>
+    <nav class="navlinks">
+      <a href="claude-code-sop.html">① 标准作业流程</a>
+      <a href="claude-code-testing.html">② 测试体系</a>
+      <a href="claude-code-pipeline.html">③ 工程落地</a>
+      <a class="here" href="claude-code-glossary.html">④ 速查手册</a>
+    </nav>
+    <div class="themer" role="group" aria-label="主题切换">
+      <button type="button" data-set="light" aria-pressed="false">浅色</button>
+      <button type="button" data-set="dark" aria-pressed="true">深色</button>
+      <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<span class="kicker">第四册 · 速查</span>
+<h1>速查手册</h1>
+<p class="lede">
+不用从头读。卡住的时候按目录跳过来查一条就走。
+Claude Code 的部分都对照过官方文档,git 部分全部实测过。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:10px;font-size:14px;">目录</strong>
+  <ol>
+    <li><a href="#cc">Claude Code 名词与命令</a></li>
+    <li><a href="#git">git 命令速查</a></li>
+    <li><a href="#gitundo">git 回退三件套(最危险的一节)</a></li>
+    <li><a href="#giterr">git 新手报错速查</a></li>
+    <li><a href="#py">Python 命令速查</a></li>
+    <li><a href="#pyerr">Python / pytest 报错速查</a></li>
+    <li><a href="#prompt">提示词模板库</a></li>
+    <li><a href="#claudemd">CLAUDE.md 模板</a></li>
+  </ol>
+</div>
+
+<!-- ============================================ -->
+<h2 id="cc">一、Claude Code 名词与命令</h2>
+
+<h3>输入框里的特殊符号</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:14%">符号</th><th style="width:24%">叫什么</th><th>做什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>!</code></td><td><strong>Shell 模式</strong></td>
+  <td>行首打 <code>!command</code>,<strong>直接执行 shell 命令,不经过模型</strong>,输出加入会话。
+      <em>流程步骤 4 的 <code>!git diff</code> 靠的就是它 —— 保证输出直接进你的眼睛</em></td>
+</tr>
+<tr>
+  <td><code>@</code></td><td><strong>文件引用</strong></td>
+  <td><code>@myshop/</code> 把这个目录的内容读进上下文。比手动复制粘贴方便,比让它自己猜可靠</td>
+</tr>
+<tr>
+  <td><code>/</code></td><td><strong>斜杠命令</strong></td>
+  <td>行首打 <code>/</code> 会弹出所有可用命令</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>常用斜杠命令</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:20%">命令</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>/rewind</code></td><td>打开检查点菜单,回退代码和/或对话。等价于空输入框按 <code>Esc Esc</code></td></tr>
+<tr><td><code>/review</code></td><td><strong><code>/code-review</code> 的别名</strong>,两者完全相同。审查当前分支改动</td></tr>
+<tr><td><code>/code-review --fix</code></td><td>审完直接把问题改掉</td></tr>
+<tr><td><code>/security-review</code></td><td>独立命令,专查安全问题</td></tr>
+<tr><td><code>/clear</code></td><td><strong>开一个全新对话</strong>。清空历史,但保留 CLAUDE.md 和配置</td></tr>
+<tr><td><code>/compact</code></td><td><strong>在当前对话内压缩</strong>前面的内容释放上下文,不清空历史</td></tr>
+<tr><td><code>/init</code></td><td>自动生成一份 CLAUDE.md 初稿</td></tr>
+<tr><td><code>/context</code></td><td>看当前上下文里加载了什么</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t"><code>/clear</code> 什么时候用</span>
+  跑到第三四轮,上下文里全是旧 diff 和旧报错,AI 开始翻旧账、重提已经解决的问题。
+  <br><br>
+  <strong>规矩:一个 commit 打完 = 一次 <code>/clear</code>。</strong>
+  该记住的东西已经在 commit message 和 CLAUDE.md 里了,不需要它记在脑子里。
+</div>
+
+<h3>快捷键</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:22%">按键</th><th>做什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>Shift + Tab</code></td>
+  <td>循环切换权限模式。<strong>不要数按几下——按到状态栏出现 <code>⏸ plan mode on</code> 为止</strong></td>
+</tr>
+<tr>
+  <td><code>Esc Esc</code></td>
+  <td>空输入框时 = 打开 rewind 菜单;<strong>输入框有字时,第一次 Esc 先清空文字</strong>(按 ↑ 可恢复),第二次才打开菜单</td>
+</tr>
+<tr><td><code>Ctrl + G</code></td><td><strong>把计划拉进你的编辑器直接改</strong>,比反复说「再改改」快得多</td></tr>
+<tr><td><code>Alt + M</code></td><td>Windows 上无 VT 模式时,代替 Shift+Tab</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>权限模式</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:22%">模式</th><th>能做什么</th></tr></thead>
+<tbody>
+<tr><td><code>default</code><br><span style="font-size:12px;color:var(--ink-faint)">显示为 Manual</span></td><td>大部分改动需要你批准</td></tr>
+<tr><td><code>acceptEdits</code></td><td>自动批准文件编辑,但运行命令仍要问你</td></tr>
+<tr><td><code>plan</code> ★</td><td><strong>只读。能看文件、能列目录,但不能编辑、不能运行命令</strong>,直到你批准计划</td></tr>
+<tr><td><code>bypassPermissions</code></td><td>几乎全自动。<strong>不是默认就在循环里</strong>,要特定方式启动</td></tr>
+<tr><td><code>auto</code></td><td>由分类器自动决定。<strong>Pro/Max/Team 新开会话默认是这个</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>CLAUDE.md 三个层级</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:34%">位置</th><th>影响范围</th></tr></thead>
+<tbody>
+<tr><td><code>~/.claude/CLAUDE.md</code></td><td>用户级,影响你<strong>所有</strong>项目</td></tr>
+<tr><td><code>./CLAUDE.md</code></td><td>项目级,团队共享(会进 git)</td></tr>
+<tr><td><code>./CLAUDE.local.md</code></td><td>本地私密,不进版本控制</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>/rewind 的射程与死角</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:36%">✅ 能回退</th><th>❌ 回退不了</th></tr></thead>
+<tbody>
+<tr>
+  <td>Claude 用文件编辑工具(Read/Write/Edit)<strong>改过或新建的文件</strong></td>
+  <td>
+    ① <strong>bash 命令的副作用</strong>(<code>rm</code>、<code>mv</code>、<code>pip install</code>)<br>
+    ② <strong>git 状态的改变</strong><br>
+    ③ <strong>子代理 / 后台任务的编辑</strong>(含后台 <code>/code-review --fix</code>)<br>
+    ④ <strong>你自己在编辑器里手改的文件</strong><br>
+    ⑤ 数据库文件、已发出的网络请求
+  </td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">三个容易误会的限制</span>
+  ① <strong>粒度是「你发的每一条消息」</strong>,不是每一次文件编辑——你不能精确回到「它改 price.py 那一刻」<br>
+  ② 只保留<strong>最近 100 个</strong>检查点<br>
+  ③ 随会话在 <strong>30 天后清除</strong>
+  <br><br>
+  官方对它的定位原话:<em>「不是版本控制的替代品」</em>。
+</div>
+
+<!-- ============================================ -->
+<h2 id="git">二、git 命令速查</h2>
+
+<div class="box note">
+  <span class="box-t">先记住三个比喻,后面全部好懂</span>
+  <strong>git 仓库 = 游戏的存档系统</strong>(<code>commit</code> = 存档,回退 = 读档)<br>
+  <strong>暂存区 = 超市结账传送带</strong>(改文件 = 从货架拿东西;<code>add</code> = 放上传送带;<code>commit</code> = 收银员打单)<br>
+  <strong>未跟踪文件 <code>??</code> = 没贴条码的商品</strong>(git 只对贴过条码的东西负责)
+</div>
+
+<div class="card">
+<div class="card-t">建立与查看</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:36%">命令</th><th>做什么</th></tr></thead>
+<tbody>
+<tr><td><code>git init</code></td><td>给项目装上存档系统(只做一次)</td></tr>
+<tr><td><code>git checkout -b feat/xxx</code></td><td>新建分支并切过去。<code>-b</code> = 新建</td></tr>
+<tr><td><code>git switch -c feat/xxx</code></td><td><strong>同上,新写法,更安全</strong>(git 2.23+)</td></tr>
+<tr><td><code>git status</code></td><td>看进度面板。啰嗦但有指引,<strong>新手用这个</strong></td></tr>
+<tr><td><code>git status -s</code></td><td>两个字母的简短版。<strong>没输出 = 干净</strong>,不是卡住了</td></tr>
+<tr><td><code>git log --oneline</code></td><td>看存档列表</td></tr>
+<tr><td><code>git log --oneline --stat</code></td><td>每次提交改了哪些文件、加删几行</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4><code>git status -s</code> 的两列怎么读</h4>
+<pre><code>M  README.md    ← 左列 = 暂存区:改了,已 add
+ M app.py       ← 右列 = 工作区:改了,没 add(注意 M 前面那个空格!)
+MM both.py      ← 两种都有:add 过之后又改了
+A  new.py       ← 新文件,已 add
+?? ai_notes.py  ← git 完全不认识的新文件(最危险的一类)</code></pre>
+
+<div class="box trap">
+  <span class="box-t"><code>M</code> 前面那个空格特别容易被忽略,而它恰恰是关键</span>
+  <code>M&nbsp;</code>(已暂存)和 <code>&nbsp;M</code>(未暂存)是<strong>完全不同的两种状态</strong>。
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">看改动</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:36%">命令</th><th>看的是什么</th></tr></thead>
+<tbody>
+<tr><td><code>git diff</code></td><td><strong>还没 add</strong> 的改动</td></tr>
+<tr><td><code>git diff --staged</code></td><td><strong>已经 add</strong>、待提交的改动(<code>--cached</code> 同义)</td></tr>
+<tr><td><code>git diff HEAD</code></td><td><strong>两种全看</strong>(最全,流程步骤 4 推荐用这条)</td></tr>
+<tr><td><code>git diff --stat</code></td><td>只看每个文件加删几行</td></tr>
+<tr><td><code>git diff --staged --name-only</code></td><td>只列改动的文件名</td></tr>
+<tr><td><code>git diff main...HEAD</code></td><td>从分支起点到现在的<strong>全部</strong>改动(步骤 7 总审用)</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>diff 怎么读</h4>
+<pre><code>--- a/app.py         ← a = 改之前
++++ b/app.py         ← b = 改之后
+@@ -1 +1,4 @@        ← 改动发生在第 1 行起
+-print("hello")      ← 减号 = 被删掉的旧内容
++def greet(name):    ← 加号 = 新加的内容</code></pre>
+
+<div class="box trap">
+  <span class="box-t">头号坑:<code>git add</code> 之后 <code>git diff</code> 变空白</span>
+  新手会以为改动丢了。其实是跑到<strong>暂存区</strong>去了,要用 <code>git diff --staged</code> 看。
+  <br><br>
+  另外:<strong>未跟踪的新文件不会出现在 <code>git diff</code> 里</strong>(git 还不认识它)。
+  所以步骤 4 应该<strong>先 <code>git status</code> 再 <code>git diff</code></strong>。
+  <br><br>
+  输出很长时会进入分页模式(底部显示冒号),<strong>按 <code>q</code> 退出</strong>,不是死机。
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">提交</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:36%">命令</th><th>做什么</th></tr></thead>
+<tbody>
+<tr><td><code>git add -A</code></td><td>暂存全部改动(含新文件)</td></tr>
+<tr><td><code>git add 文件名</code></td><td>只暂存某个文件</td></tr>
+<tr><td><code>git commit -m "说明"</code></td><td>存档并起名</td></tr>
+<tr><td><code>git restore --staged .</code></td><td>取消暂存,<strong>但保留你写的内容</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <span class="box-t">提交信息的判断标准</span>
+  <strong>一次提交要能用一句话讲清楚。讲不清就说明该拆成两次。</strong>
+  <br><br>
+  <span class="danger">❌</span> <code>更新</code> / <code>修改</code> / <code>fix bug</code> —— 三天后自己也看不懂<br>
+  <span class="safe">✅</span> <code>feat: 第1步 price 支持满减计算</code>
+</div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="gitundo">三、git 回退三件套(最危险的一节)</h2>
+
+<div class="box trap">
+  <span class="box-t">🔥 全篇最重要的一条:<code>reset --hard</code> 删不掉 AI 新建的文件</span>
+  AI 一顿操作新建了 5 个实验文件,你跑 <code>git reset --hard</code>,
+  然后发现<strong>那 5 个文件原封不动躺在目录里</strong>,你以为「回退失败了」。
+  <br><br>
+  <strong>不是失败。reset 只管 git「认识」的文件</strong>——那些从没 <code>add</code> 过的新文件(<code>??</code>),
+  git 压根不知道它们存在。
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr>
+  <th style="width:24%">手段</th><th style="width:34%">✅ 能回退</th><th>❌ 管不了</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><code>git restore .</code><br><code>git checkout -- .</code></td>
+  <td><strong>已跟踪文件</strong>的<strong>未暂存</strong>改动</td>
+  <td>已 add 的改动;<strong>AI 新建的未跟踪文件</strong></td>
+</tr>
+<tr>
+  <td><code>git reset --hard HEAD</code></td>
+  <td>已跟踪文件的<strong>所有</strong>改动(含已暂存)</td>
+  <td><strong>未跟踪文件照样纹丝不动</strong></td>
+</tr>
+<tr>
+  <td><code>git clean -fd</code></td>
+  <td><strong>未跟踪的新文件和新目录</strong></td>
+  <td>—(但<strong>先用 <code>-fdn</code> 预演!</strong>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <span class="box-t">一次干净的回退 = 两步,缺一不可</span>
+  <ol style="margin-bottom:0">
+    <li><code>git status</code> —— 先看清 AI 到底动了什么</li>
+    <li><code>git reset --hard HEAD</code> —— 抹掉<strong>老文件</strong>的改动</li>
+    <li><code>git clean -fdn</code> —— <strong>预演</strong>,看看还剩哪些<strong>新文件</strong>要删</li>
+    <li><code>git clean -fd</code> —— 确认无误再真删</li>
+  </ol>
+  <br>
+  <strong>口诀:先 reset 后 clean;clean 先 n 后 f。</strong>
+</div>
+
+<h3>clean 的参数</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:24%">命令</th><th>行为</th></tr></thead>
+<tbody>
+<tr><td><code>git clean -fdn</code></td><td><span class="safe">安全</span> 预演,只打印会删什么,不真删</td></tr>
+<tr><td><code>git clean -fd</code></td><td>真删。<code>-f</code>=force,<code>-d</code>=连新目录一起</td></tr>
+<tr><td><code>git clean -fdx</code></td><td><span class="danger">☢️ 核弹级</span> 连 <code>.gitignore</code> 忽略的一起删</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">clean 的三个坑(全部实测过)</span>
+  <strong>① 不加 <code>-d</code> 会漏掉新建的文件夹。</strong>
+  <code>git clean -n</code> 只列文件,不列目录,你会以为清干净了其实没有。
+  <br><br>
+  <strong>② <code>-x</code> 绝不要乱加。</strong>实测:<code>git clean -fdx</code>
+  直接蒸发了一个 <strong>9MB、569 个文件的 <code>.venv</code></strong>,<code>.env</code> 里的密钥也会没。
+  <br><br>
+  <strong>③ 删掉的东西不进回收站、不进 git、<code>reflog</code> 也救不回</strong>,永久消失。
+  <em>所以必须先 <code>-fdn</code> 预演。</em>
+</div>
+
+<div class="box note">
+  <span class="box-t">一个反直觉的细节</span>
+  新文件 <strong>add 过和没 add 过,命运完全不同</strong>:
+  <br><br>
+  <code>git reset --hard</code> 会把<strong>已经 add 过的新文件连文件本身一起删掉</strong>(实测直接从磁盘消失),
+  但对<strong>没 add 过</strong>的新文件束手无策。
+</div>
+
+<h3>回到某一次旧提交的三种方式</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:24%">方式</th><th style="width:30%">命令</th><th>特点</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>只是去看看</strong></td>
+  <td><code>git checkout 哈希</code></td>
+  <td>历史一点不改。会提示 <code>detached HEAD</code>(听着吓人,其实就是「你现在站在一次提交上」)。
+      <br>回来:<code>git switch -</code></td>
+</tr>
+<tr>
+  <td><strong>真的退回去</strong></td>
+  <td><code>git reset --hard 哈希</code></td>
+  <td><span class="danger">危险</span> 后面的提交从分支上消失。
+      <br>后悔药:<code>git reflog</code> 能找回来</td>
+</tr>
+<tr>
+  <td><strong>最安全</strong></td>
+  <td><code>git revert 哈希</code></td>
+  <td>历史不改,只<strong>追加一个「反做」的提交</strong>。团队协作时用这个</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================ -->
+<h2 id="giterr">四、git 新手报错速查</h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:44%">报错</th><th>原因 / 解法</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>fatal: not a git repository</code></td>
+  <td>当前目录没有 git 仓库 → <code>git init</code>,或者你 cd 错地方了</td>
+</tr>
+<tr>
+  <td><code>fatal: clean.requireForce ... refusing to clean</code></td>
+  <td>忘了加 <code>-f</code> → 用 <code>git clean -fdn</code> 先预演</td>
+</tr>
+<tr>
+  <td><code>nothing to commit, working tree clean</code></td>
+  <td><strong>不是报错</strong>,是「干净」的意思 —— 好消息</td>
+</tr>
+<tr>
+  <td><code>Please tell me who you are</code></td>
+  <td>第一次用 git,没配名字 →
+      <br><code>git config --global user.name "你的名字"</code>
+      <br><code>git config --global user.email "你的邮箱"</code></td>
+</tr>
+<tr>
+  <td><code>error: pathspec 'xxx' did not match</code></td>
+  <td>分支名或文件名写错了 → <code>git branch</code> 看有哪些分支</td>
+</tr>
+<tr>
+  <td><code>You are in 'detached HEAD' state</code></td>
+  <td><strong>不是报错</strong>。你 checkout 到了一个提交而不是分支 → <code>git switch -</code> 回去</td>
+</tr>
+<tr>
+  <td>终端卡在一个冒号 <code>:</code> 不动</td>
+  <td>进了分页器 → <strong>按 <code>q</code></strong></td>
+</tr>
+<tr>
+  <td>突然进了个奇怪的编辑器,退不出来</td>
+  <td>是 vim。<strong>按 <code>Esc</code>,再输入 <code>:wq</code> 回车</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>Python 项目的 .gitignore(直接抄)</h3>
+
+<pre><code># ---- Python 垃圾 ----
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 虚拟环境(几千个文件、几十 MB)----
+.venv/
+venv/
+
+# ---- 密钥,千万别提交 ----
+.env
+
+# ---- 数据库文件 ----
+*.db
+
+# ---- macOS ----
+.DS_Store</code></pre>
+
+<div class="box trap">
+  <span class="box-t">.gitignore 管不了「已经被提交过」的文件</span>
+  如果你先提交了 <code>__pycache__</code>,之后再写 <code>.gitignore</code>,git 会继续跟踪它们。清理:
+  <pre style="margin:10px 0"><code>git rm -r --cached __pycache__
+git commit -m "chore: 把 __pycache__ 从版本库里移除"</code></pre>
+  <strong><code>--cached</code> 千万别漏!</strong>不加它就是把磁盘上的文件真删了。对 <code>.env</code> 漏加就是灾难。
+  <br><br>
+  <strong>正确顺序永远是:先写 .gitignore,再开始 add/commit。</strong>
+</div>
+
+<!-- ============================================ -->
+<h2 id="py">五、Python 命令速查</h2>
+
+<div class="box key">
+  <span class="box-t">Python 没有 package.json 的 scripts</span>
+  JS 有 <code>npm test</code> 这个统一入口,<strong>Python 没有等价物</strong>。
+  后果是:<em>AI 每次自测跑的命令都可能不一样</em>(<code>pytest</code> / <code>python -m pytest</code> / <code>.venv/bin/pytest</code>)。
+  <br><br>
+  <strong>解法:CLAUDE.md 就是 Python 项目缺失的那个 scripts。</strong>把命令写死在里面(见<a href="#claudemd">第八节</a>)。
+</div>
+
+<div class="card">
+<div class="card-t">环境</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:44%">命令</th><th>做什么</th></tr></thead>
+<tbody>
+<tr><td><code>python3 -m venv .venv</code></td><td>建虚拟环境</td></tr>
+<tr><td><code>source .venv/bin/activate</code></td><td>激活(<strong>只在当前终端窗口有效</strong>)</td></tr>
+<tr><td><code>.venv/bin/python -m pip install pytest mypy ruff</code></td><td>装三个工具</td></tr>
+<tr><td><code>which python; which pytest</code></td><td><strong>诊断</strong>:两个都该在 <code>.venv/bin/</code> 下</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">对 AI 下命令时永远写全路径</span>
+  <strong>Claude Code 在 Bash 里跑命令,不继承你终端的 activate 状态。</strong>
+  你 activate 了自己敲 <code>pytest</code> 好好的,让 AI 跑就可能 <code>command not found</code>。
+  <br><br>
+  所以永远写 <code>.venv/bin/python -m pytest</code> 这种形式。
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">pytest</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:44%">命令</th><th>做什么</th></tr></thead>
+<tbody>
+<tr><td><code>python -m pytest</code></td><td><strong>全量</strong>(步骤 5a 用)</td></tr>
+<tr><td><code>python -m pytest tests/test_price.py</code></td><td>只跑一个文件(<strong>步骤 3 用</strong>)</td></tr>
+<tr><td><code>python -m pytest tests/test_price.py::test_零元是边界值</code></td><td>只跑一条</td></tr>
+<tr><td><code>python -m pytest -k "价格"</code></td><td>按关键字过滤</td></tr>
+<tr><td><code>python -m pytest -q</code></td><td>安静模式,输出少</td></tr>
+<tr><td><code>python -m pytest -v</code></td><td>详细模式,每条单独一行</td></tr>
+<tr><td><code>python -m pytest -x</code></td><td><strong>第一个失败就停</strong></td></tr>
+<tr><td><code>python -m pytest -rs</code></td><td>显示被 skip 的原因</td></tr>
+<tr><td><code>python -m pytest --durations=5</code></td><td>找出最慢的 5 条</td></tr>
+<tr><td><code>python -m pytest --cov=myshop</code></td><td>出覆盖率报告(需 <code>pytest-cov</code>)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">mypy / ruff</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:44%">命令</th><th>做什么</th></tr></thead>
+<tbody>
+<tr><td><code>python -m mypy</code></td><td>类型检查(按 pyproject 配置的范围)</td></tr>
+<tr><td><code>python -m mypy --check-untyped-defs myshop tests</code></td><td><strong>推荐</strong>:连没写类型标注的函数体也检查</td></tr>
+<tr><td><code>python -m ruff check .</code></td><td>规范检查</td></tr>
+<tr><td><code>python -m ruff check . --fix</code></td><td><strong>能自动修的直接修掉</strong></td></tr>
+<tr><td><code>python -m ruff format .</code></td><td>格式化代码</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <span class="box-t">mypy 的一个 AI 协作专属坑</span>
+  mypy <strong>默认不检查「没写类型标注」的函数体</strong>。
+  AI 生成的测试函数经常忘写 <code>-&gt; None</code>,于是 mypy 对整个测试文件<strong>视而不见</strong>,
+  你却以为「类型检查过了」。
+  <br><br>
+  解法:配置里开 <code>check_untyped_defs = true</code>。
+</div>
+</div>
+
+<h3>pyproject.toml 最小可用配置</h3>
+
+<pre><code>[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]           # ← 救命稻草,解决 ModuleNotFoundError
+addopts = "-v --strict-markers"
+
+[tool.mypy]
+python_version = "3.9"
+files = ["myshop", "tests"]
+strict = true
+check_untyped_defs = true
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]   # 注意:3.9 上别加 "UP",会打架</code></pre>
+
+<!-- ============================================ -->
+<h2 id="pyerr">六、Python / pytest 报错速查</h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:38%">现象</th><th>原因 / 解法</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>ModuleNotFoundError: No module named 'myshop'</code></td>
+  <td><strong>头号劝退坑。</strong>项目根目录不在搜索路径里。三选一:
+      ① pyproject 配 <code>pythonpath = ["."]</code>
+      ② 用 <code>python -m pytest</code> 而不是 <code>pytest</code>
+      ③ 根目录放一个 <code>conftest.py</code><br>
+      <strong>退出码是 2,不是 5</strong></td>
+</tr>
+<tr>
+  <td><code>collected 0 items</code> / 退出码 <strong>5</strong></td>
+  <td>一条测试都没找到。检查:文件名是不是 <code>test_*.py</code>、函数名是不是 <code>test_</code> 开头</td>
+</tr>
+<tr>
+  <td>写了测试类却<strong>一条都没跑</strong>,只有个 warning</td>
+  <td><strong>测试类里有 <code>__init__</code> 方法 → pytest 静默跳过整个类。</strong>
+      AI 时不时会生成这种。删掉 <code>__init__</code></td>
+</tr>
+<tr>
+  <td><code>command not found: pytest</code></td>
+  <td>没 activate,或装到了别的 Python。用全路径 <code>.venv/bin/python -m pytest</code></td>
+</tr>
+<tr>
+  <td><code>import file mismatch</code></td>
+  <td>两个子目录里有同名测试文件 → 给 <code>tests/</code> 各子目录加空的 <code>__init__.py</code></td>
+</tr>
+<tr>
+  <td>接口测试报「端口已被占用」</td>
+  <td>写死端口了 → 用 <code>make_server(port=0)</code> 让系统随机分配</td>
+</tr>
+<tr>
+  <td>测 404 时说「接口挂了」</td>
+  <td><code>urllib</code> 把 4xx 当异常抛 → 要 <code>except urllib.error.HTTPError</code> 接住</td>
+</tr>
+<tr>
+  <td>JSON 里中文变成 <code>咖啡</code></td>
+  <td><code>json.dumps</code> 默认转义 → 加 <code>ensure_ascii=False</code></td>
+</tr>
+<tr>
+  <td>ruff 催你把 <code>Dict[str,Any]</code> 改成 <code>dict[str,Any]</code></td>
+  <td>你选了 <code>UP</code> 规则但用的是 Python 3.9 → 从 <code>select</code> 里去掉 <code>"UP"</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- ============================================ -->
+<h2 id="prompt">七、提示词模板库</h2>
+
+<div class="card">
+<div class="card-t">① Plan 模式:让它先规划</div>
+<pre><code>读一下 @myshop/ 和 @tests/,搞清楚现状,
+给我「给订单加满减优惠」的实施方案,先别写代码。
+
+方案要说清楚:
+- 要改哪几个文件,每个文件改什么
+- 拆成几步,每步做完能独立验证
+- 每一步之后应该跑哪些测试(给出确切命令)
+- 有没有会影响到现有功能的地方</code></pre>
+</div>
+
+<div class="card">
+<div class="card-t">② 步骤 3:做一步 + 自测(最常用)</div>
+<pre><code>实施方案第 1 步。
+
+改完自己跑这两条,修到全绿:
+  .venv/bin/python -m mypy
+  .venv/bin/python -m pytest tests/test_price.py
+
+约束:
+- 不许改动任何测试文件;不许 skip、注释掉或放宽断言
+- 如果你认为测试本身有问题,停下来告诉我,不要自己改
+- 不要改本步骤范围之外的文件
+- 把命令的真实输出贴给我,不要只说"通过了"
+
+做完第 1 步就停,等我检查,不要继续做第 2 步。</code></pre>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:42%">这条约束</th><th>在防什么</th></tr></thead>
+<tbody>
+<tr><td>不许改测试文件</td><td><strong>改断言让红变绿</strong> —— 最常见的作弊</td></tr>
+<tr><td>有问题先告诉我</td><td>给它一个诚实的出口</td></tr>
+<tr><td>不改范围外文件</td><td>范围蔓延</td></tr>
+<tr><td>贴真实输出</td><td><strong>它没跑却声称跑过了</strong></td></tr>
+<tr><td>做完就停</td><td>防止它一路做到第 5 步</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">③ 步骤 5a:提交前跑全量</div>
+<pre><code>我看过 diff 了,可以。
+
+现在跑一次完整的(不带任何过滤参数):
+  .venv/bin/python -m mypy
+  .venv/bin/python -m pytest
+
+确认全绿之后提交,commit message 写清楚这一步做了什么。</code></pre>
+</div>
+
+<div class="card">
+<div class="card-t">④ 确认测试真的有效(变异测试手工版)</div>
+<pre><code>你刚写的这 4 条测试,我要确认它们真的有效。
+
+请依次做:
+1. 故意把 format_price 里的补零逻辑去掉,跑测试,贴出变红的输出
+2. 改回去,跑测试,贴出全绿的输出
+
+如果有哪条测试在代码被改坏时依然是绿的,说明那条测试没用,告诉我。</code></pre>
+<div class="box good" style="margin-top:0">
+  <span class="box-t">为什么这个动作值钱</span>
+  AI 写的测试有相当比例是「永远通过」的。
+  <strong>一条从来不会红的测试,等于没有这条测试。</strong>
+</div>
+</div>
+
+<div class="card">
+<div class="card-t">⑤ 步骤 7:跑 E2E(堵死四条歪路)</div>
+<pre><code>跑一次 .venv/bin/python -m pytest tests/e2e/。
+
+如果有失败:
+- 先原样重跑一遍,确认是偶发还是稳定复现
+- 不许用 sleep / 重试 / 放宽断言 / skip 的方式让它变绿
+- 稳定复现的话告诉我是哪条、错在哪一步,先别动手改</code></pre>
+</div>
+
+<div class="card">
+<div class="card-t">⑥ 没有测试的项目</div>
+<pre><code>实施方案第 1 步。这个项目没有测试,所以改完跑:
+  .venv/bin/python -m mypy
+  .venv/bin/python -m ruff check .
+然后启动服务自己访问一下,确认没报错,把输出贴给我。
+
+另外:给你改动的这个模块顺手补 2~3 条单元测试,
+先把测试给我看,我确认断言之后你再继续。</code></pre>
+</div>
+
+<div class="card">
+<div class="card-t">⑦ 步骤 4:你自己看 diff 的四问</div>
+<pre><code>!git status
+!git diff HEAD</code></pre>
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:40%">问自己</th><th>怎么查</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>有没有我没预期的文件?</td><td><code>git diff --staged --name-only</code></td></tr>
+<tr><td>2</td><td><strong>测试文件的断言被改了吗?</strong></td><td><code>git diff --staged --name-only | grep -E '^tests/'</code></td></tr>
+<tr><td>3</td><td>有没有 AI 新建、我不知道的文件?</td><td><code>git status -s</code> 里的 <code>??</code></td></tr>
+<tr><td>4</td><td>diff 规模和「第一步」对得上吗?</td><td>对不上就是超范围</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- ============================================ -->
+<h2 id="claudemd">八、CLAUDE.md 模板</h2>
+
+<p>放在项目根目录,<strong>每次开新对话自动加载</strong>。它同时扮演两个角色:
+<strong>Python 缺失的那个 <code>scripts</code></strong>,以及<strong>规矩的存放处</strong>。</p>
+
+<pre><code># myshop 项目说明
+
+## 环境
+- Python 3.9,虚拟环境在 .venv/
+- 所有命令都用 .venv/bin/python -m xxx 的形式
+- 不要用系统 python,不要 pip install 到全局
+
+## 本项目的命令(请严格使用,不要自己发明)
+- 全量测试:  .venv/bin/python -m pytest -q
+- 单文件测试:.venv/bin/python -m pytest tests/test_price.py -q
+- 类型检查:  .venv/bin/python -m mypy --check-untyped-defs myshop tests
+- 规范检查:  .venv/bin/python -m ruff check .
+- E2E(只在最后跑):.venv/bin/python -m pytest tests/e2e/
+
+## 硬性约束
+- 修 bug / 改行为时,不要修改现有测试的断言。
+  如果你认为某条断言本身写错了,停下来告诉我原因,由我决定。
+- 不许用 skip / 注释掉 / 放宽断言 / 加 sleep 的方式让测试变绿
+- 每次只做一步,做完停下等我检查,不要连着做下一步
+- 报告结果时贴命令的真实输出,不要只说"通过了"
+- 不要改本次任务范围之外的文件
+
+## 提交规范
+- 提交信息格式:type: 简短说明(feat / fix / chore / docs / test)
+- 一次提交要能用一句话讲清楚</code></pre>
+
+<div class="box key">
+  <span class="box-t">建 CLAUDE.md 的时机:第 0 步,不是「高级技巧」</span>
+  很多教程把它放在最后当进阶内容。<strong>其实它应该在建项目时就有</strong>——
+  因为它同时解决了「Python 没有统一命令入口」和「每次都要重复说约束」两个问题。
+  <br><br>
+  懒得手写就跑 <code>/init</code> 生成初稿,再按上面的模板补。<strong>控制在 200 行内。</strong>
+</div>
+
+<h3>再进一步:自定义命令和 hooks</h3>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th style="width:26%">手段</th><th style="width:30%">怎么做</th><th>强度</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>CLAUDE.md</strong></td>
+  <td>项目根目录建文件</td>
+  <td>指令级 —— AI 理论上可以不照做</td>
+</tr>
+<tr>
+  <td><strong>自定义 slash command</strong></td>
+  <td><code>.claude/skills/check/SKILL.md</code> 里写 Markdown 指令,之后打 <code>/check</code></td>
+  <td>指令级,但省打字</td>
+</tr>
+<tr>
+  <td><strong>Hooks</strong></td>
+  <td><code>.claude/settings.json</code> 配置</td>
+  <td><strong>强制级</strong> —— 在固定生命周期点执行 shell 命令,不依赖模型判断</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <span class="box-t">Hooks 的代价</span>
+  可以配成「每次编辑完自动跑检查」,但要注意:<strong>它是每次编辑后都跑</strong>。
+  全量测试慢的项目会拖垮体验——<strong>建议只挂 mypy 或只跑最快的那一层</strong>。
+  <br><br>
+  具体的事件名和字段格式各版本略有差异,配之前<strong>先查一下你这个版本的 hooks 文档</strong>,
+  别照抄网上的旧写法。
+</div>
+
+<div class="box good">
+  <span class="box-t">建议的推进顺序</span>
+  <strong>先手打几轮把流程跑熟</strong> → 觉得某句话每次都要说 → 写进 <code>CLAUDE.md</code> →
+  某组命令总是一起跑 → 做成 <code>/check</code> → 某个检查绝对不能漏 → 上 hook。
+  <br><br>
+  <strong>不要一上来就配一堆自动化。</strong>你得先知道自己需要什么,才知道该固化什么。
+</div>
+
+<div class="footer">
+  <p><strong>四册全景:</strong></p>
+  <p>
+    <a href="claude-code-sop.html">① 标准作业流程</a> —— 七步流程,Python 完整走一遍<br>
+    <a href="claude-code-testing.html">② 测试体系</a> —— 金字塔四层、flaky、AI 能力边界<br>
+    <a href="claude-code-pipeline.html">③ 工程落地</a> —— 谁做 / 工具 / 阶段 / 本地云端 / Jenkins<br>
+    ④ 速查手册 —— 你在这里
+  </p>
+  <p style="margin-top:20px;color:var(--ink-faint)">
+    git 部分全部在 git 2.39.5 实测;Python 部分在 Python 3.9.6 / pytest 8.4.2 / mypy 1.19.1 / ruff 0.16.3 实测;
+    Claude Code 部分对照官方文档核实。
+  </p>
+</div>
+
+</div>
+
+<script>
+  (function(){
+    var root=document.documentElement, btns=document.querySelectorAll('.themer button');
+    function paint(m){
+      root.setAttribute('data-theme',m);
+      btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.set===m))});
+      try{localStorage.setItem('cc-theme',m)}catch(e){}
+    }
+    var s=null; try{s=localStorage.getItem('cc-theme')}catch(e){}
+    paint(s||'dark');
+    btns.forEach(function(b){b.addEventListener('click',function(){paint(b.dataset.set)})});
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,693 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>07 · 完整实战 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="06-subagent-fork.html">← 上一页</a>
+  <a href="00-index.html">回到目录 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 07 章 · 难度 ★★★</span>
+  <h1>完整实战：把 300 字提示词变成一条 <code>/kb</code></h1>
+  <p class="lead">
+    前六章的零件全部装到一起。这一章你会亲手建三个文件，
+    从此把每次 300 字的粘贴，变成打七个字符。<br>
+    最后还会拆开本知识库的主题切换代码，告诉你它是怎么做到的。
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">改造总览：一变四</a></li>
+      <li><a href="#s2">第一步：建输出风格</a></li>
+      <li><a href="#s3">第二步：建 CLAUDE.md</a></li>
+      <li><a href="#s4">第三步：建 /kb 技能</a></li>
+      <li><a href="#s5">第四步：建页面模板</a></li>
+      <li><a href="#s6">验收：走一遍完整流程</a></li>
+      <li><a href="#s7">拆解：三主题切换是怎么实现的</a></li>
+      <li><a href="#s8">拆解：代码块一键复制</a></li>
+      <li><a href="#s9">/export：给对话留一份原始底稿</a></li>
+      <li><a href="#s10">还有哪些现成技能能帮上忙</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. 改造总览：一变四</h2>
+
+  <figure class="figure">
+    <svg viewBox="0 0 740 300" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="一段长提示词被拆成输出风格、CLAUDE.md、技能、模板四个文件">
+      <defs>
+        <marker id="a7" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <rect x="20" y="100" width="180" height="100" rx="11" fill="var(--danger-bg)" stroke="var(--danger)"/>
+      <text x="110" y="86" text-anchor="middle" fill="var(--danger)" font-size="12.5" font-weight="600">改造前</text>
+      <text x="110" y="134" text-anchor="middle" fill="var(--text)" font-size="13">300 字长提示词</text>
+      <text x="110" y="158" text-anchor="middle" fill="var(--text)" font-size="13">每次都要粘贴一遍</text>
+      <text x="110" y="182" text-anchor="middle" fill="var(--muted)" font-size="11.5">每次结果还不一样</text>
+
+      <path d="M206 150 H262" stroke="var(--accent)" stroke-width="2.2" marker-end="url(#a7)"/>
+      <text x="234" y="141" text-anchor="middle" fill="var(--muted)" font-size="11">拆</text>
+
+      <rect x="270" y="18" width="200" height="52" rx="9" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="370" y="38" text-anchor="middle" fill="var(--text)" font-size="12.5">① 输出风格</text>
+      <text x="370" y="57" text-anchor="middle" fill="var(--muted)" font-size="11">中文 · 小白 · 五步讲解法</text>
+
+      <rect x="270" y="82" width="200" height="52" rx="9" fill="var(--info-bg)" stroke="var(--info)"/>
+      <text x="370" y="102" text-anchor="middle" fill="var(--text)" font-size="12.5">② CLAUDE.md</text>
+      <text x="370" y="121" text-anchor="middle" fill="var(--muted)" font-size="11">输出目录 · 文件命名</text>
+
+      <rect x="270" y="146" width="200" height="52" rx="9" fill="var(--warn-bg)" stroke="var(--warn)"/>
+      <text x="370" y="166" text-anchor="middle" fill="var(--text)" font-size="12.5">③ 技能 /kb</text>
+      <text x="370" y="185" text-anchor="middle" fill="var(--muted)" font-size="11">盘点→核实→生成→自检</text>
+
+      <rect x="270" y="210" width="200" height="52" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="370" y="230" text-anchor="middle" fill="var(--text)" font-size="12.5">④ template.html</text>
+      <text x="370" y="249" text-anchor="middle" fill="var(--muted)" font-size="11">样式 · 三主题切换</text>
+
+      <path d="M476 44 C 520 44, 530 140, 570 140" stroke="var(--muted)" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+      <path d="M476 108 C 520 108, 530 140, 570 140" stroke="var(--muted)" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+      <path d="M476 172 C 520 172, 530 142, 570 142" stroke="var(--muted)" stroke-width="1.5" fill="none" stroke-dasharray="4 4"/>
+      <path d="M476 236 C 520 236, 530 144, 570 144" stroke="var(--muted)" stroke-width="1.5" fill="none" stroke-dasharray="4 4" marker-end="url(#a7)"/>
+
+      <rect x="578" y="112" width="146" height="62" rx="11" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="651" y="98" text-anchor="middle" fill="var(--ok)" font-size="12.5" font-weight="600">改造后</text>
+      <text x="651" y="140" text-anchor="middle" fill="var(--text)" font-size="15" font-family="monospace">/kb 主题名</text>
+      <text x="651" y="161" text-anchor="middle" fill="var(--muted)" font-size="11">就这一行</text>
+
+      <text x="370" y="288" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        四个文件建一次，之后一直用
+      </text>
+    </svg>
+    <figcaption>图 7-1　一段长提示词拆成四个各司其职的文件</figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>文件</th><th>装什么</th><th>建一次要多久</th></tr></thead>
+      <tbody>
+        <tr><td>①</td><td><code>~/.claude/output-styles/beginner-zh.md</code></td><td>中文、小白视角、五步讲解法</td><td>2 分钟</td></tr>
+        <tr><td>②</td><td>项目里的 <code>CLAUDE.md</code></td><td>输出目录、文件命名</td><td>1 分钟</td></tr>
+        <tr><td>③</td><td><code>~/.claude/skills/kb/SKILL.md</code></td><td>整理知识的四步流程</td><td>5 分钟</td></tr>
+        <tr><td>④</td><td><code>~/.claude/skills/kb/template.html</code></td><td>样式和主题切换</td><td>直接抄本知识库的</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. 第一步：建输出风格</h2>
+
+  <div class="codeblock">
+    <div class="cb-title">终端：建目录</div>
+    <pre><code>mkdir -p ~/.claude/output-styles</code></pre>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-title">~/.claude/output-styles/beginner-zh.md</div>
+    <pre><code>---
+name: 小白中文讲解
+description: 中文作答，遇到新名词按五步法讲清楚
+keep-coding-instructions: true
+---
+
+## 语言
+
+- 回答一律用中文。
+- 检索和查阅文档时用英文关键词，但不要把用户的中文原话翻译后再理解。
+
+## 读者设定
+
+用户是初学者。遇到用户可能没接触过的名词时，按固定五步讲：
+
+1. 一句话定义，不使用行话
+2. 一个生活化类比
+3. 它在整个体系中的位置：和已讲过的名词是包含 / 并列 / 替代 / 前置哪种关系
+4. 一个能照抄跑通的最小例子
+5. 一到两个初学者常见误区
+
+术语首次出现写成「中文（English）」，之后只用中文。
+
+## 表达
+
+- 讲解顺序从易到难，后面的内容只依赖前面已讲过的名词。
+- 涉及对比、多个选项、多个字段时，用表格而不是长段文字。
+- 涉及命令、配置、路径时，先核对官方文档再回答；
+  不确定的明确标「⚠️ 待验证」，不要猜。</code></pre>
+  </div>
+
+  <p>然后启用它：</p>
+  <div class="codeblock"><pre><code>/config</code></pre></div>
+  <p>在里面选 <b>Output style → 小白中文讲解</b>。或者直接改设置文件：</p>
+  <div class="codeblock">
+    <div class="cb-title">.claude/settings.local.json</div>
+    <pre><code>{
+  "outputStyle": "小白中文讲解"
+}</code></pre>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">🚫 两个必踩的坑，提前避开</span>
+    <p><b>（1）<code>keep-coding-instructions: true</code> 不能忘。</b>
+      它默认是 <code>false</code>，会把 Claude Code 自带的编程指令丢掉
+      （<a href="04-output-style.html#s6">第 04 章第 6 节</a>）。</p>
+    <p><b>（2）改完必须 <code>/clear</code> 或开新会话。</b>
+      输出风格是系统提示词的一部分，<b>只在会话开始时读一次</b>
+      （<a href="04-output-style.html#s7">第 04 章第 7 节</a>）。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 第二步：建 CLAUDE.md</h2>
+
+  <div class="codeblock">
+    <div class="cb-title">你的学习项目根目录 / CLAUDE.md</div>
+    <pre><code># 这个项目是什么
+
+我的 Claude Code 学习笔记库。用来把学到的东西整理成 HTML 教程自己看。
+
+# 输出规范
+
+- 知识库 HTML 输出到 `./kb/`
+- 文件名：`00-index.html`（索引）、`01-<英文短名>.html` 依次编号
+- 所有页面共用 `./kb/style.css` 和 `./kb/app.js`，不要在每页内联重复的样式
+- 单个 HTML 正文控制在 600–900 行，超了就拆成新文件
+- 不引任何外部 CDN、字体、图片；页面必须离线可打开
+- 图示一律用手写内联 SVG</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 三条经验</span>
+    <p><b>（1）保持在 200 行以内</b>——它每次会话都全文加载。</p>
+    <p><b>（2）写<b>能验证</b>的话</b>。「600–900 行」比「适合阅读的长度」有用得多。</p>
+    <p><b>（3）想确认它真的被加载了</b>，打 <code>/context</code> 看 <b>Memory files</b> 一栏。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 第三步：建 <code>/kb</code> 技能</h2>
+
+  <div class="codeblock">
+    <div class="cb-title">终端：建目录</div>
+    <pre><code>mkdir -p ~/.claude/skills/kb</code></pre>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-title">~/.claude/skills/kb/SKILL.md</div>
+    <pre><code>---
+name: kb
+description: 把当前对话整理成面向初学者的中文知识库 HTML（分页 + 索引 + 主题切换）。当用户说"整理成知识 / 做成笔记 / 生成教程 / 归档这次对话"时使用。
+argument-hint: [主题名] [输出目录，默认 ./kb]
+disable-model-invocation: true
+allowed-tools: Read, Write, Glob, WebSearch, WebFetch
+---
+
+# 对话 → 初学者知识库
+
+把**本次对话**中出现的知识，整理成零基础也能看懂的中文 HTML 教程。
+主题：$0（为空时自行归纳）　输出目录：$1（为空时用 `./kb/`）
+
+## 工作流程（严格按顺序，不要跳步）
+
+### 第 1 步　盘点大纲 → 停下来等我确认
+
+列出本次对话涉及的**全部**知识点，做成表格：
+编号 / 知识点 / 难度(★☆☆) / 归入哪个 HTML 文件。
+**输出大纲后必须停下，等我说"继续"再写 HTML。** 这一步不生成任何文件。
+
+### 第 2 步　核实
+
+对每一条关于命令、配置、路径的说法：
+- 用**英文关键词**检索官方文档核对
+- 标注版本 / 环境要求
+- 查不到或不确定的，明确标 `⚠️ 待验证`，**不要猜**
+
+### 第 3 步　逐个生成（一次一个文件）
+
+**写完一个 HTML 立刻落盘，再写下一个。** 不要攒到最后一起写。
+每写完一个，回一行 `✅ 01-xxx.html 已写入（覆盖第 3、4、7 条）`。
+
+### 第 4 步　自检
+
+对照第 1 步的大纲逐条打钩，报告：已覆盖 N 条 / 遗漏哪些 / 哪些标了待验证。
+
+## 输出规范
+
+- 文件名：`00-index.html`（索引）、`01-<英文短名>.html` 依次编号
+- 单文件正文 600–900 行，超了就拆；宁可多拆文件，不牺牲内容
+- 每页顶部固定导航：`← 上一页　目录　下一页 →` + 主题切换
+- `00-index.html` 列出所有分页、每页一句话摘要、推荐阅读顺序
+
+## 样式
+
+复用同目录下的 [template.html](template.html)。不要自己另写一套配色。
+可用组件：`.concept` 概念卡 ｜ `.callout.tip/.warn/.danger` 提示框 ｜
+`table` 对比表 ｜ `.steps` 步骤 ｜ `pre>code` 代码块 ｜ `.figure` 图示
+
+## 硬性约束
+
+- **不丢内容**：对话里每个知识点都必须在某页有落点
+- **不编造**：不确定就标 `⚠️ 待验证`
+- 每个概念至少配一张对比表格或一个可运行例子；每章至少一张流程图
+- 图示用手写内联 SVG；不引任何外部 CDN、字体、图片
+- 代码块可直接复制，路径写完整，不写省略号</code></pre>
+  </div>
+
+  <h3>逐条解释这个文件里的每个决定</h3>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>写法</th><th>为什么这么写</th><th>出处</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>disable-model-invocation: true</code></td>
+          <td>生成七八个文件是重操作，<b>必须由你决定时机</b>，不能让 Claude 自己开工</td>
+          <td><a href="03-skill-advanced.html#s2">03 章 2 节</a></td>
+        </tr>
+        <tr>
+          <td><code>description</code> 里列出触发说法</td>
+          <td>虽然禁了自动调用，但写清楚仍有价值：你自己以后也靠它想起这技能是干嘛的</td>
+          <td><a href="02-skill-basics.html#s2">02 章 2 节</a></td>
+        </tr>
+        <tr>
+          <td><code>allowed-tools</code> 只列必需的</td>
+          <td>免掉写文件、查文档时的权限弹窗，但<b>不多给</b></td>
+          <td><a href="03-skill-advanced.html#s7">03 章 7 节</a></td>
+        </tr>
+        <tr>
+          <td><code>$0</code> <code>$1</code> 接参数</td>
+          <td>让 <code>/kb 技能体系 ./notes</code> 这样调用生效</td>
+          <td><a href="03-skill-advanced.html#s3">03 章 3 节</a></td>
+        </tr>
+        <tr>
+          <td>第 1 步「停下来等我确认」</td>
+          <td>方向错了只废一张大纲，不废八个文件</td>
+          <td><a href="01-prompt-design.html#s7">01 章 7 节</a></td>
+        </tr>
+        <tr>
+          <td>第 3 步「写完立刻落盘」</td>
+          <td>让成果尽早离开上下文，压缩就伤不到它</td>
+          <td><a href="01-prompt-design.html#s4">01 章 4 节</a></td>
+        </tr>
+        <tr>
+          <td>第 4 步「对照清单打钩」</td>
+          <td>「不丢内容」需要一个可对照物才能验证</td>
+          <td><a href="01-prompt-design.html#s6">01 章 6 节</a></td>
+        </tr>
+        <tr>
+          <td>「至少一张表格 / 至少一张图」</td>
+          <td>硬约束，可以数；「图文并茂」是软约束，没法数</td>
+          <td><a href="01-prompt-design.html#s5">01 章 5 节</a></td>
+        </tr>
+        <tr>
+          <td>引用 <code>template.html</code></td>
+          <td>样式不用每次重新描述，而且每次生成外观一致</td>
+          <td><a href="03-skill-advanced.html#s6">03 章 6 节</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 可选升级：让它跑在分身里</span>
+    <p>如果你的对话经常聊得很长，在前置数据里加一行：</p>
+    <div class="codeblock"><pre><code>context: fork</code></pre></div>
+    <p>整理工作就会在<b>分身</b>里进行：分身能看到完整对话，写文件到磁盘，
+      只把「写了 8 个文件」回传给你，<b>主对话几乎不被消耗</b>
+      （<a href="06-subagent-fork.html#s5">第 06 章第 5 节</a>）。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. 第四步：建页面模板</h2>
+
+  <p>把本知识库的 <code>style.css</code> 和 <code>app.js</code> 合并成一个
+    <code>template.html</code>，放进技能目录：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">~/.claude/skills/kb/template.html 的骨架</div>
+    <pre><code>&lt;!doctype html&gt;
+&lt;html lang="zh-CN" data-theme="dark"&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8"&gt;
+&lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;
+&lt;title&gt;页面标题&lt;/title&gt;
+&lt;style&gt;
+  /* 这里放全部 CSS，见下一节的讲解 */
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;nav class="topbar"&gt;导航 + 主题切换按钮&lt;/nav&gt;
+  &lt;main&gt;正文，各组件的示例用法&lt;/main&gt;
+  &lt;script&gt;
+    /* 这里放主题切换和复制按钮的 JS */
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 模板 vs 共用文件，怎么选</span>
+    <div class="table-wrap" style="margin:10px 0 0">
+      <table>
+        <thead><tr><th></th><th>模板（样式内联进每页）</th><th>共用文件（<code>style.css</code>）</th></tr></thead>
+        <tbody>
+          <tr><td>单个文件能不能独立发给别人</td><td>✅ 能</td><td>❌ 要连同 css/js 一起</td></tr>
+          <tr><td>改样式</td><td>❌ 要改所有页面</td><td>✅ 改一处，全部生效</td></tr>
+          <tr><td>离线可看</td><td>✅</td><td>✅（相对路径不是外部依赖）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:10px"><b>本知识库选了共用文件</b>，因为 8 个页面复制 8 遍同一套 250 行样式太浪费，
+      而且改一处要改八处。你要是常常单独分享某一页，就选模板方案。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. 验收：走一遍完整流程</h2>
+
+  <ol class="steps">
+    <li><b>开一个新会话</b>
+      <p>因为输出风格要新会话才生效。已经开着的话打 <code>/clear</code>。</p>
+    </li>
+    <li><b>确认配置都加载了</b>
+      <div class="codeblock"><pre><code>/context</code></pre></div>
+      <p>看 <b>Memory files</b> 里有没有你的 CLAUDE.md。</p>
+      <div class="codeblock"><pre><code>/skills</code></pre></div>
+      <p>看列表里有没有 <code>kb</code>。</p>
+    </li>
+    <li><b>正常聊你要学的东西</b>
+      <p>问问题、让它解释、让它举例——这些都会成为后面整理的素材。</p>
+    </li>
+    <li><b>聊到一个段落，调用技能</b>
+      <div class="codeblock"><pre><code>/kb Claude 技能体系</code></pre></div>
+    </li>
+    <li><b>检查它给的大纲</b>
+      <p>它<b>应该停下来</b>等你确认。这时候检查：有没有漏掉的知识点？分文件合不合理？
+        要改就现在改——这时候改最便宜。</p>
+    </li>
+    <li><b>说「继续」</b>
+      <p>它开始逐个生成，每写完一个会回一行 <code>✅ ... 已写入</code>。</p>
+    </li>
+    <li><b>看自检报告</b>
+      <p>对照大纲逐条打钩，遗漏和「⚠️ 待验证」会被列出来。</p>
+    </li>
+  </ol>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 如果它没停下来直接开写</span>
+    <p>说明「停下等确认」这句话的分量不够。两个加强办法：</p>
+    <ol>
+      <li>在那句话后面补一句<b>「这一步不生成任何文件」</b>——堵住最容易出事的口子</li>
+      <li>把这句话<b>往 SKILL.md 前面挪</b>，靠前的指令更容易被遵守</li>
+    </ol>
+    <p>改完不用重启，<b>技能有实时变更检测</b>（<a href="02-skill-basics.html#s9">02 章 9 节</a>），
+      直接再调一次就行。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 拆解：三主题切换是怎么实现的</h2>
+
+  <p>你现在看的这个页面，右上角有三个按钮。它是这么做的——只有三个要点。</p>
+
+  <h3>要点一：用 CSS 变量，而不是到处写颜色</h3>
+
+  <div class="codeblock">
+    <div class="cb-title">style.css</div>
+    <pre><code>:root{                      /* 浅色是基准 */
+  --bg:#ffffff;
+  --text:#18181b;
+  --accent:#bd5a20;
+}
+html[data-theme="dark"]{    /* 深色只覆盖需要变的几个 */
+  --bg:#131316;
+  --text:#ececee;
+  --accent:#e8935c;
+}
+
+body{ background:var(--bg); color:var(--text); }</code></pre>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 CSS 变量（CSS Variables）</span>
+    <p><b>一句话</b>：给颜色起个名字，用的地方写名字，换主题时只换名字对应的值。</p>
+    <p><b>类比</b>：像 Excel 里把税率放在 B1 单元格，所有公式引用 <code>$B$1</code>。
+      改税率只改一个格，不用把每条公式都翻一遍。</p>
+    <p><b>好处</b>：<code>body</code> 那行代码<b>一个字都不用改</b>，
+      只要 <code>&lt;html&gt;</code> 上的 <code>data-theme</code> 一变，整页颜色全变。</p>
+  </div>
+
+  <h3>要点二：存「偏好」，不存「结果」</h3>
+
+  <div class="codeblock">
+    <div class="cb-title">app.js（核心逻辑）</div>
+    <pre><code>var KEY = 'kb-theme';
+var mq = window.matchMedia('(prefers-color-scheme: dark)');
+
+function getPref() {
+  try { return localStorage.getItem(KEY) || 'dark'; }  // 没存过 → 默认深色
+  catch (e) { return 'dark'; }                          // 隐私模式可能抛异常
+}
+
+function apply() {
+  var pref = getPref();                     // 'light' | 'dark' | 'system'
+  var real = (pref === 'system')
+    ? (mq.matches ? 'dark' : 'light')       // 跟随系统 → 现场换算
+    : pref;
+  document.documentElement.dataset.theme = real;   // 写到 &lt;html data-theme="..."&gt;
+}</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 这里最关键的设计</span>
+    <p><code>localStorage</code> 里存的是<b>三个值之一</b>：<code>light</code> / <code>dark</code> / <code>system</code>——
+      也就是<b>用户的选择</b>；而 <code>&lt;html data-theme&gt;</code> 上写的<b>永远只有 <code>light</code> 或 <code>dark</code></b>——
+      也就是<b>换算后的结果</b>。</p>
+    <p><b>为什么要分开？</b>如果你把「跟随系统」当时算出来的 <code>dark</code> 直接存进去，
+      那用户后来把系统调成浅色时，页面<b>还是深色</b>——因为你已经忘了他当初选的是"跟随"。</p>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-title">系统主题变化时要跟着变</div>
+    <pre><code>if (mq.addEventListener) mq.addEventListener('change', apply);
+else if (mq.addListener) mq.addListener(apply);   // 老浏览器的写法</code></pre>
+  </div>
+  <p>因为 <code>apply()</code> 每次都重新读偏好，所以只有偏好是 <code>system</code> 时，
+    系统变化才会真的影响页面——不用额外写判断。</p>
+
+  <h3>要点三：默认深色，而且不能闪一下白的</h3>
+
+  <div class="codeblock">
+    <div class="cb-title">每个 HTML 文件的第二行</div>
+    <pre><code>&lt;html lang="zh-CN" data-theme="dark"&gt;</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 这行硬编码不是多余的</span>
+    <p>如果不写，浏览器会<b>先按 CSS 里的 <code>:root</code> 渲染成浅色</b>，
+      等 JS 跑完才切成深色——用户会看到<b>白屏闪一下</b>，很难受。</p>
+    <p>直接在 HTML 里写死 <code>data-theme="dark"</code>，页面<b>一开始就是深色</b>，
+      JS 只在用户选了别的时候才去改它。这正好也满足了「默认深色」这条要求。</p>
+  </div>
+
+  <h3>按钮的高亮状态</h3>
+  <div class="codeblock">
+    <pre><code>// JS：给当前选中的按钮加标记
+btns[i].setAttribute('aria-pressed', String(btns[i].dataset.themeSet === pref));</code></pre>
+  </div>
+  <div class="codeblock">
+    <pre><code>/* CSS：被标记的按钮变成高亮 */
+.theme-switch button[aria-pressed="true"]{ background:var(--accent); color:#fff; }</code></pre>
+  </div>
+  <p>用 <code>aria-pressed</code> 而不是自定义的 class，<b>顺带把无障碍也做了</b>——
+    读屏软件能读出"这个按钮是按下状态"。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 拆解：代码块一键复制</h2>
+
+  <p>把鼠标移到本页任何一个代码块上，右上角会出现「复制」按钮。实现分三步：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">① 页面加载后，给每个代码块自动插一个按钮</div>
+    <pre><code>function addCopyButtons() {
+  var blocks = document.querySelectorAll('.codeblock');
+  for (var i = 0; i &lt; blocks.length; i++) {
+    if (blocks[i].querySelector('.copy')) continue;   // 已经有了就跳过
+    var b = document.createElement('button');
+    b.className = 'copy';
+    b.textContent = '复制';
+    blocks[i].appendChild(b);
+  }
+}</code></pre>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-title">② 用「事件委托」监听点击</div>
+    <pre><code>document.addEventListener('click', function (e) {
+  var btn = e.target.closest('.codeblock .copy');
+  if (!btn) return;                                   // 点的不是复制按钮，忽略
+  var code = btn.closest('.codeblock').querySelector('code');
+  navigator.clipboard.writeText(code.innerText).then(done, fallback);
+});</code></pre>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 事件委托（Event Delegation）</span>
+    <p><b>一句话</b>：不给每个按钮单独装监听器，而是<b>在整个文档上装一个</b>，
+      点击时再判断"点的是不是我关心的东西"。</p>
+    <p><b>类比</b>：不给每个房间装门铃，而是在大门口装一个，
+      有人按了再问"你找几号房"。</p>
+    <p><b>好处</b>：按钮是后来用 JS 插进去的，如果用传统写法，
+      得<b>等按钮插完再挨个绑定</b>；事件委托完全不用操心这个顺序。</p>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-title">③ 兜底：本地文件打开时剪贴板可能被禁</div>
+    <pre><code>function fallback() {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';           // 藏起来，别让用户看见
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); done(); }
+  catch (err) { btn.textContent = '请手动复制'; }
+  document.body.removeChild(ta);
+}</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 为什么必须写这个兜底</span>
+    <p>你是用<b>双击文件</b>的方式打开这些 HTML 的，地址栏是 <code>file://</code> 开头。
+      部分浏览器在这种协议下<b>禁用现代剪贴板 API</b>。
+      没有兜底的话，复制按钮点了没反应，而且<b>不报错</b>——最难查的那种 bug。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s9">9. <code>/export</code>：给对话留一份原始底稿</h2>
+
+  <div class="codeblock">
+    <pre><code>/export my-session.txt</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>用法</th><th>行为</th></tr></thead>
+      <tbody>
+        <tr><td><code>/export 文件名</code></td><td>直接把当前对话写成<b>纯文本</b>文件</td></tr>
+        <tr><td><code>/export</code>（不带参数）</td><td>弹出对话框，选<b>复制到剪贴板</b>或<b>另存为文件</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 推荐的用法</span>
+    <p>在调用 <code>/kb</code> <b>之前</b>先 <code>/export</code> 存一份。
+      这样万一整理时漏了什么，你手上还有<b>完整的原始记录</b>可以回查，
+      而不用重新把对话再走一遍。</p>
+    <p>注意它只有<b>纯文本</b>一种格式。想要带分析的 HTML 报告，用的是另一个命令：<code>/insights</code>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s10">10. 还有哪些现成技能能帮上忙</h2>
+
+  <p>你不需要什么都自己写。这些是<b>已经装好、可以直接用</b>的相关技能：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>技能</th><th>干什么</th><th>对你的用处</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>skill-creator</code></td>
+          <td><b>造技能的技能</b>：从零建、改进、测试一个技能</td>
+          <td>🟢 让它带你走一遍造 <code>/kb</code> 的完整流程，比照抄理解更深</td>
+        </tr>
+        <tr>
+          <td><code>dataviz</code></td>
+          <td>图表、看板的配色与设计规范，深浅色都照顾到</td>
+          <td>🟢 知识库里要放数据图表时用</td>
+        </tr>
+        <tr>
+          <td><code>artifact-diagramming</code></td>
+          <td>什么时候该画图、怎么画出有信息量的图、内联 SVG 的技巧</td>
+          <td>🟢 提升本知识库这类流程图的质量</td>
+        </tr>
+        <tr>
+          <td><code>artifact-design</code></td>
+          <td>网页的设计规范</td>
+          <td>🟡 主要服务于「发布成在线页面」，本地 HTML 可借鉴部分</td>
+        </tr>
+        <tr>
+          <td><code>docx</code> / <code>pdf</code> / <code>pptx</code></td>
+          <td>生成 Word / PDF / PPT</td>
+          <td>🟢 想把笔记换成别的格式时直接用</td>
+        </tr>
+        <tr>
+          <td><code>consolidate-memory</code></td>
+          <td>整理自动记忆：合并重复、修正过时、清理索引</td>
+          <td>🟡 用久了记忆变乱时跑一次</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 这张表因人而异</span>
+    <p>每个人装的技能不一样。<b>看你自己实际有哪些，打 <code>/skills</code></b>。</p>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 建议的下一个动作</span>
+    <p>与其照抄本章的 <code>SKILL.md</code>，不如打：</p>
+    <div class="codeblock"><pre><code>/skill-creator</code></pre></div>
+    <p>让它带你从需求开始，一步步生成、测试、优化一个属于你自己的技能。
+      <b>造一遍，比读十遍管用。</b></p>
+  </div>
+
+  <hr>
+
+  <h2>全部学完了 —— 回顾一下</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>章</th><th>你学会了</th></tr></thead>
+      <tbody>
+        <tr><td><a href="01-prompt-design.html">01</a></td><td>提示词该怎么写：硬约束、三段式流程、确认点、事实核对</td></tr>
+        <tr><td><a href="02-skill-basics.html">02</a></td><td>技能是什么、放哪、怎么做一个</td></tr>
+        <tr><td><a href="03-skill-advanced.html">03</a></td><td>参数、实时数据注入、附属文件、调用权限、生命周期</td></tr>
+        <tr><td><a href="04-output-style.html">04</a></td><td>输出风格改的是系统提示词，一次设定每轮生效</td></tr>
+        <tr><td><a href="05-choose-where.html">05</a></td><td>五种定制方式的分工，以及一句需求该放哪</td></tr>
+        <tr><td><a href="06-subagent-fork.html">06</a></td><td>子代理与分身的区别，以及对话太长时怎么办</td></tr>
+        <tr><td><b>07</b></td><td>把它们装到一起，做出属于你的 <code>/kb</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">🎯 一句话总结整套知识库</span>
+    <p><b>你重复打的每一段话，都该有一个文件来装它。</b><br>
+      每轮都要的 → 输出风格；固定事实 → CLAUDE.md；多步流程 → 技能；
+      样式资产 → 附属文件；必须执行的 → 钩子。</p>
+  </div>
+
+  <nav class="pager">
+    <a href="06-subagent-fork.html" class="prev"><small>← 上一页</small>06 · 子代理与分身</a>
+    <a href="00-index.html" class="next"><small>回到 →</small>目录</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

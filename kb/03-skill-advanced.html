@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>03 · 技能进阶 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="02-skill-basics.html">← 上一页</a>
+  <a href="04-output-style.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 03 章 · 难度 ★★☆</span>
+  <h1>技能进阶：参数、实时数据、附属文件、调用权限</h1>
+  <p class="lead">
+    上一章的技能是「一段死的文字」。这一章让它<b>活起来</b>：
+    能接参数、能读你电脑上的实时数据、能带模板文件，
+    还能规定<b>谁有权调用它</b>。<br>
+    前置知识：<a href="02-skill-basics.html">第 02 章</a>。
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">前置数据字段全表</a></li>
+      <li><a href="#s2">控制谁能调用：两个开关</a></li>
+      <li><a href="#s3">接收参数：$ARGUMENTS 和它的兄弟</a></li>
+      <li><a href="#s4">内置变量：不用写死路径</a></li>
+      <li><a href="#s5">动态上下文注入：把命令输出塞进提示词</a></li>
+      <li><a href="#s6">附属文件：让技能带模板和脚本</a></li>
+      <li><a href="#s7">预授权工具：allowed-tools</a></li>
+      <li><a href="#s8">技能内容生命周期（重要）</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. 前置数据字段全表</h2>
+
+  <p>技能的所有配置都写在文件开头两行 <code>---</code> 之间。<b>所有字段都是可选的</b>，
+    只有 <code>description</code> 强烈建议写。下面按用途分组，方便你查。</p>
+
+  <h3>① 身份与触发</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th><th>示例</th></tr></thead>
+      <tbody>
+        <tr><td><code>description</code></td><td><b>最重要</b>。写清"做什么 + 什么时候用"，Claude 靠它决定是否自动加载。省略时会用正文第一段代替</td><td>见下方说明</td></tr>
+        <tr><td><code>when_to_use</code></td><td>补充触发场景，比如典型说法、示例请求。会拼接在 <code>description</code> 后面</td><td><code>用户说"整理笔记"时</code></td></tr>
+        <tr><td><code>name</code></td><td>技能列表里显示的名字。<b>不影响你打的命令</b>（命令名来自文件夹名）</td><td><code>知识整理</code></td></tr>
+        <tr><td><code>paths</code></td><td>只有在处理匹配这些通配符的文件时，才自动加载该技能</td><td><code>src/**/*.ts</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 1536 字符上限</span>
+    <p><code>description</code> 和 <code>when_to_use</code> <b>合起来</b>在技能列表里
+      <b>超过 1536 个字符会被截断</b>（这是为了省上下文）。
+      所以<b>把最关键的用途写在最前面</b>，别把重点埋在后半段。</p>
+  </div>
+
+  <h3>② 调用权限</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th><th>默认</th></tr></thead>
+      <tbody>
+        <tr><td><code>disable-model-invocation</code></td><td>设为 <code>true</code> 后，<b>只有你能调</b>，Claude 不能自动加载</td><td><code>false</code></td></tr>
+        <tr><td><code>user-invocable</code></td><td>设为 <code>false</code> 后，<b>只有 Claude 能调</b>，命令菜单里看不到它</td><td><code>true</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>③ 参数</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th><th>示例</th></tr></thead>
+      <tbody>
+        <tr><td><code>argument-hint</code></td><td>自动补全时给你的提示，纯提示，不校验</td><td><code>[主题名] [输出目录]</code></td></tr>
+        <tr><td><code>arguments</code></td><td>给参数起名字，正文里就能用 <code>$名字</code> 代替 <code>$0</code>、<code>$1</code></td><td><code>[issue, branch]</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>④ 工具与模型</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>allowed-tools</code></td><td>调用这一轮内，这些工具<b>不用弹窗问你</b>就能用。下条消息即失效</td></tr>
+        <tr><td><code>disallowed-tools</code></td><td>技能生效期间，把这些工具<b>从可用池里拿掉</b></td></tr>
+        <tr><td><code>model</code></td><td>这个技能生效时用哪个模型。只影响当前这一轮，不写进设置</td></tr>
+        <tr><td><code>effort</code></td><td>思考投入档位：<code>low</code> / <code>medium</code> / <code>high</code> / <code>xhigh</code> / <code>max</code></td></tr>
+        <tr><td><code>shell</code></td><td>正文里 <code>!</code> 命令用哪个 shell：<code>bash</code>（默认）或 <code>powershell</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>⑤ 子代理与钩子（第 06 章详讲）</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>context: fork</code></td><td>在一个「分身」里跑这个技能，不占用主对话</td></tr>
+        <tr><td><code>agent</code></td><td>配合 <code>context: fork</code>，指定用哪种子代理</td></tr>
+        <tr><td><code>background</code></td><td>只在 <code>context: fork</code> 下有效。设 <code>false</code> 表示等结果回来再继续，默认 <code>true</code>（后台跑）</td></tr>
+        <tr><td><code>hooks</code></td><td>调用时注册钩子，之后整个会话都保持</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>⑥ 元信息（一般用不到）</h3>
+  <p><code>metadata</code>（你自己的键值数据）、<code>license</code>（许可证）、
+    <code>compatibility</code>（环境要求）。后两个是
+    <b>Agent Skills 开放标准</b>的字段，Claude Code 接受但不据此做任何事。</p>
+
+  <div class="callout info">
+    <span class="label">💡 布尔值可以怎么写</span>
+    <p>除了 <code>true</code> / <code>false</code>，还接受
+      <code>yes</code> <code>no</code> <code>on</code> <code>off</code> <code>1</code> <code>0</code>，
+      大小写随意。（此宽松写法需 v2.1.218 及以上；更早版本只认 <code>true</code>/<code>false</code>。）</p>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 想把技能传到 claude.ai 用？字段要减到 6 个</span>
+    <p>上面这些字段<b>只在 Claude Code 里全部有效</b>。
+      如果你要把技能上传到 claude.ai、通过 Skills API 使用，或用官方打包脚本打包，
+      <b>只允许 6 个字段</b>：<code>name</code>、<code>description</code>、<code>license</code>、
+      <code>compatibility</code>、<code>metadata</code>、<code>allowed-tools</code>。</p>
+    <p>多写一个就<b>直接报错</b>，不是忽略。报错长这样：</p>
+    <div class="codeblock">
+      <pre><code>Unexpected key(s) in SKILL.md frontmatter: argument-hint.
+Allowed properties are: allowed-tools, compatibility, description,
+license, metadata, name</code></pre>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. 控制谁能调用：两个开关</h2>
+
+  <p>默认情况下，<b>你和 Claude 都能调</b>任何技能。两个字段可以改变这一点。</p>
+
+  <div class="concept">
+    <h3>只有你能调（disable-model-invocation）</h3>
+    <p class="term">disable-model-invocation: true</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>加上这行，Claude 就<b>不能自作主张</b>触发这个技能了，只有你亲手打 <code>/名字</code> 才行。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像家里那个「总闸」——你可以拉，但不希望智能音箱觉得"该睡觉了"就替你拉了。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它和 <code>user-invocable: false</code> 是<b>一对相反</b>的开关：
+        前者禁掉 Claude，后者禁掉你。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <pre><code>---
+name: deploy
+description: 把应用部署到生产环境
+disable-model-invocation: true
+---
+
+部署 $ARGUMENTS 到生产：
+1. 跑测试
+2. 构建
+3. 推送到部署目标
+4. 验证部署成功</code></pre>
+        </div>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为它只是"不推荐自动调"。</b>不是，是<b>硬拦截</b>。
+          Claude 真去调的话，Claude Code 会<b>直接拦下来</b>，
+          还会告诉它"别换个方式把部署步骤重做一遍"，所以它多半会转而建议你自己打 <code>/deploy</code>。</p>
+        <p>❌ <b>忘了它还有个副作用</b>：加了这行以后，
+          <b><code>description</code> 也不会进上下文了</b>（因为 Claude 反正不需要判断）。
+          这顺带省了一点点上下文。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>前置数据</th><th>你能调</th><th>Claude 能调</th><th>什么时候进上下文</th><th>适合</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>（默认，什么都不写）</td><td>✅</td><td>✅</td>
+          <td><code>description</code> 一直在，正文调用时才加载</td>
+          <td>大多数情况</td>
+        </tr>
+        <tr>
+          <td><code>disable-model-invocation: true</code></td><td>✅</td><td>❌</td>
+          <td><code>description</code> 也不进，你调时才加载正文</td>
+          <td>有副作用、要你决定时机的：部署、提交、发消息、<b>批量生成文件</b></td>
+        </tr>
+        <tr>
+          <td><code>user-invocable: false</code></td><td>❌</td><td>✅</td>
+          <td><code>description</code> 一直在，Claude 调时才加载正文</td>
+          <td>纯背景知识，比如「这套老系统是怎么回事」——你打它没意义</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 对你的场景怎么选</span>
+    <p>「把对话整理成一堆 HTML 文件」是个<b>重操作</b>——一次生成七八个文件。
+      你肯定不希望聊着聊着，Claude 觉得"时机成熟了"就自己开始写。
+      所以这类技能<b>应该加 <code>disable-model-invocation: true</code></b>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 接收参数：$ARGUMENTS 和它的兄弟</h2>
+
+  <p>你希望 <code>/kb Claude技能体系</code> 里的「Claude技能体系」能被技能读到。
+    这就要用<b>字符串替换</b>。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>写法</th><th>拿到什么</th></tr></thead>
+      <tbody>
+        <tr><td><code>$ARGUMENTS</code></td><td>你打的<b>全部</b>参数（原样一整串）</td></tr>
+        <tr><td><code>$ARGUMENTS[0]</code></td><td>第 1 个参数（<b>从 0 开始数</b>）</td></tr>
+        <tr><td><code>$0</code> <code>$1</code> <code>$2</code></td><td>上面那个的简写。<code>$0</code> 是第 1 个，<code>$1</code> 是第 2 个</td></tr>
+        <tr><td><code>$名字</code></td><td>在前置数据里用 <code>arguments</code> 声明过的具名参数</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="codeblock">
+    <div class="cb-title">具名参数的完整例子</div>
+    <pre><code>---
+description: 根据 issue 编号在指定分支上修复问题
+argument-hint: [issue编号] [分支名]
+arguments: [issue, branch]
+---
+
+修复 issue #$issue，在分支 $branch 上操作。
+先读 issue 描述，再定位相关代码。</code></pre>
+  </div>
+
+  <p>调用时：</p>
+  <div class="codeblock">
+    <pre><code>/fix-issue 342 feature/login</code></pre>
+  </div>
+  <p>正文里的 <code>$issue</code> 会变成 <code>342</code>，<code>$branch</code> 会变成 <code>feature/login</code>。</p>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 三个容易踩的点</span>
+    <p><b>（1）从 0 开始数。</b><code>$0</code> 是<b>第一个</b>参数，不是第二个。</p>
+    <p><b>（2）没传参数会怎样？</b>
+      带下标的（如 <code>$2</code>）如果没对应参数，<b>原样留在正文里</b>不变；
+      具名的（如 <code>$branch</code>）如果没传，<b>会变成空字符串</b>。行为不一样，注意。</p>
+    <p><b>（3）正文里没写 <code>$ARGUMENTS</code> 怎么办？</b>
+      Claude Code 会把参数<b>自动追加</b>到末尾，形如 <code>ARGUMENTS: 你打的内容</code>。
+      所以就算你忘了写占位符，参数也不会丢。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 内置变量：不用写死路径</h2>
+
+  <p>技能里经常要引用「技能自己目录下的文件」。硬编码路径会在换电脑、换项目时坏掉。
+    用内置变量就不会：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>变量</th><th>展开成</th><th>什么时候用</th></tr></thead>
+      <tbody>
+        <tr><td><code>${CLAUDE_SKILL_DIR}</code></td><td>这个技能 <code>SKILL.md</code> 所在的目录</td><td>引用技能自带的模板、脚本</td></tr>
+        <tr><td><code>${CLAUDE_PROJECT_DIR}</code></td><td>项目根目录</td><td>引用项目里的脚本或配置</td></tr>
+        <tr><td><code>${CLAUDE_SESSION_ID}</code></td><td>当前会话 ID</td><td>做日志、生成带会话标识的文件名</td></tr>
+        <tr><td><code>${CLAUDE_EFFORT}</code></td><td>当前思考投入档位</td><td>根据档位调整指令详略</td></tr>
+        <tr><td><code>${CLAUDE_PLUGIN_ROOT}</code></td><td>插件安装目录</td><td><b>仅插件技能</b>里可用</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 一个巧妙用法</span>
+    <p><code>${CLAUDE_SKILL_DIR}</code> 会在<b>两个地方</b>被替换：
+      <b>正文里</b>，以及 <b><code>allowed-tools</code> 里的 Bash 规则里</b>。</p>
+    <p>在这两处用同一个变量，就能做到：技能调用自己带的脚本，
+      <b>而且不弹权限窗口</b>——因为预授权的路径和实际执行的路径能对上。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. 动态上下文注入：把命令输出塞进提示词</h2>
+
+  <div class="concept">
+    <h3>动态上下文注入（Dynamic Context Injection）</h3>
+    <p class="term">!`command`</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>在技能正文里写 <code>!`某条命令`</code>，Claude Code 会<b>先跑这条命令</b>，
+        把输出<b>替换掉这一行</b>，再把整个文件交给 Claude。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像邮件群发的「合并域」：模板里写 <code>{姓名}</code>，发出去之前系统替你填成真实姓名。
+        这里填的不是姓名，而是<b>命令的实时输出</b>。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它让技能从<b>「死的文字」</b>变成<b>「能感知环境的模板」</b>。
+        这是技能比旧版自定义命令强的地方之一。
+        注意它和 <a href="#s3">参数替换</a> 是<b>并列</b>的两种"填空"：
+        参数来自<b>你打的字</b>，动态注入来自<b>命令的输出</b>。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <pre><code>## 当前改动
+
+!`git diff HEAD`
+
+## 当前分支
+
+!`git branch --show-current`
+
+请根据以上信息，写一条符合规范的提交信息。</code></pre>
+        </div>
+        <p>Claude 看到的是<b>真实的 diff 内容和分支名</b>，不是这两行命令。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为它在 claude.ai 网页版也能用。</b>不能。
+          这是 Claude Code 专有的正文特性，在 claude.ai 聊天里和通过 API 都不生效。</p>
+        <p>❌ <b>忽略命令失败的后果。</b>见下面的警告。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">🚫 命令失败会中止整个技能调用</span>
+    <p>用默认的 <code>bash</code> 时，<b>任何非零退出码都算失败，会直接中止这次技能调用</b>。</p>
+    <p>只有一个例外：<b>搜索和比较类命令</b>（如 <code>grep</code>、<code>diff</code>）的
+      <b>退出码 1</b> 被当作正常结果，输出照常注入——因为对它们来说"1"只是"没找到"。
+      退出码 2 及以上，即使是这类命令也算失败。</p>
+    <p><b>实用对策</b>：给可能失败的命令加个兜底，例如
+      <code>!`git diff HEAD || echo "（不是 git 仓库）"`</code>。</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>限制</th><th>具体行为</th></tr></thead>
+      <tbody>
+        <tr><td><b>超时</b></td><td>默认 2 分钟。超时后如果该命令能被转到后台，技能照常渲染，注入的文字会说明"已转后台"并给出输出文件；不能转后台的则被杀掉，<b>这次调用中止</b></td></tr>
+        <tr><td><b>输出体积</b></td><td>超过上限时，注入的不是被截断的文字，而是<b>一个文件路径 + 一小段预览</b></td></tr>
+        <tr><td><b>Shell</b></td><td>默认 <code>bash</code>；写 <code>shell: powershell</code> 可改用 PowerShell</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. 附属文件：让技能带模板和脚本</h2>
+
+  <p>这是技能相比旧版自定义命令<b>最大的优势</b>：一个技能是一个<b>文件夹</b>，
+    里面可以放不止 <code>SKILL.md</code>。</p>
+
+  <div class="codeblock">
+    <div class="cb-title">一个带附属文件的技能长这样</div>
+    <pre><code>~/.claude/skills/kb/
+├── SKILL.md          ← 必需。总纲和导航
+├── template.html     ← 页面模板，让 Claude 照着填
+├── reference.md      ← 详细参考资料，需要时才读
+└── scripts/
+    └── build.sh      ← 脚本，被执行，不进上下文</code></pre>
+  </div>
+
+  <h3>关键在于「按需加载」</h3>
+
+  <figure class="figure">
+    <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="SKILL.md 常驻上下文，附属文件按需读取">
+      <rect x="30" y="40" width="200" height="150" rx="12" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="130" y="28" text-anchor="middle" fill="var(--accent)" font-size="12.5" font-weight="600">调用时立刻进上下文</text>
+      <rect x="52" y="66" width="156" height="34" rx="7" fill="var(--surface)" stroke="var(--accent-line)"/>
+      <text x="130" y="88" text-anchor="middle" fill="var(--text)" font-size="13" font-family="monospace">SKILL.md</text>
+      <text x="130" y="126" text-anchor="middle" fill="var(--muted)" font-size="11.5">建议控制在 500 行以内</text>
+      <text x="130" y="148" text-anchor="middle" fill="var(--muted)" font-size="11.5">因为它会一直占着位置</text>
+
+      <path d="M240 115 H300" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="5 4"/>
+      <text x="270" y="106" text-anchor="middle" fill="var(--muted)" font-size="11">引用</text>
+
+      <rect x="308" y="40" width="360" height="150" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-dasharray="6 4"/>
+      <text x="488" y="28" text-anchor="middle" fill="var(--muted)" font-size="12.5" font-weight="600">用到时才读，不用就是 0 成本</text>
+      <rect x="330" y="62" width="150" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="405" y="82" text-anchor="middle" fill="var(--text)" font-size="12" font-family="monospace">template.html</text>
+      <rect x="496" y="62" width="150" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="571" y="82" text-anchor="middle" fill="var(--text)" font-size="12" font-family="monospace">reference.md</text>
+      <rect x="330" y="102" width="150" height="30" rx="6" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="405" y="122" text-anchor="middle" fill="var(--text)" font-size="12" font-family="monospace">scripts/build.sh</text>
+      <text x="571" y="122" text-anchor="middle" fill="var(--muted)" font-size="11.5">脚本是被「执行」的，</text>
+      <text x="571" y="140" text-anchor="middle" fill="var(--muted)" font-size="11.5">不进上下文</text>
+      <text x="488" y="170" text-anchor="middle" fill="var(--muted)" font-size="11.5">大段参考资料放这里，平时不花一分钱</text>
+
+      <text x="350" y="216" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        SKILL.md 是「目录」，附属文件是「正文」
+      </text>
+    </svg>
+    <figcaption>图 3-1　SKILL.md 常驻，附属文件按需加载</figcaption>
+  </figure>
+
+  <p>要让 Claude 知道每个文件是干什么的、什么时候该读，<b>必须在 SKILL.md 里写明</b>：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">在 SKILL.md 里这样引用</div>
+    <pre><code>## 样式
+
+生成页面时，直接复用同目录下的 [template.html](template.html)：
+把它的 &lt;style&gt; 和 &lt;script&gt; 原样复制进每个页面，
+只替换 &lt;title&gt;、导航链接和 &lt;main&gt; 内容。
+
+## 更多参考
+
+- 完整字段说明见 [reference.md](reference.md)</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 官方建议</span>
+    <p><b><code>SKILL.md</code> 控制在 500 行以内</b>，详细参考资料挪到独立文件。
+      理由见下一节——<code>SKILL.md</code> 一旦加载就<b>整轮会话都占着位置</b>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 预授权工具：allowed-tools</h2>
+
+  <p>正常情况下，Claude 每次要跑命令、写文件，都可能弹窗问你「允许吗」。
+    <code>allowed-tools</code> 可以让某个技能<b>在调用的那一轮内</b>免问。</p>
+
+  <div class="codeblock">
+    <pre><code>---
+description: 汇总 git 状态
+allowed-tools: Bash(git status:*) Bash(git diff:*) Read
+---</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>要点</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><b>有效期</b></td><td>只在<b>调用它的那一轮</b>。你发下一条消息，授权就清空了（但技能正文还留在上下文里）</td></tr>
+        <tr><td><b>不是限制</b></td><td>它<b>只加不减</b>。没列出来的工具照样能用，只是会走正常的权限流程</td></tr>
+        <tr><td><b>想长期免问</b></td><td>去权限设置里加允许规则，而不是靠这个字段</td></tr>
+        <tr><td><b>想禁用工具</b></td><td>用 <code>disallowed-tools</code>，它会<b>把工具从可用池里拿掉</b>，同样下条消息失效</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">🚫 安全提醒：别随便跑陌生仓库里的技能</span>
+    <p><b>工作区信任机制管不住这个字段。</b>项目技能的 <code>allowed-tools</code>
+      在你调用时就会生效，<b>哪怕这个文件夹你从来没信任过</b>。</p>
+    <p>也就是说，一个技能可以<b>给自己授予很大的工具权限</b>。
+      所以：<b>从别人仓库里拿到的技能，先打开看一眼 <code>allowed-tools</code> 写了什么</b>，再决定要不要跑。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 技能内容生命周期（重要）</h2>
+
+  <p>这一节解释一个很多人纳闷的现象：<b>「为什么技能好像只在第一次有效？」</b></p>
+
+  <figure class="figure">
+    <svg viewBox="0 0 740 270" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="技能内容在会话中的生命周期时间线">
+      <line x1="40" y1="70" x2="700" y2="70" stroke="var(--border)" stroke-width="2"/>
+
+      <circle cx="90" cy="70" r="7" fill="var(--accent)"/>
+      <text x="90" y="52" text-anchor="middle" fill="var(--accent)" font-size="12" font-weight="600">你打 /kb</text>
+      <text x="90" y="96" text-anchor="middle" fill="var(--text)" font-size="11.5">正文作为一条消息</text>
+      <text x="90" y="112" text-anchor="middle" fill="var(--text)" font-size="11.5">插入对话</text>
+
+      <circle cx="255" cy="70" r="7" fill="var(--muted)"/>
+      <text x="255" y="52" text-anchor="middle" fill="var(--muted)" font-size="12">你发下一条消息</text>
+      <text x="255" y="96" text-anchor="middle" fill="var(--danger)" font-size="11.5">allowed-tools 失效</text>
+      <text x="255" y="112" text-anchor="middle" fill="var(--ok)" font-size="11.5">正文仍在</text>
+
+      <circle cx="420" cy="70" r="7" fill="var(--muted)"/>
+      <text x="420" y="52" text-anchor="middle" fill="var(--muted)" font-size="12">再次调用 /kb</text>
+      <text x="420" y="96" text-anchor="middle" fill="var(--text)" font-size="11.5">内容没变 → 只加一句</text>
+      <text x="420" y="112" text-anchor="middle" fill="var(--text)" font-size="11.5">「已加载」，不重复插入</text>
+
+      <circle cx="600" cy="70" r="7" fill="var(--warn)"/>
+      <text x="600" y="52" text-anchor="middle" fill="var(--warn)" font-size="12" font-weight="600">触发自动压缩</text>
+      <text x="600" y="96" text-anchor="middle" fill="var(--text)" font-size="11.5">摘要后重新附加</text>
+      <text x="600" y="112" text-anchor="middle" fill="var(--text)" font-size="11.5">每个技能保留前 5000 token</text>
+      <text x="600" y="128" text-anchor="middle" fill="var(--text)" font-size="11.5">所有技能合计 25000 token</text>
+
+      <rect x="470" y="152" width="260" height="72" rx="9" fill="var(--warn-bg)" stroke="var(--warn)"/>
+      <text x="600" y="174" text-anchor="middle" fill="var(--warn)" font-size="12" font-weight="600">从最近调用的开始填预算</text>
+      <text x="600" y="194" text-anchor="middle" fill="var(--text)" font-size="11.5">→ 一轮里调了很多技能的话，</text>
+      <text x="600" y="212" text-anchor="middle" fill="var(--text)" font-size="11.5">早期那些可能被整个丢掉</text>
+
+      <text x="250" y="252" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        技能正文 = 一条留在对话里的消息，不是「设置项」
+      </text>
+    </svg>
+    <figcaption>图 3-2　技能内容在一次会话中的完整生命周期</figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>阶段</th><th>发生了什么</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>调用时</b></td>
+          <td>渲染后的 <code>SKILL.md</code> 内容<b>作为一条消息进入对话</b>，
+            并<b>在这个会话里一直留着</b></td>
+        </tr>
+        <tr>
+          <td><b>之后每一轮</b></td>
+          <td>Claude Code <b>不会再去读那个文件</b>。
+            所以要贯穿整个任务的要求，得写成<b>持续性指令</b>，不要写成"一次性步骤"</td>
+        </tr>
+        <tr>
+          <td><b>重复调用</b></td>
+          <td>渲染结果<b>完全相同</b> → 只补一句"已加载"，不塞第二份。<br>
+            渲染结果<b>不同</b>（参数变了、或 <code>!</code> 命令输出变了）→ <b>整份再追加一次</b></td>
+        </tr>
+        <tr>
+          <td><b>自动压缩后</b></td>
+          <td>每个技能<b>最近一次</b>的调用会被重新附加，<b>各保留前 5000 token</b>，
+            所有技能<b>共享 25000 token 总预算</b>，<b>从最近调用的开始填</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 「技能好像失效了」怎么办</span>
+    <p>官方的解释是：<b>内容通常还在，只是模型选择了别的做法。</b>三个对策，按顺序试：</p>
+    <ol>
+      <li><b>加强 <code>description</code> 和正文的措辞</b>，让它更倾向于继续遵守（回顾
+        <a href="01-prompt-design.html#s5">第 01 章的软约束 vs 硬约束</a>）</li>
+      <li><b>如果刚经历过压缩，或中间调了很多别的技能</b> → <b>重新调用一次</b>，
+        把完整内容恢复回来</li>
+      <li><b>需要百分百可靠的话，用「钩子（Hooks）」</b>——它在固定时机执行固定命令，
+        不依赖模型的判断</li>
+    </ol>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 这也解释了为什么 SKILL.md 要短</span>
+    <p>正文一旦加载就<b>整轮会话都在占位置</b>，等于<b>持续的成本</b>。
+      所以官方建议：<b>写"做什么"，不要长篇叙述"为什么、怎么来的"</b>，
+      大段资料挪到<a href="#s6">附属文件</a>里去。</p>
+  </div>
+
+  <hr>
+
+  <h2>本章小结</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>你想要</th><th>用什么</th></tr></thead>
+      <tbody>
+        <tr><td>让 Claude 知道何时该自动用它</td><td>写好 <code>description</code>（前 1536 字符内说清用途）</td></tr>
+        <tr><td>禁止 Claude 自作主张</td><td><code>disable-model-invocation: true</code></td></tr>
+        <tr><td>接收命令行参数</td><td><code>$ARGUMENTS</code> / <code>$0</code> / <code>arguments</code> + <code>$名字</code></td></tr>
+        <tr><td>引用技能自带的文件</td><td><code>${CLAUDE_SKILL_DIR}</code></td></tr>
+        <tr><td>塞入实时数据</td><td><code>!`命令`</code>（注意非零退出码会中止）</td></tr>
+        <tr><td>带模板 / 参考资料 / 脚本</td><td>放进技能文件夹，在 SKILL.md 里说明用途</td></tr>
+        <tr><td>免权限弹窗</td><td><code>allowed-tools</code>（只管一轮）</td></tr>
+        <tr><td>技能"失效"了</td><td>先重新调用一次；要绝对可靠就改用钩子</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">👉 下一步</span>
+    <p>技能解决的是<b>「偶尔要用的流程」</b>。
+      但「我是初学者，请用中文、讲通俗点」这种<b>每一轮都要生效</b>的要求，
+      放技能里就不合适了。下一章讲专门管这件事的功能：<b>输出风格</b>。</p>
+  </div>
+
+  <nav class="pager">
+    <a href="02-skill-basics.html" class="prev"><small>← 上一页</small>02 · 技能入门</a>
+    <a href="04-output-style.html" class="next"><small>下一页 →</small>04 · 输出风格</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

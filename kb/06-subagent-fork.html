@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>06 · 子代理与分身 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="05-choose-where.html">← 上一页</a>
+  <a href="07-case-study.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 06 章 · 难度 ★★★</span>
+  <h1>子代理与分身：让别人替你干活</h1>
+  <p class="lead">
+    对话越聊越长，上下文快满了，这时候还要它「把整个对话整理成 8 个 HTML 文件」——
+    这活儿一开始就注定要撑爆。<br>
+    这一章讲的两个工具，专门解决这个问题。<br>
+    前置知识：<a href="01-prompt-design.html#s2">第 01 章的上下文窗口</a>、<a href="03-skill-advanced.html">第 03 章</a>。
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">子代理是什么</a></li>
+      <li><a href="#s2">分身是什么</a></li>
+      <li><a href="#s3">一张表看清两者区别</a></li>
+      <li><a href="#s4">怎么用分身：/subtask</a></li>
+      <li><a href="#s5">让技能跑在分身里：context: fork</a></li>
+      <li><a href="#s6">分身模式要不要手动开</a></li>
+      <li><a href="#s7">怎么定义一个自己的子代理</a></li>
+      <li><a href="#s8">什么时候用哪个</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. 子代理是什么</h2>
+
+  <div class="concept">
+    <h3>子代理（Subagent）</h3>
+    <p class="term">subagent · .claude/agents/</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>Claude 派出去的一个<b>独立助手</b>：它有自己的系统提示词、自己的工具、自己的上下文，
+        干完活只把<b>最终结论</b>报回来。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像你请一个<b>外包</b>：你写一份需求文档发过去，他在自己那边翻资料、试方案、
+        改了十几版——这些过程<b>你一概看不到</b>，最后他交给你一份成果。
+        你的办公桌上只多了这一份成果，没多那十几版草稿。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它和<a href="02-skill-basics.html">技能</a>是<b>并列</b>的两种扩展方式：
+        技能是<b>「给当前这个 Claude 加一段指令」</b>，
+        子代理是<b>「另开一个 Claude 去干」</b>。<br>
+        和<a href="#s2">分身</a>是<b>近亲</b>——分身是子代理的一种特殊形态。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">~/.claude/agents/code-reviewer.md</div>
+          <pre><code>---
+name: code-reviewer
+description: 代码审查专家。写完代码后使用。
+tools: Read, Grep, Glob, Bash
+model: sonnet
+---
+
+你是一位资深代码审查员，从质量和安全角度审查代码。</code></pre>
+        </div>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为它知道你们刚才聊了什么。</b><b>不知道。</b>它<b>从零开始</b>，
+          只看得到派活时给它的那段话。你说的「按上面的要求做」，它完全不知道"上面"是什么。</p>
+        <p>❌ <b>以为你设的输出风格对它也生效。</b>不生效（<a href="04-output-style.html#s8">第 04 章第 8 节</a>），
+          它用的是自己的系统提示词。所以它可能给你返回英文。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 子代理确实会拿到的东西</span>
+    <p>虽然它看不到对话历史，但这些还是会给它：</p>
+    <ul>
+      <li><b>CLAUDE.md 文件</b>（内置的 Explore 和 Plan 两种除外）</li>
+      <li><b>Git 状态快照</b></li>
+      <li>在 <code>skills</code> 字段里<b>预加载的技能</b>（注意：预加载时是<b>全文注入</b>，
+        不像普通会话那样只放 <code>description</code>）</li>
+      <li>同批其他代理的名册，方便互相发消息（需 v2.1.206+）</li>
+    </ul>
+    <p>而<b>主对话的自动记忆不会给它</b>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. 分身是什么</h2>
+
+  <div class="concept">
+    <h3>分身（Fork）</h3>
+    <p class="term">context: fork · /subtask</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>一种特殊的子代理：它<b>继承你们到目前为止的全部对话</b>，
+        但它干活的过程<b>不会占用你的主对话</b>，只把最终结果送回来。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>不是请外包，而是<b>「复制一个此刻的你」</b>：
+        这个复制体<b>完整记得刚才开的每一场会</b>，你不用给他做任何交接。
+        他到隔壁房间去把活干完，回来只汇报结论，
+        <b>他在隔壁翻的那一堆资料，不会堆到你桌上</b>。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>分身是<a href="#s1">子代理</a>的<b>特例</b>：
+        它<b>放弃了</b>子代理的"输入隔离"（它看得到一切），
+        但<b>保留了</b>"输出隔离"（过程不回流）。<br>
+        换句话说：<b>子代理是双向隔离，分身是单向隔离。</b></dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <pre><code>/subtask 根据我们刚才讨论的解析器改动，写一批单元测试</code></pre>
+        </div>
+        <p>注意这句话里的「刚才讨论的」——<b>只有分身能听懂</b>，普通子代理不行。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为分身是"更强的子代理"。</b>不是强弱，是<b>取舍</b>。
+          分身<b>丢掉了子代理最大的优点——输入隔离</b>。
+          如果你希望它带着干净的脑子重新看问题，反而该用普通子代理。</p>
+        <p>❌ <b>以为它跑完主对话就变干净了。</b>主对话确实不会被它的过程污染，
+          <b>但它带过去的是"此刻的完整对话"</b>——如果此刻已经很满了，分身那边一样满。
+          分身省的是<b>后续</b>的消耗，不是已有的。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 740 330" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="普通子代理与分身在上下文继承上的区别">
+      <defs>
+        <marker id="a6" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--accent)"/>
+        </marker>
+        <marker id="a6b" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <!-- 主对话 -->
+      <rect x="20" y="120" width="150" height="110" rx="11" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="95" y="106" text-anchor="middle" fill="var(--accent)" font-size="12.5" font-weight="600">主对话</text>
+      <rect x="34" y="136" width="122" height="11" rx="3" fill="var(--accent-line)" opacity=".7"/>
+      <rect x="34" y="152" width="122" height="11" rx="3" fill="var(--accent-line)" opacity=".7"/>
+      <rect x="34" y="168" width="122" height="11" rx="3" fill="var(--accent-line)" opacity=".7"/>
+      <rect x="34" y="184" width="122" height="11" rx="3" fill="var(--accent-line)" opacity=".7"/>
+      <rect x="34" y="200" width="122" height="11" rx="3" fill="var(--accent-line)" opacity=".7"/>
+      <text x="95" y="248" text-anchor="middle" fill="var(--muted)" font-size="11">聊了很久的对话</text>
+
+      <!-- 上：子代理 -->
+      <path d="M176 150 C 230 150, 250 66, 300 66" stroke="var(--muted)" stroke-width="1.8"
+            fill="none" stroke-dasharray="5 4" marker-end="url(#a6b)"/>
+      <text x="238" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">只给一段说明</text>
+
+      <rect x="306" y="24" width="180" height="88" rx="11" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="396" y="14" text-anchor="middle" fill="var(--muted)" font-size="12.5" font-weight="600">普通子代理</text>
+      <rect x="322" y="40" width="148" height="11" rx="3" fill="var(--muted)" opacity=".35"/>
+      <text x="396" y="72" text-anchor="middle" fill="var(--text)" font-size="11.5">脑子是空的</text>
+      <text x="396" y="92" text-anchor="middle" fill="var(--text)" font-size="11.5">自己的系统提示词 / 工具 / 模型</text>
+
+      <path d="M492 68 H556" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#a6)"/>
+      <rect x="562" y="46" width="160" height="44" rx="9" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="642" y="73" text-anchor="middle" fill="var(--text)" font-size="12">只回传最终结果</text>
+
+      <!-- 下：分身 -->
+      <path d="M176 200 C 230 200, 250 262, 300 262" stroke="var(--accent)" stroke-width="2.2"
+            fill="none" marker-end="url(#a6)"/>
+      <text x="238" y="256" text-anchor="middle" fill="var(--accent)" font-size="11">整段对话复制过去</text>
+
+      <rect x="306" y="220" width="180" height="88" rx="11" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="396" y="210" text-anchor="middle" fill="var(--accent)" font-size="12.5" font-weight="600">分身</text>
+      <rect x="322" y="236" width="148" height="8" rx="2" fill="var(--accent-line)" opacity=".7"/>
+      <rect x="322" y="248" width="148" height="8" rx="2" fill="var(--accent-line)" opacity=".7"/>
+      <rect x="322" y="260" width="148" height="8" rx="2" fill="var(--accent-line)" opacity=".7"/>
+      <text x="396" y="288" text-anchor="middle" fill="var(--text)" font-size="11.5">完整继承：历史 / 系统提示词 / 工具 / 模型</text>
+
+      <path d="M492 264 H556" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#a6)"/>
+      <rect x="562" y="242" width="160" height="44" rx="9" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="642" y="262" text-anchor="middle" fill="var(--text)" font-size="12">只回传最终结果</text>
+      <text x="642" y="279" text-anchor="middle" fill="var(--muted)" font-size="11">过程不回流</text>
+
+      <text x="370" y="326" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        区别只在左半边（输入），右半边（输出隔离）两者一样
+      </text>
+    </svg>
+    <figcaption>图 6-1　普通子代理 vs 分身：差别在「看不看得到对话历史」</figcaption>
+  </figure>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 一张表看清两者区别</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>对比项</th><th>分身（Fork）</th><th>普通子代理（Subagent）</th></tr></thead>
+      <tbody>
+        <tr><td><b>完整对话历史</b></td><td>✅ 继承</td><td>❌ 从零开始</td></tr>
+        <tr><td><b>系统提示词</b></td><td>✅ 和主会话相同</td><td>❌ 用它自己定义里的</td></tr>
+        <tr><td><b>工具</b></td><td>✅ 同一套工具池</td><td>❌ 用 <code>tools</code> 字段指定的那些</td></tr>
+        <tr><td><b>模型</b></td><td>✅ 和主会话相同</td><td>❌ 用 <code>model</code> 字段，或继承</td></tr>
+        <tr><td><b>输出风格</b></td><td>✅ 生效</td><td>❌ 不生效</td></tr>
+        <tr><td><b>CLAUDE.md</b></td><td>✅ 加载</td><td>✅ 加载（Explore / Plan 除外）</td></tr>
+        <tr><td><b>主对话的自动记忆</b></td><td>❌ 不加载</td><td>❌ 不加载</td></tr>
+        <tr><td><b>提示词缓存</b></td><td>和主会话<b>共享</b></td><td><b>独立</b>的缓存</td></tr>
+        <tr><td><b>过程是否回流主对话</b></td><td>❌ 不回流，只回结果</td><td>❌ 不回流，只回结果</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 用一句话记住</span>
+    <p><b>子代理 = 双向隔离</b>（它看不到你，你看不到它的过程）<br>
+      <b>分身 = 单向隔离</b>（它看得到你，但你看不到它的过程）</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 怎么用分身：<code>/subtask</code></h2>
+
+  <div class="codeblock">
+    <pre><code>/subtask 把我们刚才讨论的内容整理成 HTML，写到 ./kb/ 目录</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 版本很重要</span>
+    <div class="table-wrap" style="margin:10px 0 0">
+      <table>
+        <thead><tr><th>你的版本</th><th>命令</th></tr></thead>
+        <tbody>
+          <tr><td><b>v2.1.212</b> 及以上</td><td><code>/subtask</code></td></tr>
+          <tr><td>v2.1.161 ～ v2.1.211</td><td><code>/fork</code>（旧名）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:10px">查版本：</p>
+    <div class="codeblock"><pre><code>claude --version</code></pre></div>
+    <p>或者在会话里打 <code>/status</code>。</p>
+  </div>
+
+  <h3>分身跑起来是什么体验</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>现象</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><b>后台运行</b></td><td>在交互式会话里，分身<b>默认在后台跑</b>，你可以继续在主对话里干别的</td></tr>
+        <tr><td><b>权限弹窗</b></td><td>它需要权限时，<b>弹窗出现在你的主会话里</b>，并会写明是哪个子代理在申请</td></tr>
+        <tr><td><b>工具调用</b></td><td>它调工具的过程<b>不进你的主对话</b></td></tr>
+        <tr><td><b>结果</b></td><td>只有<b>最终结果</b>回到主对话，你的上下文保持干净</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. 让技能跑在分身里：<code>context: fork</code></h2>
+
+  <p>更实用的做法：<b>把分身写进技能的配置里</b>，这样每次调用这个技能都自动在分身里跑。</p>
+
+  <div class="codeblock">
+    <div class="cb-title">~/.claude/skills/kb/SKILL.md（片段）</div>
+    <pre><code>---
+description: 把当前对话整理成初学者中文 HTML 教程
+disable-model-invocation: true
+context: fork
+---
+
+把本次对话中出现的知识，整理成 HTML 教程……</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th><th>默认</th></tr></thead>
+      <tbody>
+        <tr><td><code>context: fork</code></td><td>这个技能在分身里跑</td><td>不写就是在主对话里跑</td></tr>
+        <tr><td><code>agent</code></td><td>指定用哪种子代理类型</td><td>默认类型</td></tr>
+        <tr><td><code>background</code></td><td>设 <code>false</code> = <b>等结果回来</b>再继续这一轮；<br>
+          默认 <code>true</code> = 后台跑，你可以继续干别的</td><td><code>true</code>（需 v2.1.218+ 才能设 <code>false</code>）</td></tr>
+        <tr><td><code>model</code></td><td>配合 <code>context: fork</code> 时，改的是<b>分身的模型</b></td><td>继承</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 为什么这对「整理对话」特别合适</span>
+    <p>把三件事连起来看：</p>
+    <ol>
+      <li>整理知识<b>必须</b>读完整个对话 → 普通子代理不行，<b>只有分身能做</b></li>
+      <li>生成 8 个 HTML 文件会消耗<b>大量</b>上下文 → 在主对话里做，必定触发压缩</li>
+      <li>分身写文件到<b>磁盘</b>，只把「写了 8 个文件」这句话回传 → <b>主对话几乎没被消耗</b></li>
+    </ol>
+    <p>这正好也印证了<a href="01-prompt-design.html#s4">第 01 章</a>那条原则：
+      <b>让成果尽早离开上下文，进入硬盘。</b></p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. 分身模式要不要手动开</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>场景</th><th>分身模式</th><th>怎么开</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>交互式会话</b>（你平时打字聊天）</td>
+          <td>✅ <b>v2.1.232 起默认开启</b></td>
+          <td>不用管，<code>/subtask</code> 直接能用</td>
+        </tr>
+        <tr>
+          <td><b>非交互模式</b>（<code>-p</code> 参数）和 Agent SDK</td>
+          <td>❌ 默认关闭</td>
+          <td><code>CLAUDE_CODE_FORK_SUBAGENT=1</code></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 开和不开的区别</span>
+    <p><b>开着</b>：Claude 可以<b>自己主动</b>请求开一个分身，而且子代理默认在后台跑。<br>
+      <b>关着</b>：<code>/subtask</code> <b>照样能用</b>，只是得你亲手发起，Claude 不会主动要。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 怎么定义一个自己的子代理</h2>
+
+  <p>子代理和技能一样，也是「一个 Markdown 文件」。存放位置：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>位置</th><th>范围</th></tr></thead>
+      <tbody>
+        <tr><td><code>~/.claude/agents/</code></td><td>你所有项目</td></tr>
+        <tr><td><code>.claude/agents/</code></td><td>当前项目（可提交到 Git 共享）</td></tr>
+        <tr><td>插件的 <code>agents/</code></td><td>启用插件的地方，命名为 <code>插件名:代理名</code></td></tr>
+        <tr><td>受管设置目录</td><td>全组织</td></tr>
+        <tr><td><code>--agents</code> 启动参数</td><td>仅本次会话（传 JSON）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>前置数据字段</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>必填</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td>✅</td><td>唯一标识，<b>只能用小写字母和连字符</b></td></tr>
+        <tr><td><code>description</code></td><td>✅</td><td>Claude 靠它判断什么时候该派这个代理去干活</td></tr>
+        <tr><td><code>tools</code></td><td></td><td>它能用哪些工具</td></tr>
+        <tr><td><code>model</code></td><td></td><td>用哪个模型</td></tr>
+        <tr><td><code>skills</code></td><td></td><td>预加载哪些技能（<b>全文注入</b>，不只是描述）</td></tr>
+        <tr><td><code>memory</code></td><td></td><td>让它维护自己独立的自动记忆</td></tr>
+        <tr><td>其他</td><td></td><td><code>disallowedTools</code>、<code>permissionMode</code>、<code>maxTurns</code>、
+          <code>mcpServers</code>、<code>hooks</code>、<code>background</code>、<code>effort</code>、
+          <code>isolation</code>、<code>color</code>、<code>initialPrompt</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 别忘了它看不到对话</span>
+    <p>自定义子代理最常见的失败原因，就是<b>派活时给的信息不够</b>。
+      因为它<b>什么背景都没有</b>，你（或 Claude）派活时的那段话必须<b>自包含</b>：
+      文件路径写全、术语解释清楚、别说"照上面说的做"。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 什么时候用哪个</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>你的情况</th><th>用什么</th><th>为什么</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>「把<b>刚才聊的</b>整理成文档」</td>
+          <td><b>分身</b></td>
+          <td>需要完整对话历史，只有分身有</td>
+        </tr>
+        <tr>
+          <td>对话已经很长，还要做一件很吃上下文的事</td>
+          <td><b>分身</b></td>
+          <td>过程不回流，主对话保持干净</td>
+        </tr>
+        <tr>
+          <td>想从<b>几个不同角度</b>同时试方案</td>
+          <td><b>分身</b>（多开几个）</td>
+          <td>它们都从同一个起点出发，结果可比</td>
+        </tr>
+        <tr>
+          <td>「去代码库里找出所有用到 X 的地方」</td>
+          <td><b>普通子代理</b></td>
+          <td>翻文件会产生海量中间输出，正好要隔离掉；而且它不需要知道你们聊过什么</td>
+        </tr>
+        <tr>
+          <td>想让它<b>带着干净的脑子</b>重新审视</td>
+          <td><b>普通子代理</b></td>
+          <td>不受前面讨论的思路影响</td>
+        </tr>
+        <tr>
+          <td>一件小事，几步就完了</td>
+          <td><b>都不用</b></td>
+          <td>派代理本身也有开销，小事直接做更快</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <h2>本章小结</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>要点</th><th>记住这一句</th></tr></thead>
+      <tbody>
+        <tr><td>子代理</td><td>从零开始的独立助手，<b>看不到你们的对话</b></td></tr>
+        <tr><td>分身</td><td><b>继承完整对话</b>的子代理，过程不回流主对话</td></tr>
+        <tr><td>一句话区分</td><td>子代理=双向隔离，分身=单向隔离</td></tr>
+        <tr><td>怎么发起分身</td><td><code>/subtask 要干的事</code>（v2.1.212+；更早叫 <code>/fork</code>）</td></tr>
+        <tr><td>让技能跑在分身里</td><td>前置数据加 <code>context: fork</code></td></tr>
+        <tr><td>要手动开吗</td><td>交互式会话 v2.1.232+ 默认开；<code>-p</code> 模式要 <code>CLAUDE_CODE_FORK_SUBAGENT=1</code></td></tr>
+        <tr><td>输出风格</td><td>对子代理<b>无效</b>，对分身<b>有效</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">👉 下一步</span>
+    <p>所有零件都讲完了。最后一章把它们<b>装到一起</b>：
+      从零把那段 300 字的提示词，改造成一条 <code>/kb</code> 命令，
+      并拆解主题切换是怎么实现的。</p>
+  </div>
+
+  <nav class="pager">
+    <a href="05-choose-where.html" class="prev"><small>← 上一页</small>05 · 该放进哪一层</a>
+    <a href="07-case-study.html" class="next"><small>下一页 →</small>07 · 完整实战</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>目录 — Claude Code 初学者知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="#" class="disabled">← 上一页</a>
+  <a href="01-prompt-design.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">共 7 章 · 53 个知识点</span>
+  <h1>Claude Code 初学者知识库</h1>
+  <p class="lead">
+    这份知识库回答一个问题：<b>「我每次都要粘贴同一段长提示词，有没有更好的办法？」</b><br>
+    从提示词该怎么写开始，一路讲到把它拆成技能、输出风格、CLAUDE.md 和模板，
+    最后动手做出一条属于你的 <code>/kb</code> 命令。
+  </p>
+
+  <div class="callout info">
+    <span class="label">📖 怎么用这份知识库</span>
+    <p><b>时间紧</b> → 只读 <b>01 → 02 → 05 → 07</b> 这条主线，约 40 分钟，足够动手了。<br>
+      <b>想学透</b> → 按 01 到 07 顺序读完。<br>
+      <b>只想解决某个具体问题</b> → 看下面的<a href="#quick">问题速查表</a>。</p>
+    <p>右上角可以切换<b>浅色 / 深色 / 跟随系统</b>三种主题，默认深色，你的选择会被记住。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>全部章节</h2>
+
+  <div class="cards">
+    <a class="card" href="01-prompt-design.html">
+      <span class="num">01</span>
+      <h3>提示词怎么写才不翻车</h3>
+      <p>不讲任何软件功能，只讲：为什么你写的提示词没达到预期，以及怎么改。</p>
+      <div class="meta"><span class="badge d1">★☆☆ 入门</span><span>11 个知识点</span></div>
+    </a>
+
+    <a class="card" href="02-skill-basics.html">
+      <span class="num">02</span>
+      <h3>技能入门</h3>
+      <p>把长提示词存成一个 <code>/命令</code>。5 分钟做出你的第一个技能。</p>
+      <div class="meta"><span class="badge d1">★☆☆ 入门</span><span>10 个知识点</span></div>
+    </a>
+
+    <a class="card" href="03-skill-advanced.html">
+      <span class="num">03</span>
+      <h3>技能进阶</h3>
+      <p>让技能活起来：接参数、读实时数据、带模板文件、控制谁能调用。</p>
+      <div class="meta"><span class="badge d2">★★☆ 进阶</span><span>12 个知识点</span></div>
+    </a>
+
+    <a class="card" href="04-output-style.html">
+      <span class="num">04</span>
+      <h3>输出风格</h3>
+      <p>「用中文、讲通俗点」这种每轮都要的要求，一次设定，永久生效。</p>
+      <div class="meta"><span class="badge d2">★★☆ 进阶</span><span>7 个知识点</span></div>
+    </a>
+
+    <a class="card" href="05-choose-where.html">
+      <span class="num">05</span>
+      <h3>该放进哪一层</h3>
+      <p>CLAUDE.md、规则、自动记忆，加上前面的技能和风格 —— 一张决策图看清分工。</p>
+      <div class="meta"><span class="badge d2">★★☆ 进阶</span><span>9 个知识点</span></div>
+    </a>
+
+    <a class="card" href="06-subagent-fork.html">
+      <span class="num">06</span>
+      <h3>子代理与分身</h3>
+      <p>对话太长、上下文不够用时的解法。两者的区别只有一个字：记不记得。</p>
+      <div class="meta"><span class="badge d3">★★★ 高阶</span><span>4 个知识点</span></div>
+    </a>
+
+    <a class="card" href="07-case-study.html">
+      <span class="num">07</span>
+      <h3>完整实战</h3>
+      <p>把 300 字提示词变成一条 <code>/kb</code>，并拆解主题切换和一键复制的代码。</p>
+      <div class="meta"><span class="badge d3">★★★ 高阶</span><span>5 个知识点</span></div>
+    </a>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>推荐阅读路径</h2>
+
+  <figure class="figure">
+    <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="推荐阅读路径：主线四章，支线三章">
+      <defs>
+        <marker id="ai" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--accent)"/>
+        </marker>
+        <marker id="ai2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <text x="40" y="34" fill="var(--accent)" font-size="12.5" font-weight="600">必读主线（约 40 分钟）</text>
+
+      <rect x="26" y="46" width="136" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="94" y="66" text-anchor="middle" fill="var(--text)" font-size="12.5">01 提示词设计</text>
+      <text x="94" y="83" text-anchor="middle" fill="var(--muted)" font-size="11">★☆☆</text>
+
+      <path d="M168 69 H196" stroke="var(--accent)" stroke-width="2" marker-end="url(#ai)"/>
+
+      <rect x="202" y="46" width="136" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="270" y="66" text-anchor="middle" fill="var(--text)" font-size="12.5">02 技能入门</text>
+      <text x="270" y="83" text-anchor="middle" fill="var(--muted)" font-size="11">★☆☆</text>
+
+      <path d="M344 69 H372" stroke="var(--accent)" stroke-width="2" marker-end="url(#ai)"/>
+
+      <rect x="378" y="46" width="136" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="446" y="66" text-anchor="middle" fill="var(--text)" font-size="12.5">05 该放哪一层</text>
+      <text x="446" y="83" text-anchor="middle" fill="var(--muted)" font-size="11">★★☆</text>
+
+      <path d="M520 69 H548" stroke="var(--accent)" stroke-width="2" marker-end="url(#ai)"/>
+
+      <rect x="554" y="46" width="122" height="46" rx="9" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="615" y="66" text-anchor="middle" fill="var(--text)" font-size="12.5">07 完整实战</text>
+      <text x="615" y="83" text-anchor="middle" fill="var(--muted)" font-size="11">★★★</text>
+
+      <text x="40" y="140" fill="var(--muted)" font-size="12.5" font-weight="600">深入支线（按需读）</text>
+
+      <path d="M270 96 V152" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ai2)"/>
+      <rect x="202" y="156" width="136" height="46" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="270" y="176" text-anchor="middle" fill="var(--text)" font-size="12.5">03 技能进阶</text>
+      <text x="270" y="193" text-anchor="middle" fill="var(--muted)" font-size="11">★★☆</text>
+
+      <path d="M344 179 H372" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ai2)"/>
+      <rect x="378" y="156" width="136" height="46" rx="9" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="446" y="176" text-anchor="middle" fill="var(--text)" font-size="12.5">04 输出风格</text>
+      <text x="446" y="193" text-anchor="middle" fill="var(--muted)" font-size="11">★★☆</text>
+
+      <path d="M446 148 V100" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ai2)"/>
+
+      <path d="M270 206 V228" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#ai2)"/>
+      <rect x="202" y="232" width="136" height="24" rx="7" fill="var(--surface)" stroke="var(--border)"/>
+      <text x="270" y="248" text-anchor="middle" fill="var(--text)" font-size="12">06 子代理与分身 ★★★</text>
+    </svg>
+    <figcaption>图 0-1　推荐阅读路径</figcaption>
+  </figure>
+
+  <!-- ============================================================ -->
+  <h2 id="quick">问题速查表</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>你遇到的问题</th><th>去看</th></tr></thead>
+      <tbody>
+        <tr><td>让它写长文档，写到后面就跑偏、前后矛盾</td><td><a href="01-prompt-design.html#s4">01 章 4 节</a></td></tr>
+        <tr><td>我明明写了要求，它却没照做</td><td><a href="01-prompt-design.html#s5">01 章 5 节</a>（软约束 vs 硬约束）</td></tr>
+        <tr><td>整理出来的内容总是缺东西</td><td><a href="01-prompt-design.html#s6">01 章 6 节</a>（三段式流程）</td></tr>
+        <tr><td>它给我的命令是过时的、根本不能用</td><td><a href="01-prompt-design.html#s8">01 章 8 节</a></td></tr>
+        <tr><td>我不想每次都粘贴同一段话</td><td><a href="02-skill-basics.html">02 章</a>（技能）</td></tr>
+        <tr><td><code>/我的命令</code> 打了没反应</td><td><a href="02-skill-basics.html#s4">02 章 4 节</a>（命令名来自文件夹名）</td></tr>
+        <tr><td>想让技能读到我电脑上的实时数据</td><td><a href="03-skill-advanced.html#s5">03 章 5 节</a>（<code>!</code> 注入）</td></tr>
+        <tr><td>不想让 Claude 自作主张触发某个技能</td><td><a href="03-skill-advanced.html#s2">03 章 2 节</a></td></tr>
+        <tr><td>技能好像只在第一次有效，后面就忘了</td><td><a href="03-skill-advanced.html#s8">03 章 8 节</a>（生命周期）</td></tr>
+        <tr><td>想让它一直用中文、一直讲得通俗</td><td><a href="04-output-style.html">04 章</a>（输出风格）</td></tr>
+        <tr><td><code>/output-style</code> 打了没用</td><td><a href="04-output-style.html#s4">04 章 4 节</a>（已被删除）</td></tr>
+        <tr><td>改了配置却完全没生效</td><td><a href="04-output-style.html#s7">04 章 7 节</a>（要 <code>/clear</code>）</td></tr>
+        <tr><td>不知道某句话该写进哪个文件</td><td><a href="05-choose-where.html#s8">05 章 8 节</a>（决策图）</td></tr>
+        <tr><td>怎么确认我的 CLAUDE.md 真的被加载了</td><td><a href="05-choose-where.html#s2">05 章 2 节</a>（<code>/context</code>）</td></tr>
+        <tr><td>压缩之后指令就失灵了</td><td><a href="05-choose-where.html#s10">05 章 10 节</a></td></tr>
+        <tr><td>对话太长，做大任务时上下文不够用</td><td><a href="06-subagent-fork.html">06 章</a>（分身）</td></tr>
+        <tr><td>想动手做一个属于自己的 <code>/命令</code></td><td><a href="07-case-study.html">07 章</a>（完整实战）</td></tr>
+        <tr><td>想知道页面的三主题切换怎么写的</td><td><a href="07-case-study.html#s7">07 章 7 节</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>关于内容准确性</h2>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 两处标注为「待验证」的内容</span>
+    <p><b>（1）内置技能清单</b>（<a href="02-skill-basics.html#s7">02 章 7 节</a>）——
+      官方文档页在抓取时被截断，清单可能不完整。以你机器上 <code>/skills</code> 的实际输出为准。</p>
+    <p><b>（2）桌面 App 里 <code>/config</code> 的行为</b>（<a href="04-output-style.html#s4">04 章 4 节</a>）——
+      两份官方文档说法不一致，以实际表现为准。</p>
+    <p>除这两处外，涉及命令、路径、版本号的内容均已核对官方文档，并在正文中标注了版本要求。</p>
+  </div>
+
+  <div class="callout info">
+    <span class="label">📁 这些文件长什么样</span>
+    <div class="codeblock" style="margin-top:10px">
+      <pre><code>kb/
+├── style.css            共用样式（含三套主题变量）
+├── app.js               共用脚本（主题切换 + 一键复制）
+├── 00-index.html        本页
+├── 01-prompt-design.html
+├── 02-skill-basics.html
+├── 03-skill-advanced.html
+├── 04-output-style.html
+├── 05-choose-where.html
+├── 06-subagent-fork.html
+└── 07-case-study.html</code></pre>
+    </div>
+    <p>全部<b>离线可打开</b>，没有任何外部 CDN、字体或图片依赖。
+      所有图示都是手写的内联 SVG，会跟着主题变色。<br>
+      <b>移动整个 <code>kb/</code> 文件夹</b>即可，单独拷贝某个 HTML 会丢样式。</p>
+  </div>
+
+  <nav class="pager">
+    <span></span>
+    <a href="01-prompt-design.html" class="next"><small>开始阅读 →</small>01 · 提示词怎么写才不翻车</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

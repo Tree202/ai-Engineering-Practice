@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>04 · 输出风格 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="03-skill-advanced.html">← 上一页</a>
+  <a href="05-choose-where.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 04 章 · 难度 ★★☆</span>
+  <h1>输出风格：一次设定，每轮生效</h1>
+  <p class="lead">
+    「我是初学者，请用中文，讲通俗一点」——这句话你<b>每一轮</b>都想让它记得，
+    但又不想<b>每一轮</b>都打一遍。<br>
+    这就是输出风格要解决的问题。<br>
+    前置知识：<a href="02-skill-basics.html">第 02 章</a>（了解技能，以便对比）。
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">输出风格是什么</a></li>
+      <li><a href="#s2">先搞懂：系统提示词是什么</a></li>
+      <li><a href="#s3">内置的四种风格</a></li>
+      <li><a href="#s4">怎么切换（⚠️ 老命令已被删除）</a></li>
+      <li><a href="#s5">写一个属于你的风格</a></li>
+      <li><a href="#s6">keep-coding-instructions：留不留编程指令</a></li>
+      <li><a href="#s7">生效时机：为什么改了没反应</a></li>
+      <li><a href="#s8">作用范围：对子代理无效</a></li>
+      <li><a href="#s9">代价：会多花多少 token</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. 输出风格是什么</h2>
+
+  <div class="concept">
+    <h3>输出风格（Output Style）</h3>
+    <p class="term">output style · outputStyle</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>一份写好的"人设与表达规范"，它会被<b>直接加进系统提示词</b>，从而影响<b>每一轮</b>回答。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像给客服定的<b>话术手册</b>：不改变他掌握的业务知识，只改变他<b>怎么说</b>——
+        用什么称呼、先说结论还是先说过程、要不要配个表格。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它和<a href="02-skill-basics.html">技能</a>是<b>并列</b>关系，分工完全不同：
+        <b>技能</b>管"偶尔要跑的一套流程"，<b>输出风格</b>管"每一轮都要遵守的说话方式"。
+        官方原话说得很准：<b>输出风格改变的是 Claude <i>怎么回应</i>，不是它<i>知道什么</i></b>。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">~/.claude/output-styles/diagram-first.md</div>
+          <pre><code>---
+name: Diagrams first
+description: 每次解释都先给一张图
+keep-coding-instructions: true
+---
+
+解释代码、架构或数据流时，先给一张 Mermaid 图展示结构，
+然后再用文字说明。</code></pre>
+        </div>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>拿它存项目信息。</b>「我的 API 在 src/api/」这类<b>项目事实</b>
+          应该放 CLAUDE.md（第 05 章），不是输出风格。
+          输出风格只管<b>表达方式</b>。</p>
+        <p>❌ <b>改完立刻期待生效。</b>不会。见<a href="#s7">第 7 节</a>。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. 先搞懂：系统提示词是什么</h2>
+
+  <div class="concept">
+    <h3>系统提示词（System Prompt）</h3>
+    <p class="term">system prompt</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>在你说第一句话<b>之前</b>就已经给到 Claude 的一大段基础指令，
+        规定了它是谁、能用什么工具、该怎么干活。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像员工的<b>岗位说明书</b>：入职第一天就发给他，之后每一天都默认有效，
+        而不是每次派活时重念一遍。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它是<b>最高优先级、最持久</b>的一层。理解它，就能理解为什么
+        输出风格（改系统提示词）和 CLAUDE.md（系统提示词<b>之后</b>的一条用户消息）
+        效果不同——这是<a href="05-choose-where.html">第 05 章</a>的核心。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>命令行启动时临时往系统提示词末尾加一句：
+        <div class="codeblock">
+          <pre><code>claude --append-system-prompt "所有回答用中文"</code></pre>
+        </div>
+        <p>缺点是<b>每次启动都要带这个参数</b>，所以更适合写在脚本里，不适合日常交互。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为你能看到完整的系统提示词。</b>看不到全文，但你可以往里<b>加东西</b>——
+          输出风格和 <code>--append-system-prompt</code> 就是两种加法。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 660 300" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="系统提示词、输出风格、CLAUDE.md、对话内容的层次结构">
+      <rect x="90" y="24" width="480" height="72" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="330" y="52" text-anchor="middle" fill="var(--text)" font-size="14" font-weight="600">系统提示词</text>
+      <text x="330" y="74" text-anchor="middle" fill="var(--muted)" font-size="12">Claude Code 自带的基础指令（你看不到全文）</text>
+
+      <rect x="90" y="102" width="480" height="56" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="330" y="126" text-anchor="middle" fill="var(--accent)" font-size="13.5" font-weight="600">↑ 输出风格加在这里（系统提示词末尾）</text>
+      <text x="330" y="147" text-anchor="middle" fill="var(--muted)" font-size="11.5">所以它对每一轮都生效，优先级很高</text>
+
+      <rect x="90" y="170" width="480" height="56" rx="10" fill="var(--info-bg)" stroke="var(--info)"/>
+      <text x="330" y="194" text-anchor="middle" fill="var(--info)" font-size="13.5" font-weight="600">CLAUDE.md（作为一条「用户消息」插在这里）</text>
+      <text x="330" y="215" text-anchor="middle" fill="var(--muted)" font-size="11.5">注意：它不在系统提示词里，而在其后</text>
+
+      <rect x="90" y="238" width="480" height="46" rx="10" fill="var(--surface)" stroke="var(--border)" stroke-dasharray="5 4"/>
+      <text x="330" y="266" text-anchor="middle" fill="var(--text)" font-size="13">你和 Claude 的对话（技能调用后的内容也在这一层）</text>
+
+      <text x="72" y="60" text-anchor="end" fill="var(--muted)" font-size="11.5">先</text>
+      <text x="72" y="266" text-anchor="end" fill="var(--muted)" font-size="11.5">后</text>
+      <path d="M60 30 V278" stroke="var(--muted)" stroke-width="1.3" stroke-dasharray="4 4"/>
+    </svg>
+    <figcaption>图 4-1　各种定制手段在「一次请求」里的位置</figcaption>
+  </figure>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 内置的四种风格</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>风格</th><th>特点</th><th>什么时候用</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>Default</b><br>（默认）</td>
+          <td>Claude Code 原本的系统提示词，为高效完成软件工程任务设计</td>
+          <td>日常写代码</td>
+        </tr>
+        <tr>
+          <td><b>Proactive</b><br>（主动）</td>
+          <td>立刻动手，遇到常规决策<b>自己做合理假设</b>而不是停下来问你，倾向行动而非规划</td>
+          <td>你信任它、希望少被打断时。<br>注意：它比"自动模式"更激进，<b>但不改变你的权限模式</b>——什么能跑不用问，仍由权限设置说了算</td>
+        </tr>
+        <tr>
+          <td><b>Explanatory</b><br>（讲解）</td>
+          <td>干活的同时穿插「洞察」，解释为什么这么实现、这个代码库有什么模式</td>
+          <td><b>你现在这种学习阶段</b></td>
+        </tr>
+        <tr>
+          <td><b>Learning</b><br>（学习）</td>
+          <td>协作式边做边学：不仅讲洞察，还会在代码里<b>留下 <code>TODO(human)</code> 标记</b>，
+            让你自己写一小段关键代码</td>
+          <td>想真正上手练，而不只是看</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 给你的建议</span>
+    <p>你正在学 Claude 的各种功能，<b>Explanatory</b> 是最省事的起点——不用写任何文件，
+      选一下就能让它每次多讲讲"为什么"。等你觉得它讲的角度不对，再照
+      <a href="#s5">第 5 节</a>写一个自己的。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 怎么切换（⚠️ 老命令已被删除）</h2>
+
+  <div class="callout danger">
+    <span class="label">🚫 网上的旧教程会坑你</span>
+    <p>过去有一个独立命令 <code>/output-style</code> 用来切换风格。它已经：</p>
+    <ul>
+      <li><b>v2.1.73</b> 被标记为废弃</li>
+      <li><b>v2.1.91</b> 被<b>删除</b></li>
+    </ul>
+    <p>现在打它<b>没有任何反应</b>。这也是
+      <a href="01-prompt-design.html#s8">第 01 章第 8 节</a>为什么要求"查文档核对、标版本"的真实来源。</p>
+  </div>
+
+  <h3>现在的三种切换方式</h3>
+
+  <ol class="steps">
+    <li><b>终端里用菜单</b>
+      <div class="codeblock"><pre><code>/config</code></pre></div>
+      <p>在里面选 <b>Output style</b>。选完会存到<b>项目本地</b>的
+        <code>.claude/settings.local.json</code>。</p>
+    </li>
+
+    <li><b>直接改设置文件</b>
+      <div class="codeblock">
+        <div class="cb-title">.claude/settings.local.json</div>
+        <pre><code>{
+  "outputStyle": "Explanatory"
+}</code></pre>
+      </div>
+      <p>值就是风格的名字。这也是<b>桌面 App 用户的推荐做法</b>。</p>
+    </li>
+
+    <li><b>一行命令直接设（较新版本）</b>
+      <div class="codeblock"><pre><code>/config outputStyle=Explanatory</code></pre></div>
+      <p><code>键=值</code> 这种写法需要 <b>v2.1.181</b> 及以上；
+        像 <code>/config theme=dark</code> 这种简写键名需要 <b>v2.1.182</b> 及以上。
+        打 <code>/config --help</code> 可以列出所有能设的键。</p>
+    </li>
+  </ol>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 待验证：桌面 App 里 <code>/config</code> 的行为</span>
+    <p>两份官方文档说法不一致：<b>输出风格</b>那页说，在桌面 App 里运行 <code>/config</code> 会
+      <b>打开「设置 &gt; Claude Code」界面</b>，而不是弹出选择菜单；
+      <b>命令参考</b>那页则说 <code>/config</code> 在两端行为一致。</p>
+    <p>建议<b>以你这台机器上的实际表现为准</b>。
+      如果打了 <code>/config</code> 没看到风格菜单，就用上面第 2 种方式直接改文件，这个一定有效。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. 写一个属于你的风格</h2>
+
+  <h3>放哪</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>级别</th><th>路径</th><th>生效范围</th></tr></thead>
+      <tbody>
+        <tr><td>个人</td><td><code>~/.claude/output-styles/</code></td><td>你所有项目 ← <b>推荐</b></td></tr>
+        <tr><td>项目</td><td><code>.claude/output-styles/</code></td><td>当前项目</td></tr>
+        <tr><td>企业策略</td><td>受管设置目录下的 <code>.claude/output-styles/</code></td><td>组织统一下发</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><b>文件名就是风格名</b>，除非你在前置数据里写了 <code>name</code>。</p>
+
+  <h3>前置数据只有四个字段</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>字段</th><th>作用</th><th>默认</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td>风格名，不写就用文件名</td><td>文件名</td></tr>
+        <tr><td><code>description</code></td><td><code>/config</code> 选择器里显示的说明</td><td>无</td></tr>
+        <tr><td><code>keep-coding-instructions</code></td><td>是否保留 Claude Code 自带的软件工程指令</td><td><code>false</code></td></tr>
+        <tr><td><code>force-for-plugin</code></td><td><b>仅插件用</b>：插件一启用就强制套用这个风格</td><td><code>false</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>给你的场景量身写一个</h3>
+
+  <div class="codeblock">
+    <div class="cb-title">~/.claude/output-styles/beginner-zh.md</div>
+    <pre><code>---
+name: 小白中文讲解
+description: 中文作答，遇到新名词按五步法讲清楚
+keep-coding-instructions: true
+---
+
+## 语言
+
+- 回答一律用中文。
+- 检索和查阅文档时用英文关键词，但不要把用户的中文原话翻译后再理解。
+
+## 读者设定
+
+用户是初学者。遇到用户可能没接触过的名词时，按固定五步讲：
+
+1. 一句话定义，不使用行话
+2. 一个生活化类比
+3. 它在整个体系中的位置：和已讲过的名词是包含 / 并列 / 替代 / 前置哪种关系
+4. 一个能照抄跑通的最小例子
+5. 一到两个初学者常见误区
+
+术语首次出现写成「中文（English）」，之后只用中文。
+
+## 表达
+
+- 讲解顺序从易到难，后面的内容只依赖前面已讲过的名词。
+- 涉及对比、多个选项、多个字段时，用表格而不是长段文字。
+- 涉及命令、配置、路径时，先核对官方文档再回答；
+  不确定的明确标「⚠️ 待验证」，不要猜。</code></pre>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 注意这里发生了什么</span>
+    <p>这一个文件，把你原来那段长提示词里的
+      <b>「我是初学者」「输出中文」「先讲概念」「检索用英文」</b>
+      全部吸收了。<b>以后这几句话你再也不用打了。</b></p>
+    <p>剩下的「生成 HTML、目录规范、主题切换」属于<b>工作流</b>，
+      归<a href="02-skill-basics.html">技能</a>管——这就是第 05 章要讲的分工。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. keep-coding-instructions：留不留编程指令</h2>
+
+  <p>这是自定义输出风格里<b>最容易出事的一个字段</b>，因为它的默认值是 <code>false</code>。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>取值</th><th>发生什么</th><th>什么时候选</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>true</code></td>
+          <td><b>保留</b> Claude Code 自带的软件工程指令（怎么控制改动范围、怎么写注释、怎么验证结果），
+            你的内容加在后面</td>
+          <td>你<b>还在写代码</b>，只是想换个表达方式 ← <b>多数情况选这个</b></td>
+        </tr>
+        <tr>
+          <td><code>false</code><br>（默认）</td>
+          <td><b>丢掉</b>那些编程指令</td>
+          <td>Claude 完全不做软件工程了，比如当写作助手、数据分析助手</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">🚫 最常见的翻车现场</span>
+    <p>「我只是想让它用中文回答」→ 写了个自定义风格 → 忘了写 <code>keep-coding-instructions: true</code>
+      → <b>默认 false 生效，编程指令被丢掉</b> → 它开始乱改文件、不验证、改动范围失控。</p>
+    <p><b>记住</b>：只要 Claude 还要碰代码，就写上 <code>keep-coding-instructions: true</code>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 生效时机：为什么改了没反应</h2>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 这是初学者第一大困惑</span>
+    <p>输出风格是<b>系统提示词的一部分</b>，而系统提示词
+      <b>只在会话开始时读一次</b>。所以你在会话中途改了风格文件或设置，
+      <b>当前这个会话不会有任何变化</b>。</p>
+    <p><b>必须</b> <code>/clear</code> 开一个新对话，或者干脆重开一个会话。</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>改完立刻生效？</th><th>为什么</th></tr></thead>
+      <tbody>
+        <tr><td>改<b>技能</b>文件</td><td>✅ 立刻</td><td>技能有实时变更检测，且是调用时才读</td></tr>
+        <tr><td>改<b>输出风格</b></td><td>❌ 要 <code>/clear</code> 或新会话</td><td>系统提示词只在会话开始时读一次</td></tr>
+        <tr><td>改 <b>CLAUDE.md</b></td><td>❌ 要新会话</td><td>同样在会话开始时加载</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 顺带一提</span>
+    <p><code>/clear</code> 是<b>开一个全新的空对话</b>（旧对话可以用 <code>/resume</code> 找回来）。
+      如果你只是想腾出上下文空间、但要接着聊，用的是 <code>/compact</code>——
+      但 <code>/compact</code> <b>不会</b>重新加载系统提示词，所以它救不了风格没生效的问题。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 作用范围：对子代理无效</h2>
+
+  <p>这一条现在看可能有点抽象，读完<a href="06-subagent-fork.html">第 06 章</a>会更清楚，先记住结论：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>场景</th><th>输出风格生效吗</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><td>主对话</td><td>✅ 生效</td><td>风格就是加在主对话的系统提示词上的</td></tr>
+        <tr><td><b>子代理</b>（Subagent）</td><td>❌ <b>不生效</b></td><td>子代理<b>用的是它自己的系统提示词</b></td></tr>
+        <tr><td><b>分身</b>（Fork）</td><td>✅ 生效</td><td>分身<b>继承父会话完整的系统提示词</b>，是唯一的例外</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 实际影响</span>
+    <p>如果你设了"全部用中文"，然后让 Claude 派一个<b>子代理</b>去干活，
+      <b>子代理返回的内容可能是英文的</b>——因为风格管不到它。</p>
+    <p>要让子代理也守规矩，得在<b>派活时的那段话里</b>明确写上要求，
+      或者改用<b>分身</b>（<code>context: fork</code>）。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s9">9. 代价：会多花多少 token</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>来源</th><th>影响</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>输入</b>（你的风格文字本身）</td>
+          <td>系统提示词变长 → 输入 token 增加。
+            但<b>提示词缓存</b>会让第一次请求之后的成本降下来</td>
+        </tr>
+        <tr>
+          <td><b>输出</b>（内置 Explanatory / Learning）</td>
+          <td><b>刻意设计成回答更长</b>，所以输出 token 会明显增加</td>
+        </tr>
+        <tr>
+          <td><b>输出</b>（你自定义的）</td>
+          <td>取决于你写了什么。要求"每个概念配表格 + 例子"，回答自然就长</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 权衡建议</span>
+    <p>风格文件<b>别写成长篇大论</b>——它每一轮都在占位置。
+      把"每一轮都要遵守的表达规范"放进去（几十行足够），
+      把"某个任务的详细步骤"留给<a href="02-skill-basics.html">技能</a>，
+      后者只在用到时才花钱。</p>
+  </div>
+
+  <hr>
+
+  <h2>本章小结</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>问题</th><th>答案</th></tr></thead>
+      <tbody>
+        <tr><td>输出风格改什么</td><td>改<b>系统提示词</b> → 影响每一轮的表达方式</td></tr>
+        <tr><td>内置有哪些</td><td>Default / Proactive / Explanatory / Learning</td></tr>
+        <tr><td>怎么切换</td><td><code>/config</code> 或改 <code>outputStyle</code> 设置。<b><code>/output-style</code> 已删除</b></td></tr>
+        <tr><td>自定义放哪</td><td><code>~/.claude/output-styles/名字.md</code>，文件名即风格名</td></tr>
+        <tr><td>最容易忘的字段</td><td><code>keep-coding-instructions: true</code>（还要写代码就必须加）</td></tr>
+        <tr><td>改了没反应</td><td>要 <code>/clear</code> 或开新会话</td></tr>
+        <tr><td>管得到子代理吗</td><td>管不到；只有<b>分身</b>例外</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">👉 下一步</span>
+    <p>现在你手上有两个工具了：<b>技能</b>（偶尔用的流程）和<b>输出风格</b>（每轮的表达）。
+      加上还没讲的 <b>CLAUDE.md</b>，一共有五种定制方式。
+      下一章用一张决策图告诉你：<b>拿到一句需求，到底该放进哪一层。</b></p>
+  </div>
+
+  <nav class="pager">
+    <a href="03-skill-advanced.html" class="prev"><small>← 上一页</small>03 · 技能进阶</a>
+    <a href="05-choose-where.html" class="next"><small>下一页 →</small>05 · 该放进哪一层</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

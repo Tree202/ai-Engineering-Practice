@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>05 · 该放进哪一层 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="04-output-style.html">← 上一页</a>
+  <a href="06-subagent-fork.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 05 章 · 难度 ★★☆</span>
+  <h1>该放进哪一层：五种定制方式的分工</h1>
+  <p class="lead">
+    到这里你已经学了<b>技能</b>和<b>输出风格</b>。加上这一章的 <b>CLAUDE.md</b>，
+    Claude Code 一共有五种"把话存起来"的方式。<br>
+    这一章给你一张决策图：<b>拿到一句需求，一眼看出该放哪。</b><br>
+    前置知识：<a href="02-skill-basics.html">第 02 章</a>、<a href="04-output-style.html">第 04 章</a>。
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">CLAUDE.md 是什么</a></li>
+      <li><a href="#s2">CLAUDE.md 放在哪几个位置</a></li>
+      <li><a href="#s3">怎么写好一个 CLAUDE.md</a></li>
+      <li><a href="#s4">导入其他文件：@路径</a></li>
+      <li><a href="#s5">.claude/rules/：按文件类型分开加载</a></li>
+      <li><a href="#s6">自动记忆：Claude 自己做的笔记</a></li>
+      <li><a href="#s7">五种定制方式全对比</a></li>
+      <li><a href="#s8">决策图：这句话该放哪</a></li>
+      <li><a href="#s9">把你那段长提示词拆开</a></li>
+      <li><a href="#s10">压缩之后哪些会活下来</a></li>
+      <li><a href="#s11">相关命令速查</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. CLAUDE.md 是什么</h2>
+
+  <div class="concept">
+    <h3>CLAUDE.md</h3>
+    <p class="term">CLAUDE.md · 记忆文件</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>一个普通的 Markdown 文件，放在约定好的位置，<b>每次会话开始时自动加载</b>，
+        用来告诉 Claude 关于这个项目、或关于你的固定事实。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像贴在工位显示器边上的<b>便签条</b>：「测试用 <code>npm test</code>」「别直接推 main 分支」。
+        新人每天来上班第一眼就看到，不用你天天口头交代。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它和<a href="04-output-style.html">输出风格</a>都是"一直生效"的，但位置不同：
+        <b>输出风格改的是系统提示词</b>；
+        <b>CLAUDE.md 是系统提示词<i>之后</i>的一条「用户消息」</b>（见图 4-1）。<br>
+        这个差别有实际后果——见下面的误区。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">项目根目录的 CLAUDE.md</div>
+          <pre><code># 项目约定
+
+- 缩进用 2 个空格
+- 提交前跑 `npm test`
+- API 处理器放在 `src/api/handlers/`
+- 知识库 HTML 输出到 `./kb/`，文件名 `01-xxx.html` 依次编号</code></pre>
+        </div>
+        <p>不想自己从头写的话，可以让它自动生成一份起点：</p>
+        <div class="codeblock"><pre><code>/init</code></pre></div>
+        <p>它会分析你的代码库，把发现的构建命令、测试方式、项目约定写进去。
+          <b>如果已经有 CLAUDE.md，它不会覆盖，只会提改进建议。</b></p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为写进去就一定会被执行。</b>不会。官方说得很直白：
+          CLAUDE.md 是<b>作为「用户消息」送进去的，不是系统提示词的一部分</b>，
+          它是<b>上下文，不是强制配置</b>。含糊或互相矛盾的指令，遵守度会明显下降。</p>
+        <p>❌ <b>把它写成几百行的大百科。</b>它<b>每次会话都全文加载</b>，
+          越长越占上下文，遵守度反而越低。目标是<b>200 行以内</b>。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="callout danger">
+    <span class="label">🚫 什么时候 CLAUDE.md 一定不够用</span>
+    <p>如果某件事<b>必须在某个时刻百分百执行</b>（比如"每次提交前都要跑 lint"），
+      CLAUDE.md 给不了这个保证，因为它只是"建议"。</p>
+    <p>这时候要用<b>钩子（Hooks）</b>——它在固定的生命周期事件上执行固定的 shell 命令，
+      <b>不管 Claude 怎么想都会执行</b>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. CLAUDE.md 放在哪几个位置</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>级别</th><th>路径</th><th>用途</th><th>谁能看到</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>受管策略</b></td>
+          <td class="nowrap">macOS：<code>/Library/Application Support/ClaudeCode/CLAUDE.md</code><br>
+            Linux/WSL：<code>/etc/claude-code/CLAUDE.md</code><br>
+            Windows：<code>C:\Program Files\ClaudeCode\CLAUDE.md</code></td>
+          <td>公司统一规范、合规要求</td>
+          <td>全组织，<b>个人无法排除</b></td>
+        </tr>
+        <tr>
+          <td><b>用户</b></td>
+          <td><code>~/.claude/CLAUDE.md</code></td>
+          <td>你的个人偏好，跨所有项目</td>
+          <td>只有你</td>
+        </tr>
+        <tr>
+          <td><b>项目</b></td>
+          <td><code>./CLAUDE.md</code> 或 <code>./.claude/CLAUDE.md</code></td>
+          <td>团队共享的项目约定</td>
+          <td>团队（通过 Git）</td>
+        </tr>
+        <tr>
+          <td><b>本地</b></td>
+          <td><code>./CLAUDE.local.md</code></td>
+          <td>你在这个项目里的私人偏好</td>
+          <td>只有你（记得加进 <code>.gitignore</code>）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 它们不是互相覆盖，而是拼接</span>
+    <p>Claude Code 会<b>从你的工作目录一路往上走</b>，把沿途每一层的 <code>CLAUDE.md</code>
+      和 <code>CLAUDE.local.md</code> 都<b>拼接</b>进上下文，而不是只用最近的那个。</p>
+    <p>顺序是<b>从文件系统根目录往下</b>，所以<b>离你启动位置越近的，读得越晚</b>；
+      同一层里 <code>CLAUDE.local.md</code> 排在 <code>CLAUDE.md</code> 后面。</p>
+    <p><b>子目录</b>里的 CLAUDE.md 不在启动时加载，而是等 Claude 真的去读那个目录里的文件时才加载。</p>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 想确认到底加载了哪些？</span>
+    <p>别猜，直接查：</p>
+    <div class="codeblock"><pre><code>/context</code></pre></div>
+    <p>看 <b>Memory files</b> 那一栏。<b>没出现在里面的文件，Claude 就是看不见。</b>
+      这是排查"我明明写了它却不听"的第一步。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 怎么写好一个 CLAUDE.md</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>原则</th><th>做法</th></tr></thead>
+      <tbody>
+        <tr><td><b>体积</b></td><td>目标 <b>200 行以内</b>。太长会占上下文、降低遵守度</td></tr>
+        <tr><td><b>结构</b></td><td>用标题和短列表分组。Claude 和人一样，扫结构比读大段文字快</td></tr>
+        <tr><td><b>具体</b></td><td>写<b>能验证</b>的话（呼应<a href="01-prompt-design.html#s5">第 01 章的硬约束</a>）</td></tr>
+        <tr><td><b>一致</b></td><td>定期清理过时和互相矛盾的条目。两条规则打架时，Claude 可能<b>随便挑一条</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="vs">
+    <div class="bad">
+      <h4>❌ 模糊</h4>
+      <div class="codeblock"><pre><code>- 代码要格式化好
+- 记得测试
+- 文件组织得清楚点</code></pre></div>
+    </div>
+    <div class="good">
+      <h4>✅ 具体</h4>
+      <div class="codeblock"><pre><code>- 缩进用 2 个空格
+- 提交前跑 `npm test`
+- API 处理器放 `src/api/handlers/`</code></pre></div>
+    </div>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 什么时候该往 CLAUDE.md 里加一条</span>
+    <p>官方给了四个信号，非常实用：</p>
+    <ul>
+      <li>Claude <b>第二次</b>犯同一个错</li>
+      <li>代码审查抓到了一个"它本该知道"的问题</li>
+      <li>你<b>又</b>打了一遍上次打过的那句纠正</li>
+      <li>新同事来了也需要知道这件事</li>
+    </ul>
+    <p>反过来，如果某条内容是<b>多步流程</b>，或者<b>只在代码库某一块才有用</b>，
+      就该挪到<a href="02-skill-basics.html">技能</a>或<a href="#s5">路径作用域规则</a>里去。</p>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 两个小技巧</span>
+    <p><b>（1）留给人看的笔记不占 token。</b>CLAUDE.md 里的
+      块级 HTML 注释 <code>&lt;!-- 维护者备注 --&gt;</code> 会在送进上下文<b>之前被剥掉</b>。
+      用它给人类维护者留话，不花上下文。</p>
+    <p><b>（2）已经有 AGENTS.md 怎么办？</b>Claude Code <b>只读 CLAUDE.md，不读 AGENTS.md</b>。
+      建一个 CLAUDE.md 把它导入进来即可：</p>
+    <div class="codeblock">
+      <div class="cb-title">CLAUDE.md</div>
+      <pre><code>@AGENTS.md
+
+## Claude Code 专用
+
+改 src/billing/ 下的文件时，先用计划模式。</code></pre>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 导入其他文件：@路径</h2>
+
+  <p>CLAUDE.md 可以用 <code>@路径</code> 把别的文件<b>整个拉进来</b>：</p>
+
+  <div class="codeblock">
+    <pre><code>项目概览见 @README，可用命令见 @package.json。
+
+# 补充说明
+- git 工作流 @docs/git-instructions.md</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>规则</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>路径类型</td><td>相对路径、绝对路径都行。<b>相对路径相对于「写这行的那个文件」</b>，不是工作目录</td></tr>
+        <tr><td>嵌套深度</td><td>被导入的文件还能再导入，<b>最多 4 层</b></td></tr>
+        <tr><td>不想导入怎么办</td><td>用反引号包起来：写 <code>`@README`</code> 就只是普通文字。
+          代码块和行内代码里的 <code>@</code> 都不会被当成导入</td></tr>
+        <tr><td>加载时机</td><td><b>启动时就展开加载</b>。所以拆成导入<b>只是为了组织清晰，并不省上下文</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 外部导入会弹一次批准框</span>
+    <p>如果<b>项目级</b>的记忆文件里，某个导入的路径<b>解析到了工作目录之外</b>（比如导入你主目录里的文件），
+      Claude Code <b>第一次</b>会弹出批准对话框列出这些文件。你拒绝的话，这些导入就永久停用、也不再弹。</p>
+    <p>这是在保护你：<b>防止别人往共享项目里提交一个偷偷读你本地文件的导入。</b>
+      你自己 <code>~/.claude/</code> 下的记忆文件不受此限——那是你自己写的。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. <code>.claude/rules/</code>：按文件类型分开加载</h2>
+
+  <div class="concept">
+    <h3>项目规则（Project Rules）</h3>
+    <p class="term">.claude/rules/*.md</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>把 CLAUDE.md 拆成一堆按主题分的小文件，还能规定
+        <b>「只有在处理某类文件时才加载」</b>。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>公司手册太厚没人看，于是拆成「财务篇」「差旅篇」「安全篇」，
+        而且<b>只在你真的要报销时才把财务篇发给你</b>。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它是 CLAUDE.md 的<b>拆分方案</b>（不是替代品）。
+        和<a href="02-skill-basics.html">技能</a>的区别：
+        规则是<b>「符合条件就自动进上下文」</b>，技能是<b>「调用才进」</b>。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">.claude/rules/api.md</div>
+          <pre><code>---
+paths:
+  - "src/api/**/*.ts"
+---
+
+# API 开发规则
+
+- 所有接口必须做输入校验
+- 使用统一的错误响应格式
+- 补上 OpenAPI 文档注释</code></pre>
+        </div>
+        <p>只有当 Claude 去读 <code>src/api/</code> 下的 TypeScript 文件时，这些规则才会进上下文。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为不写 <code>paths</code> 也能省上下文。</b>不写 <code>paths</code> 的规则
+          <b>会无条件在启动时加载</b>，和 <code>.claude/CLAUDE.md</code> 同等优先级。
+          省上下文靠的是 <code>paths</code>。</p>
+        <p>❌ <b>用它存"偶尔才跑的流程"。</b>那种应该用技能——官方明确这么建议。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>通配符</th><th>匹配</th></tr></thead>
+      <tbody>
+        <tr><td><code>**/*.ts</code></td><td>任意目录下所有 TypeScript 文件</td></tr>
+        <tr><td><code>src/**/*</code></td><td><code>src/</code> 下所有文件</td></tr>
+        <tr><td><code>*.md</code></td><td>项目根目录下的 Markdown 文件</td></tr>
+        <tr><td><code>src/**/*.{ts,tsx}</code></td><td>大括号可以一次匹配多个扩展名</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>个人级的规则放 <code>~/.claude/rules/</code>，对所有项目生效；
+    它<b>比项目规则先加载</b>，所以项目规则优先级更高。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. 自动记忆：Claude 自己做的笔记</h2>
+
+  <div class="concept">
+    <h3>自动记忆（Auto Memory）</h3>
+    <p class="term">auto memory · MEMORY.md</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>Claude <b>自己</b>决定记下来的东西：你的纠正、你的偏好、它摸索出来的构建命令。
+        你不用写任何文件。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>CLAUDE.md 是<b>你给新人写的入职手册</b>；
+        自动记忆是<b>新人自己记的工作笔记</b>——你说过"我们这儿用 pnpm 不用 npm"，他记下来了。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它和 CLAUDE.md 是<b>互补</b>的一对，<b>两者都在每次会话开始时加载</b>。
+        核心区别就一个字：<b>谁写的</b>。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>直接跟它说就行：
+        <div class="codeblock"><pre><code>记住：这个项目一律用 pnpm，不要用 npm</code></pre></div>
+        <p>想看它到底记了什么、或者改掉删掉：</p>
+        <div class="codeblock"><pre><code>/memory</code></pre></div>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为它会跨机器同步。</b>不会。自动记忆是<b>本机的</b>，
+          存在 <code>~/.claude/projects/&lt;项目&gt;/memory/</code>，不会同步到别的电脑或云端。</p>
+        <p>❌ <b>把大段内容塞进 MEMORY.md。</b>只有<b>前 200 行或前 25KB</b>（先到者为准）
+          会在会话开始时加载，超出的部分<b>直接不加载</b>。详细内容应该拆到同目录的主题文件里，
+          那些是用到时才读的。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>CLAUDE.md</th><th>自动记忆</th></tr></thead>
+      <tbody>
+        <tr><td>谁写</td><td><b>你</b></td><td><b>Claude</b></td></tr>
+        <tr><td>内容</td><td>指令和规则</td><td>它学到的经验和模式</td></tr>
+        <tr><td>范围</td><td>项目 / 个人 / 组织</td><td>按 Git 仓库划分，同仓库的多个工作树共用一份</td></tr>
+        <tr><td>加载量</td><td><b>全文</b>加载</td><td>只加载 <code>MEMORY.md</code> 前 200 行或 25KB</td></tr>
+        <tr><td>关闭方式</td><td>删掉文件</td><td>设置里 <code>autoMemoryEnabled: false</code>，
+          或环境变量 <code>CLAUDE_CODE_DISABLE_AUTO_MEMORY=1</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>看到界面上闪过「Saved 2 memories」「Recalled 2 memories」，就是它在读写这个目录。
+    这些都是<b>普通的 Markdown 文件，你随时能打开改或删</b>。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 五种定制方式全对比</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>方式</th><th>工作原理</th><th>什么时候用</th><th>生效范围</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>输出风格</b></td>
+          <td>修改<b>系统提示词</b></td>
+          <td>你想要一个不同的角色、语气、默认回答格式，<b>每一轮都要</b></td>
+          <td>主对话；<b>子代理无效</b>，分身有效</td>
+        </tr>
+        <tr>
+          <td><b>CLAUDE.md</b></td>
+          <td>作为<b>系统提示词之后的一条用户消息</b>加入</td>
+          <td>Claude 每次都该知道的<b>项目约定和事实</b></td>
+          <td>会话全程；子代理也会加载（Explore/Plan 除外）</td>
+        </tr>
+        <tr>
+          <td><code>--append-system-prompt</code></td>
+          <td>往系统提示词<b>追加</b>，不删除任何东西</td>
+          <td>单次启动的一次性追加。<b>每次都得带这个参数</b>，适合脚本</td>
+          <td>本次启动</td>
+        </tr>
+        <tr>
+          <td><b>子代理</b></td>
+          <td>跑一个<b>独立的助手</b>，有自己的系统提示词、模型、工具</td>
+          <td>需要一个作用域独立的专职帮手</td>
+          <td>见<a href="06-subagent-fork.html">第 06 章</a></td>
+        </tr>
+        <tr>
+          <td><b>技能</b></td>
+          <td>在被调用或被判定相关时，<b>加载一段任务指令</b></td>
+          <td>你有一套<b>可复用的工作流</b></td>
+          <td>调用后整轮会话常驻</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 决策图：这句话该放哪</h2>
+
+  <figure class="figure">
+    <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="判断一句需求该放进哪一层的决策流程图">
+      <defs>
+        <marker id="a5" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
+
+      <rect x="248" y="12" width="224" height="42" rx="21" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="360" y="38" text-anchor="middle" fill="var(--text)" font-size="13.5">手上有一句需求</text>
+
+      <path d="M360 56 V84" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+
+      <rect x="228" y="88" width="264" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="360" y="108" text-anchor="middle" fill="var(--text)" font-size="12.5">它是「每一轮都要遵守的</text>
+      <text x="360" y="126" text-anchor="middle" fill="var(--text)" font-size="12.5">说话方式」吗？</text>
+
+      <path d="M492 111 H592" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="540" y="103" text-anchor="middle" fill="var(--ok)" font-size="12">是</text>
+      <rect x="596" y="90" width="112" height="42" rx="9" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="652" y="108" text-anchor="middle" fill="var(--text)" font-size="12">输出风格</text>
+      <text x="652" y="124" text-anchor="middle" fill="var(--muted)" font-size="10.5">output-styles/</text>
+
+      <path d="M360 136 V164" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="374" y="154" fill="var(--danger)" font-size="12">否</text>
+
+      <rect x="228" y="168" width="264" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="360" y="188" text-anchor="middle" fill="var(--text)" font-size="12.5">它是「一条固定事实」吗？</text>
+      <text x="360" y="206" text-anchor="middle" fill="var(--muted)" font-size="11.5">路径、命令、约定</text>
+
+      <path d="M492 191 H592" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="540" y="183" text-anchor="middle" fill="var(--ok)" font-size="12">是</text>
+      <rect x="596" y="170" width="112" height="42" rx="9" fill="var(--info-bg)" stroke="var(--info)"/>
+      <text x="652" y="188" text-anchor="middle" fill="var(--text)" font-size="12">CLAUDE.md</text>
+      <text x="652" y="204" text-anchor="middle" fill="var(--muted)" font-size="10.5">只在部分目录 → rules/</text>
+
+      <path d="M360 216 V244" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="374" y="234" fill="var(--danger)" font-size="12">否</text>
+
+      <rect x="228" y="248" width="264" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="360" y="268" text-anchor="middle" fill="var(--text)" font-size="12.5">它是「一套多步流程」吗？</text>
+      <text x="360" y="286" text-anchor="middle" fill="var(--muted)" font-size="11.5">而且会反复用到</text>
+
+      <path d="M492 271 H592" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="540" y="263" text-anchor="middle" fill="var(--ok)" font-size="12">是</text>
+      <rect x="596" y="250" width="112" height="42" rx="9" fill="var(--warn-bg)" stroke="var(--warn)"/>
+      <text x="652" y="268" text-anchor="middle" fill="var(--text)" font-size="12">技能</text>
+      <text x="652" y="284" text-anchor="middle" fill="var(--muted)" font-size="10.5">skills/名字/SKILL.md</text>
+
+      <path d="M360 296 V324" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="374" y="314" fill="var(--danger)" font-size="12">否</text>
+
+      <rect x="228" y="328" width="264" height="46" rx="9" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="360" y="348" text-anchor="middle" fill="var(--text)" font-size="12.5">它必须「百分百执行」吗？</text>
+
+      <path d="M492 351 H592" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="540" y="343" text-anchor="middle" fill="var(--ok)" font-size="12">是</text>
+      <rect x="596" y="330" width="112" height="42" rx="9" fill="var(--danger-bg)" stroke="var(--danger)"/>
+      <text x="652" y="355" text-anchor="middle" fill="var(--text)" font-size="12">钩子 Hooks</text>
+
+      <path d="M360 376 V398" stroke="var(--muted)" stroke-width="1.6" marker-end="url(#a5)"/>
+      <text x="360" y="414" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        都不是 → 就在这次对话里直接说，不用存
+      </text>
+    </svg>
+    <figcaption>图 5-1　一句需求该放进哪一层</figcaption>
+  </figure>
+
+  <!-- ============================================================ -->
+  <h2 id="s9">9. 把你那段长提示词拆开</h2>
+
+  <p>现在用上面的决策图，把一段真实的长提示词拆掉。原文是：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">拆之前：每次都要重打的一整段</div>
+    <pre><code>我是初学者，学习 claude 的各种功能。
+我输入的内容全部转换为英文，你使用英文搜索分析。你输出的结果输出中文。
+我是小白，当遇到没有接触过的名词和功能时，先讲清名词概念、逻辑关系、使用方法。
+你的讲解要：从易到难、有逻辑性、有条理性、用通俗易懂的例子。
+输出内容不限于：文字 表格 列表 图片，并且有三种主题（浅色/深色/跟随系统，默认深色）。
+把上面讲解的知识生成 html，内容不丢失，图文并茂。
+输出内容长度和大小不限制。
+当一个 html 文件长度适合阅读，可以生成多个 html 文件。</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>原句</th><th>属于</th><th>去处</th></tr></thead>
+      <tbody>
+        <tr><td>我是初学者 / 输出中文 / 检索用英文</td><td>每轮的说话方式</td><td><b>输出风格</b> <code>~/.claude/output-styles/beginner-zh.md</code></td></tr>
+        <tr><td>遇到新名词先讲清概念、从易到难</td><td>每轮的说话方式</td><td><b>输出风格</b>（改写成五步法）</td></tr>
+        <tr><td>输出到 <code>./kb/</code>、文件名规范</td><td>项目事实</td><td><b>CLAUDE.md</b></td></tr>
+        <tr><td>整理对话 → 核实 → 逐个生成 → 自检</td><td>多步流程</td><td><b>技能</b> <code>~/.claude/skills/kb/SKILL.md</code></td></tr>
+        <tr><td>三种主题、配色、样式</td><td>可复用资产</td><td>技能目录里的 <b>模板文件</b> <code>template.html</code></td></tr>
+        <tr><td>「输出长度不限制」</td><td colspan="2"><b>删掉</b>，改成「写一个存一个」（见 <a href="01-prompt-design.html#s4">第 01 章第 4 节</a>）</td></tr>
+        <tr><td>「不限于…等等」「适合阅读」</td><td colspan="2"><b>改写</b>成可数的硬约束（见 <a href="01-prompt-design.html#s5">第 01 章第 5 节</a>）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">✅ 拆完之后</span>
+    <p>你每次要做的，从<b>粘贴 300 字</b>变成：</p>
+    <div class="codeblock"><pre><code>/kb Claude 技能体系</code></pre></div>
+    <p>而且因为样式来自同一个模板文件，<b>每次生成的页面外观完全一致</b>，
+      不会这次橙色下次蓝色。完整实施步骤见<a href="07-case-study.html">第 07 章</a>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s10">10. 压缩之后哪些会活下来</h2>
+
+  <p>回顾<a href="01-prompt-design.html#s3">第 01 章</a>：上下文满了会触发压缩，细节会丢。
+    但不是所有东西都会丢——不同来源的内容命运不同：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>内容来源</th><th>压缩后</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>项目根目录的 CLAUDE.md</b></td>
+          <td>✅ <b>存活</b>。Claude Code 会<b>重新从磁盘读一遍</b>再注入回去</td>
+        </tr>
+        <tr>
+          <td><b>子目录里的 CLAUDE.md</b></td>
+          <td>⚠️ <b>不自动重注入</b>。等下次 Claude 读那个目录里的文件时才会重新加载</td>
+        </tr>
+        <tr>
+          <td><b>带 <code>paths</code> 的规则</b></td>
+          <td>⚠️ 同上，要等下次匹配到文件</td>
+        </tr>
+        <tr>
+          <td><b>技能内容</b></td>
+          <td>🟡 <b>部分存活</b>。每个技能最近一次调用会被重新附加，
+            <b>各留前 5000 token，全部技能共享 25000 token 预算，从最近的开始填</b></td>
+        </tr>
+        <tr>
+          <td><b>你在对话里临时说的话</b></td>
+          <td>❌ <b>只剩摘要</b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 一个非常实用的推论</span>
+    <p>如果某条指令「压缩之后就失灵了」，原因几乎总是这三个之一：</p>
+    <ol>
+      <li>它<b>只在对话里说过</b>，没写进任何文件 → 写进 CLAUDE.md</li>
+      <li>它在<b>子目录</b>的 CLAUDE.md 里，还没被重新触发</li>
+      <li>它是<b>路径作用域规则</b>，从压缩以来还没匹配到文件</li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s11">11. 相关命令速查</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>命令</th><th>作用</th></tr></thead>
+      <tbody>
+        <tr><td><code>/init</code></td><td>分析代码库，自动生成一份起始 CLAUDE.md。已有则只提建议不覆盖</td></tr>
+        <tr><td><code>/memory</code></td><td>列出所有记忆文件位置并可直接打开编辑；也能开关自动记忆</td></tr>
+        <tr><td><code>/context</code></td><td>看上下文占用的彩色方格图，<b>并确认哪些记忆文件真的加载了</b></td></tr>
+        <tr><td><code>/config</code></td><td>打开设置界面（主题、模型、输出风格等）。别名 <code>/settings</code></td></tr>
+        <tr><td><code>/skills</code></td><td>列出当前可用的全部技能</td></tr>
+        <tr><td><code>/compact [说明]</code></td><td>压缩当前对话腾出空间，可附一句话指定摘要重点</td></tr>
+        <tr><td><code>/clear [名字]</code></td><td>开一个全新空对话。可给旧对话起个名，方便 <code>/resume</code> 找回。别名 <code>/reset</code> <code>/new</code></td></tr>
+        <tr><td><code>/export [文件名]</code></td><td>把当前对话导成纯文本。带文件名直接写文件，不带则弹框选复制或另存</td></tr>
+        <tr><td><code>/insights</code></td><td><b>生成一份 HTML 报告</b>，分析你最近的会话：常在哪些项目干活、怎么用 Claude Code、哪里容易出问题、有哪些功能值得试。<b>云端会话不可用</b></td></tr>
+        <tr><td><code>/doctor</code></td><td>体检配置。它还会给已提交的 CLAUDE.md 提"瘦身"建议（需 v2.1.206+）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">💡 <code>/insights</code> 值得你现在就试一下</span>
+    <p>你正在学 Claude Code，而 <code>/insights</code> 恰好会告诉你
+      <b>「你实际上是怎么用它的、哪里出过问题、还有什么功能没用上」</b>，
+      而且输出正是你喜欢的 HTML 报告。</p>
+  </div>
+
+  <hr>
+
+  <h2>本章小结</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>内容类型</th><th>放这里</th></tr></thead>
+      <tbody>
+        <tr><td>每轮都要的<b>说话方式</b></td><td><code>~/.claude/output-styles/名字.md</code></td></tr>
+        <tr><td>每次都该知道的<b>事实</b></td><td><code>CLAUDE.md</code>（200 行以内）</td></tr>
+        <tr><td>只在<b>部分目录</b>才适用的事实</td><td><code>.claude/rules/*.md</code> + <code>paths</code></td></tr>
+        <tr><td>反复用的<b>多步流程</b></td><td><code>~/.claude/skills/名字/SKILL.md</code></td></tr>
+        <tr><td>模板、参考资料、脚本</td><td>技能文件夹里的附属文件</td></tr>
+        <tr><td>必须<b>百分百执行</b>的动作</td><td>钩子 Hooks</td></tr>
+        <tr><td>Claude 自己该记住的</td><td>自动记忆（不用你管）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">👉 下一步</span>
+    <p>前面反复提到「子代理」和「分身」。它们能解决一个你迟早会遇到的问题：
+      <b>对话太长，整理知识时上下文根本不够用</b>。下一章讲这个。</p>
+  </div>
+
+  <nav class="pager">
+    <a href="04-output-style.html" class="prev"><small>← 上一页</small>04 · 输出风格</a>
+    <a href="06-subagent-fork.html" class="next"><small>下一页 →</small>06 · 子代理与分身</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

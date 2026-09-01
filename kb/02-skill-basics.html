@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>02 · 技能入门 — Claude Code 知识库</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <a href="00-index.html" class="home">📚 目录</a>
+  <a href="01-prompt-design.html">← 上一页</a>
+  <a href="03-skill-advanced.html">下一页 →</a>
+  <span class="spacer"></span>
+  <div class="theme-switch" role="group" aria-label="主题切换">
+    <button type="button" data-theme-set="light">浅色</button>
+    <button type="button" data-theme-set="dark">深色</button>
+    <button type="button" data-theme-set="system">跟随系统</button>
+  </div>
+</nav>
+
+<main>
+  <span class="chapter-tag">第 02 章 · 难度 ★☆☆</span>
+  <h1>技能入门：把长提示词存成一个 <code>/命令</code></h1>
+  <p class="lead">
+    上一章讲了提示词该怎么写。这一章解决第二个问题：<b>写好了，存到哪？</b><br>
+    答案是「技能」。学完这一章，你能在 5 分钟内做出属于自己的第一个 <code>/命令</code>。
+  </p>
+
+  <div class="toc">
+    <div class="toc-title">本页内容</div>
+    <ol>
+      <li><a href="#s1">技能是什么</a></li>
+      <li><a href="#s2">SKILL.md 长什么样：两个部分</a></li>
+      <li><a href="#s3">放在哪：四级位置</a></li>
+      <li><a href="#s4">目录名 = 命令名</a></li>
+      <li><a href="#s5">重名了谁赢</a></li>
+      <li><a href="#s6">重要变化：自定义命令已经并入技能</a></li>
+      <li><a href="#s7">内置技能：你已经有一堆了</a></li>
+      <li><a href="#s8">动手：5 分钟做出第一个技能</a></li>
+      <li><a href="#s9">改完不用重启：实时变更检测</a></li>
+      <li><a href="#s10">什么时候该做技能</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s1">1. 技能是什么</h2>
+
+  <div class="concept">
+    <h3>技能（Skill）</h3>
+    <p class="term">skill · SKILL.md</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>一个存在硬盘上的文本文件，里面写着一段提示词。你打 <code>/文件夹名</code>，
+        就等于把这个文件的内容整段发出去。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像输入法里的<b>「常用短语」</b>：你把「本人身份证号 XXX，收货地址 YYY」存成一个短语，
+        以后打两个字就出来了。技能就是这个，只不过存的是几百字的工作流程，
+        而且<b>还能带附件</b>（模板文件、脚本）。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>技能是<a href="01-prompt-design.html#s1">「可复用工作流」</a>那一类内容的<b>归宿</b>。
+        它和后面要讲的输出风格（第 04 章）、CLAUDE.md（第 05 章）是<b>并列</b>关系，
+        三者分工不同：技能是<b>「用的时候才加载」</b>，另外两个是<b>「一直都在」</b>。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>
+        <div class="codeblock">
+          <div class="cb-title">整个技能就是这一个文件：~/.claude/skills/hello/SKILL.md</div>
+          <pre><code>---
+description: 用三句话打个招呼
+---
+
+用三句话跟我打招呼，语气轻松一点。</code></pre>
+        </div>
+        <p>存好之后，在会话里打 <code>/hello</code>，就等于把「用三句话跟我打招呼……」这句话发出去了。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为技能是「装了一个插件、多了一个功能」。</b>不是。
+          技能没有给 Claude 任何新能力，它只是<b>把你本来要打的字提前存好了</b>。</p>
+        <p>❌ <b>以为技能只能你手动调。</b>默认情况下 Claude <b>也能自己判断</b>什么时候该用它
+          （靠 <code>description</code> 那一行）。想禁止它自作主张，见第 03 章。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <figure class="figure">
+    <svg viewBox="0 0 740 200" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="打一个斜杠命令，技能文件内容被整段插入对话的过程">
+      <defs>
+        <marker id="a2" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <rect x="16" y="58" width="150" height="70" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="91" y="44" text-anchor="middle" fill="var(--muted)" font-size="12">你</text>
+      <text x="91" y="90" text-anchor="middle" fill="var(--text)" font-size="15" font-family="monospace">/hello</text>
+      <text x="91" y="112" text-anchor="middle" fill="var(--muted)" font-size="11">只打 6 个字符</text>
+
+      <path d="M172 93 H216" stroke="var(--accent)" stroke-width="2" marker-end="url(#a2)"/>
+
+      <rect x="222" y="48" width="170" height="90" rx="10" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="307" y="34" text-anchor="middle" fill="var(--muted)" font-size="12">Claude Code</text>
+      <text x="307" y="76" text-anchor="middle" fill="var(--text)" font-size="12.5">找到磁盘上的</text>
+      <text x="307" y="98" text-anchor="middle" fill="var(--accent)" font-size="12" font-family="monospace">skills/hello/SKILL.md</text>
+      <text x="307" y="120" text-anchor="middle" fill="var(--text)" font-size="12.5">读出全文</text>
+
+      <path d="M398 93 H442" stroke="var(--accent)" stroke-width="2" marker-end="url(#a2)"/>
+
+      <rect x="448" y="48" width="170" height="90" rx="10" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="533" y="34" text-anchor="middle" fill="var(--muted)" font-size="12">对话里</text>
+      <text x="533" y="80" text-anchor="middle" fill="var(--text)" font-size="12.5">整段内容被插进来</text>
+      <text x="533" y="102" text-anchor="middle" fill="var(--muted)" font-size="11.5">（就像你亲手打的一样）</text>
+
+      <path d="M624 93 H668" stroke="var(--accent)" stroke-width="2" marker-end="url(#a2)"/>
+
+      <rect x="674" y="58" width="52" height="70" rx="10" fill="var(--ok-bg)" stroke="var(--ok)"/>
+      <text x="700" y="98" text-anchor="middle" fill="var(--ok)" font-size="22">✓</text>
+
+      <text x="370" y="176" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        技能没有变魔术，它只是替你把那段字打了出来
+      </text>
+    </svg>
+    <figcaption>图 2-1　一条 <code>/命令</code> 背后发生了什么</figcaption>
+  </figure>
+
+  <!-- ============================================================ -->
+  <h2 id="s2">2. SKILL.md 长什么样：两个部分</h2>
+
+  <p>每个技能都是一个<b>文件夹</b>，里面必须有一个叫 <code>SKILL.md</code> 的文件。这个文件分两段：</p>
+
+  <div class="codeblock">
+    <div class="cb-title">SKILL.md 的结构</div>
+    <pre><code>---                                    ← 三个减号，开始
+description: 这个技能是干什么的         ← 前置数据区
+disable-model-invocation: true
+---                                    ← 三个减号，结束
+
+这里往下是正文，就是普通的 Markdown。      ← 正文区
+你想让 Claude 做什么，就在这里写清楚。</code></pre>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>部分</th><th>叫什么</th><th>写什么</th><th>必填吗</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>上半段</td>
+          <td>前置数据（<span class="t">Frontmatter</span>）</td>
+          <td>配置项。用 <code>键: 值</code> 的格式，夹在两行 <code>---</code> 之间</td>
+          <td>整体可省略；但强烈建议至少写 <code>description</code></td>
+        </tr>
+        <tr>
+          <td>下半段</td>
+          <td>正文</td>
+          <td>你的提示词本体，普通 Markdown</td>
+          <td>是</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ <code>description</code> 这一行不只是注释</span>
+    <p>它有一个实际作用：<b>Claude 靠它判断什么时候该自动调用这个技能</b>。
+      所以别写「一个技能」这种废话，要写清楚<b>「做什么 + 什么时候用」</b>。</p>
+    <div class="vs" style="margin-top:12px">
+      <div class="bad">
+        <h4>❌ 没用的写法</h4>
+        <div class="codeblock"><pre><code>description: 整理知识</code></pre></div>
+      </div>
+      <div class="good">
+        <h4>✅ 有用的写法</h4>
+        <div class="codeblock"><pre><code>description: 把当前对话整理成初学者
+中文 HTML 教程。当用户说"整理成知识 /
+做成笔记 / 生成教程"时使用。</code></pre></div>
+      </div>
+    </div>
+    <p style="margin-top:12px">还有个上限要知道：<code>description</code> 在技能列表里
+      <b>超过 1536 个字符会被截断</b>，所以<b>把最关键的用途写在最前面</b>。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s3">3. 放在哪：四级位置</h2>
+
+  <p>同一个技能文件，放在不同地方，生效范围完全不同：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>级别</th><th>路径</th><th>对谁生效</th><th>适合放什么</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>个人</b></td>
+          <td class="nowrap"><code>~/.claude/skills/&lt;名字&gt;/SKILL.md</code></td>
+          <td>你的<b>所有</b>项目</td>
+          <td>个人习惯、学习笔记流程 ← <b>你的场景选这个</b></td>
+        </tr>
+        <tr>
+          <td><b>项目</b></td>
+          <td class="nowrap"><code>.claude/skills/&lt;名字&gt;/SKILL.md</code></td>
+          <td>仅当前项目</td>
+          <td>团队共用的流程，可以提交到 Git 一起分享</td>
+        </tr>
+        <tr>
+          <td><b>插件</b></td>
+          <td class="nowrap"><code>&lt;插件&gt;/skills/&lt;名字&gt;/SKILL.md</code></td>
+          <td>启用了该插件的地方</td>
+          <td>打包分发给别人的整套能力</td>
+        </tr>
+        <tr>
+          <td><b>企业</b></td>
+          <td>由 IT 部门统一管理的目录</td>
+          <td>组织内全部用户</td>
+          <td>公司规范（个人一般用不到）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout info">
+    <span class="label">💡 <code>~</code> 是什么意思</span>
+    <p><code>~</code> 代表你的用户主目录。在 Mac 上就是 <code>/Users/你的用户名/</code>。
+      所以 <code>~/.claude/skills/</code> 展开来是
+      <code>/Users/你的用户名/.claude/skills/</code>。</p>
+    <p>目录名以点开头（<code>.claude</code>）表示<b>隐藏文件夹</b>，在访达里默认看不见。
+      在访达里按 <kbd>Command + Shift + .</kbd> 可以显示隐藏文件。</p>
+  </div>
+
+  <h3>项目技能还会往上找</h3>
+  <p>如果你在子目录里启动 Claude Code，它会<b>一路往上找到仓库根目录</b>，
+    把沿途每一层的 <code>.claude/skills/</code> 都加载进来。所以在子目录里启动，
+    照样能用到根目录定义的技能。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s4">4. 目录名 = 命令名</h2>
+
+  <p>这条规则很简单，但初学者经常搞错：</p>
+
+  <div class="callout tip">
+    <span class="label">✅ 记住这一条</span>
+    <p>在个人技能和项目技能里，<b>你打的命令名来自「文件夹名」，不是前置数据里的 <code>name</code> 字段</b>。</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>文件位置</th><th>你打什么</th></tr></thead>
+      <tbody>
+        <tr><td><code>.claude/skills/deploy-staging/SKILL.md</code></td><td><code>/deploy-staging</code></td></tr>
+        <tr><td><code>~/.claude/skills/kb/SKILL.md</code></td><td><code>/kb</code></td></tr>
+        <tr><td><code>.claude/commands/deploy.md</code>（旧写法）</td><td><code>/deploy</code>（取文件名）</td></tr>
+        <tr><td>插件里的 <code>my-plugin/skills/review/SKILL.md</code></td><td><code>/my-plugin:review</code>（带插件前缀）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 那 <code>name</code> 字段是干嘛的</span>
+    <p>在个人/项目技能里，<code>name</code> <b>只影响技能列表里显示的名字</b>，不影响你打的命令。
+      想改命令名，<b>去改文件夹名</b>。（插件技能是例外，那里 <code>name</code> 会参与命令名。）</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s5">5. 重名了谁赢</h2>
+
+  <p>如果两个地方都有一个叫 <code>deploy</code> 的技能，谁生效？规则是：</p>
+
+  <figure class="figure">
+    <svg viewBox="0 0 620 250" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-label="技能优先级：企业高于个人高于项目高于内置">
+      <rect x="150" y="16" width="320" height="42" rx="8" fill="var(--danger-bg)" stroke="var(--danger)"/>
+      <text x="310" y="42" text-anchor="middle" fill="var(--text)" font-size="13.5">企业（IT 统一部署）</text>
+
+      <rect x="150" y="68" width="320" height="42" rx="8" fill="var(--warn-bg)" stroke="var(--warn)"/>
+      <text x="310" y="94" text-anchor="middle" fill="var(--text)" font-size="13.5">个人　~/.claude/skills/</text>
+
+      <rect x="150" y="120" width="320" height="42" rx="8" fill="var(--accent-bg)" stroke="var(--accent)"/>
+      <text x="310" y="146" text-anchor="middle" fill="var(--text)" font-size="13.5">项目　.claude/skills/</text>
+
+      <rect x="150" y="172" width="320" height="42" rx="8" fill="var(--surface-2)" stroke="var(--border)"/>
+      <text x="310" y="198" text-anchor="middle" fill="var(--text)" font-size="13.5">内置技能（Claude Code 自带）</text>
+
+      <text x="112" y="30" text-anchor="end" fill="var(--muted)" font-size="12">优先级高</text>
+      <text x="112" y="206" text-anchor="end" fill="var(--muted)" font-size="12">优先级低</text>
+      <path d="M126 22 V208" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <path d="M126 22 l-4 8 M126 22 l4 8" stroke="var(--muted)" stroke-width="1.5" fill="none"/>
+
+      <text x="500" y="94" fill="var(--muted)" font-size="12">← 个人的会</text>
+      <text x="500" y="112" fill="var(--muted)" font-size="12">　 盖住项目的</text>
+
+      <text x="310" y="240" text-anchor="middle" fill="var(--muted)" font-size="12.5">
+        同名时，上面的盖住下面的
+      </text>
+    </svg>
+    <figcaption>图 2-2　技能同名冲突的优先级</figcaption>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>情况</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td>个人 vs 项目 同名</td><td><b>个人的赢</b></td></tr>
+        <tr><td>你的技能 vs 同名内置技能</td><td><b>你的赢</b>（但内置技能的<b>别名</b>不会被替换）</td></tr>
+        <tr><td><code>.claude/commands/deploy.md</code> vs <code>.claude/skills/deploy/</code></td><td><b>技能赢</b></td></tr>
+        <tr><td>插件技能</td><td>不冲突，它有 <code>插件名:技能名</code> 的专属命名空间</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s6">6. 重要变化：自定义命令已经并入技能</h2>
+
+  <div class="callout info">
+    <span class="label">📌 如果你看过旧教程，这条一定要知道</span>
+    <p>以前有一个独立的概念叫<b>自定义命令（Custom Commands）</b>，放在 <code>.claude/commands/</code> 目录里。
+      <b>现在它已经合并进技能了。</b></p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th><code>.claude/commands/deploy.md</code></th><th><code>.claude/skills/deploy/SKILL.md</code></th></tr></thead>
+      <tbody>
+        <tr><td>产生的命令</td><td><code>/deploy</code></td><td><code>/deploy</code></td></tr>
+        <tr><td>行为</td><td colspan="2" style="text-align:center">完全一样</td></tr>
+        <tr><td>旧文件还能用吗</td><td>✅ 能，不用改</td><td>—</td></tr>
+        <tr><td>能带附属文件</td><td>❌ 不能</td><td>✅ 能（模板、脚本、参考文档）</td></tr>
+        <tr><td>能控制谁可以调用</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Claude 能自动加载</td><td>❌</td><td>✅</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><b>结论：新建的一律用技能写法</b>（<code>skills/名字/SKILL.md</code>），
+    已有的 <code>commands/</code> 文件不用动，它们继续能用。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s7">7. 内置技能：你已经有一堆了</h2>
+
+  <div class="concept">
+    <h3>内置技能（Bundled Skills）</h3>
+    <p class="term">bundled skills</p>
+    <dl>
+      <dt><span class="n">1</span>一句话定义</dt>
+      <dd>Claude Code 自带的、开箱即用的技能，不用你写任何文件。</dd>
+
+      <dt><span class="n">2</span>生活化类比</dt>
+      <dd>像新买的手机里预装的「计算器」「指南针」——不用去应用商店下，开机就有。</dd>
+
+      <dt><span class="n">3</span>在体系中的位置</dt>
+      <dd>它和你自己写的技能是<b>并列</b>关系，调用方式一模一样（都是打 <code>/名字</code>），
+        只是<b>优先级最低</b>——你写一个同名的就会盖掉它（见上一节）。</dd>
+
+      <dt><span class="n">4</span>最小例子</dt>
+      <dd>直接在会话里打就行，不需要任何准备：
+        <div class="codeblock">
+          <pre><code>/doctor</code></pre>
+        </div>
+        <p>它会检查你的 Claude Code 安装配置有没有问题，并尝试修复。</p>
+      </dd>
+
+      <dt><span class="n">5</span>常见误区</dt>
+      <dd>
+        <p>❌ <b>以为内置技能都会自动触发。</b>不是。有些（比如 <code>/verify</code>）
+          <b>只有你手动打才会跑</b>，这样长耗时的检查不会自己乱花时间和额度。</p>
+        <p>❌ <b>以为它们是「内置命令」。</b>两者不同：内置<b>技能</b>是给 Claude 一段详细提示词，
+          让它自己用工具去干；内置<b>命令</b>（如 <code>/clear</code>）执行的是固定逻辑。</p>
+      </dd>
+    </dl>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>内置技能</th><th>干什么</th></tr></thead>
+      <tbody>
+        <tr><td><code>/doctor</code></td><td>体检并修复安装配置问题</td></tr>
+        <tr><td><code>/code-review</code></td><td>审查改动或 PR，找 bug 和可简化的地方</td></tr>
+        <tr><td><code>/debug</code></td><td>开调试日志、排查问题</td></tr>
+        <tr><td><code>/verify</code></td><td>构建并运行你的 App，确认改动真的生效（只在你手动调时才跑）</td></tr>
+        <tr><td><code>/run</code></td><td>启动并操作你的 App，看效果</td></tr>
+        <tr><td><code>/run-skill-generator</code></td><td>教会 <code>/run</code> 和 <code>/verify</code> 怎么构建启动你这个项目</td></tr>
+        <tr><td><code>/batch</code></td><td>并行地在整个代码库里做大规模改动</td></tr>
+        <tr><td><code>/loop</code></td><td>让一段提示词反复执行</td></tr>
+        <tr><td><code>/dataviz</code></td><td>图表、看板的设计规范</td></tr>
+        <tr><td><code>/claude-api</code></td><td>加载 Claude API 参考资料</td></tr>
+        <tr><td><code>/fewer-permission-prompts</code></td><td>扫描历史记录，生成白名单，减少权限弹窗</td></tr>
+        <tr><td><code>/design-sync</code></td><td>转换 React 设计系统并上传</td></tr>
+        <tr><td><code>/deep-research</code></td><td>并行发起大量网页检索并交叉验证（标记为「工作流」）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 待验证</span>
+    <p>上面这张表来自官方命令参考页，但抓取时<b>该页面内容被截断</b>，
+      所以这份清单<b>可能不完整</b>，且会随版本变化。
+      要看你这台机器上<b>实际可用</b>的完整清单，在会话里输入 <code>/skills</code>，
+      或者直接打一个 <code>/</code> 看自动补全列表。</p>
+  </div>
+
+  <p>如果你不想要这些内置技能占位置，可以在设置里用
+    <code>disableBundledSkills</code> 关掉——它会关闭<b>除 <code>/doctor</code> 之外</b>的全部内置技能。</p>
+
+  <!-- ============================================================ -->
+  <h2 id="s8">8. 动手：5 分钟做出第一个技能</h2>
+
+  <p>我们做一个真实有用的：<b>让它总结你还没提交的代码改动，并指出风险</b>。</p>
+
+  <ol class="steps">
+    <li><b>建文件夹</b>
+      <div class="codeblock">
+        <div class="cb-title">终端里执行</div>
+        <pre><code>mkdir -p ~/.claude/skills/summarize-changes</code></pre>
+      </div>
+      <p><code>mkdir</code> = 建目录，<code>-p</code> = 中间缺哪层就补哪层。</p>
+    </li>
+
+    <li><b>在里面新建 <code>SKILL.md</code>，写入这些内容</b>
+      <div class="codeblock">
+        <div class="cb-title">~/.claude/skills/summarize-changes/SKILL.md</div>
+        <pre><code>---
+description: 总结未提交的改动并指出风险。当用户问"我改了什么""帮我写提交信息""看看我的 diff"时使用。
+---
+
+## 当前改动
+
+!`git diff HEAD`
+
+## 要求
+
+用两三条要点总结上面的改动，然后列出你注意到的风险，
+例如缺少错误处理、写死的值、需要同步更新的测试。
+如果 diff 是空的，就说明没有未提交的改动。</code></pre>
+      </div>
+    </li>
+
+    <li><b>试一试</b>
+      <p>随便进一个 Git 项目，改动一个文件，然后启动 Claude Code。两种调用方式都可以：</p>
+      <div class="codeblock">
+        <div class="cb-title">方式一：你手动调</div>
+        <pre><code>/summarize-changes</code></pre>
+      </div>
+      <div class="codeblock">
+        <div class="cb-title">方式二：让 Claude 自己判断（因为 description 匹配上了）</div>
+        <pre><code>我改了什么？</code></pre>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout tip">
+    <span class="label">💡 那一行反引号是什么魔法</span>
+    <p>正文里的 <code>!`git diff HEAD`</code> 叫<b>动态上下文注入</b>：
+      Claude Code 会<b>先在你电脑上跑这条命令</b>，把输出结果<b>替换掉这一行</b>，
+      然后才把整个文件交给 Claude。</p>
+    <p>也就是说，Claude 看到的不是「<code>!`git diff HEAD`</code>」这行字，
+      而是<b>你真实的代码改动内容</b>。这让技能的内容能随环境变化，而不是死的。详见第 03 章。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s9">9. 改完不用重启：实时变更检测</h2>
+
+  <div class="callout tip">
+    <span class="label">✅ 好消息</span>
+    <p>Claude Code 会<b>监视技能目录的文件变化</b>。你在 <code>~/.claude/skills/</code>
+      或项目的 <code>.claude/skills/</code> 里新增、修改、删除技能，
+      <b>当前会话里立刻生效，不用重启</b>。这让调试技能非常快：改一行 → 直接再调一次看效果。</p>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 一个例外</span>
+    <p>如果你创建的是一个<b>会话开始时还不存在的顶层技能目录</b>（比如项目里本来就没有
+      <code>.claude/skills/</code>，你现在才建），那需要<b>重启 Claude Code</b>，
+      它才能开始监视这个新目录。</p>
+    <p>另外，实时检测只覆盖 <code>SKILL.md</code> 的文本内容。</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 id="s10">10. 什么时候该做技能</h2>
+
+  <p>官方给的判断标准很干脆，就两条：</p>
+
+  <div class="callout info">
+    <span class="label">📌 该做技能的信号</span>
+    <p><b>（1）</b>你<b>反复往对话里粘贴同一段指令、清单或多步流程</b>；<br>
+      <b>（2）</b>CLAUDE.md 里某一节已经<b>从"事实"长成了"流程"</b>。</p>
+  </div>
+
+  <p>还有一个很实际的理由——<b>省上下文</b>：</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th></th><th>写进 CLAUDE.md</th><th>写成技能</th></tr></thead>
+      <tbody>
+        <tr><td>什么时候进上下文</td><td><b>每次会话都全文加载</b></td><td>只有<b>调用时</b>才加载正文</td></tr>
+        <tr><td>平时的成本</td><td>一直占着位置</td><td>平时只占 <code>description</code> 那一行</td></tr>
+        <tr><td>适合放</td><td>短的、每次都要知道的事实</td><td>长的、偶尔才用的流程和参考资料</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>所以官方那句话说得很准：<b>「长篇参考资料放在技能里，不用的时候几乎不花任何成本。」</b></p>
+
+  <hr>
+
+  <h2>本章小结</h2>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>要点</th><th>记住这一句</th></tr></thead>
+      <tbody>
+        <tr><td>技能是什么</td><td>硬盘上的一段提示词，打 <code>/名字</code> 就发出去</td></tr>
+        <tr><td>文件结构</td><td><code>SKILL.md</code> = 前置数据（<code>---</code> 之间）+ 正文</td></tr>
+        <tr><td>放哪</td><td>个人用 <code>~/.claude/skills/</code>，团队共享用项目 <code>.claude/skills/</code></td></tr>
+        <tr><td>命令名从哪来</td><td><b>文件夹名</b>，不是 <code>name</code> 字段</td></tr>
+        <tr><td>重名谁赢</td><td>企业 &gt; 个人 &gt; 项目 &gt; 内置；技能 &gt; 同名 commands 文件</td></tr>
+        <tr><td>旧的自定义命令</td><td>已并入技能，老文件继续能用，新建一律用技能</td></tr>
+        <tr><td>改完要重启吗</td><td>不用（除非是新建的顶层目录）</td></tr>
+        <tr><td>什么时候该做</td><td>你第二次粘贴同一段指令的时候</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="label">👉 下一步</span>
+    <p>你已经会做一个能用的技能了。下一章讲<b>怎么让它变强</b>：
+      接收参数、跑命令拿实时数据、带模板文件、以及最重要的——<b>控制谁能调用它</b>。</p>
+  </div>
+
+  <nav class="pager">
+    <a href="01-prompt-design.html" class="prev"><small>← 上一页</small>01 · 提示词怎么写</a>
+    <a href="03-skill-advanced.html" class="next"><small>下一页 →</small>03 · 技能进阶</a>
+  </nav>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
