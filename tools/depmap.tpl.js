@@ -6,8 +6,8 @@
  */
 (function () {
   "use strict";
-  var RAW = "01|01-overview|01 全景(无依赖)|362|12|176|plan-soft|plan|1.5|一 · 打地基\n02|02-python-setup|02 Python 环境|362|62|176|ok-soft|ok|2.0|一 · 打地基\n03|03-test-basics|03 测试是什么|206|112|148|info-soft|info|1.5|一 · 打地基\n04|04-static-check|04 静态检查|546|112|148|info-soft|info|1.5|一 · 打地基\n05|05-pyramid|05 金字塔|362|162|176|warn-soft|warn|1.5|二 · 测试体系\n06|06-myshop|06 myshop|26|162|148|raised|rule2|1.5|二 · 测试体系\n07|07-four-layers-code|07 四层代码|206|212|148|warn-soft|warn|1.5|二 · 测试体系\n08|08-break-it|08 改坏实验|206|262|148|bad-soft|bad|1.5|二 · 测试体系\n09|09-partial-vs-full|09 局部vs全量|206|312|148|bad-soft|bad|1.5|二 · 测试体系\n10|10-flaky-e2e|10 E2E / flaky|546|212|148|warn-soft|warn|1.5|二 · 测试体系\n11|11-git-basics|11 git 基础|726|112|160|raised|rule2|1.5|三 · 存档与撤销\n12|12-git-undo|12 git 回退|726|162|160|raised|rule2|1.5|三 · 存档与撤销\n13|13-claude-code|13 Claude Code|726|262|160|plan-soft|plan|1.5|四 · 工具与流程\n14|14-workflow|14 七步流程实战(汇总)|420|312|220|ok-soft|ok|2.2|四 · 工具与流程\n15|15-team-roles|15 岗位工具|300|362|150|raised|rule2|1.5|五 · 放大到团队\n16|16-pipeline|16 流水线|470|362|150|raised|rule2|1.5|五 · 放大到团队\n17|17-quality-gate|17 门禁概念|300|412|150|warn-soft|warn|2.2|六 · 质量门禁\n18|18-gate-items|18 门禁检查项|470|412|150|warn-soft|warn|2.2|六 · 质量门禁\n19|19-gate-demo|19 门禁实战|640|412|150|warn-soft|warn|2.2|六 · 质量门禁\n20|20-ai-boundary|20 AI 边界|120|470|150|raised|rule2|1.5|七 · 收尾\n21|21-automation|21 固化流程|290|470|150|raised|rule2|1.5|七 · 收尾\n22|22-cheatsheet|22 速查(独立)|460|470|150|sunk|rule|1.5|七 · 收尾";
-  var PRE = {"02":"01","03":"02","04":"0203","05":"0304","06":"0205","07":"030506","08":"040607","09":"08","10":"0507","11":"02","12":"11","13":"011112","14":"0913","15":"0514","16":"1415","17":"16","18":"1617","19":"1718","20":"081318","21":"131420"};
+  var RAW = "__DATA__";
+  var PRE = {__PRES__};
 
   /* ---------- 解析节点表 ---------- */
   var N = {}, ORDER = [];
