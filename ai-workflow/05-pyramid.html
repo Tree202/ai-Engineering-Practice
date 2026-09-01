@@ -225,7 +225,7 @@
     <text x="420" y="76"  font-size="14" font-weight="800" fill="var(--bad)"  text-anchor="middle">&#9314; E2E / 系统</text>
     <text x="420" y="150" font-size="14" font-weight="800" fill="var(--warn)" text-anchor="middle">&#9313; 集成 / 接口</text>
     <text x="420" y="234" font-size="14" font-weight="800" fill="var(--info)" text-anchor="middle">&#9312; 单元 / 组件</text>
-    <text x="420" y="316" font-size="14" font-weight="800" fill="var(--ok)"   text-anchor="middle">&#9311; 静态检查</text>
+    <text x="420" y="316" font-size="14" font-weight="800" fill="var(--ok)"   text-anchor="middle">&#9450; 静态检查</text>
 
     <g font-size="11.5" fill="var(--faint)" text-anchor="end">
       <text x="328" y="72">10 秒+ / 条</text>
@@ -273,12 +273,12 @@
 <thead><tr><th style="width:20%">层级</th><th style="width:12%">条数</th><th style="width:16%">实测耗时</th><th style="width:14%">相对倍数</th><th>慢在哪</th></tr></thead>
 <tbody>
 <tr>
-  <td>&#9311; ruff</td><td>&mdash;</td>
+  <td>&#9450; ruff</td><td>&mdash;</td>
   <td style="color:var(--ok)"><strong>0.02 秒</strong></td><td>&mdash;</td>
   <td>不运行代码,只扫一遍文本</td>
 </tr>
 <tr>
-  <td>&#9311; mypy</td><td>&mdash;</td>
+  <td>&#9450; mypy</td><td>&mdash;</td>
   <td style="color:var(--ok)"><strong>0.27 秒</strong></td><td>&mdash;</td>
   <td>不运行代码,推导全项目的类型</td>
 </tr>
@@ -321,8 +321,8 @@
 <table>
 <thead><tr><th style="width:22%">什么时候</th><th style="width:34%">跑哪几层</th><th>为什么</th></tr></thead>
 <tbody>
-<tr><td><strong>每改一小块</strong></td><td>&#9311; + &#9312;</td><td>加起来不到 0.3 秒,可以无限次跑</td></tr>
-<tr><td><strong>准备存档前</strong></td><td>&#9311; + &#9312; + &#9313; 全量</td><td>3.7 秒,一天跑几十次也无所谓</td></tr>
+<tr><td><strong>每改一小块</strong></td><td>&#9450; + &#9312;</td><td>加起来不到 0.3 秒,可以无限次跑</td></tr>
+<tr><td><strong>准备存档前</strong></td><td>&#9450; + &#9312; + &#9313; 全量</td><td>3.7 秒,一天跑几十次也无所谓</td></tr>
 <tr><td><strong>整个任务做完</strong></td><td>加上 &#9314;</td><td>十几分钟,所以只跑一次</td></tr>
 </tbody>
 </table>
