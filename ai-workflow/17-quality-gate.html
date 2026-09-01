@@ -191,65 +191,69 @@
 <p>拿到任何一个检查环节,问三个问题。<strong>三个全是「是」,才是门禁。</strong></p>
 
 <figure>
-<svg viewBox="0 0 860 340" role="img" aria-label="三问判别流程图">
+<svg viewBox="0 0 940 344" role="img" aria-label="三问判别流程图">
   <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker>
+  <marker id="a2b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--bad)"/></marker></defs>
   <g class="st">
     <g text-anchor="middle">
-      <rect x="16" y="24" width="150" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
-      <text x="91" y="47" font-size="12.5" font-weight="700" fill="var(--ink)">拿到一个</text>
-      <text x="91" y="64" font-size="12.5" font-weight="700" fill="var(--ink)">检查环节</text>
+      <rect x="16" y="28" width="130" height="56" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="81" y="51" font-size="12" font-weight="700" fill="var(--ink)">拿到一个</text>
+      <text x="81" y="69" font-size="12" font-weight="700" fill="var(--ink)">检查环节</text>
 
-      <polygon points="270,16 380,50 270,84 160,50" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
-      <text x="270" y="46" font-size="11.5" font-weight="700" fill="var(--ink)">问 1</text>
-      <text x="270" y="62" font-size="10.5" fill="var(--soft)">是自动跑的吗?</text>
+      <polygon points="230,20 288,56 230,92 172,56" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="230" y="52" font-size="11.5" font-weight="700" fill="var(--ink)">问 1</text>
+      <text x="230" y="68" font-size="10" fill="var(--soft)">自动跑吗?</text>
 
-      <polygon points="500,16 620,50 500,84 380,50" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
-      <text x="500" y="46" font-size="11.5" font-weight="700" fill="var(--ink)">问 2</text>
-      <text x="500" y="62" font-size="10.5" fill="var(--soft)">有明确阈值吗?</text>
+      <polygon points="430,20 488,56 430,92 372,56" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="430" y="52" font-size="11.5" font-weight="700" fill="var(--ink)">问 2</text>
+      <text x="430" y="68" font-size="10" fill="var(--soft)">有阈值吗?</text>
 
-      <polygon points="730,16 850,50 730,84 610,50" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
-      <text x="730" y="46" font-size="11.5" font-weight="700" fill="var(--ink)">问 3</text>
-      <text x="730" y="62" font-size="10.5" fill="var(--soft)">不过会阻断吗?</text>
+      <polygon points="630,20 688,56 630,92 572,56" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="630" y="52" font-size="11.5" font-weight="700" fill="var(--ink)">问 3</text>
+      <text x="630" y="68" font-size="10" fill="var(--soft)">会阻断吗?</text>
 
-      <rect x="640" y="128" width="180" height="54" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
-      <text x="730" y="151" font-size="13" font-weight="800" fill="var(--ok)">&#10004; 是质量门禁</text>
-      <text x="730" y="169" font-size="10.5" fill="var(--soft)">三个都是「是」</text>
+      <rect x="730" y="28" width="190" height="56" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+      <text x="825" y="51" font-size="13" font-weight="800" fill="var(--ok)">&#10004; 是质量门禁</text>
+      <text x="825" y="69" font-size="10.5" fill="var(--soft)">三个都是「是」</text>
 
-      <rect x="150" y="212" width="150" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
-      <text x="225" y="234" font-size="11.5" font-weight="700" fill="var(--soft)">人工评审</text>
-      <text x="225" y="251" font-size="10" fill="var(--faint)">不是门禁</text>
+      <rect x="155" y="200" width="150" height="56" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="230" y="223" font-size="11.5" font-weight="700" fill="var(--soft)">人工评审</text>
+      <text x="230" y="241" font-size="10" fill="var(--faint)">不是门禁</text>
 
-      <rect x="380" y="212" width="160" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
-      <text x="460" y="234" font-size="11.5" font-weight="700" fill="var(--soft)">只出报告</text>
-      <text x="460" y="251" font-size="10" fill="var(--faint)">量了不判 &rarr; 不是门禁</text>
+      <rect x="350" y="200" width="160" height="56" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="430" y="223" font-size="11.5" font-weight="700" fill="var(--soft)">只出报告</text>
+      <text x="430" y="241" font-size="10" fill="var(--faint)">量了不判 &rarr; 不是门禁</text>
 
-      <rect x="608" y="212" width="176" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
-      <text x="696" y="234" font-size="11.5" font-weight="700" fill="var(--soft)">红了也能合</text>
-      <text x="696" y="251" font-size="10" fill="var(--faint)">判了不拦 &rarr; 不是门禁</text>
+      <rect x="542" y="200" width="176" height="56" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="630" y="223" font-size="11.5" font-weight="700" fill="var(--soft)">红了也能合</text>
+      <text x="630" y="241" font-size="10" fill="var(--faint)">判了不拦 &rarr; 不是门禁</text>
     </g>
 
     <g stroke="var(--faint)" stroke-width="1.3" marker-end="url(#a2)" fill="none">
-      <line x1="168" y1="50" x2="176" y2="50"/>
-      <line x1="382" y1="50" x2="390" y2="50"/>
-      <line x1="622" y1="50" x2="630" y2="50"/>
-      <line x1="730" y1="86" x2="730" y2="124"/>
-      <path d="M 270 86 L 270 160 L 225 160 L 225 208"/>
-      <path d="M 500 86 L 500 160 L 460 160 L 460 208"/>
-      <path d="M 800 86 L 830 120 L 750 190 L 700 208"/>
+      <line x1="148" y1="56" x2="168" y2="56"/>
+      <line x1="290" y1="56" x2="368" y2="56"/>
+      <line x1="490" y1="56" x2="568" y2="56"/>
+      <line x1="690" y1="56" x2="726" y2="56"/>
     </g>
-    <g font-size="10.5" fill="var(--ok)" font-weight="700">
-      <text x="196" y="44">是</text><text x="410" y="44">是</text><text x="650" y="44">是</text>
+    <g stroke="var(--bad)" stroke-width="1.3" marker-end="url(#a2b)" fill="none">
+      <line x1="230" y1="94" x2="230" y2="196"/>
+      <line x1="430" y1="94" x2="430" y2="196"/>
+      <line x1="630" y1="94" x2="630" y2="196"/>
+    </g>
+    <g font-size="10.5" fill="var(--ok)" font-weight="700" text-anchor="middle">
+      <text x="329" y="48">是</text><text x="529" y="48">是</text><text x="708" y="48">是</text>
     </g>
     <g font-size="10.5" fill="var(--bad)" font-weight="700">
-      <text x="278" y="120">否</text><text x="508" y="120">否</text><text x="812" y="112">否</text>
+      <text x="240" y="150">否</text><text x="440" y="150">否</text><text x="640" y="150">否</text>
     </g>
 
-    <text x="16" y="308" font-size="12.5" fill="var(--soft)" font-weight="700">
+    <text x="16" y="300" font-size="12.5" fill="var(--soft)" font-weight="700">
       最常见的错判是问 3:很多团队跑了一堆检查、也定了阈值,
     </text>
-    <text x="16" y="328" font-size="12.5" fill="var(--bad)" font-weight="700">
-      但红了照样能合 —— 那就只是一份没人看的报告。
+    <text x="16" y="322" font-size="12.5" fill="var(--bad)" font-weight="700">
+      但红了照样能合 &mdash;&mdash; 那就只是一份没人看的报告。
     </text>
   </g>
 </svg>
