@@ -104,6 +104,17 @@ def main() -> int:
     n = scan_dir(site, "正式页", formal)
     if legacy:
         scan_dir(site / "_v1", "_v1 历史页(不计入)", legacy)
+
+    # 站点其余部分:总入口 + 姊妹课 + 第一版存档(此前这 14 个 HTML 零工具覆盖)
+    root = site.parent
+    if (root / "index.html").exists():
+        n += scan_dir(root, "总入口", [root / "index.html"])
+    if (root / "kb").exists():
+        n += scan_dir(root / "kb", "姊妹课", sorted((root / "kb").glob("*.html")))
+    if (root / "legacy-v1").exists():
+        scan_dir(root / "legacy-v1", "第一版存档(逐字节存档,只报不计入)",
+                 sorted((root / "legacy-v1").glob("*.html")))
+
     print("RESULT:", "PASS" if n == 0 else f"FAIL({n})")
     return 0 if n == 0 else 1
 

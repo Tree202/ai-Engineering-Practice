@@ -594,9 +594,8 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 
 <div class="box note">
   <b class="t">附注:装上浏览器驱动之后,五次实验长什么样(Windows 实测)</b>
-  配套项目后来补了一个最小网页(<code>web.py</code>,第 <a class="pg" href="06-myshop.html">6</a> 页),
-  装上 playwright 后那条 E2E 不再跳过:基线变成 <code>19 passed</code>(两条 E2E 真跑),
-  mypy 报 <code>10 source files</code>。本页五次实验在 Windows 上重跑的新数字:
+  配套项目含一个最小网页(<code>web.py</code>,第 <a class="pg" href="06-myshop.html">6</a> 页),
+  装上 playwright 后那条 E2E 不再跳过:基线变成 <code>19 passed</code>(两条 E2E 真跑)。本页五次实验在 Windows 上重跑的新数字:
   <br><br>
   <span style="font-family:var(--mono);font-size:12.5px">
   &#9312; 3 failed, 2 passed(只跑 test_price,不变)&nbsp;·&nbsp;
@@ -633,7 +632,7 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 <tr><th>单元层</th><td>3/5</td><td>4/5</td><td>2/5</td><td>1/5</td><td style="color:var(--bad)"><strong>0/5</strong></td></tr>
 <tr><th>集成层</th><td>&mdash;</td><td>2/5</td><td>2/5</td><td style="color:var(--bad)"><strong>0/5</strong></td><td>2/5</td></tr>
 <tr><th>接口层</th><td>&mdash;</td><td>2/7</td><td>2/7</td><td style="color:var(--bad)"><strong>0/7</strong></td><td>1/7</td></tr>
-<tr><th><strong>总红</strong></th><td>3</td><td><strong>8</strong></td><td>6</td><td><strong>1</strong></td><td>3</td></tr>
+<tr><th><strong>总红</strong></th><td>3<br><span style="font-size:11px;color:var(--faint)">仅跑 test_price</span></td><td><strong>8</strong></td><td>6</td><td><strong>1</strong></td><td>3</td></tr>
 <tr><th>失败类型</th><td>Assertion</td><td>Assertion</td><td>Assertion</td><td><strong>DID NOT RAISE</strong></td><td><strong>LookupError / 404</strong></td></tr>
 <tr><th>真实危害</th><td>难看</td><td>难看</td><td style="color:var(--bad)"><strong>差 10 倍</strong></td><td style="color:var(--bad)"><strong>校验有洞</strong></td><td style="color:var(--bad)"><strong>静默丢数据</strong></td></tr>
 <tr><th><strong>谁抓住的</strong></th><td>边界测试</td><td>价格文案断言</td><td><code>test_普通价格</code></td><td><code>test_负数要报错</code></td><td>「换连接读回来」</td></tr>

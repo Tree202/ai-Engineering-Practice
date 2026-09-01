@@ -89,24 +89,13 @@ def _在导航图内(段, line) -> bool:
     return False
 
 
-_缓存: dict = {}
-
-
-def _段缓存(html: str):
-    k = id(html)
-    if k not in _缓存:
-        _缓存.clear()
-        _缓存[k] = _导航图行段(html)
-    return _缓存[k]
-
-
 def 收窄(rule: str, path: str, html: str, items: list) -> list:
     out = []
     for it in items:
         kind = str(it.get("kind", ""))
 
         # ① 导航图/依赖图豁免「无出边」判据 —— 见 _导航图行段 的说明
-        if rule == "dangling_node" and _在导航图内(_段缓存(html), it.get("line")):
+        if rule == "dangling_node" and _在导航图内(_导航图行段(html), it.get("line")):
             continue
 
         # ② grid_text 只报「轨道写死的 grid」。
@@ -196,19 +185,29 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="版式与结构巡检")
     ap.add_argument("--dir", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai-workflow"))
     ap.add_argument("--baseline", default=r"D:\ext.zhaoliuliu3\Desktop\ai-workflow",
-                    help="只读原版目录,用于真值自检;不存在则跳过")
+                    help="只读原版目录,用于真值自检")
+    ap.add_argument("--allow-missing-baseline", action="store_true",
+                    help="基线不存在时继续巡检(退出码仍会标记未自检)")
     a = ap.parse_args()
 
     目标 = os.path.abspath(a.dir)
-    失败 = 0
-    if os.path.isdir(a.baseline):
-        失败 = 真值自检(a.baseline, 目标)
+    自检失败 = 0
+    缺基线 = not os.path.isdir(a.baseline)
+    if 缺基线:
+        print("!! 未找到原版目录 %s —— 真值自检没跑。" % a.baseline)
+        print("   没有自检的「0 个问题」不可信:一个永远返回空的检查器也能得到它。")
+        if not a.allow_missing_baseline:
+            print("   要在无基线环境巡检,加 --allow-missing-baseline(退出码仍为 2)。")
+            sys.exit(2)
     else:
-        print("(未找到原版目录,跳过真值自检)\n")
+        自检失败 = 真值自检(a.baseline, 目标)
 
     n = 扫目录(目标, "正式页")
     # _v1/ 是历史页,按设计不参与巡检(六个规则模块内部也各自过滤了它)
 
-    if 失败:
+    if 自检失败:
         print("真值自检未通过 —— 规则可能被改坏了,先修规则再看结果。")
-    sys.exit(1 if 失败 else 0)
+        sys.exit(1)
+    if n:
+        sys.exit(1)          # 巡检发现问题也要非零退出,否则不能当门禁用
+    sys.exit(2 if 缺基线 else 0)

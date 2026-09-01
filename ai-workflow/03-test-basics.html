@@ -330,7 +330,7 @@ E         + ¥0.5</span>
     <thead><tr><th style="width:14%">第几件</th><th style="width:20%">做什么</th><th>怎么做</th></tr></thead>
     <tbody>
     <tr><td><strong>&#9312;</strong></td><td><strong>找</strong></td>
-        <td>按四条规则扫描:文件名 <code>test_*.py</code>、函数名 <code>test</code> 开头、类名 <code>Test</code> 开头、类不能有 <code>__init__</code></td></tr>
+        <td>按四条规则扫描:文件名 <code>test_*.py</code> 或 <code>*_test.py</code>、函数名 <code>test</code> 开头、类名 <code>Test</code> 开头、类不能有 <code>__init__</code>。注意:这是 <strong>pytest 默认值</strong> —— 你在第 2 页写入的配置已把函数名收窄为 <code>test_*</code> 前缀</td></tr>
     <tr><td><strong>&#9313;</strong></td><td><strong>跑</strong></td>
         <td>把找到的每个函数<strong>当普通函数调用一次</strong>。就这么简单,没别的魔法</td></tr>
     <tr><td><strong>&#9314;</strong></td><td><strong>报</strong></td>
@@ -359,7 +359,7 @@ E         + ¥0.5</span>
 <tbody>
 <tr><td><strong>0</strong></td><td>全部通过</td><td>正常情况</td></tr>
 <tr><td><strong>1</strong></td><td>有测试失败</td><td>最常见的失败</td></tr>
-<tr><td><strong>2</strong></td><td>被中断</td><td>收集阶段就出错,比如 import 失败</td></tr>
+<tr><td><strong>2</strong></td><td>被中断</td><td>官方文档写「被用户中断」;实测收集阶段出错(如 import 失败)同样返回 2</td></tr>
 <tr><td><strong>3</strong></td><td>内部错误</td><td>很少见</td></tr>
 <tr><td><strong>4</strong></td><td>命令行用法错误</td><td>参数打错了</td></tr>
 <tr><td><strong>5</strong></td><td>一条都没收集到</td><td>文件名/函数名不符合规则</td></tr>
@@ -631,7 +631,7 @@ E         + ¥0.5</span>
 <tr><td>35–37</td><td>准备工作与 <code>yield</code></td><td>参数位置写名字;测试隔离靠它</td></tr>
 <tr><td>38</td><td>断言重写</td><td>为什么测试里的报错这么详细</td></tr>
 <tr><td>39</td><td>三种混淆的「测试」</td><td>自动化 / 手动 / 自然语言验收标准</td></tr>
-<tr><td>40</td><td>测试数量是长出来的</td><td>中文测试名可用,前提是 <code>test</code> 开头</td></tr>
+<tr><td>40</td><td>测试数量是长出来的</td><td>从一条开始,每次修 bug 先补一条;中文测试名可用(<code>test</code> 开头即可)</td></tr>
 </tbody>
 </table>
 </div>

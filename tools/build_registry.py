@@ -12,8 +12,9 @@ import re
 import sys
 
 sys.stdout.reconfigure(encoding="utf-8")
-SCRATCH = r"C:\Users\EXT~1.ZHA\AppData\Local\Temp\claude\D--claude-data-learn-claude\d79786d4-f23f-48aa-909b-40d611947fdc\scratchpad"
-ROOT = r"D:\ext.zhaoliuliu3\Desktop\claude_AI"
+# 输入数据随仓库发布(references/),不再依赖会话临时目录 —— 453 条可审计、sources.md 可重生成
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCRATCH = os.path.join(ROOT, "references")
 
 items = json.load(io.open(os.path.join(SCRATCH, "registry_items.json"), encoding="utf-8"))
 
@@ -201,9 +202,9 @@ VERIFIED = """## 三、已独立核实(有一手出处)
 |---|---|---|
 | `git switch` 遇不存在的分支退出码 **128** | 本机 git 实测(`die()` 一律 128) | ⚠️ 教程原标 1,已修正 |
 | pytest `python_functions` 默认值是 `["test"]` | pytest 行为 | ✅ 正确 |
-| myshop 基线 `17 passed, 1 skipped` | Windows + Python 3.12.10 实跑 | ✅ 复现 |
+| myshop 基线 `17 passed, 1 skipped` | Windows + Python 3.12.10 实跑 | ✅ 复现(快照时点;后装 playwright 后为 19 passed,见变更清单 E2E 节) |
 | 08 页五次改坏实验的红绿计数(3/2、8/9/1、6/11/1、1/16/1、3/14/1) | 同上,逐次复现 | ✅ 全部吻合 |
-| `mypy` 输出 `8 source files` | 同上 | ✅ 复现 |
+| `mypy` 输出 `8 source files` | 同上 | ✅ 复现(快照时点;后增 web.py/conftest 后为 10) |
 | API 契约:`POST /orders` 返回 `"total_text": "¥25.00"` | curl 实测 | ✅ 复现 |
 | 导航栏高度:桌面 54.3px、375px 手机 100.9px | 浏览器实测 | ⚠️ 据此修掉写死的 `scroll-padding-top:78px` |
 | `&#9311;`(U+245F)渲染为空方块,`&#9450;`(U+24EA)才是 ⓪ | 渲染对照 | ⚠️ 05/15 页 8 处已修正 |
@@ -320,7 +321,7 @@ A(MAINT)
 
 out = os.path.join(ROOT, "references", "sources.md")
 # 注意:必须读 git HEAD 里那份原件,不能读 out 本身 —— 否则重跑会把上一版登记表整个吞成附录
-orig = os.path.join(SCRATCH, "sources_orig.md")
+orig = os.path.join(SCRATCH, "sources_v21_orig.md")
 old = io.open(orig, encoding="utf-8").read() if os.path.exists(orig) else ""
 # 保留原有的「本次修正依据」小表,附在末尾
 keep = ""

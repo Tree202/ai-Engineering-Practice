@@ -120,7 +120,7 @@
   <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
   <ol>
     <li><a href="#sop">一、七步流程卡</a></li>
-    <li><a href="#six">二、六道防线卡</a></li>
+    <li><a href="#six">二、六件事速查卡</a></li>
     <li><a href="#py">三、Python 与测试命令</a></li>
     <li><a href="#exit">四、退出码速查</a></li>
     <li><a href="#git">五、存档系统命令</a></li>
@@ -192,7 +192,9 @@
 <figcaption>七步流程。出自 <a href="14-workflow.html">第 14 页</a></figcaption>
 </figure>
 
-<h2 id="six">二、六道防线卡</h2>
+<h2 id="six">二、六件事速查卡</h2>
+
+<p style="font-size:13.5px;color:var(--faint);margin:2px 0 10px">口径同第 <a class="pg" href="01-overview.html">1</a> 页:防线是<strong>五道</strong>(下表 1–5 行,第 5 道是质量门禁);第 6 行「自己看改动」是<strong>第六件事</strong>,不算防线 —— 它是唯一不能外包的那件。</p>
 
 <div class="tw">
 <table>
@@ -271,7 +273,7 @@ python3 -m venv .venv
 <tbody>
 <tr><td style="color:var(--ok)"><strong>0</strong></td><td><strong>全部通过</strong></td><td style="color:var(--ok)">放行</td></tr>
 <tr><td style="color:var(--bad)"><strong>1</strong></td><td><strong>有用例挂了</strong></td><td style="color:var(--bad)">阻断 —— 最常见的一种</td></tr>
-<tr><td style="color:var(--bad)"><strong>2</strong></td><td>被用户中断</td><td style="color:var(--bad)">阻断</td></tr>
+<tr><td style="color:var(--bad)"><strong>2</strong></td><td>被用户中断(官方口径;实测收集出错如 import 失败也返回 2)</td><td style="color:var(--bad)">阻断</td></tr>
 <tr><td style="color:var(--bad)"><strong>3</strong></td><td>内部错误</td><td style="color:var(--bad)">阻断</td></tr>
 <tr><td style="color:var(--bad)"><strong>4</strong></td><td>命令行用法错了</td><td style="color:var(--bad)">阻断 —— <strong>说明你的门禁配置写错了</strong></td></tr>
 <tr><td style="color:var(--warn)"><strong>5</strong></td><td><strong>一条用例都没找到</strong></td>

@@ -119,9 +119,9 @@
 |---|---|---|
 | `git switch` 遇不存在的分支退出码 **128** | 本机 git 实测(`die()` 一律 128) | ⚠️ 教程原标 1,已修正 |
 | pytest `python_functions` 默认值是 `["test"]` | pytest 行为 | ✅ 正确 |
-| myshop 基线 `17 passed, 1 skipped` | Windows + Python 3.12.10 实跑 | ✅ 复现 |
+| myshop 基线 `17 passed, 1 skipped` | Windows + Python 3.12.10 实跑 | ✅ 复现(快照时点;后装 playwright 后为 19 passed,见变更清单 E2E 节) |
 | 08 页五次改坏实验的红绿计数(3/2、8/9/1、6/11/1、1/16/1、3/14/1) | 同上,逐次复现 | ✅ 全部吻合 |
-| `mypy` 输出 `8 source files` | 同上 | ✅ 复现 |
+| `mypy` 输出 `8 source files` | 同上 | ✅ 复现(快照时点;后增 web.py/conftest 后为 10) |
 | API 契约:`POST /orders` 返回 `"total_text": "¥25.00"` | curl 实测 | ✅ 复现 |
 | 导航栏高度:桌面 54.3px、375px 手机 100.9px | 浏览器实测 | ⚠️ 据此修掉写死的 `scroll-padding-top:78px` |
 | `&#9311;`(U+245F)渲染为空方块,`&#9450;`(U+24EA)才是 ⓪ | 渲染对照 | ⚠️ 05/15 页 8 处已修正 |
