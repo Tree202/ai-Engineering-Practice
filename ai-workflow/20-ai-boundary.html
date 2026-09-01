@@ -85,8 +85,8 @@
   .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
   @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
   .chk{list-style:none;padding-left:0}
-  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
-  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  .chk li{position:relative;padding-left:26px;margin:9px 0}
+  .chk li::before{content:"\2610";position:absolute;left:0;top:0;font-family:var(--mono);color:var(--faint);font-size:17px;line-height:inherit}
   @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
     pre{font-size:12px}.term{padding:2px 15px 17px}}
 </style>

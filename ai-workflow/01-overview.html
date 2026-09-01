@@ -697,10 +697,19 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
 <p>六件事按「什么时候会出事」排个序,就得到一套可以照着做的流程。</p>
 
 <figure>
-<svg viewBox="0 0 900 540" role="img" aria-label="七步流程的流程图,含 5a/5b/5c 三个分支">
+<svg viewBox="0 0 960 600" role="img" aria-label="七步流程的流程图。步骤 4 看完改动后分三支:5a 满意、5b 小问题、5c 方向错了,另有一个兵底。5a 全做完去步骤 7,没做完回步骤 3;5b 回步骤 3;5c 与兵底回步骤 1">
   <defs>
     <marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/>
+    </marker>
+    <marker id="a2g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--ok)"/>
+    </marker>
+    <marker id="a2i" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--info)"/>
+    </marker>
+    <marker id="a2b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--bad)"/>
     </marker>
   </defs>
   <g class="st" text-anchor="middle" font-size="13">
@@ -744,13 +753,13 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
     <text x="774" y="373" font-size="11" fill="var(--faint)">用存档系统</text>
     <text x="774" y="388" font-size="11" fill="var(--faint)">彻底回到原点</text>
 
-    <rect x="320" y="420" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
-    <text x="450" y="439" font-weight="700" fill="var(--warn)">步骤 7 · 最后总审</text>
-    <text x="450" y="455" font-size="11.5" fill="var(--faint)">跑最贵的那层检查 + 通读全部改动</text>
+    <rect x="320" y="460" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="450" y="479" font-weight="700" fill="var(--warn)">步骤 7 · 最后总审</text>
+    <text x="450" y="495" font-size="11.5" fill="var(--faint)">跑最贵的那层检查 + 通读全部改动</text>
 
-    <rect x="320" y="486" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.4"/>
-    <text x="450" y="505" font-weight="800" fill="var(--warn)">推上去 → 质量门禁</text>
-    <text x="450" y="521" font-size="11.5" fill="var(--faint)">跑在云端,你绕不过 · 第 17–19 页</text>
+    <rect x="320" y="526" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.4"/>
+    <text x="450" y="545" font-weight="800" fill="var(--warn)">推上去 → 质量门禁</text>
+    <text x="450" y="561" font-size="11.5" fill="var(--faint)">跑在云端,你绕不过 · 第 17–19 页</text>
   </g>
 
   <g stroke="var(--faint)" stroke-width="1.4" marker-end="url(#a2)" fill="none">
@@ -762,7 +771,7 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
     <path d="M 435 312 L 435 324 L 332 324 L 332 334"/>
     <path d="M 465 312 L 465 324 L 548 324 L 548 334"/>
     <path d="M 490 312 L 490 324 L 774 324 L 774 334"/>
-    <line x1="450" y1="464" x2="450" y2="484"/>
+    <line x1="450" y1="504" x2="450" y2="524"/>
   </g>
 
   <path d="M 18 365 L 8 365 L 8 226 L 316 226" fill="none" stroke="var(--ok)"
@@ -770,10 +779,24 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
   <text x="28" y="295" class="st" font-size="12" fill="var(--ok)" font-weight="700"
         transform="rotate(-90 28 295)">步骤 6 · 循环做下一步</text>
 
-  <path d="M 116 394 L 116 410 L 316 410" fill="none" stroke="var(--ok)"
-        stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+  <path d="M 116 394 L 116 482 L 316 482" fill="none" stroke="var(--ok)"
+        stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a2g)"/>
+  <text x="124" y="474" class="st" font-size="11" fill="var(--ok)" font-weight="700">全做完</text>
+
+  <!-- 5b 小问题 → 回步骤 3(还在这一步,改完再看一遍);在 x=774 处跨过兵底的下行线 -->
+  <path d="M 332 394 L 332 408 L 762 408 Q 774 396 786 408 L 896 408 L 896 226 L 584 226"
+        fill="none" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a2i)"/>
+  <text x="912" y="342" class="st" font-size="11.5" fill="var(--info)" font-weight="700"
+        transform="rotate(-90 912 342)">5b · 改完再看一遍</text>
+
+  <!-- 5c 方向错了 与 兵底 → 都回步骤 1 重新要方案,兵底在 (774,424) 汇入 -->
+  <path d="M 548 394 L 548 424 L 936 424 L 936 98 L 584 98"
+        fill="none" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a2b)"/>
+  <path d="M 774 394 L 774 424" fill="none" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <circle cx="774" cy="424" r="2.8" fill="var(--bad)"/>
+  <text x="742" y="446" class="st" text-anchor="middle" font-size="11.5" fill="var(--bad)" font-weight="700">撤销 / 退档后 → 重新要方案</text>
 </svg>
-<figcaption>七步流程。步骤 5 有三个分支,取决于你看完改动后的判断;最下面那一格才是「别人也绕不过」的</figcaption>
+<figcaption>七步流程。步骤 5 有三个分支,取决于你看完改动后的判断 —— <strong>5a 满意</strong>:方案全做完就去步骤 7,没做完就回步骤 3 做下一步;<strong>5b 小问题</strong>也回步骤 3,但它是「还在这一步」;<strong>5c 方向错了</strong>和<strong>兵底</strong>都退回步骤 1 重新要方案,差别只在退多远。最下面那一格才是「别人也绕不过」的</figcaption>
 </figure>
 
 <h3>每一步对应哪道防线</h3>
