@@ -1,0 +1,734 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12 git 回退:三件套与它们的死角</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">12 git 回退 <span>· 三件套与死角</span></span>
+  <a href="11-git-basics.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="13-claude-code.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 12 页 · 难度 ★★★ · 前置:第 11 页</span>
+<h1>git 回退:三件套与它们的死角</h1>
+<p class="lede">
+全书<strong>最容易出人命</strong>的一页。这里的命令能一秒钟抹掉你几小时的工作,而且<strong>没有回收站</strong>。
+但更常见的问题不是删多了,而是 —— <strong>你以为回退了,其实没有。</strong>
+</p>
+
+<div class="box trap">
+  <b class="t">&#128293; 先说本页最重要的一条</b>
+  <strong>最常用的那条回退命令,删不掉 AI 新建的文件。</strong>
+  <br><br>
+  你跑完它,发现那些文件还原封不动躺在目录里,于是以为「回退失败了」。
+  <strong>不是失败 —— 是它管不着那些文件。</strong>
+</div>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#tracked">一、先分清「跟踪」与「未跟踪」</a></li>
+    <li><a href="#three">二、回退三件套总览</a></li>
+    <li><a href="#restore">三、第一件:丢弃未勾选的改动</a></li>
+    <li><a href="#reset">四、第二件:回到上次存档</a></li>
+    <li><a href="#clean">五、第三件:清掉新文件</a></li>
+    <li><a href="#combo">六、完整还原的标准四步</a></li>
+    <li><a href="#old">七、回到某个旧存档</a></li>
+    <li><a href="#ignore">八、忽略清单的最大陷阱</a></li>
+    <li><a href="#errors">九、新手报错速查</a></li>
+  </ol>
+</div>
+
+<h2 id="tracked">一、先分清「跟踪」与「未跟踪」</h2>
+
+<p><strong>不理解这个区分,后面所有命令的行为你都会觉得莫名其妙。</strong></p>
+
+<div class="term">
+  <div class="term-h"><span class="zh">未跟踪文件</span><span class="en">untracked file</span><span class="badge">核心概念</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p><strong>git 从来没见过的文件</strong> —— 你新建了它,但从没 <code>add</code> 过。
+    在状态里显示为 <code>??</code>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>没贴条码的商品。</strong></p>
+    <p>超市的库存系统只管贴过条码的东西。有人把一箱自己带来的货放在货架上,
+    <strong>系统里查不到它、盘点盘不着它、退货也退不了它</strong> —— 因为系统压根不知道它存在。</p>
+    <p><strong>它就一直躺在那儿。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>文件在 git 眼里只有两种身份,而<strong>这个身份决定了它会被哪条命令影响</strong>:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:24%">身份</th><th style="width:30%">怎么变成这样</th><th>回退命令管得着吗</th></tr></thead>
+    <tbody>
+    <tr><td><strong>已跟踪</strong></td><td><code>add</code> 过,或已经存档过</td><td style="color:var(--ok)">&#9989; 管得着</td></tr>
+    <tr><td><strong>未跟踪</strong> <code>??</code></td><td>新建了但从没 <code>add</code></td><td style="color:var(--bad)"><strong>&#10060; 大部分管不着</strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>AI 干完活之后典型的状态:</p>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ git status -s</span>
+<span class="c-warn"> M </span>report.py                    <span class="c-dim">&larr; 已跟踪,改了</span>
+<span class="c-warn"> M </span>src/mod.py                   <span class="c-dim">&larr; 已跟踪,改了</span>
+<span class="c-bad">?? </span>experiment_final_FINAL.py    <span class="c-dim">&larr; 未跟踪,新建的</span>
+<span class="c-bad">?? </span>experiment_v1.py             <span class="c-dim">&larr; 未跟踪</span>
+<span class="c-bad">?? </span>experiment_v2.py             <span class="c-dim">&larr; 未跟踪</span>
+<span class="c-bad">?? </span>tmp_output/                  <span class="c-dim">&larr; 未跟踪的目录</span></pre>
+    </div>
+    <p><strong>前两行和后四行,需要用完全不同的命令处理。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>&#128260; 误区(实测发现的反直觉细节):「新建的文件都是未跟踪的」。</strong>
+    <strong>只要 <code>add</code> 过一次就不是了。</strong>
+    <br>而这会导致一个惊人的结果:<strong><code>add</code> 过的新文件,会被回退命令连文件本身一起删掉</strong>
+    (实测直接从磁盘消失);没 <code>add</code> 过的反而活下来。见第四节。</p>
+  </div></div>
+</div>
+
+<h2 id="three">二、回退三件套总览</h2>
+
+<figure>
+<svg viewBox="0 0 880 300" role="img" aria-label="三个回退命令各自的射程">
+  <g class="st">
+    <rect x="30" y="46" width="380" height="60" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="220" y="72" font-size="13" font-weight="700" fill="var(--info)" text-anchor="middle">已跟踪 · 未勾选的改动</text>
+    <text x="220" y="92" font-size="11.5" fill="var(--faint)" text-anchor="middle">你改了但还没 add 的</text>
+
+    <rect x="30" y="120" width="380" height="60" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="220" y="146" font-size="13" font-weight="700" fill="var(--warn)" text-anchor="middle">已跟踪 · 已勾选的改动</text>
+    <text x="220" y="166" font-size="11.5" fill="var(--faint)" text-anchor="middle">你 add 过的</text>
+
+    <rect x="30" y="194" width="380" height="60" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="220" y="220" font-size="13" font-weight="700" fill="var(--bad)" text-anchor="middle">未跟踪的新文件 ??</text>
+    <text x="220" y="240" font-size="11.5" fill="var(--faint)" text-anchor="middle">AI 新建的、从没 add 过的</text>
+
+    <rect x="450" y="46" width="200" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="550" y="72" font-size="12.5" font-family="var(--mono)" fill="var(--ink)" text-anchor="middle">git restore .</text>
+    <text x="550" y="92" font-size="11" fill="var(--faint)" text-anchor="middle">只管第一格</text>
+
+    <rect x="450" y="120" width="200" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="550" y="146" font-size="12.5" font-family="var(--mono)" fill="var(--ink)" text-anchor="middle">git reset --hard</text>
+    <text x="550" y="166" font-size="11" fill="var(--faint)" text-anchor="middle">管前两格</text>
+
+    <rect x="450" y="194" width="200" height="60" rx="10" fill="var(--raised)" stroke="var(--bad)" stroke-width="1.8"/>
+    <text x="550" y="220" font-size="12.5" font-family="var(--mono)" fill="var(--bad)" text-anchor="middle">git clean -fd</text>
+    <text x="550" y="240" font-size="11" fill="var(--faint)" text-anchor="middle"><strong>只有它管第三格</strong></text>
+  </g>
+  <g stroke="var(--rule2)" stroke-width="1.4" stroke-dasharray="4 3">
+    <line x1="412" y1="76" x2="446" y2="76"/>
+    <line x1="412" y1="150" x2="446" y2="150"/>
+    <line x1="412" y1="224" x2="446" y2="224"/>
+  </g>
+  <path d="M 650 150 Q 700 150 700 100 Q 700 76 656 76" fill="none" stroke="var(--warn)"
+        stroke-width="1.6" stroke-dasharray="4 3"/>
+  <text x="740" y="120" class="st" font-size="11.5" fill="var(--warn)">reset 也覆盖上面一格</text>
+
+  <text x="440" y="286" class="st" font-size="13.5" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    一次干净的还原 = reset(管老文件)+ clean(管新文件)。缺一条都不完整
+  </text>
+</svg>
+<figcaption>三条命令的射程不重叠。这张图解释了「为什么回退了却没干净」</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">命令</th><th style="width:34%">&#9989; 能回退</th><th>&#10060; 管不了</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>git restore .</code><br><span style="font-size:12px;color:var(--faint)">老写法 <code>git checkout -- .</code></span></td>
+  <td>已跟踪文件的<strong>未勾选</strong>改动</td>
+  <td>已勾选的改动;<strong>未跟踪的新文件</strong></td>
+</tr>
+<tr>
+  <td><code>git reset --hard HEAD</code></td>
+  <td>已跟踪文件的<strong>所有</strong>改动(含已勾选)</td>
+  <td style="color:var(--bad)"><strong>未跟踪文件照样纹丝不动</strong></td>
+</tr>
+<tr>
+  <td><code>git clean -fd</code></td>
+  <td><strong>未跟踪的新文件和新目录</strong></td>
+  <td>&mdash;(但<strong>先用 <code>-fdn</code> 预演!</strong>)</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="restore">三、第一件:丢弃未勾选的改动</h2>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git restore .</code></pre>
+
+<p>这条命令<strong>没有任何输出</strong>,静悄悄地把你还没勾选的改动一笔勾销。</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测:它动了什么、没动什么</div>
+<pre><span class="c-dim">现场:app.py 有未勾选改动、README.md 有已勾选改动、还有两个新建的东西</span>
+<span class="c-cmd">$ git status -s</span>
+<span class="c-ok">M  </span>README.md
+<span class="c-warn"> M </span>app.py
+<span class="c-bad">?? </span>ai_notes.py
+<span class="c-bad">?? </span>scratch/
+
+<span class="c-cmd">$ git restore .</span>
+<span class="c-dim">(无输出)</span>
+
+<span class="c-cmd">$ git status -s</span>
+<span class="c-ok">M  </span>README.md        <span class="c-dim">&larr; 已勾选的改动:纹丝不动</span>
+<span class="c-bad">?? </span>ai_notes.py      <span class="c-dim">&larr; 新文件:纹丝不动</span>
+<span class="c-bad">?? </span>scratch/         <span class="c-dim">&larr; 新目录:纹丝不动</span>
+<span class="c-dim">(app.py 的改动:已被抹掉)</span></pre>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 它的三个坑</b>
+  <ol style="margin-bottom:0">
+    <li><strong>对新建的文件完全无效</strong> —— AI 新建的一堆文件一个都不会消失</li>
+    <li><strong>救不回来。</strong>没存过档的改动被它抹掉就是<strong>永久丢失</strong>,后悔药也没用。
+        <strong>执行前先 <code>git diff</code> 看一眼你要丢的是什么</strong></li>
+    <li><strong>那个点是「当前目录」</strong> —— 在子目录里执行只还原子目录。
+        记得先回到项目根目录</li>
+  </ol>
+</div>
+
+<h2 id="reset">四、第二件:回到上次存档</h2>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git reset --hard HEAD</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">部分</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>reset</code></td><td>把指针挪回去</td></tr>
+<tr><td><code>--hard</code></td><td><strong>连同工作区一起强制拉回</strong>(不加它只是取消勾选,内容保留)</td></tr>
+<tr><td><code>HEAD</code></td><td>「当前存档指针」,也就是最近一次存档</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ git reset --hard HEAD</span>
+HEAD is now at b086c7f feat: greet 支持自定义问候语
+
+<span class="c-cmd">$ git status</span>
+On branch main
+<span class="c-bad">Untracked files:
+	ai_notes.py
+	scratch/</span>
+
+<span class="c-cmd">$ ls</span>
+README.md  <span class="c-bad">ai_notes.py</span>  app.py  <span class="c-bad">scratch</span>
+<span class="c-dim">(README 和 app.py 的改动都没了,但两个新东西一个没少)</span></pre>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 本教程最关键的一个坑</b>
+  <strong>AI 一顿操作新建了 5 个文件,你跑 <code>git reset --hard</code>,
+  然后发现那 5 个文件原封不动躺在目录里。</strong>
+  <br><br>
+  你以为「回退失败了」。<strong>不是失败 —— reset 只管 git「认识」的文件。</strong>
+  那些从没 <code>add</code> 过的新文件,git 压根不知道它们存在,自然也不会删。
+  <br><br>
+  <strong>后果不只是碍眼:</strong>下次运行程序时,这些残留文件可能被误 import、可能干扰测试收集、
+  可能让你以为某个功能已经实现了。
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 一个反直觉的细节(实测)</b>
+  <strong>新文件「<code>add</code> 过」和「没 <code>add</code> 过」,命运完全相反:</strong>
+  <div class="term-box" style="margin:9px 0 0">
+    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测</div>
+<pre><span class="c-cmd">$ git status -s</span>
+<span class="c-ok">A  </span>staged_new.py         <span class="c-dim">&larr; add 过</span>
+<span class="c-bad">?? </span>untracked_new.py      <span class="c-dim">&larr; 没 add</span>
+
+<span class="c-cmd">$ git reset --hard HEAD</span>
+<span class="c-cmd">$ ls</span>
+report.py  src  <span class="c-bad">untracked_new.py</span>
+<span class="c-dim">&gt;&gt;&gt; staged_new.py 被连文件一起删掉了;untracked_new.py 活下来了</span></pre>
+  </div>
+  <p style="margin:9px 0 0"><strong>机制:</strong><code>add</code> 一个新文件,它就进了「已跟踪」那一侧。
+  而 <code>reset --hard</code> 的职责是「让工作区严格等于目标存档」——
+  目标存档里没有这个文件,那它就得从工作区消失。
+  <br><strong>不是 git 在「惩罚」你 add,是 add 把文件搬到了 git 管辖的那一侧。</strong></p>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 还有一个必须知道的例外(实测)</b>
+  「reset --hard 不删未跟踪文件」<strong>只在回到 <code>HEAD</code> 时成立</strong>。
+  <br><br>
+  <strong>如果你 reset 到另一个存档,而那个存档里恰好有同名文件,
+  你的未跟踪文件会被静默覆盖。</strong>
+  <div class="term-box" style="margin:9px 0 0">
+    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测</div>
+<pre><span class="c-cmd">$ printf 'MY PRECIOUS UNTRACKED WORK\n' &gt; shared.txt</span>
+<span class="c-cmd">$ git status -s</span>
+<span class="c-bad">?? </span>shared.txt
+
+<span class="c-cmd">$ git reset --hard HEAD~1</span>    <span class="c-dim">&larr; 上一个存档里有 shared.txt</span>
+HEAD is now at 7a40b36 c2 adds shared.txt
+<span class="c-dim">&gt;&gt;&gt; 你写的内容被存档里的版本静默覆盖了</span></pre>
+  </div>
+</div>
+
+<h2 id="clean">五、第三件:清掉新文件</h2>
+
+<div class="box key">
+  <b class="t">规矩:永远先预演</b>
+  <strong><code>-n</code> 是预演(只说要删什么,不真删),<code>-f</code> 才是真删。</strong>
+  <br><strong>口诀:先 n 后 f。</strong>
+</div>
+
+<h3>第一步:预演</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git clean -fdn</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>Would remove ai_notes.py
+Would remove scratch/
+<span class="c-dim">(预演之后文件全都还在)</span></pre>
+</div>
+
+<h3>第二步:确认无误再真删</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git clean -fd</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>Removing ai_notes.py
+Removing scratch/</pre>
+</div>
+
+<h3>参数含义</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:14%">参数</th><th style="width:24%">含义</th><th>不加会怎样</th></tr></thead>
+<tbody>
+<tr><td><code>-n</code></td><td>预演</td><td>直接真删</td></tr>
+<tr><td><code>-f</code></td><td>确认执行</td><td><strong>被拒绝</strong>,见下</td></tr>
+<tr><td><code>-d</code></td><td>连目录一起</td><td><strong>整个未跟踪目录及其内容全部跳过</strong> &mdash; 见下</td></tr>
+<tr><td style="color:var(--bad)"><code>-x</code></td><td style="color:var(--bad)">☢️ 连忽略清单里的也删</td><td style="color:var(--bad)"><strong>别加</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 关于 <code>-d</code>,经核实修正了一处常见的错误说法</b>
+  很多教程说「不加 <code>-d</code> 只列文件、不列目录」。<strong>机制说得不准,会误导。</strong>
+  <br><br>
+  <strong>真实行为:不加 <code>-d</code> 时,git 根本不会进入未跟踪的目录</strong> ——
+  那个目录本身和它里面的<strong>全部文件</strong>都不列、不删。
+  <div class="term-box" style="margin:9px 0 0">
+    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测</div>
+<pre><span class="c-cmd">$ git clean -n</span>          <span class="c-dim">&larr; 不加 -d</span>
+Would remove ai_notes.py
+<span class="c-dim">&gt;&gt;&gt; newdir/sub/deep.txt 完全不出现,连文件都没列</span>
+
+<span class="c-cmd">$ git clean -fdn</span>        <span class="c-dim">&larr; 加了 -d</span>
+Would remove ai_notes.py
+Would remove newdir/</pre>
+  </div>
+  <p style="margin:9px 0 0"><strong>所以「以为清干净了其实没有」的风险比想象中大</strong> ——
+  一整个目录连同内容都被跳过了。</p>
+</div>
+
+<h3>三个必须知道的行为</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">情况</th><th>结果</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>忘了加 <code>-f</code></strong></td>
+  <td><div class="term-box" style="margin:0"><pre style="padding:9px 12px"><span class="c-bad">fatal: clean.requireForce defaults to true and neither -i, -n, nor -f given; refusing to clean</span></pre></div>
+      <strong>这是保护机制,不是报错。</strong></td>
+</tr>
+<tr>
+  <td style="color:var(--bad)"><strong><code>-x</code> 是核弹级</strong></td>
+  <td>它会把<strong>忽略清单里的东西一起删光</strong>。实测:<code>git clean -fdx</code>
+      <strong>直接蒸发了一个 9MB、569 个文件的虚拟环境</strong>,密钥文件也会没。
+      <strong>没有明确理由绝不要加。</strong></td>
+</tr>
+<tr>
+  <td><strong>嵌套的 git 仓库</strong></td>
+  <td>如果某个未跟踪目录里面有 <code>.git</code>,<strong>单个 <code>-f</code> 删不掉它</strong>,需要 <code>-ff</code>。
+      官方原文:<em>「Git will refuse to modify untracked nested git repositories … unless a second -f is given.」</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; clean 删掉的东西没有回收站</b>
+  <strong>不进回收站、不进 git、后悔药也没有,永久消失。</strong>
+  <br><br>
+  所以<strong>必须先 <code>-fdn</code> 预演</strong>。预演清单里如果出现你想留的东西
+  (比如 AI 生成的一份不错的文档),先复制出来或者 <code>git add</code> 保住它。
+</div>
+
+<h2 id="combo">六、完整还原的标准四步</h2>
+
+<div class="box good">
+  <b class="t">背下这四步 —— 口诀:先 reset 后 clean;clean 先 n 后 f</b>
+</div>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git status</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git reset --hard HEAD</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git clean -fdn</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git clean -fd</code></pre>
+
+<h3>完整实测记录</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; AI 改了 2 个文件 + 新建 3 个文件 1 个目录</div>
+<pre><span class="c-cmd">$ git status -s</span>
+<span class="c-warn"> M </span>report.py
+<span class="c-warn"> M </span>src/mod.py
+<span class="c-bad">?? </span>experiment_final_FINAL.py
+<span class="c-bad">?? </span>experiment_v1.py
+<span class="c-bad">?? </span>experiment_v2.py
+<span class="c-bad">?? </span>tmp_output/
+
+<span class="c-cmd">$ git reset --hard HEAD</span>
+HEAD is now at 622dcb3 docs: 用 -am 一步提交
+
+<span class="c-cmd">$ ls</span>
+experiment_final_FINAL.py  experiment_v1.py  experiment_v2.py  report.py  src  tmp_output
+<span class="c-bad">&uarr;&uarr;&uarr; 已跟踪文件的改动没了(对),但新建的 4 个东西一个都没删!</span>
+
+<span class="c-cmd">$ git clean -fdn</span>
+Would remove experiment_final_FINAL.py
+Would remove experiment_v1.py
+Would remove experiment_v2.py
+Would remove tmp_output/
+
+<span class="c-cmd">$ git clean -fd</span>
+Removing experiment_final_FINAL.py
+Removing experiment_v1.py
+Removing experiment_v2.py
+Removing tmp_output/
+
+<span class="c-cmd">$ ls</span>
+report.py  src
+<span class="c-cmd">$ git status -s</span>
+<span class="c-ok">(空 = 彻底回到 AI 动手之前)</span></pre>
+</div>
+
+<div class="box key">
+  <b class="t">前提:让 AI 动手之前,你的工作区必须是干净的</b>
+  否则这套四步会<strong>把你自己没存档的活儿一起抹平</strong>。
+  <br><br>
+  这就是第 11 页那句「工作区必须干净」的第二个理由 —— <strong>它不只影响看改动,还影响你能不能安全回退。</strong>
+</div>
+
+<h2 id="old">七、回到某个旧存档</h2>
+
+<p>先找到目标存档的编号:</p>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git log --oneline</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">方式</th><th style="width:32%">命令</th><th>特点</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>只是去看看</strong></td>
+  <td><code>git checkout 编号</code></td>
+  <td>历史一点不改。会提示进入「游离」状态 —— 听着吓人,其实就是「你现在站在一次存档上,而不是站在某条分支上」。
+      <br>回来:<code>git switch -</code></td>
+</tr>
+<tr>
+  <td><strong>真的退回去</strong></td>
+  <td><code>git reset --hard 编号</code></td>
+  <td style="color:var(--bad)"><strong>危险</strong>:后面的存档从这条分支上消失</td>
+</tr>
+<tr>
+  <td style="color:var(--ok)"><strong>最安全</strong></td>
+  <td><code>git revert 编号</code></td>
+  <td><strong>历史不改,只追加一个「反做」的存档。</strong>团队协作时用这个</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">后悔药:找回被 reset 掉的存档</b>
+<pre style="margin:9px 0 0"><code>cd &lt;你的项目&gt;/myshop && git reflog</code></pre>
+  <p style="margin:9px 0 0">它记录了 <code>HEAD</code> 的每一次移动,包括被你 reset 掉的那些。
+  找到编号后 <code>git reset --hard 那个编号</code> 就能回去。</p>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 但后悔药有明确边界</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:44%">丢失的东西</th><th>能找回吗</th></tr></thead>
+  <tbody>
+  <tr><td><strong>已存档</strong>的内容(被 reset 掉的提交)</td><td style="color:var(--ok)"><strong>&#9989; 能</strong></td></tr>
+  <tr><td><strong>没存档</strong>的改动(被 restore / reset --hard 抹掉的)</td><td style="color:var(--bad)"><strong>&#10060; 不能,永久丢失</strong></td></tr>
+  <tr><td>被 <code>clean</code> 删掉的新文件</td><td style="color:var(--bad)"><strong>&#10060; 不能</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>一句话:存过档的救得回,没存过档的救不回。</strong>
+  这又回到了那条最根本的规矩 —— <strong>存得勤一点。</strong></p>
+</div>
+
+<h2 id="ignore">八、忽略清单的最大陷阱</h2>
+
+<div class="box trap">
+  <b class="t">&#9888; 忽略清单<strong>只对未跟踪文件生效</strong></b>
+  <strong>文件一旦被存档过,后加规则完全无效。</strong>
+  <br><br>
+  <strong>新手 90% 的「忽略清单不管用」都是这个原因。</strong>
+</div>
+
+<h3>怎么补救</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git rm -r --cached __pycache__</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git commit -m "chore: 把缓存目录从版本库里移除"</code></pre>
+
+<div class="box trap">
+  <b class="t">&#128293; <code>--cached</code> 这个词千万别漏</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:38%">写法</th><th>后果</th></tr></thead>
+  <tbody>
+  <tr><td><code>git rm -r --cached 路径</code></td><td style="color:var(--ok)">只从 git 里移除,<strong>磁盘文件保留</strong></td></tr>
+  <tr><td><code>git rm -r 路径</code></td><td style="color:var(--bad)"><strong>磁盘上的文件真删了</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">对密钥文件漏加 <code>--cached</code> 就是灾难。</p>
+</div>
+
+<div class="box good">
+  <b class="t">&#128161; 调试忽略规则的唯一正解</b>
+  「为什么我写的规则不生效?」—— 别猜,直接问它:
+<pre style="margin:9px 0 0"><code>cd &lt;你的项目&gt;/myshop && git check-ignore -v 某个文件</code></pre>
+  <p style="margin:9px 0 0">它会告诉你<strong>这个文件被哪个文件的第几行规则命中</strong>。
+  没有输出就说明没有任何规则匹配它。</p>
+</div>
+
+<div class="box note">
+  <b class="t">两个规则写法细节</b>
+  <ul style="margin-bottom:0">
+    <li><code>.venv/</code> 带尾斜杠 = <strong>只匹配目录</strong>;<code>.venv</code> 不带 = 同名的文件和目录都匹配</li>
+    <li><strong>历史里的旧版本依然存在</strong> —— 如果泄露的是密钥,必须视作<strong>已泄露</strong>并立刻更换,
+        光从 git 里移除是不够的</li>
+  </ul>
+</div>
+
+<h2 id="errors">九、新手报错速查</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:46%">看到什么</th><th>怎么办</th></tr></thead>
+<tbody>
+<tr><td><code>fatal: not a git repository</code></td><td>当前目录没有仓库 &rarr; <code>git init</code>,或者你 cd 错地方了</td></tr>
+<tr><td><code>Please tell me who you are</code></td><td>第一次用,没配名字 &rarr; 见第 11 页第二节</td></tr>
+<tr><td><code>refusing to clean</code></td><td>忘了加 <code>-f</code> &rarr; 先用 <code>git clean -fdn</code> 预演</td></tr>
+<tr><td><code>nothing to commit, working tree clean</code></td><td><strong>不是报错</strong>,是「干净」的意思 —— 好消息</td></tr>
+<tr><td><code>You are in 'detached HEAD' state</code></td><td><strong>不是报错</strong>。你切到了一次存档而不是分支 &rarr; <code>git switch -</code> 回去</td></tr>
+<tr><td>终端卡在一个冒号不动</td><td>进了分页器 &rarr; <strong>按 <code>q</code></strong></td></tr>
+<tr><td>突然进了个奇怪的编辑器退不出来</td><td>是 vim &rarr; <strong>按 <code>Esc</code>,再输入 <code>:wq</code> 回车</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>&#128260; 关于「路径不匹配」这类报错 —— 四种措辞都不一样</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测四种</div>
+<pre><span class="c-cmd">$ git add nosuchfile.txt</span>
+<span class="c-bad">fatal: pathspec 'nosuchfile.txt' did not match any files</span>                <span class="c-dim">(退出码 128)</span>
+
+<span class="c-cmd">$ git rm nosuchfile.txt</span>
+<span class="c-bad">fatal: pathspec 'nosuchfile.txt' did not match any files</span>                <span class="c-dim">(退出码 128)</span>
+
+<span class="c-cmd">$ git restore nosuchfile.txt</span>
+<span class="c-bad">error: pathspec 'nosuchfile.txt' did not match any file(s) known to git</span>  <span class="c-dim">(退出码 1)</span>
+
+<span class="c-cmd">$ git checkout nosuchbranch</span>
+<span class="c-bad">error: pathspec 'nosuchbranch' did not match any file(s) known to git</span>    <span class="c-dim">(退出码 1)</span>
+
+<span class="c-cmd">$ git switch nosuchbranch</span>
+<span class="c-bad">fatal: invalid reference: nosuchbranch</span>                                  <span class="c-dim">(退出码 128)</span></pre>
+</div>
+
+<div class="box good">
+  <b class="t">最后两行的对比,就是「为什么该用 <code>switch</code>」</b>
+  <code>git checkout nosuchbranch</code> 报「路径不匹配」对新手极其困惑 ——
+  <em>我明明在切分支,你跟我说文件路径?</em>
+  <br><br>
+  <strong>根源是 <code>checkout</code> 职责重载</strong>:它先当分支名解释,解释不通就退回去当文件路径解释。
+  <br>而 <code>switch</code> 只管分支,所以能直接给出人话。
+</div>
+
+<div class="box note">
+  <b class="t">分支切不过去的三个常见原因</b>
+  <ul style="margin-bottom:0">
+    <li>分支名拼错了 &rarr; <code>git branch</code> 看看有哪些</li>
+    <li>分支只在远端存在 &rarr; 先 <code>git fetch</code></li>
+    <li><strong>文件名大小写</strong> &rarr; macOS 默认文件系统不区分大小写,但 git 区分,容易出怪事</li>
+  </ul>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>116</td><td>回退三件套总览</td><td>三条命令射程不重叠</td></tr>
+<tr><td>117</td><td>&#128293; <strong>reset 删不掉新文件</strong></td><td>你会以为「回退失败了」</td></tr>
+<tr><td>118</td><td>&#128260; <strong>一个例外</strong></td><td>reset 到别的存档时,未跟踪文件会被<strong>静默覆盖</strong></td></tr>
+<tr><td>119</td><td>标准四步</td><td>status &rarr; reset &rarr; clean -fdn &rarr; clean -fd</td></tr>
+<tr><td>120</td><td>&#128260; <code>-d</code> 的真实行为</td><td>不加它是<strong>根本不进入</strong>未跟踪目录;嵌套仓库要 <code>-ff</code></td></tr>
+<tr><td>121</td><td>☢️ <code>-x</code> 是核弹级</td><td>实测蒸发 9MB 虚拟环境</td></tr>
+<tr><td>122</td><td>add 过 vs 没 add 过</td><td>命运完全相反</td></tr>
+<tr><td>123</td><td>回到旧存档三种方式</td><td>看看 / 真退 / <strong>反做(最安全)</strong></td></tr>
+<tr><td>124</td><td>后悔药的边界</td><td><strong>存过档的救得回,没存过的救不回</strong></td></tr>
+<tr><td>125</td><td>&#128260; 忽略清单改进版</td><td>见第 11 页</td></tr>
+<tr><td>126</td><td>&#9888; 忽略清单管不了已存档的</td><td><code>git rm --cached</code>;<code>check-ignore -v</code> 调试</td></tr>
+<tr><td>127</td><td>&#128260; 报错速查</td><td><strong>路径不匹配有四种措辞</strong>;<code>switch</code> 报的是人话</td></tr>
+<tr><td>128</td><td>&#128260; <code>switch</code>/<code>restore</code> 的状态</td><td>2.51 起不再实验性,旧版手册仍写着</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="11-git-basics.html">&larr; 上一页:git 基础</a>
+  <a href="00-index.html">目录</a>
+  <a href="13-claude-code.html">下一页:Claude Code 功能详解 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 12 页 / 共 23 页 · 覆盖知识点 116–128 · 难度 &#9733;&#9733;&#9733;</p>
+  <p><strong>本页含 4 处经核实修正:</strong><code>-d</code> 的真实机制(不进入目录而非不列目录)、
+  嵌套仓库需 <code>-ff</code>、reset 到非 HEAD 时会静默覆盖未跟踪文件、路径报错的四种措辞
+  (<code>switch</code>/<code>restore</code> 实验性标签一条在第 11 页讲授并计数)。全部实测于 git 2.39.5。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

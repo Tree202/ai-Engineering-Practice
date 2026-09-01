@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11 git 基础:代码的存档系统</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">11 git 基础 <span>· 代码的存档系统</span></span>
+  <a href="10-flaky-e2e.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="12-git-undo.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 11 页 · 难度 ★★ · 前置:第 02 页</span>
+<h1>git 基础:代码的存档系统</h1>
+<p class="lede">
+这一页把 git 当<strong>游戏存档</strong>来讲。它是五道防线里唯一横跨全程的一道,
+也是唯一「漏了就全盘皆输」的一道 —— 因为存档必须在事故<strong>之前</strong>按下。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#what">一、git 是什么</a></li>
+    <li><a href="#init">二、开一条新存档位</a></li>
+    <li><a href="#status">三、看当前进度</a></li>
+    <li><a href="#clean">四、为什么工作区必须干净</a></li>
+    <li><a href="#stage">五、暂存区:超市结账传送带</a></li>
+    <li><a href="#diff">六、看改动</a></li>
+    <li><a href="#commit">七、存档</a></li>
+    <li><a href="#msg">八、存档说明怎么写</a></li>
+  </ol>
+</div>
+
+<h2 id="what">一、git 是什么</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">存档系统</span><span class="en">git</span><span class="badge">绝对不能省</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个记录代码历史的工具。你在关键时刻<strong>手动按一下「存档」</strong>,
+    之后不管怎么乱改,都能一条命令退回任何一个存过的档。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>游戏存档。</strong>这个类比全书都在用:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:38%">游戏里</th><th style="width:32%">代码里</th><th>命令</th></tr></thead>
+    <tbody>
+    <tr><td>给这个游戏装上存档功能</td><td>初始化仓库</td><td><code>git init</code></td></tr>
+    <tr><td>开一条新存档位打 BOSS</td><td>开一条新分支</td><td><code>git switch -c</code></td></tr>
+    <tr><td>看看现在进行到哪了</td><td>看工作区状态</td><td><code>git status</code></td></tr>
+    <tr><td>看看这段打了什么</td><td>看改动</td><td><code>git diff</code></td></tr>
+    <tr><td><strong>按存档键</strong></td><td><strong>提交</strong></td><td><code>git commit</code></td></tr>
+    <tr><td>存档列表</td><td>提交历史</td><td><code>git log</code></td></tr>
+    <tr><td>读档</td><td>回退(第 12 页)</td><td><code>git restore</code> 等</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>其他所有防线的地基</strong>:</p>
+    <ul>
+      <li>没有它,「一键撤销」的死角就没人兜底</li>
+      <li>没有它,「你自己看改动」根本无从看起 —— 因为你不知道「改之前」是什么样</li>
+      <li>没有它,第 8 页那五个实验一个都做不了</li>
+    </ul>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>一天工作的节奏:</p>
+<pre><code>开工:  开一条新分支,确认工作区干净
+第1步做完 &rarr; 检查 &rarr; 满意 &rarr; 存档
+第2步做完 &rarr; 检查 &rarr; 满意 &rarr; 存档
+第3步做完 &rarr; 检查 &rarr; 不满意 &rarr; 一条命令退回第2步
+再来一次第3步 &rarr; 检查 &rarr; 满意 &rarr; 存档</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「等出事了再学」。</strong>来不及。<strong>存档必须在事故之前按下</strong> ——
+    出事之后你已经没有可退回的点了。</p>
+    <p><strong>误区 2:「git 是团队协作用的,我一个人不需要」。</strong>
+    <strong>一个人时它更重要</strong> —— 因为没有别人帮你发现问题,你只能靠「随时能退回去」这个保障。</p>
+  </div></div>
+</div>
+
+<h2 id="init">二、开一条新存档位</h2>
+
+<h3>第一次用:装上存档系统</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git init</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>Initialized empty Git repository in /Users/daijie27/Desktop/claude_data/learn_claude/myshop/.git/</pre>
+</div>
+
+<div class="box note">
+  <b class="t">第一次用还要告诉它你是谁</b>
+  否则提交时会报错。<strong>只需要做一次,以后所有项目都用这个:</strong>
+<pre style="margin:9px 0 0"><code>git config --global user.name "你的名字"</code></pre>
+<pre style="margin:6px 0 0"><code>git config --global user.email "你的邮箱"</code></pre>
+</div>
+
+<h3>开新分支</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git switch -c feat/add-discount</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:28%">部分</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>switch</code></td><td>切换到某条分支</td></tr>
+<tr><td><code>-c</code></td><td><code>--create</code> 的缩写:<strong>新建</strong>一条分支并立刻切过去</td></tr>
+<tr><td><code>feat/add-discount</code></td><td>分支名。<code>feat/</code> 是社区约定的前缀(新功能),后面写实际功能名</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">为什么非要新开一条分支</b>
+  让主干保持绝对干净。<strong>AI 在新分支上怎么折腾都行</strong>,最坏情况是切回主干把这条分支整个删掉,主干一行都没动过。
+  <br><br>
+  <strong>这一步把爆炸半径从「整个项目」缩到了「这条分支」。</strong>
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 关于 <code>switch</code> 和老写法 <code>checkout -b</code></b>
+  你会在网上看到大量教程用 <code>git checkout -b</code>。<strong>两者效果一样</strong>,但推荐用 <code>switch</code>:
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:26%">命令</th><th>职责</th></tr></thead>
+  <tbody>
+  <tr><td><code>checkout</code></td><td><strong>身兼两职</strong>:切分支 + 恢复文件。<em>职责重载 &rarr; 容易误操作、报错信息也怪</em></td></tr>
+  <tr><td><code>switch</code></td><td>只管切分支</td></tr>
+  <tr><td><code>restore</code></td><td>只管恢复文件</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>核实后的两个补充:</strong></p>
+  <ul style="margin-bottom:0">
+    <li>这两个新命令<strong>从 git 2.51 起已经摘掉「实验性」标签</strong>,可以放心用</li>
+    <li>但如果你本机是较老的版本(比如 2.39),<code>man git-switch</code> <strong>仍然会看到 EXPERIMENTAL 字样</strong> ——
+        两件事同时成立,不用慌</li>
+  </ul>
+</div>
+
+<div class="box key">
+  <b class="t">&#128161; 一个立刻能体会的差别</b>
+  分支名打错时,两个命令的报错完全不同:
+  <div class="term-box" style="margin:9px 0 0">
+    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测对比</div>
+<pre><span class="c-cmd">$ git checkout nosuchbranch</span>
+<span class="c-bad">error: pathspec 'nosuchbranch' did not match any file(s) known to git</span>
+<span class="c-dim">&uarr; 我明明在切分支,你跟我说「文件路径」?</span>
+
+<span class="c-cmd">$ git switch nosuchbranch</span>
+<span class="c-ok">fatal: invalid reference: nosuchbranch</span>
+<span class="c-dim">&uarr; 人话:这个分支名无效</span></pre>
+  </div>
+  <p style="margin:9px 0 0">前者之所以说「文件路径」,正是因为它职责重载 ——
+  它先当分支名解释,解释不通就<strong>退回去当文件路径解释</strong>,于是给出一条看似不相关的错误。
+  <br><strong>这就是「为什么该用 switch」的最佳实例。</strong></p>
+</div>
+
+<h2 id="status">三、看当前进度</h2>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git status</code></pre>
+
+<h3>五种状态各自长什么样</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 实测五种状态</div>
+<pre><span class="c-dim">【状态1:干净】</span>
+<span class="c-cmd">$ git status</span>
+On branch main
+<span class="c-ok">nothing to commit, working tree clean</span>
+
+<span class="c-cmd">$ git status -s</span>
+<span class="c-dim">(完全没有输出 &mdash; 没输出就是好消息,不是命令卡住了)</span>
+
+<span class="c-dim">【状态2:有 git 不认识的新文件】</span>
+<span class="c-warn">?? </span>README.md
+<span class="c-warn">?? </span>app.py
+
+<span class="c-dim">【状态3:改了,已经勾选待存档】</span>
+<span class="c-ok">M  </span>README.md
+
+<span class="c-dim">【状态4:改了,还没勾选】</span>
+<span class="c-warn"> M </span>app.py
+
+<span class="c-dim">【状态5:勾选之后又改了】</span>
+<span class="c-ok">MM</span> both.py</pre>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 简短版 <code>-s</code> 的关键:左右两列</b>
+  <strong>左列 = 暂存区(勾选过的),右列 = 工作区(还没勾选的)。</strong>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:14%">符号</th><th>含义</th></tr></thead>
+  <tbody>
+  <tr><td><code>M&nbsp;&nbsp;</code></td><td>改了,<strong>已</strong>勾选(注意 M 在左边)</td></tr>
+  <tr><td><code>&nbsp;M&nbsp;</code></td><td>改了,<strong>没</strong>勾选(注意 M 前面有个空格)</td></tr>
+  <tr><td><code>MM</code></td><td>两种都有:勾选之后又改了</td></tr>
+  <tr><td><code>A&nbsp;&nbsp;</code></td><td>新文件,已勾选</td></tr>
+  <tr><td><code>??</code></td><td><strong>git 完全不认识的新文件</strong> —— 最危险的一类,第 12 页详讲</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong><code>M</code> 前面那个空格特别容易被忽略,而它恰恰是关键。</strong></p>
+</div>
+
+<div class="box good">
+  <b class="t">&#128161; 不确定该用哪条命令时,照抄它的提示</b>
+  <code>git status</code> 的完整输出里自带指引,比如:
+  <pre style="margin:9px 0 0"><code>  (use "git add &lt;file&gt;..." to update what will be committed)
+  (use "git restore &lt;file&gt;..." to discard changes in working directory)</code></pre>
+  <p style="margin:9px 0 0"><strong>它已经把该敲什么写在那儿了。</strong></p>
+</div>
+
+<h2 id="clean">四、为什么工作区必须干净</h2>
+
+<p>这是一条<strong>隐藏的因果链</strong>,漏了它会让整个流程的步骤 4 悄悄失效:</p>
+
+<figure>
+<svg viewBox="0 0 880 200" role="img" aria-label="工作区不干净导致看改动失效的因果链">
+  <defs><marker id="a1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+    <polygon points="0 0, 9 3.5, 0 7" fill="var(--bad)"/></marker></defs>
+  <g class="st" font-size="12.5" text-anchor="middle">
+    <rect x="10" y="56" width="158" height="72" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.4"/>
+    <text x="89" y="82" fill="var(--ink)" font-weight="700">开工前没检查</text>
+    <text x="89" y="101" fill="var(--soft)" font-size="11.5">工作区里还有你</text>
+    <text x="89" y="116" fill="var(--soft)" font-size="11.5">上次没存的改动</text>
+
+    <rect x="186" y="56" width="158" height="72" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.4"/>
+    <text x="265" y="88" fill="var(--ink)" font-weight="700">AI 又改了一堆</text>
+    <text x="265" y="108" fill="var(--soft)" font-size="11.5">两拨改动混在一起</text>
+
+    <rect x="362" y="56" width="168" height="72" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.4"/>
+    <text x="446" y="82" fill="var(--ink)" font-weight="700">你打开改动列表</text>
+    <text x="446" y="101" fill="var(--soft)" font-size="11.5">分不清哪些是它改的</text>
+    <text x="446" y="116" fill="var(--soft)" font-size="11.5">哪些是你自己的</text>
+
+    <rect x="548" y="56" width="158" height="72" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.4"/>
+    <text x="627" y="88" fill="var(--ink)" font-weight="700">信号被噪声淹没</text>
+    <text x="627" y="108" fill="var(--soft)" font-size="11.5">你只能拉到底说「行吧」</text>
+
+    <rect x="724" y="56" width="146" height="72" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.8"/>
+    <text x="797" y="84" fill="var(--bad)" font-weight="800">步骤 4</text>
+    <text x="797" y="106" fill="var(--bad)" font-weight="800">等于没做</text>
+  </g>
+  <g stroke="var(--bad)" stroke-width="1.8" marker-end="url(#a1)" opacity=".8">
+    <line x1="170" y1="92" x2="182" y2="92"/><line x1="346" y1="92" x2="358" y2="92"/>
+    <line x1="532" y1="92" x2="544" y2="92"/><line x1="708" y1="92" x2="720" y2="92"/>
+  </g>
+  <text x="440" y="172" class="st" font-size="13" fill="var(--soft)" text-anchor="middle" font-weight="600">
+    开工前那句 git status 不是走形式 &mdash;&mdash; 它在给「看改动」建立干净的对比基线
+  </text>
+</svg>
+<figcaption>基线脏了,后面所有的改动对比都在读乱码</figcaption>
+</figure>
+
+<div class="box key">
+  <b class="t">如果不干净怎么办</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:30%">做法</th><th>命令</th></tr></thead>
+  <tbody>
+  <tr><td>先存起来(推荐)</td><td><code>git add -A</code> 然后 <code>git commit -m "..."</code></td></tr>
+  <tr><td>先收进抽屉</td><td><code>git stash</code>(之后 <code>git stash pop</code> 拿回来)</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<h3>还有一件必须在第一次提交前做的事</h3>
+
+<div class="box trap">
+  <b class="t">&#9888; 先写忽略清单,再开始存档</b>
+  Python 项目会自动生成大量垃圾文件。不写忽略清单的话,它们会<strong>全部进入存档</strong>,
+  让你的改动列表全是噪音 —— <strong>又一次让步骤 4 失效</strong>。
+</div>
+
+<p>在项目根目录建 <code>.gitignore</code>:</p>
+
+<pre><code># ---- Python 垃圾 ----
+__pycache__/
+*.py[codz]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 虚拟环境(几千个文件、几十 MB)----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- 密钥,千万别提交 ----
+.env
+.env.*
+!.env.example
+.envrc
+
+# ---- 本地数据库 ----
+*.sqlite3
+
+# ---- 编辑器 ----
+.idea/</code></pre>
+
+<div class="box note">
+  <b class="t">&#128260; 这份清单经核实后做了四处改进</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:26%">改动</th><th>原因</th></tr></thead>
+  <tbody>
+  <tr><td><code>*.py[cod]</code> &rarr; <code>*.py[codz]</code></td><td>上游模板已更新,多覆盖一种扩展名</td></tr>
+  <tr><td>加了 <code>venv/ env/ ENV/</code></td><td><code>.venv/</code> <strong>只匹配这一个名字</strong>,常见别名要单独列</td></tr>
+  <tr><td>加了 <code>.env.*</code> 和 <code>!.env.example</code></td><td><code>.env</code> 只匹配精确名字,<code>.env.local</code> 这类会漏网。
+      感叹号是<strong>反向放行</strong>,让模板文件能提交</td></tr>
+  <tr><td><code>*.db</code> &rarr; <code>*.sqlite3</code></td><td><code>*.db</code> 太宽,会连你有意提交的数据文件一起吞掉</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="box good">
+  <b class="t">&#128161; <code>.DS_Store</code> 建议放全局,不要放项目里</b>
+  它是 macOS 自己生成的,<strong>不该让每个项目的忽略清单都替你的操作系统擦嘴</strong>:
+<pre style="margin:9px 0 0"><code>git config --global core.excludesFile ~/.gitignore_global</code></pre>
+<pre style="margin:6px 0 0"><code>echo ".DS_Store" &gt;&gt; ~/.gitignore_global</code></pre>
+</div>
+
+<h2 id="stage">五、暂存区:超市结账传送带</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">暂存区</span><span class="en">staging area / index</span><span class="badge">必须理解</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个<strong>「待存档清单」</strong>。你改了 10 个文件,可以只把其中 3 个放进清单,这次只存这 3 个。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>超市结账传送带。</strong></p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:38%">超市</th><th>代码</th></tr></thead>
+    <tbody>
+    <tr><td>从货架拿东西</td><td>改文件</td></tr>
+    <tr><td><strong>放上传送带</strong></td><td><strong><code>git add</code></strong></td></tr>
+    <tr><td>收银员扫码打单</td><td><code>git commit</code></td></tr>
+    <tr><td>看购物车里还没放上去的</td><td><code>git diff</code></td></tr>
+    <tr><td>看已经放上传送带的</td><td><code>git diff --staged</code></td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p><strong>步骤 4 的规矩就是:结账前把传送带上的东西再扫一眼。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它夹在「你的文件」和「存档历史」之间:</p>
+<pre><code>工作区(你改的文件)
+   &darr;  git add
+暂存区(待存档清单)
+   &darr;  git commit
+存档历史</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+<pre><code>cd &lt;你的项目&gt;/myshop && git add -A</code></pre>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:30%">命令</th><th>作用</th></tr></thead>
+    <tbody>
+    <tr><td><code>git add -A</code></td><td>把<strong>全部</strong>改动(含新文件)放上传送带</td></tr>
+    <tr><td><code>git add 文件名</code></td><td>只放某一个</td></tr>
+    <tr><td><code>git restore --staged .</code></td><td><strong>从传送带上拿下来</strong>,但保留你写的内容</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「<code>add</code> 是添加新文件用的」。</strong>不只是。
+    <strong>已存在的文件改了之后也要 <code>add</code></strong> —— 它的意思是「放上传送带」,不是「添加文件」。</p>
+    <p><strong>误区 2:「<code>add</code> 之后改动就安全了」。</strong>没有。
+    <strong>只有 <code>commit</code> 之后才进历史。</strong>传送带上的东西,一个粗暴的回退命令照样能清空。</p>
+  </div></div>
+</div>
+
+<h2 id="diff">六、看改动</h2>
+
+<h3>三条命令的分工</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:32%">命令</th><th>看的是什么</th></tr></thead>
+<tbody>
+<tr><td><code>git diff</code></td><td><strong>还没</strong> <code>add</code> 的改动(购物车里的)</td></tr>
+<tr><td><code>git diff --staged</code></td><td><strong>已经</strong> <code>add</code> 的改动(传送带上的)</td></tr>
+<tr><td><code>git diff HEAD</code></td><td><strong>两种全看</strong> —— <strong>步骤 4 推荐用这条</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 头号坑:<code>add</code> 之后 <code>git diff</code> 变成空白</b>
+  新手会以为改动丢了。<strong>其实是跑到传送带上去了</strong>,要用 <code>--staged</code> 看。
+  <br><br>
+  另外:<strong>git 不认识的新文件不会出现在 <code>git diff</code> 里。</strong>
+  所以<strong>步骤 4 应该先 <code>git status</code> 再 <code>git diff</code></strong> ——
+  前者告诉你有哪些新文件,后者告诉你改了什么。
+</div>
+
+<h3>改动怎么读</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-dim">diff --git a/app.py b/app.py</span>
+<span class="c-dim">index 11b15b1..738c813 100644</span>
+<span class="c-dim">--- a/app.py          &larr; a = 改之前</span>
+<span class="c-dim">+++ b/app.py          &larr; b = 改之后</span>
+<span class="c-dim">@@ -1 +1,4 @@         &larr; 改动发生在第 1 行起</span>
+<span class="c-bad">-print("hello")       &larr; 减号红行 = 被删掉的旧内容</span>
+<span class="c-ok">+def greet(name):     &larr; 加号绿行 = 新加的内容</span>
+<span class="c-ok">+    return f"Hello, {name}!"</span>
+<span class="c-ok">+</span>
+<span class="c-ok">+print(greet("world"))</span></pre>
+</div>
+
+<div class="box note">
+  <b class="t">两个新手常撞的小问题</b>
+  <ul style="margin-bottom:0">
+    <li><strong>输出很长时会进入分页模式</strong>(底部显示一个冒号)—— <strong>按 <code>q</code> 退出</strong>,不是死机</li>
+    <li><code>a/</code> 和 <code>b/</code> <strong>不是文件夹</strong>,是「改之前 / 改之后」的代号</li>
+  </ul>
+</div>
+
+<h3>只看规模</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git diff --stat</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre> report.py | 2 <span class="c-ok">++</span>
+ 1 file changed, 2 insertions(+)</pre>
+</div>
+
+<div class="box good">
+  <b class="t">&#128161; 步骤 4 的第一眼:先看规模</b>
+  <strong>改动规模和「方案里说的第一步」对得上吗?</strong>
+  <br>说好只改一个文件,结果这里列了 8 个 —— <strong>那就先别看内容,先问它为什么。</strong>
+</div>
+
+<h2 id="commit">七、存档</h2>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git commit -m "feat: 第1步 price 支持满减计算"</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>[main b27d579] feat: 第1步 price 支持满减计算
+ 1 file changed, 2 insertions(+)</pre>
+</div>
+
+<h3>看存档列表</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git log --oneline</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-warn">1a1b5c7</span> feat: 第3步 输出报告
+<span class="c-warn">31db09a</span> feat: 第2步 计算平均分
+<span class="c-warn">74412a5</span> feat: 第1步 读取分数</pre>
+</div>
+
+<p>前面那串字符是<strong>存档编号</strong>,第 12 页回退时要用它。加个 <code>--stat</code> 能顺便看每次改了多少:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-warn">1a1b5c7</span> feat: 第3步 输出报告
+ report.py | 5 <span class="c-ok">+++++</span>
+ 1 file changed, 5 insertions(+)
+<span class="c-warn">31db09a</span> feat: 第2步 计算平均分
+ report.py | 4 <span class="c-ok">++++</span>
+ 1 file changed, 4 insertions(+)</pre>
+</div>
+
+<h2 id="msg">八、存档说明怎么写</h2>
+
+<div class="box key">
+  <b class="t">判断标准只有一条</b>
+  <strong>一次存档要能用一句话讲清楚。讲不清就说明该拆成两次。</strong>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:12%"></th><th style="width:38%">写法</th><th>问题 / 好处</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--bad)"><strong>&#10060;</strong></td><td><code>更新</code></td><td>三天后自己也看不懂</td></tr>
+<tr><td style="color:var(--bad)"><strong>&#10060;</strong></td><td><code>修改</code> / <code>fix bug</code></td><td>回退时完全抓瞎</td></tr>
+<tr><td style="color:var(--bad)"><strong>&#10060;</strong></td><td><code>完成了今天的工作</code></td><td>说明这次存档太大了,该拆</td></tr>
+<tr><td style="color:var(--ok)"><strong>&#9989;</strong></td><td><code>feat: 第1步 price 支持满减计算</code></td><td>一眼知道做了什么</td></tr>
+<tr><td style="color:var(--ok)"><strong>&#9989;</strong></td><td><code>fix: 货币符号改回 ¥</code></td><td>回退时能精确定位</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>常用前缀(社区约定)</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">前缀</th><th style="width:26%">用于</th><th>例子</th></tr></thead>
+<tbody>
+<tr><td><code>feat:</code></td><td>新功能</td><td><code>feat: 订单支持备注字段</code></td></tr>
+<tr><td><code>fix:</code></td><td>修 bug</td><td><code>fix: 0 元订单显示错误</code></td></tr>
+<tr><td><code>test:</code></td><td>只动测试</td><td><code>test: 给 price 补边界用例</code></td></tr>
+<tr><td><code>docs:</code></td><td>只动文档</td><td><code>docs: 补充 README 快速开始</code></td></tr>
+<tr><td><code>chore:</code></td><td>杂务</td><td><code>chore: 忽略编辑器配置目录</code></td></tr>
+<tr><td><code>ci:</code></td><td>流水线配置</td><td><code>ci: 加质量门禁</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>「小步」到底多小</h3>
+
+<div class="box good">
+  <b class="t">一个可操作的节奏</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:12%">步</th><th>做什么</th></tr></thead>
+  <tbody>
+  <tr><td>1</td><td><code>git status</code> —— 看现状</td></tr>
+  <tr><td>2</td><td><code>git diff HEAD</code> —— <strong>看 AI/自己改了什么</strong></td></tr>
+  <tr><td>3</td><td><code>git add -A</code> —— 勾选</td></tr>
+  <tr><td>4</td><td><code>git commit -m "feat: 第N步 xxx"</code> —— 存档</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>四步一循环。</strong>循环得越勤,第 12 页那些回退命令的杀伤范围就越小。</p>
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; 别怕提交多</b>
+  提交是<strong>纯本地行为</strong>,不需要联网,不会打扰任何人。
+  <br>新手最常见的问题是「一天只提交一次」,结果出问题时只能整天回滚。
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>105</td><td>git = 游戏存档系统</td><td>全书通用的核心类比</td></tr>
+<tr><td>106</td><td><code>init</code> / <code>switch -c</code></td><td>&#128260; <code>switch</code> 优于 <code>checkout -b</code>,报错更像人话</td></tr>
+<tr><td>107</td><td>为什么开新分支</td><td>把爆炸半径缩到这条分支</td></tr>
+<tr><td>108</td><td><code>status</code> 五种状态</td><td><code>-s</code> 的<strong>左右两列</strong>是关键</td></tr>
+<tr><td>109</td><td>&#128293; <strong>工作区必须干净</strong></td><td>它是「看改动」这一步的基线</td></tr>
+<tr><td>110</td><td>暂存区 = 结账传送带</td><td>拿东西 / 放上带 / 打单</td></tr>
+<tr><td>111</td><td><code>??</code> = 没贴条码的商品</td><td>git 不认识它,第 12 页详讲</td></tr>
+<tr><td>112</td><td><code>diff</code> 三条命令的分工</td><td>步骤 4 用 <code>git diff HEAD</code></td></tr>
+<tr><td>113</td><td>&#9888; <code>add</code> 后 <code>diff</code> 变空</td><td>改动跑传送带上去了</td></tr>
+<tr><td>114</td><td><code>add -A</code> / <code>commit -m</code> / <code>log</code></td><td>四步循环</td></tr>
+<tr><td>115</td><td>存档说明规范</td><td>能用一句话讲清楚;<code>feat:</code> 等前缀</td></tr>
+<tr><td>&mdash;</td><td>&#128260; 忽略清单改进版</td><td><code>*.py[codz]</code>、<code>.env.*</code>、反向放行、全局忽略</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="10-flaky-e2e.html">&larr; 上一页:E2E 与时红时绿</a>
+  <a href="00-index.html">目录</a>
+  <a href="12-git-undo.html">下一页:git 回退与死角 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 11 页 / 共 23 页 · 覆盖知识点 105–115 · 难度 &#9733;&#9733;</p>
+  <p><strong>本页含 3 处经核实修正:</strong><code>switch</code>/<code>restore</code> 自 git 2.51 起不再标实验性(但旧版手册仍写着);
+  分支名打错时两个命令的报错措辞不同;忽略清单的四处改进。全部命令实测于 git 2.39.5。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

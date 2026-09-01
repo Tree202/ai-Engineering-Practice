@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>13 Claude Code 功能详解</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">13 Claude Code <span>· 功能详解</span></span>
+  <a href="12-git-undo.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="14-workflow.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 13 页 · 难度 ★★ · 前置:第 01、11 页</span>
+<h1>Claude Code 功能详解</h1>
+<p class="lede">
+前面讲的都是「原理」,这一页讲「按哪个键」。
+<strong>本页含 4 处对照官方文档的修正</strong> —— 其中一条流传极广的说法是反的,照做会让你误判 AI 的能力边界。
+</p>
+
+<div class="box note">
+  &#9888; 本页的界面细节(菜单项数、快捷键、模式名)基于 2026-08 的核验。Claude Code 迭代很快,操作前请以产品内 <code>/help</code> 与官方文档为准。
+</div>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#symbols">一、输入框里的三个符号</a></li>
+    <li><a href="#modes">二、权限模式</a></li>
+    <li><a href="#plan">三、先看方案模式</a></li>
+    <li><a href="#rewind">四、一键撤销</a></li>
+    <li><a href="#vs">五、撤销 vs 存档:分工</a></li>
+    <li><a href="#cmds">六、其他常用命令</a></li>
+    <li><a href="#keys">七、快捷键速查</a></li>
+  </ol>
+</div>
+
+<h2 id="symbols">一、输入框里的三个符号</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:12%">符号</th><th style="width:24%">叫什么</th><th>做什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>!</code></td><td><strong>Shell 模式</strong></td>
+  <td>行首打 <code>!命令</code>,<strong>直接执行,不经过模型</strong>,输出加入会话</td>
+</tr>
+<tr>
+  <td><code>@</code></td><td><strong>文件引用</strong></td>
+  <td>把某个文件或目录的内容读进上下文</td>
+</tr>
+<tr>
+  <td><code>/</code></td><td><strong>斜杠命令</strong></td>
+  <td>行首打 <code>/</code> 会弹出所有可用命令</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="term">
+  <div class="term-h"><span class="zh">Shell 模式</span><span class="en">! prefix</span><span class="badge">步骤 4 的关键</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>在输入框行首打一个感叹号,后面跟命令。<strong>这条命令会被直接执行,模型不参与决策</strong>,
+    执行结果加入会话让它看到。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>自己动手 vs 让助理转述。</strong></p>
+    <p>你问助理「仓库里还有多少货?」,他去看了回来告诉你「大概还挺多的」。
+    <br>而你自己走过去看,看到的是<strong>货架上实实在在的箱子</strong>。</p>
+    <p><strong>同一件事,信息经过一次转述就变了味。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p><strong>这是七步流程里「步骤 4」的全部价值所在。</strong></p>
+    <p>如果你让 AI 去跑「看改动」的命令再讲给你听,就等于<strong>让它评价自己的作业</strong> ——
+    第 8 页那三类盲区(改测试、范围蔓延、写了没接上)又全回来了。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>步骤 4 你实际敲的两行:</p>
+<pre><code>!git status</code></pre>
+<pre><code>!git diff HEAD</code></pre>
+    <p><strong>输出直接进你的眼睛,中间没有任何加工。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区:「让它跑命令然后看它贴的输出,效果一样」。</strong>
+    不一样。它可能<strong>只贴一部分</strong>、可能<strong>加上自己的解读</strong>、
+    甚至可能<strong>根本没跑却声称跑过了</strong>(第 20 页会讲这种作弊)。</p>
+  </div></div>
+</div>
+
+<div class="box note">
+  <b class="t"><code>@</code> 的用法</b>
+<pre style="margin:9px 0 0"><code>读一下 @myshop/ 和 @tests/,搞清楚现状</code></pre>
+  <p style="margin:9px 0 0">比你手动复制粘贴代码方便得多,也比让它自己猜文件在哪可靠得多。
+  <br>它在配置文件里还有一个进阶用法(导入其他文件),第 21 页会讲。</p>
+</div>
+
+<h2 id="modes">二、权限模式</h2>
+
+<div class="box key">
+  <b class="t">&#128260; 修正 1:官方清单是<strong>四种</strong>,没有叫 auto 的模式</b>
+  官方文档列出的权限模式为 <code>default</code> / <code>acceptEdits</code> / <code>plan</code> / <code>bypassPermissions</code>。
+  网上说的「auto 模式」是把状态栏文案「&#9205;&#9205; auto-accept edits on」误当成了模式名 ——
+  那只是 <code>acceptEdits</code> 开启时的显示,不是一种独立模式。清单:
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">模式</th><th>它允许什么</th></tr></thead>
+<tbody>
+<tr><td><code>default</code><br><span style="font-size:12px;color:var(--faint)">界面上显示为 Manual</span></td><td>大部分改动需要你逐个批准</td></tr>
+<tr><td><code>acceptEdits</code></td><td>自动批准文件编辑,但<strong>运行命令仍要问你</strong></td></tr>
+<tr><td><code>plan</code> &#11088;</td><td><strong>不能编辑源文件</strong>,直到你批准计划。详见第三节</td></tr>
+<tr><td><code>bypassPermissions</code></td><td>几乎全自动</td></tr>
+<tr><td><code>dontAsk</code></td><td>不在 <code>Shift+Tab</code> 循环里<span style="font-size:12px;color:var(--faint)">(版本相关,以官方文档为准)</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>怎么切换</h3>
+
+<p>按 <strong><code>Shift + Tab</code></strong> 循环切换。</p>
+
+<div class="box trap">
+  <b class="t">&#128260; 修正 2:别数「按几下」—— 你很可能数不对</b>
+  网上教程常说「按两下到 plan」。<strong>别依赖这种数法。</strong>
+  <br><br>
+  并不是所有模式都在循环里:<code>bypassPermissions</code> 只有用特定方式启动才进循环,
+  <code>dontAsk</code> <strong>永远不在循环里</strong> ——
+  循环里有几项因启动方式、配置和版本而异,「按几下」自然也就不固定。
+  <br><br>
+  <strong>&#9989; 唯一稳妥的做法:按 <code>Shift+Tab</code>,一直按到状态栏出现 <code>plan mode on</code> 为止。</strong>
+  <em>认状态栏,不数按键次数。</em>
+</div>
+
+<figure>
+<svg viewBox="0 0 720 150" role="img" aria-label="权限模式循环顺序">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st" font-size="12" text-anchor="middle">
+    <rect x="24" y="42" width="130" height="44" rx="10" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.4"/>
+    <text x="89" y="62" fill="var(--ink)" font-weight="700">default</text>
+    <text x="89" y="78" fill="var(--faint)" font-size="10.5">显示为 Manual</text>
+
+    <rect x="182" y="42" width="130" height="44" rx="10" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.4"/>
+    <text x="247" y="62" fill="var(--ink)" font-weight="700">acceptEdits</text>
+    <text x="247" y="78" fill="var(--faint)" font-size="10.5">自动批准编辑</text>
+
+    <rect x="340" y="38" width="130" height="52" rx="10" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="2.2"/>
+    <text x="405" y="60" fill="var(--plan)" font-weight="800">plan &#11088;</text>
+    <text x="405" y="78" fill="var(--soft)" font-size="10.5">不能编辑源文件</text>
+
+    <rect x="498" y="42" width="150" height="44" rx="10" fill="var(--raised)" stroke="var(--rule)" stroke-width="1.4" opacity=".5"/>
+    <text x="573" y="62" fill="var(--soft)" font-weight="700">bypassPermissions</text>
+    <text x="573" y="78" fill="var(--faint)" font-size="10.5">要特定方式启动</text>
+  </g>
+  <g stroke="var(--faint)" stroke-width="1.4" marker-end="url(#a1)">
+    <line x1="156" y1="64" x2="178" y2="64"/>
+    <line x1="314" y1="64" x2="336" y2="64"/>
+    <line x1="472" y1="64" x2="494" y2="64"/>
+  </g>
+  <path d="M 573 90 L 573 108 L 89 108 L 89 90" fill="none" stroke="var(--faint)"
+        stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#a1)"/>
+  <text x="360" y="132" class="st" font-size="12" fill="var(--warn)" text-anchor="middle" font-weight="700">
+    起点因人而异 &mdash;&mdash; 所以认状态栏,别数次数
+  </text>
+</svg>
+<figcaption>循环顺序是固定的,但你的<strong>起点</strong>不一定是 default</figcaption>
+</figure>
+
+<h2 id="plan">三、先看方案模式</h2>
+
+<div class="box trap">
+  <b class="t">&#128260; 修正 3:这一条流传很广的说法是<strong>反的</strong></b>
+  常见说法:<em>「在这个模式下,AI 什么都不能做 —— 不能编辑文件,<strong>也不能运行命令</strong>。」</em>
+  <br><br>
+  <strong>后半句是错的。</strong>官方原文明确写着:
+  <br><br>
+  <em>「Plan mode tells Claude to research and propose changes without making them.
+  Claude reads files, <strong>runs shell commands to explore</strong>, and writes a plan,
+  but does not edit your source.」</em>
+  <br><br>
+  <strong>它能运行命令去探索代码,被限制的只是「编辑源文件」这一件事。</strong>
+</div>
+
+<div class="box good">
+  <b class="t">回到第 1 页那个类比 —— 它其实早就暗示了这一点</b>
+  <strong>装修先出图纸:设计师只量房、画图、报价,不许砸墙。</strong>
+  <br><br>
+  <strong>但图纸阶段设计师照样要进门量尺寸。</strong>
+  <br><br>
+  「进门量尺寸」= 运行命令探索代码。「砸墙」= 编辑源文件。
+  <strong>被禁止的只有后者。</strong>
+</div>
+
+<h3>为什么这个区分对你很重要</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:34%">如果你以为它「什么都不能做」</th><th>实际情况</th></tr></thead>
+<tbody>
+<tr>
+  <td>你会觉得「它没读过代码,给的方案肯定是瞎猜的」</td>
+  <td style="color:var(--ok)"><strong>它真的读过</strong> —— 方案的可信度比你以为的高</td>
+</tr>
+<tr>
+  <td>你不会要求它「先搞清楚现状」</td>
+  <td style="color:var(--ok)"><strong>你应该要求</strong> —— 这是它能做且该做的事</td>
+</tr>
+<tr>
+  <td>你会以为这个模式绝对安全,什么都不用管</td>
+  <td style="color:var(--warn)"><strong>它能执行命令</strong>,所以「不改源文件」不等于「零副作用」</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>提示词模板</h3>
+
+<pre><code>读一下 @myshop/ 和 @tests/,搞清楚现状,
+给我「给订单加满减优惠」的实施方案,先别写代码。
+
+方案要说清楚:
+- 要改哪几个文件,每个文件改什么
+- 拆成几步,每步做完能独立验证
+- 每一步之后应该跑哪些检查(给出确切命令)
+- 有没有会影响到现有功能的地方</code></pre>
+
+<div class="box good">
+  <b class="t">「搞清楚现状」这四个字在要求它做前提校验</b>
+  确认接口签名真的长那样、文件真的在那儿、现有实现真的是它以为的那样。
+  <br><br>
+  <strong>它防的是「方案建立在幻觉之上」</strong> ——
+  方案里写「调用某个函数」,而那个函数根本不存在。这种情况下,后面写多少代码、跑多少检查都是错的。
+</div>
+
+<h3>审方案看四件事</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">看什么</th><th style="width:34%">警惕信号</th><th>你该说什么</th></tr></thead>
+<tbody>
+<tr><td><strong>方向对不对</strong></td><td>它理解的和你想的不是一回事</td><td>「你理解错了,我要的是 X 不是 Y」</td></tr>
+<tr><td><strong>范围超了没</strong></td><td>出现「顺便重构一下」「统一优化」</td><td>「这次只做 X,别碰其他文件」</td></tr>
+<tr><td><strong>步子太大没</strong></td><td>第一步就要改五个文件</td><td>「第 1 步拆成三步,每步做完我要能验证」</td></tr>
+<tr><td><strong>有没有幻觉</strong></td><td>提到了你没见过的函数名 / 文件名</td><td>「那个函数在哪个文件?先确认它存在」</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; 一个省时的快捷键</b>
+  <strong><code>Ctrl + G</code></strong> 可以把计划拉进你的外部编辑器直接改 ——
+  比反复说「再改改」快得多。
+</div>
+
+<h2 id="rewind">四、一键撤销</h2>
+
+<h3>怎么打开</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:36%">情况</th><th>行为</th></tr></thead>
+<tbody>
+<tr><td>输入框是<strong>空的</strong>,连按两次 <code>Esc</code></td><td>直接打开撤销菜单</td></tr>
+<tr><td>输入框<strong>有文字</strong>,连按两次 <code>Esc</code></td><td><strong>第一次先清空文字</strong>(按 ↑ 可恢复),第二次才打开菜单</td></tr>
+<tr><td>输入 <code>/rewind</code></td><td>效果相同</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>菜单里的五个选项</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th>选项</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>同时恢复<strong>代码和对话</strong></td></tr>
+<tr><td>2</td><td>只恢复<strong>对话</strong>(保留当前代码)</td></tr>
+<tr><td>3</td><td>只恢复<strong>代码</strong>(保留对话)</td></tr>
+<tr><td>4</td><td>从这一点压缩对话</td></tr>
+<tr><td>5</td><td>压缩到这一点之前的对话</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>&#9888; 它的五个死角</h3>
+
+<div class="box trap">
+  <b class="t">它<strong>只追踪 AI 用文件编辑工具做的改动</strong></b>
+  以下五种全都<strong>不</strong>回退:
+  <ol style="margin-bottom:0">
+    <li><strong>命令造成的后果</strong> —— 它执行过的删除、移动、安装,回不来</li>
+    <li><strong>存档系统的状态</strong> —— 它存过档的东西还在</li>
+    <li><strong>后台任务做的编辑</strong> —— 官方文档明确点名了后台运行的审查任务</li>
+    <li><strong>你自己在编辑器里手改的文件</strong> —— 它只认自己动过的</li>
+    <li><strong>数据库文件、已发出去的请求</strong> —— 覆水难收</li>
+  </ol>
+</div>
+
+<div class="box key">
+  <b class="t">三个容易误会的限制</b>
+  <ul style="margin-bottom:0">
+    <li><strong>粒度是「你发的每一条消息」</strong>,不是每一次改文件。
+        你不能精确回到「它改某个文件的那一刻」</li>
+    <li>只保留<strong>最近 100 个</strong>还原点</li>
+    <li>随会话在 <strong>30 天后清除</strong></li>
+  </ul>
+  <br>
+  好消息:<strong>还原点是跨会话持久的</strong> —— 重启之后依然可以用。
+  <br><br>
+  官方对它的定位原话是:<em>「不是版本控制的替代品」</em>。
+</div>
+
+<h2 id="vs">五、撤销 vs 存档:分工</h2>
+
+<figure>
+<svg viewBox="0 0 860 250" role="img" aria-label="一键撤销与存档系统的分工">
+  <g class="st">
+    <rect x="30" y="30" width="370" height="180" rx="14" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="215" y="60" font-size="15" font-weight="800" fill="var(--bad)" text-anchor="middle">一键撤销</text>
+    <text x="215" y="84" font-size="12.5" fill="var(--soft)" text-anchor="middle">「回到上一句选择」</text>
+    <g font-size="12" fill="var(--soft)">
+      <text x="56" y="116">&#9679; 自动记录,零成本</text>
+      <text x="56" y="140">&#9679; 粒度:你说的每句话</text>
+      <text x="56" y="164">&#9679; 100 个上限 / 30 天</text>
+      <text x="56" y="188" fill="var(--bad)">&#9679; 五个死角</text>
+    </g>
+
+    <rect x="460" y="30" width="370" height="180" rx="14" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="645" y="60" font-size="15" font-weight="800" fill="var(--ok)" text-anchor="middle">存档系统</text>
+    <text x="645" y="84" font-size="12.5" fill="var(--soft)" text-anchor="middle">「存档点」</text>
+    <g font-size="12" fill="var(--soft)">
+      <text x="486" y="116">&#9679; 手动存,要一点纪律</text>
+      <text x="486" y="140">&#9679; 粒度:你定的里程碑</text>
+      <text x="486" y="164">&#9679; 永久、无上限</text>
+      <text x="486" y="188" fill="var(--ok)">&#9679; 什么都管得着</text>
+    </g>
+  </g>
+</svg>
+<figcaption>能力更强的是右边那个。所以四道防线里,左边这个是唯一可以完全不用的</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%"></th><th style="width:39%">一键撤销</th><th>存档系统</th></tr></thead>
+<tbody>
+<tr><th>比喻</th><td><strong>文字冒险游戏「回到上一句选择」</strong></td><td><strong>游戏存档点</strong></td></tr>
+<tr><th>记录方式</th><td>自动,你什么都不用做</td><td>手动,你得按存档键</td></tr>
+<tr><th>粒度</th><td>你说的每一句话</td><td>你决定的每一个里程碑</td></tr>
+<tr><th>有效范围</th><td>这一局(会话)里,30 天</td><td>跨天、跨会话、跨机器,永久</td></tr>
+<tr><th>什么时候用</th><td><strong>小改跑歪了</strong></td><td><strong>整条路线走错了</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">一句话</b>
+  <strong>一键撤销是零食,存档系统是主食。</strong>只吃主食能活,只吃零食会死。
+</div>
+
+<h2 id="cmds">六、其他常用命令</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">命令</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>/review</code></td><td><strong>是 <code>/code-review</code> 的别名</strong>,两者完全相同。审查当前分支的改动</td></tr>
+<tr><td><code>/code-review --fix</code></td><td>审完<strong>直接把问题改掉</strong></td></tr>
+<tr><td><code>/security-review</code></td><td>独立命令,专查安全问题</td></tr>
+<tr><td><code>/clear</code></td><td><strong>开一个全新对话</strong>。清空历史,但保留配置文件</td></tr>
+<tr><td><code>/compact</code></td><td><strong>在当前对话内压缩</strong>前面的内容,不清空历史</td></tr>
+<tr><td><code>/init</code></td><td>自动生成一份项目配置文件初稿(第 21 页讲)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; <code>--fix</code> 和撤销的死角有关</b>
+  官方文档在讲「撤销管不了什么」时,<strong>明确点名了后台运行的审查修复任务</strong>。
+  <br><br>
+  <strong>也就是说:用 <code>--fix</code> 改出来的东西,一键撤销救不回来,只能靠存档系统。</strong>
+  <br><br>
+  这是「为什么存档系统绝对不能省」的又一个具体理由。
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; <code>/clear</code> 什么时候用</b>
+  跑到第三四轮,上下文里全是旧改动和旧报错,AI 开始翻旧账、重提已经解决的问题。
+  <br><br>
+  <strong>规矩:一次存档打完 = 一次 <code>/clear</code>。</strong>
+  该记住的东西已经在存档说明和配置文件里了,不需要它记在脑子里。
+  <br><br>
+  第 21 页会展开讲这条规矩背后的原理:<strong>知识在文件里,不在会话里。</strong>
+</div>
+
+<h2 id="keys">七、快捷键速查</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">按键</th><th>做什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>Shift + Tab</code></td>
+  <td>循环切换权限模式。<strong>&#128260; 别数按几下 —— 按到状态栏出现 <code>plan mode on</code></strong></td>
+</tr>
+<tr>
+  <td><code>Esc Esc</code></td>
+  <td>空输入框 = 打开撤销菜单;<strong>有文字时第一次先清空</strong>(按 ↑ 可恢复)</td>
+</tr>
+<tr><td><code>Ctrl + G</code></td><td><strong>把计划拉进外部编辑器改</strong></td></tr>
+<tr><td><code>Alt + M</code></td><td>Windows 上某些终端里,代替 <code>Shift+Tab</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>129</td><td><code>!</code> Shell 模式</td><td><strong>步骤 4 的全部价值</strong> —— 输出直接进你眼睛</td></tr>
+<tr><td>130</td><td><code>@</code> 文件引用</td><td>比复制粘贴方便,比让它猜可靠</td></tr>
+<tr><td>131</td><td>&#128260; 权限模式官方<strong>四种</strong></td><td><code>auto</code> 不是模式名,是 <code>acceptEdits</code> 开启时的状态栏文案</td></tr>
+<tr><td>132</td><td>&#128260; <strong>别数按几下</strong></td><td>起点因人而异,认状态栏</td></tr>
+<tr><td>133</td><td>&#128260; <strong>方案模式能运行命令</strong></td><td>只是不能编辑源文件 —— 流传很广的说法是反的</td></tr>
+<tr><td>134</td><td>前提校验</td><td>「搞清楚现状」防的是方案建在幻觉上</td></tr>
+<tr><td>135</td><td>审方案四件事</td><td>方向 / 范围 / 步子 / 幻觉</td></tr>
+<tr><td>136</td><td><code>Esc Esc</code> 的两种行为</td><td>取决于输入框空不空</td></tr>
+<tr><td>137</td><td>&#9888; 撤销的五个死角</td><td>命令后果、存档状态、后台任务、手改、已发请求</td></tr>
+<tr><td>138</td><td>三个限制</td><td>粒度是每条消息 / 100 个 / 30 天</td></tr>
+<tr><td>139</td><td>撤销 vs 存档</td><td><strong>零食 vs 主食</strong></td></tr>
+<tr><td>140</td><td><code>/review</code> 等命令</td><td><code>--fix</code> 的改动撤销救不回</td></tr>
+<tr><td>141</td><td><code>Ctrl+G</code></td><td>把计划拉进编辑器</td></tr>
+<tr><td>142</td><td><code>/clear</code> vs <code>/compact</code></td><td>一次存档打完 = 一次 <code>/clear</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="12-git-undo.html">&larr; 上一页:git 回退</a>
+  <a href="00-index.html">目录</a>
+  <a href="14-workflow.html">下一页:七步流程实战 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 13 页 / 共 23 页 · 覆盖知识点 129–142 · 难度 &#9733;&#9733;</p>
+  <p><strong>本页含 4 处经核实修正:</strong>官方权限模式共四种,<code>auto</code> 不是独立模式(那是 <code>acceptEdits</code> 开启时的状态栏文案);
+  按键次数不固定,应认状态栏;<strong>方案模式能运行命令探索,只是不能编辑源文件</strong>;
+  撤销的死角包含后台审查修复任务。全部对照官方文档核实。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

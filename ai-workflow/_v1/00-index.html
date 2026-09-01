@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 协作工程实践 · 零基础教程 · 目录</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --paper:#13151B; --raised:#1B1E26; --sunk:#0E1015;
+    --ink:#E9EBF1; --soft:#ABB1C2; --faint:#7C8394;
+    --rule:#2A2E39; --rule2:#414755;
+    --accent:#91AFE2; --accent-soft:#1E2634; --code:#1E222B;
+    --ok:#6FBF8B; --ok-soft:#17251C;
+    --warn:#DCAC4C; --warn-soft:#241E12;
+    --bad:#DD7A5F; --bad-soft:#25170F;
+    --info:#5AB3AB; --info-soft:#0F2321;
+    --plan:#A895DA; --plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"]{
+    color-scheme:light;
+    --paper:#F8F9FB; --raised:#FFFFFF; --sunk:#EEF0F5;
+    --ink:#16181F; --soft:#464B59; --faint:#767C8C;
+    --rule:#DFE2EA; --rule2:#C3C9D6;
+    --accent:#2E4A7D; --accent-soft:#E8EDF6; --code:#F0F2F7;
+    --ok:#2C7A4B; --ok-soft:#E6F4EB;
+    --warn:#96700F; --warn-soft:#FBF2DC;
+    --bad:#A8452F; --bad-soft:#FBEAE5;
+    --info:#1F6B65; --info-soft:#E2F2F0;
+    --plan:#5B4A94; --plan-soft:#EEE9F8;
+  }
+  @media (prefers-color-scheme:light){
+    :root[data-theme="system"]{
+      color-scheme:light;
+      --paper:#F8F9FB; --raised:#FFFFFF; --sunk:#EEF0F5;
+      --ink:#16181F; --soft:#464B59; --faint:#767C8C;
+      --rule:#DFE2EA; --rule2:#C3C9D6;
+      --accent:#2E4A7D; --accent-soft:#E8EDF6; --code:#F0F2F7;
+      --ok:#2C7A4B; --ok-soft:#E6F4EB;
+      --warn:#96700F; --warn-soft:#FBF2DC;
+      --bad:#A8452F; --bad-soft:#FBEAE5;
+      --info:#1F6B65; --info-soft:#E2F2F0;
+      --plan:#5B4A94; --plan-soft:#EEE9F8;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);
+       backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1120px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;
+         border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav a.dim{opacity:.4;pointer-events:none}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}
+  .nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;
+                 color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1120px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:33px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:60px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18px;margin:34px 0 10px}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+          color:var(--faint);border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;
+      overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);
+       padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .foot{margin-top:80px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:50px;
+         padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;
+           border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .pager a.dim{opacity:.35;pointer-events:none}
+
+  /* 索引页专用 */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin:24px 0}
+  .card{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:15px 18px;
+        text-decoration:none;color:inherit;display:block;transition:border-color .15s}
+  .card:hover{border-color:var(--accent)}
+  .card .no{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.05em}
+  .card .ti{font-weight:700;font-size:16px;margin:3px 0 6px;color:var(--ink)}
+  .card .ab{font-size:13.5px;color:var(--soft);line-height:1.65}
+  .card .lv{font-size:11.5px;color:var(--faint);margin-top:8px;font-family:var(--mono)}
+  .route{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:16px 20px;margin:16px 0}
+  .route b{display:block;margin-bottom:6px}
+  .route .path{font-family:var(--mono);font-size:13.5px;color:var(--accent);word-break:break-all}
+  @media(max-width:640px){
+    .wrap{padding:26px 15px 70px}h1{font-size:26px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.cards{grid-template-columns:1fr}
+  }
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+
+<div class="nav"><div class="nav-in">
+  <span class="who">AI 协作工程实践 <span>· 零基础教程</span></span>
+  <a class="dim" href="#">← 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="01-overview.html">下一页 →</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<span class="kicker">目录 · Index</span>
+<h1>让 AI 帮你写代码,<br>但不失去对代码的控制</h1>
+
+<p class="lede">
+这是一套写给<strong>完全零基础</strong>的中文教程,共 19 页。
+它回答一个问题:<strong>当 AI 替你写代码时,你怎么知道它写对了?</strong>
+</p>
+
+<div class="box note">
+  <b class="t">读这套教程需要什么</b>
+  <strong>不需要</strong>会 Python、不需要用过 git、不需要写过测试。
+  <br>
+  <strong>需要</strong>一台 Mac 或 Linux(Windows 大部分也能跟)、一个终端窗口、以及愿意亲手敲命令。
+  <br><br>
+  每个新名词都会按固定 5 步讲:<strong>① 一句话定义 → ② 生活化类比 → ③ 它在体系中的位置 → ④ 最小可运行例子 → ⑤ 常见误区</strong>。
+  术语第一次出现会写成「中文(English)」,之后只用中文。
+</div>
+
+<div class="box key">
+  <b class="t">本教程的内容是核对过的,不是凭记忆写的</b>
+  所有命令、配置键名、路径、版本号都对照过官方文档或在真机上实际运行过。
+  共核实 <strong>96 条</strong>断言,其中 <strong>14 条</strong>发现有误并已修正。
+  <br><br>
+  凡是标 <strong>⚠️ 待验证</strong> 的地方,表示我没找到可靠依据,请你自己再确认——**不会用猜的内容糊过去**。
+  <br><br>
+  验证环境:macOS 15.7.4 · Python 3.9.6 · pytest 8.4.2 · mypy 1.19.1 · ruff 0.16.3 · git 2.39.5
+</div>
+
+<!-- ========================================================= -->
+<h2 id="what">这套教程在讲一件什么事</h2>
+
+<p>先给你一张全局图。整套教程围绕<strong>四道防线</strong>展开:</p>
+
+<figure>
+<svg viewBox="0 0 900 300" role="img" aria-label="四道防线在时间轴上的位置,以及每道防线对应的教程页码">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="var(--rule2)"/>
+    </marker>
+  </defs>
+  <line x1="40" y1="152" x2="858" y2="152" stroke="var(--rule2)" stroke-width="2" marker-end="url(#ar)"/>
+  <g class="st" font-size="13" fill="var(--faint)" text-anchor="middle">
+    <line x1="180" y1="142" x2="180" y2="162" stroke="var(--rule2)" stroke-width="2"/>
+    <line x1="425" y1="142" x2="425" y2="162" stroke="var(--rule2)" stroke-width="2"/>
+    <line x1="665" y1="142" x2="665" y2="162" stroke="var(--rule2)" stroke-width="2"/>
+    <text x="180" y="182">动手前</text>
+    <text x="425" y="182">动手中</text>
+    <text x="665" y="182">出事后</text>
+    <text x="845" y="182" text-anchor="end">时间</text>
+  </g>
+
+  <g>
+    <rect x="100" y="82" width="160" height="46" rx="10" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.6"/>
+    <text x="180" y="103" class="st" font-size="14" font-weight="700" fill="var(--plan)" text-anchor="middle">① 先看方案</text>
+    <text x="180" y="120" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">防「方向错」· 第 13 页</text>
+  </g>
+  <g>
+    <rect x="345" y="82" width="160" height="46" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="425" y="103" class="st" font-size="14" font-weight="700" fill="var(--info)" text-anchor="middle">② 让它自测</text>
+    <text x="425" y="120" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">防「实现错」· 第 3–10 页</text>
+  </g>
+  <g>
+    <rect x="585" y="82" width="160" height="46" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="665" y="103" class="st" font-size="14" font-weight="700" fill="var(--bad)" text-anchor="middle">③ 一键撤销</text>
+    <text x="665" y="120" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">可选 · 第 13 页</text>
+  </g>
+
+  <g>
+    <rect x="60" y="212" width="798" height="48" rx="12" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="459" y="233" class="st" font-size="14" font-weight="700" fill="var(--ok)" text-anchor="middle">
+      ④ 存档系统(git) —— 唯一横跨全程的一道防线 · 第 11–12 页
+    </text>
+    <text x="459" y="251" class="st" font-size="11.5" fill="var(--faint)" text-anchor="middle">
+      动手前:铺网 · 动手中:每步存档 · 出事后:定位 + 回退
+    </text>
+  </g>
+  <g stroke="var(--ok)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".5">
+    <line x1="180" y1="152" x2="180" y2="212"/>
+    <line x1="425" y1="152" x2="425" y2="212"/>
+    <line x1="665" y1="152" x2="665" y2="212"/>
+  </g>
+  <g class="st" font-size="12" fill="var(--faint)" text-anchor="middle">
+    <text x="180" y="62">预防</text>
+    <text x="425" y="62">检测</text>
+    <text x="665" y="62">撤销</text>
+  </g>
+</svg>
+<figcaption>四道防线各管一段时间。前三道漏了就是漏了,只有第四道贯穿全程</figcaption>
+</figure>
+
+<div class="box good">
+  <b class="t">还有一件事,它不在上面这张图里 —— 但它最重要</b>
+  <strong>你自己用眼睛看 AI 改了什么。</strong>
+  <br><br>
+  上面四道防线全都可以交给工具,<strong>只有这一件不能</strong>。整套教程会反复回到这一点。
+</div>
+
+<!-- ========================================================= -->
+<h2 id="pages">全部 19 页</h2>
+
+<h3>第一部分 · 打地基(第 1–4 页)</h3>
+
+<div class="cards">
+  <a class="card" href="01-overview.html">
+    <div class="no">01 / overview</div>
+    <div class="ti">全景:四道防线与七步流程</div>
+    <div class="ab">先建立地图。AI 写代码会以哪两种方式失控,四种应对方法各管什么,以及它们串成的一套标准流程长什么样。这一页不出现任何命令。</div>
+    <div class="lv">难度 ★ · 覆盖 7 个知识点</div>
+  </a>
+  <a class="card" href="02-python-setup.html">
+    <div class="no">02 / python-setup</div>
+    <div class="ti">Python 环境从零开始</div>
+    <div class="ab">虚拟环境是什么、为什么不能直接 pip install、三个工具怎么装、一个配置文件怎么配好它们。后面所有页的代码都要靠这一页跑起来。</div>
+    <div class="lv">难度 ★ · 覆盖 15 个知识点</div>
+  </a>
+  <a class="card" href="03-test-basics.html">
+    <div class="no">03 / test-basics</div>
+    <div class="ti">测试到底是什么</div>
+    <div class="ab">测试是代码,不是文档。断言、pytest 做的三件事、三段式骨架、fixture、以及「AI 写了测试却一条没跑」的四条原因。</div>
+    <div class="lv">难度 ★★ · 覆盖 17 个知识点</div>
+  </a>
+  <a class="card" href="04-static-check.html">
+    <div class="no">04 / static-check</div>
+    <div class="ti">静态检查:不运行代码的检查</div>
+    <div class="ab">类型检查和代码规范检查是什么,为什么它们又快又便宜,以及它们有一个结构性的盲区——这个盲区在后面会被验证五次。</div>
+    <div class="lv">难度 ★★ · 覆盖 7 个知识点</div>
+  </a>
+</div>
+
+<h3>第二部分 · 测试体系(第 5–10 页)</h3>
+
+<div class="cards">
+  <a class="card" href="05-pyramid.html">
+    <div class="no">05 / pyramid</div>
+    <div class="ti">测试金字塔四层</div>
+    <div class="ab">四层测试各自测什么、更重要的是「不测什么」。附真机实测耗时:同一个项目,最快一层 0.00 秒,最慢一层 3.64 秒。</div>
+    <div class="lv">难度 ★★ · 覆盖 11 个知识点</div>
+  </a>
+  <a class="card" href="06-myshop.html">
+    <div class="no">06 / myshop</div>
+    <div class="ti">练习项目 myshop 解剖</div>
+    <div class="ab">一个 224 行的迷你商店。三个源码文件按依赖递增排列,这个顺序正好就是金字塔的层级——这是整套教程的实验台。</div>
+    <div class="lv">难度 ★★ · 覆盖 13 个知识点</div>
+  </a>
+  <a class="card" href="07-four-layers-code.html">
+    <div class="no">07 / four-layers-code</div>
+    <div class="ti">四层测试代码逐行讲</div>
+    <div class="ab">四个测试文件的完整代码。重点在两个「怎么断言才算数」的技巧,以及为什么最上面那层慢 260 倍。</div>
+    <div class="lv">难度 ★★★ · 覆盖 10 个知识点</div>
+  </a>
+  <a class="card" href="08-break-it.html">
+    <div class="no">08 / break-it</div>
+    <div class="ti">五次故意改坏实验</div>
+    <div class="ab">像点香测烟雾报警器一样,把好代码故意改坏五次,看哪些哨兵会响。静态检查五战五败,而每次立功的都是不同的测试。</div>
+    <div class="lv">难度 ★★★ · 覆盖 12 个知识点</div>
+  </a>
+  <a class="card" href="09-partial-vs-full.html">
+    <div class="no">09 / partial-vs-full</div>
+    <div class="ti">局部 vs 全量 + 一场真实事故</div>
+    <div class="ab">同一批测试为什么要跑两次。附一场完整复盘:一个两行的改动,如何把「应付 ¥0.00」变成「应付 免费」并流进财务系统。</div>
+    <div class="lv">难度 ★★★ · 覆盖 7 个知识点</div>
+  </a>
+  <a class="card" href="10-flaky-e2e.html">
+    <div class="no">10 / flaky-e2e</div>
+    <div class="ti">端到端测试与「时红时绿」</div>
+    <div class="ab">最贵的那层测试。以及一个 AI 协作专属的坑:面对偶发失败,人会说「重跑一下」,AI 会去修一个根本不存在的 bug。</div>
+    <div class="lv">难度 ★★★ · 覆盖 9 个知识点</div>
+  </a>
+</div>
+
+<h3>第三部分 · 存档与撤销(第 11–12 页)</h3>
+
+<div class="cards">
+  <a class="card" href="11-git-basics.html">
+    <div class="no">11 / git-basics</div>
+    <div class="ti">git 基础:代码的存档系统</div>
+    <div class="ab">把 git 当游戏存档来理解。开分支、看状态、看改动、存档。以及一个隐藏因果:工作区不干净,会让「你自己看改动」这一步彻底失效。</div>
+    <div class="lv">难度 ★★ · 覆盖 11 个知识点</div>
+  </a>
+  <a class="card" href="12-git-undo.html">
+    <div class="no">12 / git-undo</div>
+    <div class="ti">git 回退:三件套与它们的死角</div>
+    <div class="ab">全书最容易出人命的一页。头号坑:撤销命令删不掉 AI 新建的文件,你会以为「回退失败了」。附新手报错速查。</div>
+    <div class="lv">难度 ★★★ · 覆盖 11 个知识点</div>
+  </a>
+</div>
+
+<h3>第四部分 · 工具与流程(第 13–14 页)</h3>
+
+<div class="cards">
+  <a class="card" href="13-claude-code.html">
+    <div class="no">13 / claude-code</div>
+    <div class="ti">Claude Code 功能详解</div>
+    <div class="ab">符号、权限模式、Plan 模式、撤销菜单、审查命令。含 6 处对照官方文档的修正——包括一条流传很广的错误说法。</div>
+    <div class="lv">难度 ★★ · 覆盖 14 个知识点</div>
+  </a>
+  <a class="card" href="14-workflow.html">
+    <div class="no">14 / workflow</div>
+    <div class="ti">七步流程实战</div>
+    <div class="ab">把前面全部串起来,在真实项目上从头走一遍。含可直接复制的提示词模板和五条防作弊约束。</div>
+    <div class="lv">难度 ★★★ · 覆盖 12 个知识点</div>
+  </a>
+</div>
+
+<h3>第五部分 · 放大到团队(第 15–18 页)</h3>
+
+<div class="cards">
+  <a class="card" href="15-team-ci.html">
+    <div class="no">15 / team-ci</div>
+    <div class="ti">岗位分工与自动化流水线</div>
+    <div class="ab">这四层测试在公司里归谁做、用什么工具、在本地还是云端跑、在流水线的哪个位置。含完整可读的流水线配置。</div>
+    <div class="lv">难度 ★★★ · 覆盖 14 个知识点</div>
+  </a>
+  <a class="card" href="16-ai-boundary.html">
+    <div class="no">16 / ai-boundary</div>
+    <div class="ti">AI 的能力边界与防作弊</div>
+    <div class="ab">AI 在四层各能做多少。以及一个根本性陷阱:它照着「实现」写测试,会把 bug 固化成「预期行为」。</div>
+    <div class="lv">难度 ★★★ · 覆盖 10 个知识点</div>
+  </a>
+  <a class="card" href="17-automation.html">
+    <div class="no">17 / automation</div>
+    <div class="ti">固化流程与会话管理</div>
+    <div class="ab">把每次都要说的话变成配置文件、把常用命令变成一个词、把必须做的检查变成强制执行。以及什么时候该开新对话。</div>
+    <div class="lv">难度 ★★★★ · 覆盖 9 个知识点</div>
+  </a>
+  <a class="card" href="18-cheatsheet.html">
+    <div class="no">18 / cheatsheet</div>
+    <div class="ti">速查手册</div>
+    <div class="ab">不用读,卡住了跳过来查一条就走。命令速查、报错速查、提示词模板库。</div>
+    <div class="lv">难度 — · 纯查阅</div>
+  </a>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="routes">推荐阅读顺序</h2>
+
+<p>看你的处境选一条。<strong>三条路线都能走通,不用全读完才开始动手。</strong></p>
+
+<div class="route">
+  <b style="color:var(--ok)">路线 A · 完整路线(推荐)</b>
+  想系统学一遍,前后知识严格衔接,后面只用前面讲过的名词。
+  <div class="path">01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → 12 → 13 → 14 → 15 → 16 → 17 → 18</div>
+  <p style="margin-bottom:0;color:var(--faint);font-size:13.5px">预计:分 3~5 天读完,每天 3~4 页,边读边在自己电脑上敲。</p>
+</div>
+
+<div class="route">
+  <b style="color:var(--warn)">路线 B · 急用路线</b>
+  明天就要开始让 AI 帮你改代码,只想先立住底线。
+  <div class="path">01 → 02 → 11 → 12 → 13 → 14 → 18</div>
+  <p style="margin-bottom:0;color:var(--faint);font-size:13.5px">
+    7 页,半天能过一遍。跳过了测试体系——够你安全上手,但挡不住「实现错了」这类问题。有空务必回头补 03–10。</p>
+</div>
+
+<div class="route">
+  <b style="color:var(--info)">路线 C · 测试专线</b>
+  不关心 AI 协作,只想搞懂「测试」到底是怎么回事。
+  <div class="path">02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10</div>
+  <p style="margin-bottom:0;color:var(--faint);font-size:13.5px">
+    这 9 页是独立完整的,不依赖 AI 相关的任何内容。</p>
+</div>
+
+<!-- ========================================================= -->
+<h2 id="dep">依赖关系图</h2>
+
+<p>如果你想跳读,先看这张图确认你要跳的那页依赖了什么。</p>
+
+<figure>
+<svg viewBox="0 0 880 470" role="img" aria-label="19 页之间的依赖关系图">
+  <defs>
+    <marker id="ar2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/>
+    </marker>
+  </defs>
+  <g class="st" font-size="12" text-anchor="middle">
+
+    <rect x="352" y="14" width="176" height="34" rx="9" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
+    <text x="440" y="36" font-weight="700" fill="var(--plan)">01 全景(无依赖)</text>
+
+    <rect x="352" y="70" width="176" height="34" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.8"/>
+    <text x="440" y="92" font-weight="700" fill="var(--ok)">02 Python 环境</text>
+
+    <rect x="196" y="126" width="150" height="34" rx="9" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <text x="271" y="148" font-weight="700" fill="var(--info)">03 测试是什么</text>
+
+    <rect x="534" y="126" width="150" height="34" rx="9" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <text x="609" y="148" font-weight="700" fill="var(--info)">04 静态检查</text>
+
+    <rect x="700" y="126" width="164" height="34" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="782" y="148" font-weight="700" fill="var(--ink)">11 git 基础</text>
+
+    <rect x="352" y="182" width="176" height="34" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="440" y="204" font-weight="700" fill="var(--warn)">05 金字塔</text>
+
+    <rect x="20" y="182" width="150" height="34" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="95" y="204" font-weight="700" fill="var(--ink)">06 myshop</text>
+
+    <rect x="700" y="182" width="164" height="34" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="782" y="204" font-weight="700" fill="var(--ink)">12 git 回退</text>
+
+    <rect x="196" y="238" width="150" height="34" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="271" y="260" font-weight="700" fill="var(--warn)">07 四层代码</text>
+
+    <rect x="534" y="238" width="150" height="34" rx="9" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="609" y="260" font-weight="700" fill="var(--warn)">10 E2E / flaky</text>
+
+    <rect x="700" y="294" width="164" height="34" rx="9" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.5"/>
+    <text x="782" y="316" font-weight="700" fill="var(--plan)">13 Claude Code</text>
+
+    <rect x="196" y="294" width="150" height="34" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+    <text x="271" y="316" font-weight="700" fill="var(--bad)">08 改坏实验</text>
+
+    <rect x="196" y="350" width="150" height="34" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+    <text x="271" y="372" font-weight="700" fill="var(--bad)">09 局部vs全量</text>
+
+    <rect x="420" y="350" width="220" height="34" rx="9" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2.2"/>
+    <text x="530" y="372" font-weight="800" fill="var(--ok)">14 七步流程实战(汇总)</text>
+
+    <rect x="120" y="410" width="150" height="34" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="195" y="432" font-weight="700" fill="var(--ink)">15 岗位 / CI</text>
+    <rect x="290" y="410" width="150" height="34" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="365" y="432" font-weight="700" fill="var(--ink)">16 AI 边界</text>
+    <rect x="460" y="410" width="150" height="34" rx="9" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="535" y="432" font-weight="700" fill="var(--ink)">17 固化流程</text>
+    <rect x="630" y="410" width="150" height="34" rx="9" fill="var(--sunk)" stroke="var(--rule)" stroke-width="1.5"/>
+    <text x="705" y="432" fill="var(--faint)">18 速查(独立)</text>
+  </g>
+
+  <g stroke="var(--faint)" stroke-width="1.2" marker-end="url(#ar2)" fill="none" opacity=".75">
+    <path d="M 440 48 L 440 68"/>
+    <path d="M 400 104 L 271 124"/>
+    <path d="M 480 104 L 609 124"/>
+    <path d="M 500 104 L 770 124"/>
+    <path d="M 300 160 L 420 180"/>
+    <path d="M 580 160 L 460 180"/>
+    <path d="M 271 160 L 271 236"/>
+    <path d="M 400 216 L 300 236"/>
+    <path d="M 480 216 L 580 236"/>
+    <path d="M 130 216 L 240 236"/>
+    <path d="M 782 160 L 782 180"/>
+    <path d="M 782 216 L 782 292"/>
+    <path d="M 271 272 L 271 292"/>
+    <path d="M 271 328 L 271 348"/>
+    <path d="M 700 328 L 610 350"/>
+    <path d="M 346 372 L 418 372"/>
+    <path d="M 500 384 L 300 410"/>
+    <path d="M 530 384 L 365 410"/>
+    <path d="M 545 384 L 535 408"/>
+  </g>
+</svg>
+<figcaption>箭头方向 = 「先读这个」。第 14 页是汇总页,依赖最多</figcaption>
+</figure>
+
+<!-- ========================================================= -->
+<h2 id="howto">怎么用这套教程</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">做法</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><strong>只读不敲</strong></td><td style="color:var(--bad)">❌ 最没用的读法。这套教程里有五个「亲手把代码改坏」的实验,不动手等于没读</td></tr>
+<tr><td><strong>边读边敲</strong></td><td style="color:var(--ok)">✅ 推荐。所有代码块都是完整的、可以直接复制粘贴的,路径都写全了,没有省略号</td></tr>
+<tr><td><strong>先跳到第 18 页</strong></td><td>如果你只是想查一条命令怎么写</td></tr>
+<tr><td><strong>照着 18 页的提示词模板抄</strong></td><td style="color:var(--ok)">✅ 那些模板每一条约束都有原因,第 14、16 页会解释为什么</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">一件建议先做的事</b>
+  第 2 页会带你在自己电脑上建好一个练习项目。<strong>先把那一页做完</strong>,后面每一页都能立刻验证。
+  <br><br>
+  项目会建在:<code>/Users/daijie27/Desktop/claude_data/learn_claude/myshop</code>
+</div>
+
+<div class="box trap">
+  <b class="t">关于版本会过期这件事</b>
+  软件版本号变得很快。本教程里凡是写了具体版本号的地方(比如某个工具的 <code>v7</code>),
+  <strong>都标注了核实日期</strong>。
+  <br><br>
+  实际使用时,遇到版本号请以官方仓库的最新标签为准——这也是本教程发现的一处真实问题:
+  <em>某官方文档页上的版本号,比它自己的代码仓库落后了两个大版本。</em>
+</div>
+
+<div class="pager">
+  <a class="dim" href="#">← 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="01-overview.html">下一页:全景 · 四道防线与七步流程 →</a>
+</div>
+
+<div class="foot">
+  <p>共 19 页 · 覆盖 181 个知识点 · 96 条断言经官方文档或真机核实</p>
+  <p>验证环境:macOS 15.7.4(Apple Silicon)· Python 3.9.6 · pytest 8.4.2 · mypy 1.19.1 · ruff 0.16.3 · git 2.39.5 · 核实日期 2026-08-17</p>
+</div>
+
+</div>
+
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

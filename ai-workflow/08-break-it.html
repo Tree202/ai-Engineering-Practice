@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 五次故意改坏实验</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">08 改坏实验 <span>· 五次真机验证</span></span>
+  <a href="07-four-layers-code.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="09-partial-vs-full.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 08 页 · 难度 ★★★ · 前置:第 04、06、07 页 · 全程真机</span>
+<h1>五次故意改坏实验</h1>
+<p class="lede">
+把好代码故意改坏五次,看哪些哨兵会响。<strong>五次全部在真机上跑过,输出一字未改。</strong>
+结论会推翻你几个直觉 —— 包括「红得越多问题越严重」。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#why">一、为什么要故意改坏</a></li>
+    <li><a href="#e1">二、实验① 去掉补零</a></li>
+    <li><a href="#e2">三、实验② 换个货币符号</a></li>
+    <li><a href="#e3">四、实验③ 除数改错</a></li>
+    <li><a href="#e4">五、实验④ 边界挪一格</a></li>
+    <li><a href="#e5">六、实验⑤ 去掉确认提交</a></li>
+    <li><a href="#sum">七、五次横向对比</a></li>
+    <li><a href="#ai">八、回到 AI 协作</a></li>
+  </ol>
+</div>
+
+<h2 id="why">一、为什么要故意改坏</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">变异测试(手工版)</span><span class="en">mutation testing</span><span class="badge">核心方法</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p><strong>把好代码故意改坏一处,看该响的哨兵有没有响。</strong>响了说明这条测试真的在工作,没响说明它是摆设。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>点根香测烟雾报警器。</strong></p>
+    <p>你家天花板上的报警器已经安静挂了三年,从来没响过。
+    <strong>它是真的在保护你,还是电池早就没电了?</strong></p>
+    <p>你没法从「它没响」推断出「它是好的」—— 因为<strong>这三年也没着过火</strong>。
+    唯一的办法是:<strong>点根香举到它下面,看它会不会叫。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是「让它自测」这道防线的<strong>元检查</strong> —— 检查检查本身是否有效。</p>
+    <p><strong>一条永远不会失败的测试,和没有这条测试,效果完全一样。</strong>
+    而你还会因为它绿着而放松警惕,这更危险。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>标准三步:</p>
+    <ol>
+      <li>把好代码<strong>故意改坏一处</strong></li>
+      <li>跑检查,<strong>看该响的响了没有</strong></li>
+      <li><strong>改回来</strong></li>
+    </ol>
+    <p>第 3 步用一条命令完成(第 12 页会讲这条命令):</p>
+<pre><code>cd &lt;你的项目&gt;/myshop && git checkout -- .</code></pre>
+    <p>意思是「把所有文件恢复成上次存档的样子」—— 就像游戏里读档。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「改坏代码很危险」。</strong>
+    只要<strong>先存过档</strong>就一点都不危险。下面五次实验,每次都是一条命令干净还原。</p>
+    <p><strong>误区 2:「测试全绿就说明测试写得好」。</strong>
+    恰恰相反 —— <strong>全绿只说明「现在的代码通过了现有的检查」</strong>,
+    不说明那些检查有任何鉴别力。</p>
+  </div></div>
+</div>
+
+<div class="box good">
+  <b class="t">开始之前:确认基线是绿的</b>
+<pre style="margin:9px 0 0"><code>cd &lt;你的项目&gt;/myshop && git status -s && .venv/bin/python -m pytest -q</code></pre>
+  <p style="margin:9px 0 0">应该看到:<strong>工作区没有输出(干净)</strong> + <code>17 passed, 1 skipped</code>。
+  <br><strong>基线不绿的话,后面所有红字你都分不清是谁造成的。</strong></p>
+</div>
+
+<h2 id="e1">二、实验① 去掉补零</h2>
+
+<h3>改了什么</h3>
+
+<pre><code># 文件:myshop/price.py
+- return f"¥{yuan}.{fen:02d}"
++ return f"¥{yuan}.{fen}"</code></pre>
+
+<p>删掉了 <code>:02d</code> —— <strong>就 4 个字符</strong>。功能上看起来「还是把分转成元」。</p>
+
+<h3>三个工具的反应</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ .venv/bin/python -m ruff check .</span>
+<span class="c-ok">All checks passed!</span>
+
+<span class="c-cmd">$ .venv/bin/python -m mypy</span>
+<span class="c-ok">Success: no issues found in 8 source files</span>
+
+<span class="c-cmd">$ .venv/bin/python -m pytest tests/test_price.py</span>
+<span class="c-bad">3 failed, 2 passed in 0.04s</span></pre>
+</div>
+
+<h3>失败详情</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>    def test_不足一角要在前面补零() -&gt; None:
+&gt;       assert format_price(5) == "¥0.05"
+<span class="c-bad">E       AssertionError: assert '¥0.5' == '¥0.05'
+E
+E         - ¥0.05
+E         ?    -           &larr; 精确指出:这里少了一个字符
+E         + ¥0.5</span></pre>
+</div>
+
+<h3>最值得琢磨的:哪两条活下来了</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:38%">测试</th><th style="width:16%">输入</th><th style="width:14%">结果</th><th>为什么</th></tr></thead>
+<tbody>
+<tr><td><code>test_普通价格</code></td><td>1234</td><td style="color:var(--ok)"><strong>绿</strong></td>
+    <td>分位是 <code>34</code>,<strong>本来就两位数,不需要补零</strong></td></tr>
+<tr><td><code>test_零元是边界值</code></td><td>0</td><td style="color:var(--bad)">红</td><td>要补成 <code>00</code></td></tr>
+<tr><td><code>test_不足一角要在前面补零</code></td><td>5</td><td style="color:var(--bad)">红</td><td>要补成 <code>05</code></td></tr>
+<tr><td><code>test_整数元不能丢掉小数位</code></td><td>10000</td><td style="color:var(--bad)">红</td><td>要补成 <code>00</code></td></tr>
+<tr><td><code>test_负数要报错</code></td><td>-1</td><td style="color:var(--ok)"><strong>绿</strong></td>
+    <td>负数在格式化<strong>之前</strong>就被拦下了,走不到那行</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">&#11088; 实验① 的结论</b>
+  <strong>如果你只写了「正常情况」那一条测试,这个 bug 会被干干净净地放过去。</strong>
+  <br><br>
+  而它上线后长这样:
+  <pre style="margin:9px 0 0"><code>购物车合计  ¥99.9      &larr; 用户以为 99 块 9,其实是 99 块 09 分</code></pre>
+  <p style="margin:9px 0 0"><strong>边界值测试的全部价值,就在这四条里的三条。</strong></p>
+</div>
+
+<h2 id="e2">三、实验② 换个货币符号</h2>
+
+<h3>改了什么</h3>
+
+<pre><code>- return f"¥{yuan}.{fen:02d}"
++ return f"${yuan}.{fen:02d}"</code></pre>
+
+<p><strong>一个字符。</strong></p>
+
+<h3>结果</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ ruff check .</span>   <span class="c-ok">All checks passed!</span>
+<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 8 source files</span>
+
+<span class="c-cmd">$ pytest</span>
+<span class="c-bad">==================== 8 failed, 9 passed, 1 skipped in 3.65s ====================</span></pre>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">层</th><th style="width:20%">红 / 总</th><th>爆炸原因</th></tr></thead>
+<tbody>
+<tr><td><strong>&#9312; 单元</strong> <code>test_price.py</code></td><td style="color:var(--bad)"><strong>4 / 5</strong></td><td>直接测这个函数,首当其冲</td></tr>
+<tr><td><strong>&#9313; 集成</strong> <code>test_order.py</code></td><td style="color:var(--bad)"><strong>2 / 5</strong></td><td><code>order.py</code> 用了它 —— <strong>这个文件一个字没动</strong></td></tr>
+<tr><td><strong>&#9313; 接口</strong> <code>test_api.py</code></td><td style="color:var(--bad)"><strong>2 / 7</strong></td><td><code>api.py</code> &rarr; <code>order.py</code> &rarr; 它 —— <strong>也一个字没动</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>爆炸半径</h3>
+
+<figure>
+<svg viewBox="0 0 800 280" role="img" aria-label="改一个底层文件炸穿三层">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--bad)"/></marker></defs>
+  <g class="st" text-anchor="middle">
+    <rect x="290" y="196" width="220" height="52" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2.4"/>
+    <text x="400" y="218" font-size="13.5" font-weight="800" fill="var(--bad)">price.py &mdash; 18 行</text>
+    <text x="400" y="236" font-size="11.5" fill="var(--faint)">你只改了这里,1 个字符</text>
+
+    <rect x="290" y="118" width="220" height="52" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="400" y="140" font-size="13" font-weight="700" fill="var(--warn)">order.py &mdash; 一个字没动</text>
+    <text x="400" y="158" font-size="11.5" fill="var(--bad)">红了 2 条</text>
+
+    <rect x="290" y="40" width="220" height="52" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="400" y="62" font-size="13" font-weight="700" fill="var(--warn)">api.py &mdash; 一个字没动</text>
+    <text x="400" y="80" font-size="11.5" fill="var(--bad)">红了 2 条</text>
+  </g>
+  <g stroke="var(--bad)" stroke-width="2" marker-end="url(#a1)">
+    <line x1="400" y1="192" x2="400" y2="176"/>
+    <line x1="400" y1="114" x2="400" y2="98"/>
+  </g>
+  <text x="560" y="180" class="st" font-size="12" fill="var(--faint)">被使用 &rarr; 被波及</text>
+  <text x="560" y="102" class="st" font-size="12" fill="var(--faint)">被使用 &rarr; 被波及</text>
+  <text x="150" y="145" class="st" font-size="13" fill="var(--soft)" text-anchor="middle" font-weight="700">爆炸半径</text>
+  <text x="150" y="168" class="st" font-size="11.5" fill="var(--faint)" text-anchor="middle">一处改动波及的范围</text>
+</svg>
+<figcaption>越底层、越小、越不起眼的文件,爆炸半径越大 —— 因为大家都在用它</figcaption>
+</figure>
+
+<div class="box key">
+  <b class="t">&#11088; 实验② 的结论</b>
+  <strong>一个函数的爆炸半径,和它的代码行数成反比。</strong>
+  <br><br>
+  <code>format_price</code> 只有 5 行,但整个项目的价格显示全靠它。
+</div>
+
+<h2 id="e3">四、实验③ 除数改错</h2>
+
+<h3>改了什么</h3>
+
+<pre><code>- yuan, fen = divmod(cents, 100)
++ yuan, fen = divmod(cents, 10)</code></pre>
+
+<p><strong>这个 bug 让所有金额都错了 10 倍:</strong></p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 改坏后函数的真实返回值</div>
+<pre>  format_price(  1234) = <span class="c-bad">¥123.04</span>   <span class="c-dim">(应该是 ¥12.34)</span>
+  format_price(     0) = <span class="c-ok">¥0.00</span>     <span class="c-dim">&larr; 巧合对了!</span>
+  format_price(     5) = <span class="c-ok">¥0.05</span>     <span class="c-dim">&larr; 巧合对了!</span>
+  format_price( 10000) = <span class="c-bad">¥1000.00</span>  <span class="c-dim">(应该是 ¥100.00)</span>
+  format_price(  2500) = <span class="c-bad">¥250.00</span>   <span class="c-dim">(应该是 ¥25.00)</span></pre>
+</div>
+
+<h3>结果:比实验② 还少 2 条</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ ruff check .</span>   <span class="c-ok">All checks passed!</span>
+<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 8 source files</span>
+
+<span class="c-cmd">$ pytest</span>
+tests/test_price.py::test_普通价格 <span class="c-bad">FAILED</span>
+tests/test_price.py::test_零元是边界值 <span class="c-ok">PASSED</span>          <span class="c-dim">&larr; 实验① 里它红了!</span>
+tests/test_price.py::test_不足一角要在前面补零 <span class="c-ok">PASSED</span>  <span class="c-dim">&larr; 实验① 里它也红了!</span>
+tests/test_price.py::test_整数元不能丢掉小数位 <span class="c-bad">FAILED</span>
+tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>
+
+<span class="c-bad">=================== 6 failed, 11 passed, 1 skipped in 3.65s ====================</span></pre>
+</div>
+
+<h3>为什么 0 和 5 巧合地对了</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:14%">输入</th><th style="width:26%">除以 100(正确)</th><th style="width:26%">除以 10(改坏)</th><th>结果</th></tr></thead>
+<tbody>
+<tr><td><code>0</code></td><td><code>(0, 0)</code> &rarr; <code>¥0.00</code></td><td><code>(0, 0)</code> &rarr; <code>¥0.00</code></td>
+    <td style="color:var(--ok)"><strong>一样</strong></td></tr>
+<tr><td><code>5</code></td><td><code>(0, 5)</code> &rarr; <code>¥0.05</code></td><td><code>(0, 5)</code> &rarr; <code>¥0.05</code></td>
+    <td style="color:var(--ok)"><strong>一样</strong></td></tr>
+<tr><td><code>1234</code></td><td><code>(12, 34)</code> &rarr; <code>¥12.34</code></td><td><code>(123, 4)</code> &rarr; <code>¥123.04</code></td>
+    <td style="color:var(--bad)">差很远</td></tr>
+<tr><td><code>10000</code></td><td><code>(100, 0)</code> &rarr; <code>¥100.00</code></td><td><code>(1000, 0)</code> &rarr; <code>¥1000.00</code></td>
+    <td style="color:var(--bad)">差 10 倍</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>0</code> 和 <code>5</code> 都小于 10,除以 100 和除以 10 得到的商都是 <code>0</code>、余数都是它自己 —— <strong>两条路殊途同归。</strong></p>
+
+<div class="box key">
+  <b class="t">&#11088; 实验③ 的两个结论</b>
+  <p><strong>结论 1:红的条数和 bug 的严重程度毫无关系。</strong></p>
+  <div class="tw" style="margin:9px 0">
+  <table>
+  <thead><tr><th style="width:30%">实验</th><th style="width:20%">红了几条</th><th>实际危害</th></tr></thead>
+  <tbody>
+  <tr><td>② 换符号</td><td><strong>8 条</strong></td><td>符号难看,<strong>钱是对的</strong></td></tr>
+  <tr><td>③ 除数错</td><td><strong>6 条</strong></td><td style="color:var(--bad)"><strong>每笔钱都差 10 倍</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p><strong>不要用「红了几条」判断问题多大。要看红的内容。</strong></p>
+  <p style="margin-top:14px"><strong>结论 2:不同的用例只挡不同的错。</strong></p>
+  <p style="margin-bottom:0">实验① 靠边界测试(0、5)抓住 bug;实验③ 那两条边界测试<strong>完全失效</strong>,
+  靠的是最「平庸」的 <code>test_普通价格</code>。
+  <br><strong>测试的价值在于「用例的多样性」,不是「用例的数量」。</strong></p>
+</div>
+
+<h2 id="e4">五、实验④ 边界挪一格</h2>
+
+<h3>改了什么</h3>
+
+<pre><code>- if cents &lt; 0:
++ if cents &lt; -1:
+      raise ValueError("价格不能为负数")</code></pre>
+
+<p><code>-1 &lt; -1</code> 是 <strong>假</strong>,所以只有 <code>-1</code> 这一个值能溜过去:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>  format_price(-3) &rarr; <span class="c-ok">ValueError: 价格不能为负数</span>   <span class="c-dim">&#9989; 拦住</span>
+  format_price(-2) &rarr; <span class="c-ok">ValueError: 价格不能为负数</span>   <span class="c-dim">&#9989; 拦住</span>
+  format_price(-1) = <span class="c-bad">'¥-1.99'</span>                    <span class="c-dim">&#10060; 漏了!</span>
+  format_price( 0) = <span class="c-ok">'¥0.00'</span>                     <span class="c-dim">&#9989; 正常</span></pre>
+</div>
+
+<div class="box note">
+  <b class="t">顺带一个 Python 冷知识</b>
+  为什么 <code>-1</code> 会变成 <code>¥-1.99</code> 这么怪的东西?
+  <pre style="margin:9px 0"><code>divmod(-1, 100) = (-1, 99)     # 不是 (0, -1)!
+divmod(-2, 100) = (-1, 98)</code></pre>
+  <p style="margin:9px 0 0"><strong>Python 的整除是向下取整,不是向零取整。</strong>
+  <code>-1 &divide; 100</code> 得到 <code>-1</code>(不是 0),余数补成 <code>99</code>。
+  <br>这是 Python 和某些其他语言的一个真实差异,在处理负数金额、时间戳、索引时经常咬人。</p>
+</div>
+
+<h3>结果:只有 1 条红</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ pytest</span>
+<span class="c-bad">=================== 1 failed, 16 passed, 1 skipped in 3.68s ====================</span>
+
+    def test_负数要报错() -&gt; None:
+        with pytest.raises(ValueError):
+&gt;           format_price(-1)
+<span class="c-bad">E           Failed: DID NOT RAISE &lt;class 'ValueError'&gt;</span></pre>
+</div>
+
+<div class="box key">
+  <b class="t">一种没见过的失败信息</b>
+  前三次都是 <code>AssertionError</code>(算错了)。这次是 <code>DID NOT RAISE</code> ——
+  <strong>「你说这里该报错的,结果它没报」</strong>。
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:40%">失败类型</th><th style="width:24%">含义</th><th>危险程度</th></tr></thead>
+  <tbody>
+  <tr><td><code>AssertionError</code></td><td><strong>算错了</strong></td><td>值不对</td></tr>
+  <tr><td><code>DID NOT RAISE</code></td><td><strong>该拦的没拦住</strong></td><td style="color:var(--bad)"><strong>一道防线整个失效</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">后者往往更危险 —— 安全漏洞、越权访问、脏数据入库,大多长这个样子。</p>
+</div>
+
+<h3>上面两层为什么一条都没红</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 现场验证</div>
+<pre>price.py 的关卡已经漏了 -1,那 order 层呢?
+<span class="c-ok">&#9989; 被 order.py 自己的检查挡住了: 单价不能为负数</span></pre>
+</div>
+
+<p>因为 <code>order.py</code> <strong>有自己独立的校验</strong>(第 6 页那段代码里的 <code>if unit_cents &lt; 0</code>)。</p>
+
+<figure>
+<svg viewBox="0 0 780 300" role="img" aria-label="纵深防御:一道关卡破了还有另一道">
+  <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st" text-anchor="middle">
+    <text x="390" y="30" font-size="13" fill="var(--faint)">请求进来</text>
+    <rect x="255" y="46" width="270" height="46" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="390" y="66" font-size="13" font-weight="700" fill="var(--ink)">api.py</text>
+    <text x="390" y="83" font-size="11.5" fill="var(--faint)">没有校验(它只做翻译)</text>
+
+    <rect x="255" y="126" width="270" height="46" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2.2"/>
+    <text x="390" y="146" font-size="13" font-weight="800" fill="var(--ok)">order.py &mdash; 第一道关卡</text>
+    <text x="390" y="163" font-size="11.5" fill="var(--ok)">&#9989; 这次是它挡住的</text>
+
+    <rect x="255" y="206" width="270" height="46" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2.2"/>
+    <text x="390" y="226" font-size="13" font-weight="800" fill="var(--bad)">price.py &mdash; 第二道关卡</text>
+    <text x="390" y="243" font-size="11.5" fill="var(--bad)">&#10060; 被我改坏了,漏了 -1</text>
+  </g>
+  <g stroke="var(--faint)" stroke-width="1.5" marker-end="url(#a2)">
+    <line x1="390" y1="36" x2="390" y2="42"/>
+    <line x1="390" y1="92" x2="390" y2="122"/>
+    <line x1="390" y1="172" x2="390" y2="202"/>
+  </g>
+  <text x="390" y="286" class="st" font-size="13" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    纵深防御:设两道锁,破一道还有一道
+  </text>
+</svg>
+<figcaption>好消息:系统整体没塌。坏消息:洞还在,只是被掩盖了</figcaption>
+</figure>
+
+<div class="box key">
+  <b class="t">&#11088; 实验④ 的三个结论</b>
+  <p><strong>结论 1:纵深防御有用。</strong>多设一道关卡真的顶住了。</p>
+  <p><strong>结论 2(更重要):上层全绿不代表下层没问题。</strong>
+  洞还在 <code>price.py</code> 里。今天有 <code>order.py</code> 兜着;
+  <strong>哪天有人直接调用它做别的用途,<code>¥-1.99</code> 就出现在页面上了。</strong>
+  <br>所以<strong>每一层都必须有自己的测试</strong>,不能因为「上层测过了」就省掉下层。</p>
+  <p style="margin-bottom:0"><strong>结论 3:测边界要用「刚好越界一格」的值。</strong>
+  如果这条测试当初写的是 <code>format_price(-100)</code>,这个 bug 就<strong>溜过去了</strong>
+  —— 因为 <code>-100 &lt; -1</code> 为真,照样报错,测试全绿。
+  <br><strong>测负数就用 <code>-1</code>,不要用 <code>-999</code>。</strong></p>
+</div>
+
+<h2 id="e5">六、实验⑤ 去掉确认提交</h2>
+
+<h3>改了什么</h3>
+
+<pre><code># 文件:myshop/order.py
+        order_id = cur.lastrowid or 0
+-       conn.commit()
++       # conn.commit()</code></pre>
+
+<h3>先看函数层面发生了什么</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 手动实验的真实输出</div>
+<pre>create_order 返回的字典: {'id': 1, 'item': '咖啡', 'qty': 2,
+                          'total_cents': 2500, 'total_text': '¥25.00'}
+<span class="c-dim">&uarr; 完全正常!有订单号、金额对、文案对</span>
+
+换个连接去数数据库里有几条订单: <span class="c-bad">0</span>
+<span class="c-dim">&uarr; 一条都没有</span>
+
+get_order 结果: <span class="c-bad">LookupError: 订单 1 不存在</span></pre>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 这是最阴险的一类 bug:静默数据丢失</b>
+  <strong>函数返回成功,用户看到「下单成功」,数据库里什么都没有。</strong>
+  <br><br>
+  前四个 bug 都是「算错了」—— 至少你能看出不对劲。这个是<strong>「看起来完全成功,实际什么都没发生」</strong>。
+  <br><br>
+  上线之后的表现:
+  <pre style="margin:9px 0 0"><code>用户:我明明下单了,订单呢?
+客服:系统里查不到您的订单。
+你  :……可日志显示接口返回成功了啊?</code></pre>
+</div>
+
+<h3>结果:3 条红,三种不同的症状</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-cmd">$ ruff check .</span>   <span class="c-ok">All checks passed!</span>
+<span class="c-cmd">$ mypy</span>            <span class="c-ok">Success: no issues found in 8 source files</span>
+
+<span class="c-cmd">$ pytest</span>
+<span class="c-bad">FAILED tests/test_api.py::test_下单之后能用_GET_查回来 - assert 404 == 200
+FAILED tests/test_order.py::test_订单真的落盘了_换个连接还读得到 - LookupError
+FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - assert 1 != 1</span>
+<span class="c-bad">=================== 3 failed, 14 passed, 1 skipped in 3.64s ====================</span></pre>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:40%">测试</th><th style="width:26%">报错</th><th>翻译</th></tr></thead>
+<tbody>
+<tr><td><code>test_订单真的落盘了</code></td><td><code>LookupError: 订单 1 不存在</code></td>
+    <td><strong>刚存的东西读不回来</strong> —— 最诚实的一条</td></tr>
+<tr><td><code>test_下两单会拿到不同订单号</code></td><td><code>assert 1 != 1</code></td>
+    <td><strong>两笔订单拿到了同一个号</strong> —— 因为第一笔被撤销了,连自增计数也退回去了</td></tr>
+<tr><td><code>test_下单之后能用_GET_查回来</code></td><td><code>assert 404 == 200</code></td>
+    <td><strong>刚创建成功的东西,立刻查是「不存在」</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">第三条那个组合是最经典的信号</b>
+  <strong>「创建成功(201)」+「立刻查不到(404)」</strong> —— 任何后端工程师看到这两行放在一起,
+  第一反应就是「事务没提交」。
+</div>
+
+<h3>&#11088; 实验⑤ 最重要的发现</h3>
+
+<div class="box key">
+  <b class="t">单元测试一条都没红</b>
+  <code>test_price.py</code> 的 5 条全绿。为什么?
+  <strong>因为这个 bug 根本不在它的地盘上。</strong>它只管算数,不管存盘。
+  <div class="tw" style="margin:11px 0 0">
+  <table>
+  <thead><tr><th style="width:26%"></th><th style="width:34%">能抓什么</th><th>抓不到什么</th></tr></thead>
+  <tbody>
+  <tr><td>单元测试</td><td>算得对不对</td><td style="color:var(--bad)"><strong>存没存进去</strong></td></tr>
+  <tr><td><strong>集成测试</strong></td><td><strong>存没存进去</strong></td><td>网络通不通</td></tr>
+  <tr><td>接口测试</td><td>网络那头拿到什么</td><td>&mdash;</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>这就是为什么要分四层,而不是「把单元测试写足就行了」。</strong></p>
+</div>
+
+<div class="box note">
+  <b class="t">这也证明了「换连接读回来」技巧（第 5 页给结论,第 7 页给代码）的价值</b>
+  如果那条测试当初图省事,在<strong>同一个连接</strong>里查询,<strong>它会全绿</strong> ——
+  因为同连接里没提交的数据照样读得到。
+  <br><br>
+  <strong>这个 bug 就漏了。</strong>
+</div>
+
+<h2 id="sum">七、五次横向对比</h2>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:19%"></th>
+  <th style="width:16%">① 去补零</th><th style="width:16%">② 换符号</th>
+  <th style="width:16%">③ 除数错</th><th style="width:16%">④ 边界挪</th><th style="width:17%">⑤ 去提交</th>
+</tr></thead>
+<tbody>
+<tr><th>改动大小</th><td>4 字符</td><td>1 字符</td><td>1 字符</td><td>1 字符</td><td>注释 1 行</td></tr>
+<tr><th><strong>ruff</strong></th>
+  <td style="color:var(--ok)">瞎</td><td style="color:var(--ok)">瞎</td><td style="color:var(--ok)">瞎</td>
+  <td style="color:var(--ok)">瞎</td><td style="color:var(--ok)">瞎</td></tr>
+<tr><th><strong>mypy</strong></th>
+  <td style="color:var(--ok)">瞎</td><td style="color:var(--ok)">瞎</td><td style="color:var(--ok)">瞎</td>
+  <td style="color:var(--ok)">瞎</td><td style="color:var(--ok)">瞎</td></tr>
+<tr><th>单元层</th><td>3/5</td><td>4/5</td><td>2/5</td><td>1/5</td><td style="color:var(--bad)"><strong>0/5</strong></td></tr>
+<tr><th>集成层</th><td>&mdash;</td><td>2/5</td><td>2/5</td><td style="color:var(--bad)"><strong>0/5</strong></td><td>2/5</td></tr>
+<tr><th>接口层</th><td>&mdash;</td><td>2/7</td><td>2/7</td><td style="color:var(--bad)"><strong>0/7</strong></td><td>1/7</td></tr>
+<tr><th><strong>总红</strong></th><td>3</td><td><strong>8</strong></td><td>6</td><td><strong>1</strong></td><td>3</td></tr>
+<tr><th>失败类型</th><td>Assertion</td><td>Assertion</td><td>Assertion</td><td><strong>DID NOT RAISE</strong></td><td><strong>LookupError / 404</strong></td></tr>
+<tr><th>真实危害</th><td>难看</td><td>难看</td><td style="color:var(--bad)"><strong>差 10 倍</strong></td><td style="color:var(--bad)"><strong>校验有洞</strong></td><td style="color:var(--bad)"><strong>静默丢数据</strong></td></tr>
+<tr><th><strong>谁抓住的</strong></th><td>边界测试</td><td>价格文案断言</td><td><code>test_普通价格</code></td><td><code>test_负数要报错</code></td><td>「换连接读回来」</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>四条能读出来的规律</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:10%">#</th><th style="width:32%">规律</th><th>证据</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>1</strong></td><td><strong>静态检查五战五败</strong></td>
+  <td>五次改的都是「行为」,而它只看「形状」。<strong>这不是配置问题</strong>,是第 4 页讲的结构性盲区</td>
+</tr>
+<tr>
+  <td><strong>2</strong></td><td><strong>红的条数 &ne; 危害程度</strong></td>
+  <td>8 红的只是难看,6 红的会赔钱,1 红的是安全洞,3 红的会丢数据</td>
+</tr>
+<tr>
+  <td><strong>3</strong></td><td><strong>每次立功的是不同的测试</strong></td>
+  <td>五次,五组不同的测试。<strong>留任何一组、砍掉其余,都会漏掉四个 bug</strong></td>
+</tr>
+<tr>
+  <td><strong>4</strong></td><td><strong>每一层只抓自己那层的错</strong></td>
+  <td>实验④ 集成/接口层 0 红,实验⑤ 单元层 0 红。<strong>少任何一层,都有一整类 bug 溜过去</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="ai">八、回到 AI 协作</h2>
+
+<p>把这五次实验换个身份看:<strong>假设改坏代码的不是我,是 AI,而且你不知道它改了什么。</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">你能依靠什么</th><th style="width:16%">靠不靠得住</th><th>为什么</th></tr></thead>
+<tbody>
+<tr><td>AI 说「我检查过了」</td><td style="color:var(--bad)"><strong>&#10060;</strong></td><td>它在评价自己的作业</td></tr>
+<tr><td>静态检查全绿</td><td style="color:var(--warn)"><strong>&#9888;</strong></td><td><strong>五次全瞎</strong></td></tr>
+<tr><td>跑测试</td><td style="color:var(--ok)"><strong>&#9989;</strong></td><td>靠得住,<strong>但只挡你写过的用例</strong></td></tr>
+<tr><td><strong>你自己看改动</strong></td><td style="color:var(--ok)"><strong>&#9989;&#9989;</strong></td><td><strong>唯一能发现「它偷偷改了测试」的手段</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>最阴险的场景:实验④</h3>
+
+<div class="box trap">
+  <b class="t">只有 1 条红的时候,最容易被糊弄过去</b>
+  一条红,看起来太像「小问题」了。AI 很容易顺手把测试改成:
+  <pre style="margin:9px 0"><code>with pytest.raises(ValueError):
+    format_price(-100)      # 从 -1 改成 -100 &rarr; 立刻绿</code></pre>
+  <p style="margin:9px 0 0"><strong>一个字符的改动,一道安全关卡就此永久失效</strong>,而且再也不会有测试发现它。</p>
+  <p style="margin:9px 0 0"><strong>能挡住这一手的只有一件事:你自己打开改动列表,看到 <code>tests/test_price.py</code> 在里面。</strong></p>
+</div>
+
+<h3>三道防线的适用范围</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:38%">防线</th><th style="width:20%">实验①②③⑤</th><th>实验④</th></tr></thead>
+<tbody>
+<tr><td>提示词写死「不许改测试文件」</td><td style="color:var(--ok)">&#9989;</td><td style="color:var(--ok)">&#9989;</td></tr>
+<tr><td><strong>你自己看改动</strong></td><td style="color:var(--ok)">&#9989;</td><td style="color:var(--ok)"><strong>&#9989; 全靠它</strong></td></tr>
+<tr><td>跑全量测试兜底</td><td style="color:var(--ok)">&#9989;</td><td style="color:var(--bad)"><strong>&#10060; 没用</strong>(在 AI 已篡改测试的场景下,上层全绿)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">注意最后一行</b>
+  <strong>实验④ 里（在 AI 已篡改测试的场景下）,全量测试救不了你</strong> —— 因为纵深防御把问题掩盖了,上面两层都是绿的。
+  <br><br>
+  <strong>唯一能发现的,是你亲眼看见 <code>tests/</code> 出现在改动列表里。</strong>
+  <br><br>
+  这就是「第 4 步漏了,你会逐渐失去对代码库的掌控」的最好注脚。
+</div>
+
+<h3>你可以自己再玩几个</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:44%">改什么</th><th>先猜会红几条,再跑</th></tr></thead>
+<tbody>
+<tr><td><code>order.py</code> 里 <code>unit_cents * qty</code> 改成 <code>+</code></td><td>集成层的算术错误</td></tr>
+<tr><td><code>api.py</code> 里 <code>self._send(201, ...)</code> 改成 <code>200</code></td><td>接口层专属:状态码契约</td></tr>
+<tr><td><code>price.py</code> 里把 <code>"¥"</code> 删掉</td><td>三层同时飘红</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>每次玩完,一条命令还原:</p>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git checkout -- . && .venv/bin/python -m pytest -q</code></pre>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>78</td><td><strong>为什么故意改坏</strong></td><td>点香测烟雾报警器</td></tr>
+<tr><td>79</td><td>变异测试手工版</td><td>改坏 &rarr; 看响没响 &rarr; 还原</td></tr>
+<tr><td>80</td><td>实验① 去补零</td><td>光测正常情况不够</td></tr>
+<tr><td>81</td><td>实验② 换符号</td><td><strong>爆炸半径</strong>:18 行炸穿三层</td></tr>
+<tr><td>82</td><td>实验③ 除数错</td><td><strong>红的条数 &ne; 严重程度</strong></td></tr>
+<tr><td>83</td><td>实验③ 续</td><td>用例<strong>多样性</strong>比数量重要</td></tr>
+<tr><td>84</td><td>实验④ 边界挪</td><td><code>DID NOT RAISE</code>;差一格漏洞</td></tr>
+<tr><td>85</td><td>实验④ 续</td><td><strong>纵深防御既救命也掩盖问题</strong></td></tr>
+<tr><td>86</td><td>实验④ 续</td><td>测边界用「刚好越界一格」的值</td></tr>
+<tr><td>87</td><td>实验⑤ 去提交</td><td><strong>静默数据丢失</strong>:返回成功但库里没有</td></tr>
+<tr><td>88</td><td>实验⑤ 续</td><td><strong>每层只能抓自己那层的错</strong></td></tr>
+<tr><td>89</td><td>五次总结</td><td>静态检查五战五败;Python 整除向下取整</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="07-four-layers-code.html">&larr; 上一页:四层代码逐行讲</a>
+  <a href="00-index.html">目录</a>
+  <a href="09-partial-vs-full.html">下一页:局部 vs 全量 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 08 页 / 共 23 页 · 覆盖知识点 78–89 · 难度 &#9733;&#9733;&#9733; · <strong>全程真机实证</strong></p>
+  <p>五次实验全部在 macOS 15.7.4 / Python 3.9.6 / pytest 8.4.2 / mypy 1.19.1 / ruff 0.16.3 上实际执行,输出未经修改。每次实验后均用存档系统干净还原。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

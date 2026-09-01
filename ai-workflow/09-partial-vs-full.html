@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 局部 vs 全量 + 一场真实事故</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">09 局部vs全量 <span>· 一场真实事故</span></span>
+  <a href="08-break-it.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="10-flaky-e2e.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 09 页 · 难度 ★★★ · 前置:第 08 页</span>
+<h1>局部 vs 全量 + 一场真实事故</h1>
+<p class="lede">
+同一批测试,为什么要跑两次?这一页用一场完整复盘回答:
+<strong>一个只加了两行的改动,如何把「应付 ¥0.00」变成「应付 免费」,并流进财务系统。</strong>
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#two">一、两个不同的问题</a></li>
+    <li><a href="#story">二、一个只改了两行的下午</a></li>
+    <li><a href="#local">三、局部检查:全绿</a></li>
+    <li><a href="#full">四、全量检查:两条红</a></li>
+    <li><a href="#blind">五、为什么类型检查完全无能为力</a></li>
+    <li><a href="#radius">六、为什么「我知道我改了什么」救不了你</a></li>
+    <li><a href="#rules">七、三条可以直接用的规则</a></li>
+  </ol>
+</div>
+
+<h2 id="two">一、两个不同的问题</h2>
+
+<div class="box key">
+  <b class="t">这不是同一件事做两遍,是两个不同的问题</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:18%"></th><th style="width:41%">局部检查</th><th>全量检查</th></tr></thead>
+  <tbody>
+  <tr><th>什么时候</th><td>每改完一小块(流程步骤 3)</td><td>准备存档前(流程步骤 5a)</td></tr>
+  <tr><th>跑什么</th><td>只跑和刚改的东西相关的</td><td><strong>全部都跑</strong></td></tr>
+  <tr><th>命令</th><td><code>pytest tests/test_price.py</code></td><td><code>pytest</code>(不带任何参数)</td></tr>
+  <tr><th>回答什么</th><td><strong>我刚写的这段,自己立得住吗?</strong></td><td><strong>这次改动的爆炸半径有多大?</strong></td></tr>
+  <tr><th>检查半径</th><td>你手指碰过的文件</td><td>整个项目</td></tr>
+  <tr><th>耗时</th><td>0.00–0.02 秒</td><td>3.66 秒</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="box note">
+  <b class="t">一个比喻:换水管</b>
+  改一个被到处引用的底层函数,像<strong>换水管的一节管子</strong>。
+  <br><br>
+  你在自家水槽下面拧上、放水、不漏,于是宣布搞定 &mdash;&mdash; <strong>这是局部检查</strong>。<br>
+  楼下邻居的天花板,是第二天才开始滴水的 &mdash;&mdash; <strong>这是没跑全量的代价</strong>。
+  <br><br>
+  <strong>全量检查就是「整栋楼一起放水」。它只要 3.66 秒。</strong>
+</div>
+
+<h2 id="story">二、一个只改了两行的下午</h2>
+
+<p>产品经理提了个需求,编号 #482,听起来人畜无害:</p>
+
+<blockquote style="border-left:3px solid var(--rule2);margin:18px 0;padding:4px 18px;color:var(--soft)">
+「订单里 0 元的时候别显示 <code>¥0.00</code> 了,太冷冰冰。改成显示『免费』,用户看着开心。」
+</blockquote>
+
+<p>合理吗?<strong>非常合理。</strong>工作量大吗?<strong>看起来就两行。</strong></p>
+
+<pre><code>def format_price(cents: int) -&gt; str:
+    """产品需求 #482:0 元时显示「免费」。"""
+    if cents == 0:          # &larr; 新增
+        return "免费"        # &larr; 新增
+    return f"¥{cents / 100:.2f}"</code></pre>
+
+<div class="box note">
+  <b class="t">说明:这一段的实测输出来自一个独立的精简复现项目</b>
+  你会发现这里的函数用的是 <code>cents / 100</code>,和前面 myshop 里的写法不同 &mdash;&mdash;
+  <strong>这不是你看漏了</strong>。
+  <br><br>
+  为了把这个事故复现得足够干净,我另外搭了一个只有 4 个文件的最小项目来跑。
+  <strong>两个版本的行为完全一样</strong>,下面所有绿字红字都是那个项目里真实跑出来的。
+  <em>事故的道理和用哪种写法无关。</em>
+</div>
+
+<h3>改完之后,AI(或者你自己)很负责任地想了一件事</h3>
+
+<p>「改了行为,得同步改测试啊。」于是打开测试文件,把那条断言改了:</p>
+
+<pre><code>def test_zero_price() -&gt; None:
+    # 需求 #482:0 元现在显示「免费」
+-   assert format_price(0) == "¥0.00"
++   assert format_price(0) == "免费"</code></pre>
+
+<p><strong>看,多专业。</strong>改了代码,顺手把对应的测试也维护了。</p>
+
+<h2 id="local">三、局部检查:全绿</h2>
+
+<p>现在到了流程的<strong>步骤 3</strong>。你改了价格模块,那就检查价格模块相关的东西,天经地义:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 局部检查(真实输出)</div>
+<pre><span class="c-cmd">$ .venv/bin/python -m mypy price.py</span>
+<span class="c-ok">Success: no issues found in 1 source file</span>
+
+<span class="c-cmd">$ .venv/bin/python -m pytest tests/test_price.py -v</span>
+tests/test_price.py::test_normal_price <span class="c-ok">PASSED</span>       <span class="c-dim">[ 33%]</span>
+tests/test_price.py::test_zero_price <span class="c-ok">PASSED</span>         <span class="c-dim">[ 66%]</span>
+tests/test_price.py::test_large_price <span class="c-ok">PASSED</span>        <span class="c-dim">[100%]</span>
+
+<span class="c-ok">========================= 3 passed in 0.01s =========================</span></pre>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 这时候人的心理状态是最危险的</b>
+  <strong>证据看起来是充分的。</strong>你改了 A,你检查了 A,A 是绿的。手指已经放在存档键上了。
+</div>
+
+<h2 id="full">四、全量检查:两条红</h2>
+
+<p>假设这次你忍住了,按流程走了<strong>步骤 5a</strong> &mdash;&mdash; 提交前跑一遍全量:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 全量检查(真实输出)</div>
+<pre><span class="c-cmd">$ .venv/bin/python -m mypy price.py order.py tests/</span>
+<span class="c-ok">Success: no issues found in 4 source files</span>          <span class="c-dim">&larr; 类型检查依然全绿!</span>
+
+<span class="c-cmd">$ .venv/bin/python -m pytest</span>
+collected 7 items
+
+tests/test_order.py <span class="c-ok">..</span><span class="c-bad">FF</span>                              <span class="c-dim">[ 57%]</span>
+tests/test_price.py <span class="c-ok">...</span>                             <span class="c-dim">[100%]</span>
+
+<span class="c-dim">============================ FAILURES =============================</span>
+<span class="c-dim">_____________________ test_full_discount_to_zero ___________________</span>
+&gt;       assert order["receipt"] == "应付 ¥0.00"
+<span class="c-bad">E       AssertionError: assert '应付 免费' == '应付 ¥0.00'</span>
+
+<span class="c-dim">_______________________ test_gift_line_item _______________________</span>
+&gt;       assert order["lines"][1] == "赠品·挂耳包 x2  ¥0.00"
+<span class="c-bad">E       AssertionError: assert '赠品·挂耳包 x2  免费' == '赠品·挂耳包 x2  ¥0.00'</span>
+
+<span class="c-bad">==================== 2 failed, 5 passed in 0.03s ==================</span></pre>
+</div>
+
+<h3>炸的是哪两处</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">引爆点</th><th style="width:34%">场景</th><th>后果</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 满减到 0 元</strong></td>
+  <td>用户拿 88 元券买 88 元咖啡豆,刚好减到 0。系统仍要出一张收款凭证</td>
+  <td><code>应付 ¥0.00</code> &rarr; <code>应付 免费</code><br>
+      <strong>「应付 免费」这句中文不通。更要命的是这行字要进对账单和财务流水</strong> ——
+      财务系统那边可能正拿正则匹配 <code>¥[\d.]+</code>,现在匹配不到了</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 赠品行</strong></td>
+  <td>账单里单价 0 元的赠品行</td>
+  <td><code>赠品·挂耳包 x2  ¥0.00</code> &rarr; <code>赠品·挂耳包 x2  免费</code><br>
+      <strong>需求 #482 说的是「订单总价为 0 时」。没有人说过赠品的单价行也要跟着变。</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">第 &#9313; 处才是这次事故的精髓</b>
+  <code>format_price</code> 是<strong>共用的</strong>,它不知道自己这次是在服务「订单总价」还是「某一行的单价」。
+  <br><br>
+  <strong>改一个底层函数,炸的是所有调用点 —— 包括你脑子里根本没想到的那些。</strong>
+</div>
+
+<h3>关键的落差</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%"></th><th style="width:39%">步骤 3 · 局部检查</th><th>步骤 5a · 全量</th></tr></thead>
+<tbody>
+<tr><th>检查范围</th><td><code>price.py</code> + 它的测试</td><td>整个项目</td></tr>
+<tr><th>结果</th><td style="color:var(--ok)"><strong>3 passed</strong> &#9989;</td>
+    <td style="color:var(--bad)"><strong>2 failed, 5 passed</strong> &#10060;</td></tr>
+<tr><th>耗时</th><td>0.01 秒</td><td><strong>0.03 秒</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">局部检查没有骗你</b>
+  它诚实地回答了你问的那个问题:「<code>price.py</code> 现在自洽吗?」<strong>答案是自洽。</strong>
+  <br><br>
+  <strong>问题是这个问题本身就问小了。</strong>
+  <br><br>
+  你真正想知道的是「这次改动会不会弄坏别人的东西」,而这个问题,只有把所有测试都跑一遍才能回答。
+</div>
+
+<h2 id="blind">五、为什么类型检查完全无能为力</h2>
+
+<p>注意上面那个扎心的细节:<strong>全量的类型检查也是绿的</strong>,而且是在测试已经红了之后。</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 同一份代码,两个工具</div>
+<pre><span class="c-cmd">$ mypy price.py order.py tests/</span>
+<span class="c-ok">Success: no issues found in 4 source files</span>      <span class="c-dim">&larr; 4 个文件全过</span>
+
+<span class="c-cmd">$ pytest</span>
+<span class="c-bad">2 failed, 5 passed</span>                              <span class="c-dim">&larr; 同一份代码</span></pre>
+</div>
+
+<p>不是「局部绿、全量红」,而是<strong>类型检查在任何范围下都发现不了这个问题</strong>。原因就是第 4 页那个结构性盲区:</p>
+
+<pre><code>def format_price(cents: int) -&gt; str:   # 改前
+def format_price(cents: int) -&gt; str:   # 改后 —— 签名一个字符都没变</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:46%">问题类型</th><th style="width:27%">类型检查能抓?</th><th>测试能抓?</th></tr></thead>
+<tbody>
+<tr><td>改了参数类型 / 数量</td><td style="color:var(--ok)">&#9989;</td><td style="color:var(--ok)">&#9989;</td></tr>
+<tr><td>改了返回类型</td><td style="color:var(--ok)">&#9989;</td><td style="color:var(--ok)">&#9989;</td></tr>
+<tr><td>拼错属性名、少传参数</td><td style="color:var(--ok)">&#9989;</td><td style="color:var(--ok)">&#9989;</td></tr>
+<tr><td><strong>签名不变、返回内容变了</strong></td><td style="color:var(--bad)"><strong>&#10060;</strong></td>
+    <td style="color:var(--ok)">&#9989;(前提:跑全量)</td></tr>
+<tr><td><strong>改了边界条件的行为</strong></td><td style="color:var(--bad)"><strong>&#10060;</strong></td>
+    <td style="color:var(--ok)">&#9989;(前提:跑全量)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">一句话概括这次事故</b>
+  <strong>类型没变(签名一致),行为变了(返回值内容不同)。</strong>
+  <ul style="margin-bottom:0">
+    <li><strong>类型系统</strong>管的是:调用方能不能安全地把返回值当字符串用?<strong>能。</strong></li>
+    <li><strong>测试</strong>管的是:这个字符串的<strong>具体内容</strong>是不是业务上正确的那个?<strong>不是。</strong></li>
+  </ul>
+  <br>
+  这也是为什么步骤 5a 是<strong>「类型检查 <em>和</em> 测试」而不是只跑类型检查</strong> ——
+  这次事故里,前者给了你一个绿灯,后者才是救命的那个。
+</div>
+
+<h2 id="radius">六、为什么「我知道我改了什么」救不了你</h2>
+
+<p>这次事故里,<strong>改动者从头到尾都很称职</strong>:改了行为,同步改了测试,跑了检查,全绿。</p>
+
+<figure>
+<svg viewBox="0 0 820 260" role="img" aria-label="注意力半径等于编辑半径">
+  <g class="st">
+    <circle cx="240" cy="130" r="88" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.8" stroke-dasharray="6 4"/>
+    <text x="240" y="60" font-size="12.5" font-weight="700" fill="var(--info)" text-anchor="middle">你的注意力半径</text>
+    <rect x="182" y="108" width="116" height="44" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="240" y="128" font-size="12.5" font-weight="700" fill="var(--bad)" text-anchor="middle">price.py</text>
+    <text x="240" y="145" font-size="11" fill="var(--faint)" text-anchor="middle">你改了它</text>
+    <text x="240" y="238" font-size="11.5" fill="var(--faint)" text-anchor="middle">脑子里的画面:「订单总价那一栏」</text>
+
+    <circle cx="580" cy="130" r="120" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8" stroke-dasharray="6 4" opacity=".55"/>
+    <text x="580" y="30" font-size="12.5" font-weight="700" fill="var(--warn)" text-anchor="middle">真实的爆炸半径</text>
+    <rect x="522" y="108" width="116" height="44" rx="9" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="580" y="134" font-size="12.5" font-weight="700" fill="var(--bad)" text-anchor="middle">price.py</text>
+
+    <rect x="470" y="62" width="100" height="34" rx="8" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="520" y="84" font-size="11" fill="var(--soft)" text-anchor="middle">订单总价</text>
+    <rect x="592" y="62" width="112" height="34" rx="8" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="648" y="84" font-size="11" fill="var(--soft)" text-anchor="middle">赠品单价行</text>
+    <rect x="470" y="166" width="100" height="34" rx="8" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="520" y="188" font-size="11" fill="var(--soft)" text-anchor="middle">对账单</text>
+    <rect x="592" y="166" width="112" height="34" rx="8" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="648" y="188" font-size="11" fill="var(--soft)" text-anchor="middle">财务流水</text>
+
+    <text x="580" y="238" font-size="11.5" fill="var(--faint)" text-anchor="middle">三个月前另一个人写的调用点</text>
+  </g>
+</svg>
+<figcaption>两个圈的大小差距,就是「你以为的影响」和「真实的影响」之间的落差</figcaption>
+</figure>
+
+<div class="box key">
+  <b class="t">&#11088; 漏掉不是因为粗心</b>
+  <strong>你的注意力半径,天然等于你的编辑半径。</strong>
+  <br><br>
+  你改价格模块的时候,脑子里的画面是「订单总价那一栏」;
+  你不会自动浮现出「三个月前有人在赠品行也调了这个函数」。
+  <br><br>
+  <strong>代码库越大、函数越底层,你脑子里的调用点地图就越不完整。</strong>
+  而那种「人畜无害的小工具函数」恰恰是被引用最多的那类。
+  <br><br>
+  <strong>没有任何一方是不称职的。这就是为什么这类事故特别常见 —— 它不需要谁犯错。</strong>
+</div>
+
+<div class="box note">
+  <b class="t">有人会说:我 grep 一下调用点不就行了</b>
+  可以,但不够。<strong>搜索只告诉你「谁调了」,不告诉你「谁的期待被打破了」。</strong>
+  <br><br>
+  赠品行那个调用点你能搜到,但你得逐个读懂每个调用点<strong>期待的是什么格式</strong> ——
+  而那正是测试已经替你写下来的东西。
+</div>
+
+<h2 id="rules">七、三条可以直接用的规则</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:28%">规则</th><th>怎么判断</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>1</strong></td><td><strong>改底层 = 必跑全量</strong></td>
+  <td>判断标准很简单:<strong>这个函数被别的文件引用了吗?</strong>被引用得越多,局部检查越不可信。
+      <em>工具函数、格式化、序列化、常量、配置 —— 全是重灾区</em></td>
+</tr>
+<tr>
+  <td><strong>2</strong></td><td><strong>「我顺手改了对应的测试」是危险信号</strong></td>
+  <td>改一个断言意味着你<strong>确认了行为变更</strong>,而行为变更就一定有波及面。
+      <strong>你改断言的那一刻,恰恰是最该跑全量的时候</strong> —— 因为你亲手确认了旧的期待作废了</td>
+</tr>
+<tr>
+  <td><strong>3</strong></td><td><strong>别把类型检查的绿灯当测试的替代品</strong></td>
+  <td>它只保证「接得上」,不保证「算得对」。<strong>这是结构性盲区,不是配置问题</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">第 2 条值得单独强调</b>
+  这次事故里,局部检查的那份绿色<strong>是改断言换来的</strong>,不是代码变正确了。
+  <br><br>
+  <strong>如果你看到 AI 的改动里包含测试文件,那不是「它很周到」,那是一个需要停下来核对的信号。</strong>
+  <br><br>
+  第 20 页会给一条命令,专门揪出这件事。
+</div>
+
+<h3>最后算一笔账</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:44%">情况</th><th>成本</th></tr></thead>
+<tbody>
+<tr><td>步骤 5a 跑一次全量</td><td style="color:var(--ok)"><strong>0.03 秒</strong></td></tr>
+<tr><td>漏掉之后:自动化流水线拦下,回来重查</td><td style="color:var(--warn)">20 分钟 + 打断心流</td></tr>
+<tr><td>更糟:上线后财务对账异常倒查</td><td style="color:var(--bad)">一个上午 + 一次线上事故复盘</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">一句话</b>
+  <strong>步骤 3 让你写得快,步骤 5a 让你不用回来。</strong>
+  <br>跳过 5a 省下的从来不是时间,只是把时间挪到了更贵的地方去花。
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>90</td><td>局部 vs 全量是两个问题</td><td>「我改对了吗」vs「我弄坏了谁」</td></tr>
+<tr><td>91</td><td>事故复盘 #482</td><td>两行改动,炸了对账单和赠品行</td></tr>
+<tr><td>92</td><td><strong>注意力半径 = 编辑半径</strong></td><td>漏掉不是因为粗心,是认知的天然边界</td></tr>
+<tr><td>93</td><td>「顺手改了测试」是危险信号</td><td>你亲手确认了旧期待作废,正该跑全量</td></tr>
+<tr><td>94</td><td>改底层必跑全量</td><td>被引用越多,局部越不可信</td></tr>
+<tr><td>95</td><td>换水管比喻</td><td>自家水槽 vs 整栋楼放水</td></tr>
+<tr><td>96</td><td>成本账</td><td>0.03 秒 vs 一个上午</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="08-break-it.html">&larr; 上一页:五次改坏实验</a>
+  <a href="00-index.html">目录</a>
+  <a href="10-flaky-e2e.html">下一页:端到端测试与「时红时绿」&rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 09 页 / 共 23 页 · 覆盖知识点 90–96 · 难度 &#9733;&#9733;&#9733;</p>
+  <p>事故复现于一个独立的精简项目,输出为真实运行结果。本页无需修正项。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

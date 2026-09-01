@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10 端到端测试与「时红时绿」</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">10 E2E 与不稳定 <span>· 最贵的一层</span></span>
+  <a href="09-partial-vs-full.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="11-git-basics.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 10 页 · 难度 ★★★ · 前置:第 05、07 页</span>
+<h1>端到端测试与「时红时绿」</h1>
+<p class="lede">
+金字塔最顶上那一层。它是唯一能回答「用户真的能用吗」的测试,
+但它有一个特性会让 AI 协作彻底失控 —— <strong>面对偶发失败,人会说「重跑一下」,AI 会去修一个根本不存在的问题。</strong>
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#what">一、端到端测试是什么</a></li>
+    <li><a href="#value">二、它的独特价值</a></li>
+    <li><a href="#cost">三、它的四个代价</a></li>
+    <li><a href="#flaky">四、时红时绿:打破一个契约</a></li>
+    <li><a href="#why">五、为什么它特别容易时红时绿</a></li>
+    <li><a href="#ai">六、人和 AI 的反应完全不同</a></li>
+    <li><a href="#fix">七、四个应对做法</a></li>
+  </ol>
+</div>
+
+<h2 id="what">一、端到端测试是什么</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">端到端测试</span><span class="en">End-to-End / E2E</span><span class="badge">最贵的一层</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>用程序<strong>模拟一个真人在用你的产品</strong>:开浏览器、点按钮、填表单、看页面上出现了什么。</p>
+    <p>「两端」指的是:<strong>从用户这一端,到数据库那一端</strong>。整条链路完整走一遍,中间任何一环都不作假。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>整车路试 vs 零件台架测试。</strong></p>
+    <p>发动机在台架上测过、刹车在台架上测过、方向盘在台架上测过 —— <strong>每个零件单独都合格</strong>。
+    但你还是得把整车开上路跑一圈,因为可能刹车油管接到了错误的接口。</p>
+    <p><strong>零件全对、组装错了,只有路试能发现。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>金字塔<strong>最顶层</strong>。它和下面三层是<strong>互补关系</strong>,不是替代:</p>
+    <ul>
+      <li>下面三层测「零件对不对」</li>
+      <li>它测「装起来能不能用」</li>
+    </ul>
+    <p>在七步流程里,它<strong>只在步骤 7(最后总审)出现一次</strong>,绝不进日常循环 —— 原因见第四、五、六节。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>对比一下同一件事在两层的写法:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:26%"></th><th>代码</th></tr></thead>
+    <tbody>
+    <tr>
+      <td><strong>单元测试</strong><br>直接调函数</td>
+      <td><pre style="margin:0"><code>assert format_price(1234) == "¥12.34"</code></pre></td>
+    </tr>
+    <tr>
+      <td><strong>端到端</strong><br>像人一样操作</td>
+      <td><pre style="margin:0"><code>page.goto("http://127.0.0.1:8000")
+page.get_by_role("link", name="咖啡").click()
+page.get_by_label("数量").fill("2")
+page.get_by_role("button", name="去结算").click()
+expect(page.get_by_text("下单成功")).to_be_visible()</code></pre></td>
+    </tr>
+    </tbody>
+    </table>
+    </div>
+    <p><strong>看那段代码,每一行就是一个人的动作。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「E2E 最全面,所以应该多写」。</strong>
+    恰恰相反。<strong>写多了会慢到没人愿意跑</strong>,最后整套被关掉。只写最值钱的一两条主流程。</p>
+    <p><strong>误区 2:「E2E 过了就万无一失」。</strong>
+    它只走了你写的那几条路径。用户走的路径有成千上万条。</p>
+  </div></div>
+</div>
+
+<h2 id="value">二、它的独特价值</h2>
+
+<div class="box key">
+  <b class="t">它是唯一能回答「用户真的能用吗」的测试</b>
+  一个非常常见的场景:
+  <blockquote style="margin:11px 0;border-left:3px solid var(--rule2);padding:4px 16px">
+  下面三层的测试 100% 全绿 &#9989;,但用户打开页面,点登录按钮<strong>没反应</strong>。
+  <br><br>
+  为什么?因为每个零件单独测都是对的,但<strong>装起来接错线了</strong> ——
+  前端调的接口地址写错了一个字母。
+  <br><br>
+  <strong>下面三层测不到这个,因为它们压根不发真实的跨系统请求。</strong>
+  </blockquote>
+</div>
+
+<figure>
+<svg viewBox="0 0 840 260" role="img" aria-label="零件都对但组装错了">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--bad)"/></marker></defs>
+  <g class="st" text-anchor="middle">
+    <rect x="30" y="60" width="150" height="56" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="105" y="84" font-size="12.5" font-weight="700" fill="var(--ok)">前端</text>
+    <text x="105" y="102" font-size="11" fill="var(--ok)">单测全绿 &#9989;</text>
+
+    <rect x="330" y="60" width="150" height="56" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="405" y="84" font-size="12.5" font-weight="700" fill="var(--ok)">后端</text>
+    <text x="405" y="102" font-size="11" fill="var(--ok)">单测全绿 &#9989;</text>
+
+    <rect x="630" y="60" width="150" height="56" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="705" y="84" font-size="12.5" font-weight="700" fill="var(--ok)">数据库</text>
+    <text x="705" y="102" font-size="11" fill="var(--ok)">集成测试全绿 &#9989;</text>
+  </g>
+  <path d="M 182 88 L 326 88" stroke="var(--bad)" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#a1)"/>
+  <text x="254" y="76" class="st" font-size="11.5" fill="var(--bad)" text-anchor="middle" font-weight="700">&#10060; 接口地址写错一个字母</text>
+  <path d="M 482 88 L 626 88" stroke="var(--ok)" stroke-width="2" marker-end="url(#a1)"/>
+
+  <text x="420" y="164" class="st" font-size="13.5" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    三个盒子都是绿的,但盒子之间那根线是断的
+  </text>
+  <text x="420" y="196" class="st" font-size="12.5" fill="var(--faint)" text-anchor="middle">
+    只有「像真人一样从最左边走到最右边」才能发现
+  </text>
+  <text x="420" y="228" class="st" font-size="12.5" fill="var(--bad)" text-anchor="middle" font-weight="700">
+    这就是端到端测试存在的全部理由
+  </text>
+</svg>
+<figcaption>「零件都对、组装错了」是下面三层的共同盲区</figcaption>
+</figure>
+
+<h2 id="cost">三、它的四个代价</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">代价</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><strong>慢</strong></td><td>要启动整个应用 + 启动浏览器 + 等页面加载。一个用例几秒到几十秒,一套跑十几分钟很正常</td></tr>
+<tr><td><strong>脆</strong></td><td>你改个按钮的内部类名,测试就挂了(它靠选择器找元素)</td></tr>
+<tr><td><strong>难定位</strong></td><td>红了只告诉你「登录流程失败」。到底是前端、接口还是数据库的问题?得自己查</td></tr>
+<tr><td style="color:var(--bad)"><strong>时红时绿</strong></td><td><strong>&larr; 下面三节全在讲这个。它是对 AI 协作最致命的一条</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="flaky">四、时红时绿:打破一个契约</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">不稳定测试</span><span class="en">flaky test</span><span class="badge">最危险的特性</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p><strong>代码一个字没改、环境一模一样,反复跑同一个测试,有时绿有时红。</strong></p>
+    <p>跑十次,七次过、三次挂。你什么都没做,再跑一次又过了。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>一个偶尔乱叫的烟雾报警器。</strong></p>
+    <p>它三天两头没事就响一次。一开始你还紧张地跑去看,第五次之后你就学会了 ——
+    <strong>「哦,它又抽风了。」</strong>然后你伸手把它拍停。</p>
+    <p><strong>直到某一天真的着火了,你也是伸手把它拍停的。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它不是某一层特有的,但<strong>越往金字塔上层出现概率越高</strong>,E2E 层最严重。</p>
+    <p>它是<strong>「让它自测」这道防线的头号腐蚀剂</strong>:一旦测试变得不可信,整道防线就失效了。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p><strong>它打破的是测试最基本的契约:</strong></p>
+    <div class="box trap" style="margin:9px 0">
+      <p style="margin:0;font-size:17px;font-weight:700;text-align:center">红色 = 有 bug</p>
+    </div>
+    <p>一旦这个契约破了,红色的含义变成了「可能有 bug,也可能没有,你自己猜」。
+    测试套件<strong>就此失去了作为判据的资格</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「偶尔红一下没关系,重跑就行」。</strong>
+    这句话本身就是失效的开始。<strong>团队里最终会出现那句致命的话:</strong>
+    <em>「哦这个测试老是这样,重跑一下就好了。」</em>
+    <br>然后有一天,<strong>一个真的 bug 被这句话打发掉了。</strong></p>
+    <p><strong>误区 2:「不稳定的测试比没有测试强」。</strong>
+    <strong>不一定。</strong>它比没有测试更糟,因为它<strong>消耗你的信任和注意力,却不给你确定的答案</strong>。</p>
+  </div></div>
+</div>
+
+<h2 id="why">五、为什么它特别容易时红时绿</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">原因</th><th>具体表现</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>时序竞态</strong></td>
+  <td>测试点按钮时,按钮还没渲染出来 / 数据还在加载。
+      <strong>机器比人快得多</strong> —— 人会自然地等页面加载完再点,机器不会</td>
+</tr>
+<tr><td><strong>网络抖动</strong></td><td>真实请求,偶尔慢 100 毫秒就超时</td></tr>
+<tr>
+  <td><strong>测试互相污染</strong></td>
+  <td>测试 A 往数据库塞了条数据,测试 B 查询时读到了,断言的数量对不上
+      <br><em>(第 3 页那个「测试隔离」讲的就是防这个)</em></td>
+</tr>
+<tr><td><strong>并行顺序不定</strong></td><td>多个测试并发跑,每次执行顺序不同</td></tr>
+<tr><td><strong>外部依赖</strong></td><td>第三方服务挂了、跨零点导致日期变了、时区、随机数</td></tr>
+<tr><td><strong>动画过渡</strong></td><td>元素正在移动中,点击落到了空处</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">下面三层也可能不稳定,但概率低一个数量级</b>
+  单元测试如果依赖当前时间或随机数,也会时红时绿。
+  <strong>但它不涉及网络、渲染、真实时序这些不确定因素</strong>,所以出问题的概率小得多。
+</div>
+
+<h2 id="ai">六、人和 AI 的反应完全不同</h2>
+
+<div class="box trap">
+  <b class="t">&#128293; 这是全书最重要的 AI 协作陷阱之一</b>
+</div>
+
+<figure>
+<svg viewBox="0 0 880 280" role="img" aria-label="人和AI面对偶发失败的不同反应">
+  <g class="st">
+    <rect x="20" y="20" width="400" height="234" rx="14" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.8"/>
+    <text x="220" y="50" font-size="15" font-weight="800" fill="var(--ok)" text-anchor="middle">人看到偶发失败</text>
+    <text x="220" y="86" font-size="13" fill="var(--ink)" text-anchor="middle">「这个测试我见过,老抽风。」</text>
+    <text x="220" y="112" font-size="13" fill="var(--faint)" text-anchor="middle">&darr;</text>
+    <text x="220" y="138" font-size="13" fill="var(--ink)" text-anchor="middle">重跑一下</text>
+    <text x="220" y="164" font-size="13" fill="var(--faint)" text-anchor="middle">&darr;</text>
+    <text x="220" y="190" font-size="13.5" fill="var(--ok)" text-anchor="middle" font-weight="700">绿了 &rarr; 继续干活</text>
+    <text x="220" y="228" font-size="12" fill="var(--faint)" text-anchor="middle">代价:30 秒</text>
+
+    <rect x="460" y="20" width="400" height="234" rx="14" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.8"/>
+    <text x="660" y="50" font-size="15" font-weight="800" fill="var(--bad)" text-anchor="middle">AI 看到偶发失败</text>
+    <text x="660" y="86" font-size="13" fill="var(--ink)" text-anchor="middle">「红了。一定是我刚才改坏的。」</text>
+    <text x="660" y="112" font-size="13" fill="var(--faint)" text-anchor="middle">&darr;</text>
+    <text x="660" y="138" font-size="13" fill="var(--ink)" text-anchor="middle">开始修一个不存在的问题</text>
+    <text x="660" y="164" font-size="13" fill="var(--faint)" text-anchor="middle">&darr;</text>
+    <text x="660" y="190" font-size="13.5" fill="var(--bad)" text-anchor="middle" font-weight="700">加等待 / 放宽断言 / 跳过</text>
+    <text x="660" y="222" font-size="12" fill="var(--bad)" text-anchor="middle">代价:好代码被改坏</text>
+    <text x="660" y="240" font-size="12" fill="var(--bad)" text-anchor="middle">而且它汇报「已修复」</text>
+  </g>
+</svg>
+<figcaption>同一个现象,两种完全不同的处理方式。差别在于「见过世面」</figcaption>
+</figure>
+
+<h3>AI 会走的四条歪路</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">它会做什么</th><th>后果</th></tr></thead>
+<tbody>
+<tr><td><strong>1</strong></td><td>加一个硬等待(比如「等 3 秒」)</td><td>测试变慢,而且问题还在</td></tr>
+<tr><td><strong>2</strong></td><td>加重试逻辑</td><td>把不稳定藏起来了</td></tr>
+<tr><td><strong>3</strong></td><td><strong>放宽断言</strong></td><td>比如从「检查金额等于 ¥25.00」改成「检查页面没报错」</td></tr>
+<tr><td><strong>4</strong></td><td><strong>直接跳过这条测试</strong></td><td>一道防线永久消失</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">最糟的情况是它「成功」了</b>
+  红变绿了,它汇报「已修复」。<strong>但绿是因为它塞了个 3 秒等待或者删了断言,不是因为解决了问题。</strong>
+  <br><br>
+  <strong>这个只有你看改动才能发现。</strong>
+  <br><br>
+  而这一切的起点,是一个<strong>压根不存在的问题</strong> —— 纯粹的浪费,还附带把好代码改坏的风险。
+</div>
+
+<h2 id="fix">七、四个应对做法</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:30%">做法</th><th>说明</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>1</strong></td><td><strong>结构上:不进日常循环</strong></td>
+  <td>归到流程的<strong>步骤 7</strong>,整个任务跑一次。<em>这是最有效的一条</em></td>
+</tr>
+<tr>
+  <td><strong>2</strong></td><td><strong>先建立基线</strong></td>
+  <td>在干净代码上先跑一遍。本来就有 2 个红的,记下来是哪 2 个</td>
+</tr>
+<tr>
+  <td><strong>3</strong></td><td><strong>红了先重跑一次再判断</strong></td>
+  <td>重跑绿了 = 不稳定,忽略;重跑还红 = 真 bug,处理</td>
+</tr>
+<tr>
+  <td><strong>4</strong></td><td><strong>在提示词里堵死四条歪路</strong></td>
+  <td>见下面的模板</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>可直接复制的提示词</h3>
+
+<pre><code>跑一次 .venv/bin/python -m pytest tests/e2e/。
+
+如果有失败:
+- 先原样重跑一遍,确认是偶发还是稳定复现
+- 不许用增加等待、加重试、放宽断言、跳过 这四种方式让它变绿
+- 稳定复现的话告诉我是哪条、错在哪一步,先别动手改</code></pre>
+
+<div class="box good">
+  <b class="t">第二条最关键</b>
+  它把 AI 最容易走的<strong>四条歪路一次性封掉了</strong>。
+  <br><br>
+  注意措辞是「不许用……方式让它变绿」,而不是「不许改代码」——
+  <strong>真 bug 该修还是要修,禁止的是「用掩盖代替修复」</strong>。
+</div>
+
+<h3>另一条思路:让不稳定本身变成可度量的</h3>
+
+<div class="box note">
+  <b class="t">&#128161; 第 18 页会讲一个进阶做法</b>
+  与其禁止,不如<strong>把「不稳定率」本身变成一条门禁</strong>:
+  <br><br>
+  <em>「重跑之后才通过的用例超过 2%,就判定这套测试本身不可信」</em>
+  <br><br>
+  这叫<strong>让门禁监控自己</strong>。实测有现成的工具能做到这件事 —— 第 18 页给命令。
+</div>
+
+<h3>写 E2E 时降低不稳定的两个技巧</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">技巧</th><th>为什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>用自动等待,不用硬等待</strong></td>
+  <td>现代浏览器工具的断言<strong>会自动重试等待</strong>(默认 5 秒),
+      不需要你写「等 3 秒」。
+      <br><strong>&#128260; 官方术语是「自动等待(auto-waiting)」</strong>,
+      不是流传很广的那个说法。而 <code>time.sleep</code> 这类硬等待才是官方明确劝退的</td>
+</tr>
+<tr>
+  <td><strong>按「看得见的东西」定位</strong></td>
+  <td>用「按钮上的文字」而不是内部类名。
+      <em>类名改个字测试就挂,但按钮上的字改了才是真的改了功能</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>97</td><td>端到端测试是什么</td><td>用程序模拟真人;从用户端到数据库端</td></tr>
+<tr><td>98</td><td>独特价值</td><td><strong>零件都对、组装错了</strong> —— 下面三层的共同盲区</td></tr>
+<tr><td>99</td><td>四个代价</td><td>慢、脆、难定位、时红时绿</td></tr>
+<tr><td>100</td><td><strong>不稳定测试</strong></td><td>打破「红色 = 有 bug」这个契约</td></tr>
+<tr><td>101</td><td>六个成因</td><td>时序、网络、污染、并行、外部依赖、动画</td></tr>
+<tr><td>102</td><td>&#128293; <strong>人 vs AI 的反应</strong></td><td>人说「重跑」,AI 去修一个不存在的问题</td></tr>
+<tr><td>103</td><td>四条歪路</td><td>加等待 / 加重试 / 放宽断言 / 跳过</td></tr>
+<tr><td>104</td><td>&#128260; 自动等待的官方叫法</td><td>auto-waiting,默认超时 5 秒</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="09-partial-vs-full.html">&larr; 上一页:局部 vs 全量</a>
+  <a href="00-index.html">目录</a>
+  <a href="11-git-basics.html">下一页:git 基础 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 10 页 / 共 23 页 · 覆盖知识点 97–104 · 难度 &#9733;&#9733;&#9733;</p>
+  <p><strong>本页含 1 处经核实修正:</strong>浏览器工具「自动等待」的官方术语,以及断言默认超时 5 秒这个数字。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

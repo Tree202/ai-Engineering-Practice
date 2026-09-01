@@ -1,0 +1,897 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 Python 环境从零开始</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">02 Python 环境 <span>· 从零开始</span></span>
+  <a href="01-overview.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="03-test-basics.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 02 页 · 难度 ★ · 前置:第 01 页</span>
+<h1>Python 环境从零开始</h1>
+<p class="lede">
+这一页把地基打好。做完之后你会有一个能跑的练习项目,后面每一页的例子都能立刻在你自己电脑上验证。
+<strong>所有命令都在 macOS 15.7.4 + Python 3.9.6 上真实跑过。</strong>
+</p>
+
+<div class="box note">
+  <b class="t">这一页要花你多久</b>
+  纯敲命令约 <strong>10 分钟</strong>(装工具要等 25 秒左右)。连着读讲解约 <strong>40 分钟</strong>。
+  <br><br>
+  <strong>强烈建议边读边敲。</strong>第 8 页有五个亲手实验,全靠这一页建的项目。
+</div>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#check">一、先看你电脑上有什么</a></li>
+    <li><a href="#venv">二、虚拟环境:每个项目自己的一套厨具</a></li>
+    <li><a href="#tools">三、装三个工具</a></li>
+    <li><a href="#noscripts">四、一个和别的语言不同的地方</a></li>
+    <li><a href="#config">五、一个文件配好三个工具</a></li>
+    <li><a href="#modnotfound">六、头号劝退坑:找不到我的包</a></li>
+    <li><a href="#five">七、五个你一定会撞上的概念</a></li>
+    <li><a href="#py39">八、关于 Python 3.9 的两个提醒</a></li>
+    <li><a href="#done">九、验收清单</a></li>
+  </ol>
+</div>
+
+<h2 id="check">一、先看你电脑上有什么</h2>
+
+<p>打开<strong>终端(Terminal)</strong> —— macOS 上按 <code>Command + 空格</code>,输入 <code>终端</code> 回车。</p>
+
+<p>把下面这条整个复制粘贴进去,回车:</p>
+
+<pre><code>python3 --version; git --version; which python3</code></pre>
+
+<h4>你应该看到类似这样的东西</h4>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出(macOS 15.7.4)</div>
+<pre>Python 3.9.6
+git version 2.39.5 (Apple Git-154)
+/usr/bin/python3</pre>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">这一行的意思</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>Python 3.9.6</code></td><td>你电脑上的 Python 版本。<strong>3.9 有点旧但完全够用</strong>,本教程所有代码都兼容它</td></tr>
+<tr><td><code>git version 2.39.5</code></td><td>存档系统的版本。macOS 自带,不用装</td></tr>
+<tr><td><code>/usr/bin/python3</code></td><td><strong>关键信息</strong>:这个路径说明它是<strong>系统自带</strong>的 Python</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">如果报「command not found」</b>
+  说明你的 Mac 还没装开发者工具。跑这条,它会弹窗让你确认:
+  <pre style="margin:9px 0 0"><code>xcode-select --install</code></pre>
+  <p style="margin:9px 0 0">装完(几分钟)再回来。</p>
+</div>
+
+<h2 id="venv">二、虚拟环境:每个项目自己的一套厨具</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">虚拟环境</span><span class="en">virtual environment / venv</span><span class="badge">必须理解</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个<strong>只属于这一个项目的、独立的 Python</strong>。它是项目文件夹里的一个子文件夹,
+    你往它里面装的任何东西,都<strong>只影响这一个项目</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>公共厨房的锅 vs 这道菜专用的锅碗瓢盆。</strong></p>
+    <p>系统自带的 Python 是<strong>公共厨房那口大锅</strong> —— 所有项目抢着用。
+    A 项目要 1.0 版的某个工具,B 项目要 2.0 版,两边一打架,两个项目都跑不起来。</p>
+    <p>虚拟环境是<strong>给这道菜单独配一套锅碗瓢盆</strong>,全放在项目里的 <code>.venv</code> 文件夹。
+    不要了就把整个文件夹删掉,<strong>不留痕迹,也不影响任何人</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>所有后续操作的前置</strong>。第 3 页的测试工具、第 4 页的检查工具,全装进它里面。</p>
+    <p>它和「系统 Python」是<strong>并列关系</strong> —— 两个互不干扰的 Python,你选择用哪个。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>先建项目文件夹并进去(把 <code>&lt;你的项目&gt;</code> 换成你自己放代码的目录):</p>
+<pre><code>mkdir -p &lt;你的项目&gt;/myshop</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop</code></pre>
+    <p>然后建虚拟环境:</p>
+<pre><code>python3 -m venv .venv</code></pre>
+    <p>这条命令没有任何输出,<strong>没输出就是成功了</strong>。检查一下:</p>
+<pre><code>.venv/bin/python --version</code></pre>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>Python 3.9.6</pre>
+    </div>
+    <p>这个 <code>.venv/bin/python</code> 就是<strong>本项目专属的那个 Python</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「我直接装包不行吗」。</strong>不建议。往系统 Python 里装东西可能污染系统环境,
+    迟早和别的项目打架。新版 macOS 甚至会直接拒绝你。</p>
+    <p><strong>误区 2:「<code>.venv</code> 要提交到存档里」。</strong>绝对不要。
+    它有<strong>几千个文件、几十 MB</strong>,而且随时能重新生成。第 11 页会教你怎么让存档系统忽略它。</p>
+  </div></div>
+</div>
+
+<h3>两种用法:激活 vs 写全路径</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">用法</th><th style="width:34%">怎么写</th><th>特点</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 激活</strong></td>
+  <td><code>source .venv/bin/activate</code><br>之后可直接写 <code>pytest</code></td>
+  <td>命令短。但<strong>只在当前这个终端窗口有效</strong>,关掉就没了</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 写全路径</strong></td>
+  <td><code>.venv/bin/python -m pytest</code></td>
+  <td>命令长。但<strong>在任何地方、任何情况下都一定对</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#11088; 为什么本教程一律用「写全路径」</b>
+  因为你要和 AI 协作。<strong>AI 在执行命令时,不会继承你终端里「已激活」这个状态。</strong>
+  <br><br>
+  后果:你自己在终端敲 <code>pytest</code> 好好的;你让 AI 跑 <code>pytest</code>,
+  它那边可能报 <code>command not found</code>,或者用了系统 Python 跑出一堆莫名其妙的错误,
+  然后开始「修」一个根本不存在的问题。
+  <br><br>
+  <strong>所以:凡是要告诉 AI 的命令,一律写成 <code>.venv/bin/python -m xxx</code> 这种全路径形式。</strong>
+  这一条会在第 21 页变成一份配置文件里的硬性规定。
+</div>
+
+<div class="box note">
+  <b class="t">Windows 读者对照(全书唯一一处,记住这三条)</b>
+  &#9312; <code>.venv/bin/python</code> &rarr; <code>.venv\Scripts\python.exe</code>(全书所有 <code>.venv/bin/</code> 同理替换)。
+  <br><br>
+  &#9313; 激活命令:PowerShell 用 <code>.\.venv\Scripts\Activate.ps1</code>,CMD 用 <code>.venv\Scripts\activate.bat</code> —— 但本书原则是写全路径、不依赖激活,Windows 同样适用。
+  <br><br>
+  &#9314; <code>touch</code> &rarr; <code>New-Item</code>,<code>mkdir -p</code> &rarr; <code>mkdir</code>(PowerShell 自动递归)。
+  <br><br>
+  另:终端中文乱码时先执行 <code>$env:PYTHONUTF8="1"</code>。
+</div>
+
+<h4>装了却说找不到?一条命令诊断</h4>
+
+<pre><code>which python; which pytest</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:44%">现象</th><th>原因</th></tr></thead>
+<tbody>
+<tr><td>两个路径都在 <code>.venv/bin/</code> 下</td><td style="color:var(--ok)">&#9989; 正常,已激活</td></tr>
+<tr><td><code>command not found: pytest</code></td><td>没激活 —— 用全路径写法,或先 <code>source .venv/bin/activate</code></td></tr>
+<tr><td>路径指向 <code>/usr/bin/</code></td><td>用的是系统 Python,不是项目的</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="tools">三、装三个工具</h2>
+
+<p>确认你还在项目文件夹里,然后跑:</p>
+
+<pre><code>.venv/bin/python -m pip install pytest mypy ruff</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出(约 25 秒,尾部)</div>
+<pre><span class="c-dim">Downloading ruff-0.16.3-py3-none-macosx_11_0_arm64.whl (10.5 MB)
+   10.5/10.5 MB 6.4 MB/s  0:00:02
+Installing collected packages: typing_extensions, tomli, ruff, pygments,
+  pluggy, pathspec, packaging, mypy_extensions, iniconfig, mypy,
+  exceptiongroup, pytest</span>
+
+<span class="c-ok">Successfully installed mypy-1.19.1 pytest-8.4.2 ruff-0.16.3 ...</span></pre>
+</div>
+
+<h3>这三个工具分别是干什么的</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:14%">工具</th><th style="width:22%">中文叫法</th><th style="width:26%">干什么</th><th>哪一页细讲</th></tr></thead>
+<tbody>
+<tr><td><code>pytest</code></td><td>测试运行器</td><td>执行你写的测试,告诉你哪条过了哪条挂了</td><td>第 3 页</td></tr>
+<tr><td><code>mypy</code></td><td>类型检查器</td><td><strong>不运行代码</strong>,只检查「类型对不对」。秒级,覆盖 100% 代码</td><td>第 4 页</td></tr>
+<tr><td><code>ruff</code></td><td>代码检查器</td><td>抓未使用的变量、import 顺序、常见 bug 陷阱。极快</td><td>第 4 页</td></tr>
+</tbody>
+</table>
+</div>
+
+<h4>确认三个都装上了</h4>
+
+<pre><code>.venv/bin/python -m pytest --version; .venv/bin/python -m mypy --version; .venv/bin/python -m ruff --version</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>pytest 8.4.2
+mypy 1.19.1 (compiled: yes)
+ruff 0.16.3</pre>
+</div>
+
+<div class="box note">
+  <b class="t">版本可以不一样</b>
+  你装的时候版本号可能更高,<strong>没关系</strong>。本教程只有一处对版本有硬要求:
+  第五节那个 <code>pythonpath</code> 配置<strong>需要 pytest 7.0 或更高</strong>。
+</div>
+
+<h2 id="noscripts">四、一个和别的语言不同的地方</h2>
+
+<div class="box key">
+  <b class="t">Python 没有「统一的命令入口」</b>
+  如果你听过前端的 <code>npm test</code>,那是个统一入口:不管项目内部用什么测试工具,
+  一律敲 <code>npm test</code> 就行,因为项目里有个文件写明了「test 这个词对应哪条真实命令」。
+  <br><br>
+  <strong>Python 没有这个东西。</strong>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">后果</th><th>具体表现</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; AI 每次用的命令可能不一样</strong></td>
+  <td>这次跑 <code>pytest</code>,下次跑 <code>python -m pytest</code>,再下次跑 <code>.venv/bin/pytest</code>。
+      <strong>三个不完全等价</strong>,有时候前者会报「找不到模块」</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 你没法一句话说「跑项目的测试」</strong></td>
+  <td>你必须每次都把完整命令说出来,否则它就要猜</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>本教程会用的三条命令(现在先记住形状)</h3>
+
+<pre><code>.venv/bin/python -m pytest</code></pre>
+<pre><code>.venv/bin/python -m mypy</code></pre>
+<pre><code>.venv/bin/python -m ruff check .</code></pre>
+
+<div class="box good">
+  <b class="t">正解:让配置文件当那个「统一入口」</b>
+  Python 虽然没有内置的统一入口,但你可以<strong>自己造一个</strong> ——
+  在项目里放一个说明文件,把这三条命令写死在里面,让 AI 每次自动读到。
+  <br><br>
+  <strong>第 21 页会完整教这件事。</strong>现在只需知道:这不是无法弥补的缺陷,而是需要你手动补上这一环。
+</div>
+
+<h2 id="config">五、一个文件配好三个工具</h2>
+
+<p>在项目根目录建一个叫 <code>pyproject.toml</code> 的文件。<strong>这一个文件同时是三个工具的配置文件。</strong></p>
+
+<p>在 myshop 项目根目录执行:</p>
+
+<pre><code>touch pyproject.toml</code></pre>
+
+<p>用任何编辑器打开它,把下面的内容整个粘进去:</p>
+
+<pre><code>[project]
+name = "myshop"
+version = "0.1.0"
+description = "用来演示测试金字塔四层的迷你商店"
+requires-python = "&gt;=3.9"
+dependencies = []            # 主代码只用 Python 自带的东西,不装第三方包
+
+# ---------------- pytest:跑测试 ----------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]        # 只去 tests/ 文件夹里找测试,别扫整个项目
+pythonpath = ["."]           # &larr; 救命的一行,见第六节
+addopts = "-v --strict-markers"
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+# ---------------- mypy:类型检查 ----------------
+[tool.mypy]
+python_version = "3.9"
+files = ["myshop", "tests"]
+strict = true                # 严格模式:所有函数都必须写清楚类型
+
+[[tool.mypy.overrides]]
+module = "playwright.*"      # 这个包我们没装,别因为找不到它就报错
+ignore_missing_imports = true
+
+# ---------------- ruff:代码规范 ----------------
+[tool.ruff]
+target-version = "py39"      # &larr; 别漏这一行!见第八节
+line-length = 100
+
+[tool.ruff.lint]
+# E=风格  F=真错误(未使用变量等)  I=import 排序  B=常见 bug 陷阱
+select = ["E", "F", "I", "B"]</code></pre>
+
+<h3>逐段解释</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">配置项</th><th>作用</th></tr></thead>
+<tbody>
+<tr><td><code>requires-python</code></td><td>声明本项目最低需要哪个 Python 版本。<strong>ruff 会读它</strong>,见第八节</td></tr>
+<tr><td><code>testpaths</code></td><td>告诉 pytest「只去这个文件夹找测试」,不然它会扫整个项目包括 <code>.venv</code>,很慢</td></tr>
+<tr><td><code>pythonpath</code></td><td><strong>本页最重要的一行</strong>,下一节专门讲</td></tr>
+<tr><td><code>addopts</code></td><td>每次跑测试默认带上的参数。<code>-v</code> = 每条测试单独打一行</td></tr>
+<tr><td><code>python_files</code> / <code>python_functions</code></td><td>什么样的文件名/函数名才算测试。第 3 页细讲</td></tr>
+<tr><td><code>files</code>(mypy)</td><td>mypy 默认检查哪些文件夹,这样你敲 <code>mypy</code> 就不用带参数</td></tr>
+<tr><td><code>strict</code></td><td>把 mypy 的严格程度开到最高</td></tr>
+<tr><td><code>overrides</code></td><td>对某些包放宽要求。这里是因为后面会写一个用到 <code>playwright</code> 的示例文件但不装它</td></tr>
+<tr><td><code>target-version</code></td><td>告诉 ruff「我的代码要在 Python 3.9 上跑」。<strong>漏了会出事</strong>,第八节讲</td></tr>
+<tr><td><code>select</code></td><td>启用哪几组检查规则</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 实测发现的坑:配置写错了它不告诉你</b>
+  <strong>mypy 对拼错的配置键名只打一条 Warning,然后照常报成功。</strong>
+  <br><br>
+  实测把 <code>strict</code> 拼成 <code>strictt</code>:
+  <pre style="margin:9px 0"><code>pyproject.toml: [mypy]: Unrecognized option: strictt = True
+Success: no issues found in 8 source files</code></pre>
+  <p style="margin:9px 0 0"><strong>严格模式根本没开,但它报的是 Success。</strong>你会以为检查通过了,其实检查压根没开。</p>
+  <p style="margin:9px 0 0"><strong>习惯:改完配置跑一次,看输出里有没有 <code>Unrecognized option</code> 这行。</strong></p>
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 经核实修正:<code>strict = true</code> 已经包含 <code>check_untyped_defs</code></b>
+  实测 <code>mypy --help</code> 的原文:<code>--strict</code> 启用的清单里就有 <code>--check-untyped-defs</code>。
+  所以两个都写<strong>是冗余的</strong>(但无害,可以保留作教学显式化)。
+  <br><br>
+  更重要的一处措辞修正:<strong>防「AI 漏写 <code>-&gt; None</code>」靠的是 <code>disallow_untyped_defs</code>,不是 <code>check_untyped_defs</code>。</strong>
+  后者的作用是「连没写标注的函数体也检查」。
+  <br><br>
+  还有一个覆盖规则:<code>strict = true</code> 配 <code>check_untyped_defs = false</code>,
+  <strong>无论谁先写</strong>,最终都是关闭状态 —— 单项显式值赢过 strict。
+</div>
+
+<h2 id="modnotfound">六、头号劝退坑:找不到我的包</h2>
+
+<p>这是 Python 初学者遇到的第一大障碍,<strong>99% 的人会卡在这里</strong>。</p>
+
+<h3>坑长什么样</h3>
+
+<p>假设你的项目结构是这样(第 6 页会真的建起来):</p>
+
+<pre><code>myshop/                  &larr; 项目根目录
+&#9500;&#9472;&#9472; myshop/              &larr; 你的代码放这里
+&#9474;   &#9492;&#9472;&#9472; price.py
+&#9492;&#9472;&#9472; tests/               &larr; 测试放这里
+    &#9492;&#9472;&#9472; test_price.py</code></pre>
+
+<p>你在 <code>tests/test_price.py</code> 里写 <code>from myshop.price import format_price</code>,然后跑测试,得到:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 报错(真实输出)</div>
+<pre><span class="c-bad">ModuleNotFoundError: No module named 'myshop'</span>
+<span class="c-bad">Interrupted: 1 error during collection</span></pre>
+</div>
+
+<h3>为什么会这样</h3>
+
+<figure>
+<svg viewBox="0 0 840 260" role="img" aria-label="Python 找不到包的原因">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--bad)"/></marker></defs>
+  <g class="st" font-size="13">
+    <rect x="20" y="30" width="240" height="190" rx="12" fill="var(--sunk)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="140" y="54" font-weight="700" fill="var(--ink)" text-anchor="middle">你的项目</text>
+    <text x="45" y="82" font-family="var(--mono)" font-size="12" fill="var(--soft)">myshop/          &larr; 项目根</text>
+    <text x="60" y="106" font-family="var(--mono)" font-size="12" fill="var(--ok)">myshop/       &larr; 要 import 的包</text>
+    <text x="75" y="126" font-family="var(--mono)" font-size="12" fill="var(--faint)">price.py</text>
+    <text x="60" y="152" font-family="var(--mono)" font-size="12" fill="var(--soft)">tests/</text>
+    <text x="75" y="172" font-family="var(--mono)" font-size="12" fill="var(--warn)">test_price.py &larr; 从这里跑</text>
+
+    <rect x="420" y="30" width="400" height="190" rx="12" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+    <text x="620" y="54" font-weight="700" fill="var(--bad)" text-anchor="middle">Python 的搜索路径</text>
+    <text x="445" y="84" font-family="var(--mono)" font-size="12" fill="var(--soft)">1. .../myshop/tests/     &larr; 测试文件所在目录</text>
+    <text x="445" y="106" font-family="var(--mono)" font-size="12" fill="var(--soft)">2. .../.venv/lib/...     &larr; 装的第三方包</text>
+    <text x="445" y="128" font-family="var(--mono)" font-size="12" fill="var(--soft)">3. /usr/lib/python3.9    &larr; Python 自带的库</text>
+    <text x="445" y="164" font-family="var(--mono)" font-size="12.5" fill="var(--bad)" font-weight="700">&#10007; 项目根目录不在这个列表里!</text>
+    <text x="445" y="192" font-size="12" fill="var(--faint)">所以 import myshop 找不到</text>
+  </g>
+  <path d="M 265 125 L 412 125" stroke="var(--bad)" stroke-width="1.8" marker-end="url(#a1)"/>
+  <text x="338" y="116" class="st" font-size="12" fill="var(--bad)" text-anchor="middle" font-weight="600">去哪找?</text>
+  <text x="420" y="248" class="st" font-size="13" fill="var(--soft)" text-anchor="middle" font-weight="600">
+    Python 只在「搜索路径」里的目录中找包。项目根目录默认不在里面。
+  </text>
+</svg>
+<figcaption>问题的本质:pytest 从 tests/ 目录跑,项目根目录没进搜索路径</figcaption>
+</figure>
+
+<h3>三种解法,选一个就行</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">做法</th><th>评价</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312;</strong></td>
+  <td>在 <code>pyproject.toml</code> 里配<br><code>pythonpath = ["."]</code></td>
+  <td style="color:var(--ok)"><strong>&#9989; 本教程用这个。</strong>零安装、一行解决、显式可见。<strong>需要 pytest &ge; 7.0</strong></td>
+</tr>
+<tr>
+  <td><strong>&#9313;</strong></td>
+  <td>命令写成<br><code>.venv/bin/python -m pytest</code></td>
+  <td>也有效。<code>-m</code> 这种写法会把<strong>当前目录</strong>加进搜索路径。缺点是必须每次都在项目根目录跑</td>
+</tr>
+<tr>
+  <td><strong>&#9314;</strong></td>
+  <td>在项目根目录放一个空文件<br><code>conftest.py</code></td>
+  <td>有效但<strong>原理绕</strong>,而且换个导入模式就失效。见第七节</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">判定规则,背下来</b>
+  <strong>只要你的测试里出现了 <code>from &lt;你自己的包&gt; import ...</code>,就必须三选一。三个都不做 = 一定报错。</strong>
+</div>
+
+<div class="box trap">
+  <b class="t">顺带记住这个退出码</b>
+  这类报错的<strong>退出码是 2</strong>,不是 5。
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:16%">退出码</th><th>含义</th></tr></thead>
+  <tbody>
+  <tr><td><strong>0</strong></td><td>全部通过</td></tr>
+  <tr><td><strong>1</strong></td><td>有测试失败了</td></tr>
+  <tr><td><strong>2</strong></td><td><strong>被中断</strong> —— 收集阶段就出错了(比如 import 失败)</td></tr>
+  <tr><td><strong>3</strong></td><td>内部错误</td></tr>
+  <tr><td><strong>4</strong></td><td>命令行用法错误</td></tr>
+  <tr><td><strong>5</strong></td><td><strong>一条测试都没收集到</strong> —— 通常是文件名/函数名不符合规则</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">怎么看退出码:跑完命令后立刻敲 <code>echo $?</code>。</p>
+</div>
+
+<h2 id="five">七、五个你一定会撞上的概念</h2>
+
+<h3>概念 1:<code>__init__.py</code> —— 「这个文件夹是一个包」的标志</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">位置</th><th style="width:16%">要不要建</th><th>理由</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>myshop/</code>(放代码的)</td><td style="color:var(--ok)"><strong>要</strong></td>
+  <td>它是「这个文件夹是一个 Python 包」的标志,<code>import myshop.price</code> 才成立。<strong>可以是完全空的文件</strong></td>
+</tr>
+<tr>
+  <td><code>tests/</code>(放测试的)</td><td style="color:var(--warn)"><strong>默认不要</strong></td>
+  <td>只有当两个子文件夹里出现<strong>同名的测试文件</strong>、pytest 报 <code>import file mismatch</code> 时,才需要加</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p>在 myshop 项目根目录执行 —— 先把目录建出来,touch 才不会报错:</p>
+
+<pre><code>mkdir -p myshop tests/e2e</code></pre>
+<pre><code>touch myshop/__init__.py</code></pre>
+
+<h3>概念 2:<code>conftest.py</code> —— pytest 自动加载的工具箱</h3>
+
+<div class="term">
+  <div class="term-h"><span class="zh">共享配置文件</span><span class="en">conftest.py</span><span class="badge">会用到</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个特殊文件名。pytest 会<strong>自动加载它,你不需要 import</strong>。
+    作用范围是「它所在的文件夹,以及所有子文件夹」。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>办公室里的公共文具柜。</strong></p>
+    <p>放在整层楼门口的柜子,整层楼的人都能用;放在某个房间里的柜子,只有那个房间和它的隔间能用。
+    <strong>你不需要申请,进来就能拿。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>三个用途,按重要性排:</p>
+    <ol>
+      <li><strong>放共享的「准备工作」</strong>(下一个概念讲这是什么)—— 最常见</li>
+      <li>放改变 pytest 行为的钩子函数(进阶,本教程只在第 18 页用一次)</li>
+      <li><strong>副作用</strong>:把自己所在的文件夹加进搜索路径 —— 这就是上一节第 &#9314; 种解法的原理</li>
+    </ol>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>实测三种情况的对比:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:52%">情况</th><th>结果</th></tr></thead>
+    <tbody>
+    <tr><td>项目根有 <code>conftest.py</code>,跑 <code>pytest</code></td><td style="color:var(--ok)">&#9989; 能 import 自己的包</td></tr>
+    <tr><td>删掉 <code>conftest.py</code>,跑 <code>pytest</code></td><td style="color:var(--bad)">&#10060; ModuleNotFoundError</td></tr>
+    <tr><td>删掉 <code>conftest.py</code>,跑 <code>python -m pytest</code></td><td style="color:var(--ok)">&#9989; 又能了</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>&#128260; 经核实修正 —— 这一条我一开始也说错了:</strong>
+    很多教程说「因为 conftest.py 在项目根目录,所以项目根目录进了搜索路径」。<strong>因果关系是反的。</strong></p>
+    <p>官方文档明确写着,pytest 判定的「项目根目录」这个概念
+    <em>「不会被用来修改搜索路径,也不影响模块怎么被导入」</em>。</p>
+    <p>真实机制是:<strong>pytest 导入任何一个 <code>conftest.py</code> 或测试文件时,
+    会把「那个文件所在的文件夹」插到搜索路径最前面。</strong>
+    当它恰好放在项目根目录时,被插入的就正好是项目根目录 —— <em>结果对,但原因不是「因为它是项目根目录」。</em></p>
+    <p><strong>所以本教程推荐 <code>pythonpath = ["."]</code></strong> —— 显式,不依赖这些间接机制。</p>
+  </div></div>
+</div>
+
+<h3>概念 3:准备工作(fixture)—— 手术前的护士</h3>
+
+<div class="term">
+  <div class="term-h"><span class="zh">准备工作</span><span class="en">fixture</span><span class="badge">很重要</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一段<strong>由 pytest 自动帮你执行的准备代码</strong>。你只要在测试函数的参数位置写一个名字,
+    pytest 就会找到对应的准备工作、执行它、把结果塞给你。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>手术前的护士。</strong></p>
+    <p>你(医生)只需要在手术单上写「要一套干净的器械台」,护士就在你动手之前把它摆好;
+    做完之后她负责收拾。<strong>你一行代码都不用写,你只是喊了个名字。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>测试三段式里「准备」那一段的实现方式</strong>(三段式在第 3 页讲)。</p>
+    <p>它和 <code>conftest.py</code> 是<strong>配合关系</strong>:写在 <code>conftest.py</code> 里的准备工作,
+    整个文件夹的测试都能用。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:20%">名字</th><th style="width:38%">它准备什么</th><th>为什么重要</th></tr></thead>
+    <tbody>
+    <tr><td><code>tmp_path</code></td><td>一个<strong>全新的空文件夹</strong>,跑完自动删</td><td>让每条测试各写各的文件,互不干扰</td></tr>
+    <tr><td><code>monkeypatch</code></td><td>临时改某个变量,<strong>测试结束自动改回来</strong></td><td>把「真实数据库路径」临时换成临时路径</td></tr>
+    <tr><td><code>capsys</code></td><td>抓住 <code>print</code> 打印出来的东西</td><td>测「有没有打印正确的提示」</td></tr>
+    </tbody>
+    </table>
+    </div>
+<pre><code>def test_订单落盘了(tmp_path):        # &larr; 只是写了个参数名
+    数据库路径 = str(tmp_path / "test.db")  # &larr; tmp_path 已经是个准备好的空文件夹了</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「参数名可以随便起」。</strong>不行。
+    <strong>参数名必须和准备工作的名字完全一致</strong>,pytest 靠名字找。写错就报「找不到这个 fixture」。</p>
+    <p><strong>误区 2:「它是全局共享的」。</strong><code>tmp_path</code> 恰恰相反 ——
+    <strong>每条测试拿到的是不同的文件夹</strong>。这正是它的价值。</p>
+  </div></div>
+</div>
+
+<h3>概念 4:<code>yield</code> —— 把准备和收尾分开的那条线</h3>
+
+<pre><code>@pytest.fixture()
+def 服务器():
+    服务 = 启动一个服务器()          # &larr; yield 之前:准备
+
+    yield 服务的地址                  # &larr; 这一行:把东西交给测试用
+
+    服务.关掉()                      # &larr; yield 之后:收尾</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">位置</th><th>什么时候执行</th></tr></thead>
+<tbody>
+<tr><td><code>yield</code> <strong>之前</strong>的代码</td><td>测试开始前</td></tr>
+<tr><td><code>yield</code> 那一行</td><td>把值交给测试函数</td></tr>
+<tr><td><code>yield</code> <strong>之后</strong>的代码</td><td>测试结束后,<strong>不管测试成功还是失败都会执行</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">「不管成功失败都执行」很关键</b>
+  否则一条测试失败之后,服务器就一直开着不关,后面的测试全乱。
+</div>
+
+<h3>概念 5:pytest 怎么找到你的测试</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">规则</th><th style="width:30%">必须是</th><th>违反了会怎样</th></tr></thead>
+<tbody>
+<tr><td><strong>文件名</strong></td><td><code>test_*.py</code> 或 <code>*_test.py</code></td><td><strong>整个文件被无视</strong>,不报错不警告</td></tr>
+<tr><td><strong>函数名</strong></td><td>以 <code>test</code> 开头</td><td>这个函数被无视</td></tr>
+<tr><td><strong>测试类名</strong></td><td>以 <code>Test</code> 开头</td><td>整个类被无视</td></tr>
+<tr><td><strong>测试类不能有 <code>__init__</code></strong></td><td>—</td><td>&#9888; <strong>静默跳过整个类</strong>,只给一条很容易被忽略的警告</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">&#128260; 经核实修正:是 <code>test</code> 前缀,不是 <code>test_</code> 前缀</b>
+  很多教程写「函数名必须以 <code>test_</code> 开头」。<strong>实测不准确。</strong>
+  <br><br>
+  pytest 的默认配置项 <code>python_functions</code> 的默认值是 <code>['test']</code>(<strong>不带下划线</strong>),
+  <code>python_classes</code> 默认值是 <code>['Test']</code>。所以下面这些<strong>也会被收集</strong>:
+  <pre style="margin:9px 0 0"><code>test_naming.py::test_normal              PASSED
+test_naming.py::testnounderscore         PASSED   &larr; 没下划线也被收集
+test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收集</code></pre>
+  <p style="margin:9px 0 0">注意:上面的演示基于 pytest 的默认配置。你在本页第五节写入的 <code>pyproject.toml</code> 已把规则收窄为 <code>test_*</code> 前缀,照那份配置跑,<code>testnounderscore</code> 不会被收集(<code>Testing</code> 类那行仍成立,因为 <code>python_classes</code> 没有被覆盖)。</p>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 最阴的一条:文件名不匹配 = 测试静默地完全不运行</b>
+  实测:一个叫 <code>tests_helper.py</code> 的文件(注意是 <code>tests_</code> 不是 <code>test_</code>),
+  里面写了一条必定失败的测试。<strong>pytest 从头到尾没有运行它,也没有任何提示。</strong>
+  <br><br>
+  很多人把辅助文件命名成 <code>tests_xxx.py</code>,然后奇怪为什么测试没跑。
+  <strong>反过来也危险</strong>:辅助文件里如果有 <code>test</code> 开头的函数,一旦文件名撞上 <code>test_*.py</code>,就会被误当成测试收集。
+  <br><br>
+  <strong>防呆:跑完看一眼「收集到几条」(<code>collected N items</code>),数字对不上就说明有东西被吞了。</strong>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; AI 协作专属陷阱:带 <code>__init__</code> 的测试类</b>
+  AI 有时会生成这样的测试类(它以为需要初始化):
+  <pre style="margin:9px 0"><code>class TestPrice:
+    def __init__(self):        # &larr; 有了这个,整个类被跳过
+        self.data = [1, 2, 3]
+
+    def test_something(self):
+        assert self.data[0] == 1</code></pre>
+  <p style="margin:9px 0 0"><strong>pytest 会一声不吭地跳过整个类</strong>,你看到「测试通过」,其实一条都没跑。
+  正确做法是把初始化放进准备工作里。</p>
+</div>
+
+<h2 id="py39">八、关于 Python 3.9 的两个提醒</h2>
+
+<p>先说一个背景:Python 3.9 已于 2025 年 10 月结束官方支持,新装环境请用当前稳定版。本教程代码按 3.9+ 兼容语法书写,在新版 Python 上同样可跑 —— 下面两个提醒对新版本读者仍然有用。</p>
+
+<h3>提醒 1:新语法不能用</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">写法</th><th style="width:20%">3.9 能用吗</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>Optional[str]</code></td><td style="color:var(--ok)">&#9989; 能</td><td>本教程一律用这个</td></tr>
+<tr><td><code>str | None</code></td><td style="color:var(--bad)">&#10060; 不能</td><td>3.10 才有。3.9 上运行会报 <code>TypeError</code></td></tr>
+<tr><td><code>dict[str, Any]</code></td><td style="color:var(--ok)">&#9989; 能</td><td><strong>3.9 就支持了</strong>(常被误以为不行)</td></tr>
+<tr><td><code>Dict[str, Any]</code></td><td style="color:var(--ok)">&#9989; 能</td><td>老写法,也能用</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>提醒 2:那一行 <code>target-version</code> 千万别漏</h3>
+
+<div class="box key">
+  <b class="t">&#128260; 这一条经核实后方向完全改了</b>
+  常见说法是:<em>「Python 3.9 上不要启用 ruff 的 <code>UP</code> 规则,它会催你用 3.10 的语法」</em>。
+  <strong>实测发现这个因果关系是错的。</strong>
+  <br><br>
+  只要 <code>target-version = "py39"</code> 写对了,启用 <code>UP</code> 是<strong>安全的</strong> ——
+  ruff 根本不会建议你用 <code>str | None</code>(相关规则不触发)。
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:34%">情况</th><th>会发生什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>正确写了 <code>target-version = "py39"</code></strong></td>
+  <td style="color:var(--ok)">&#9989; 安全。ruff 不会提 3.10 的语法</td>
+</tr>
+<tr>
+  <td style="color:var(--bad)"><strong>漏写了 <code>target-version</code>,而且 <code>requires-python</code> 也没写</strong></td>
+  <td style="color:var(--bad)"><strong>ruff 0.16 默认按 Python 3.10 算</strong>。
+      于是 <code>ruff check --fix</code> 会把你的 <code>Optional[str]</code> <strong>直接改成 <code>str | None</code></strong>,
+      在 3.9 上一运行就 <code>TypeError</code></td>
+</tr>
+<tr>
+  <td>文件里有 <code>from __future__ import annotations</code></td>
+  <td style="color:var(--warn)">&#9888; 即使写对了 target-version 也会被建议改。函数定义能过,
+      但某些运行时读取类型的场景仍会出错</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">结论,记这一句就够</b>
+  <strong>关键不是「别加 UP 规则」,而是「别漏 <code>target-version</code>」。</strong>
+  <br><br>
+  更保险:<code>[project]</code> 段里的 <code>requires-python = "&gt;=3.9"</code> 也写上 —— ruff 会读它作为备用依据。
+  <strong>我们上面的配置两个都写了。</strong>
+  <br><br>
+  额外保险:即使触发了,相关修复在 py39 目标下被标为 <strong>unsafe</strong>,
+  <code>ruff check --fix</code> 不会动它,要加 <code>--unsafe-fixes</code> 才改。
+</div>
+
+<div class="box note">
+  <b class="t">想升级 Python 吗?</b>
+  Python 3.9 已过官方维护期。装了 Homebrew 的话升级是一条命令:
+  <pre style="margin:9px 0 0"><code>brew install python@3.13</code></pre>
+  <p style="margin:9px 0 0"><strong>但不升级也完全能走完本教程</strong> —— 所有代码都是 3.9 兼容的。先把流程学会更重要。</p>
+</div>
+
+<h2 id="done">九、验收清单</h2>
+
+<ul class="chk">
+  <li>项目文件夹 <code>myshop</code>(项目根目录)存在</li>
+  <li>里面有 <code>.venv</code> 文件夹</li>
+  <li><code>.venv/bin/python --version</code> 能打印出版本号</li>
+  <li>三个工具都装上了(pytest / mypy / ruff 都能 <code>--version</code>)</li>
+  <li>项目根目录有 <code>pyproject.toml</code>,内容是第五节那一份</li>
+  <li><code>myshop/__init__.py</code> 存在(可以是空文件)</li>
+  <li>你知道为什么要写 <code>.venv/bin/python -m xxx</code> 而不是直接写 <code>pytest</code></li>
+</ul>
+
+<h4>一条命令验收全部</h4>
+
+<p>在 myshop 项目根目录执行:</p>
+
+<pre><code>ls -a && .venv/bin/python -m pytest --version && .venv/bin/python -m mypy --version && .venv/bin/python -m ruff --version</code></pre>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:36%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>9</td><td>为什么不能直接装包</td><td>会污染系统、和别的项目打架</td></tr>
+<tr><td>10</td><td>虚拟环境</td><td>每个项目自己的一套厨具,放在 <code>.venv</code> 里</td></tr>
+<tr><td>11</td><td>激活 vs 全路径</td><td>激活只在当前窗口有效;全路径永远对</td></tr>
+<tr><td>12</td><td><strong>AI 不继承激活状态</strong></td><td>所以给 AI 的命令一律写全路径</td></tr>
+<tr><td>13</td><td>诊断命令</td><td><code>which python; which pytest</code></td></tr>
+<tr><td>14</td><td><strong>Python 没有统一命令入口</strong></td><td>靠配置文件手动补,第 21 页讲</td></tr>
+<tr><td>15</td><td>pyproject.toml</td><td>一个文件配好三个工具</td></tr>
+<tr><td>16</td><td><code>pythonpath = ["."]</code></td><td>解决头号劝退坑,需 pytest &ge; 7.0</td></tr>
+<tr><td>17</td><td><code>__init__.py</code></td><td>源码包要建;tests 默认不要</td></tr>
+<tr><td>18</td><td>&#128260; <code>conftest.py</code></td><td><strong>它所在的目录</strong>进搜索路径,不是因为它在项目根</td></tr>
+<tr><td>29</td><td><strong>准备工作(fixture)</strong></td><td>写个参数名,pytest 自动帮你把东西准备好 —— 手术前的护士</td></tr>
+<tr><td>30</td><td><code>tmp_path</code> / <code>monkeypatch</code> / <code>capsys</code></td><td>三个自带的准备工作:临时目录 / 临时改值 / 抓打印</td></tr>
+<tr><td>31</td><td>&#128260; 参数名必须一字不差</td><td>pytest 靠名字找;写错报「找不到这个 fixture」,不是「参数错误」</td></tr>
+<tr><td>35</td><td><strong><code>yield</code> 把准备和收尾分开</strong></td><td>之前 = 准备,那一行 = 交出去,之后 = 收尾</td></tr>
+<tr><td>36</td><td>收尾<strong>不管成功失败都执行</strong></td><td>否则一条测试失败,服务器就一直开着,后面全乱</td></tr>
+<tr><td>37</td><td>&#128260; <strong>pytest 的发现规则</strong></td><td>是 <code>test</code> 前缀不是 <code>test_</code>;测试类不能有 <code>__init__</code>,否则 &#9888; 静默跳过(默认值;本页配置已收窄为 <code>test_*</code>)</td></tr>
+<tr><td>19</td><td>退出码 2 vs 5</td><td>2 = import 挂了;5 = 一条都没收集到</td></tr>
+<tr><td>20</td><td>&#9888; mypy 拼错键只警告</td><td>改完配置要看有没有 <code>Unrecognized option</code></td></tr>
+<tr><td>21</td><td>&#128260; ruff 的 UP 规则</td><td>关键不是别加 UP,是<strong>别漏 target-version</strong></td></tr>
+<tr><td>22</td><td>Python 3.9 的限制</td><td>不能用 <code>str | None</code>;能用 <code>dict[str,Any]</code></td></tr>
+<tr><td>23</td><td>&#128260; <code>strict</code> 已含 <code>check_untyped_defs</code></td><td>防 AI 漏写标注靠的是 <code>disallow_untyped_defs</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="01-overview.html">&larr; 上一页:全景</a>
+  <a href="00-index.html">目录</a>
+  <a href="03-test-basics.html">下一页:测试到底是什么 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 02 页 / 共 23 页 · 覆盖知识点 9–23、29–31、35–37 · 难度 &#9733;</p>
+  <p>版本要求:<code>pythonpath</code> 需 pytest &ge; 7.0 · 实测于 macOS 15.7.4 / Python 3.9.6 / pytest 8.4.2 / mypy 1.19.1 / ruff 0.16.3</p>
+  <p><strong>本页含 4 处经核实修正:</strong>conftest.py 与搜索路径的因果关系、pytest 前缀是 <code>test</code> 而非 <code>test_</code>、ruff UP 规则与 target-version 的真实关系、<code>strict</code> 已包含 <code>check_untyped_defs</code>。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

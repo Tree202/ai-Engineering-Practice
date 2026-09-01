@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>19 门禁实战复盘(真机实证)</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">19 门禁实战 <span>· 真机实证</span></span>
+  <a href="18-gate-items.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="20-ai-boundary.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 19 页 · 难度 ★★★★ · 前置:第 17、18 页 · <b style="color:var(--bad)">全书重点 3/3 · 全程真机</b></span>
+<h1>门禁实战复盘(真机实证)</h1>
+<p class="lede">
+前两页讲的是道理。这一页是<strong>在真实代码托管平台上、用真实仓库、真实分支保护规则跑出来的完整记录</strong> ——
+包括<strong>一次我自己的错误诊断</strong>。所有终端输出都是原样抄录,没有一个字是编的。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#setup">一、实验设置</a></li>
+    <li><a href="#chain">二、完整证据链(六幕)</a></li>
+    <li><a href="#rule">三、怎么配分支保护规则</a></li>
+    <li><a href="#admin">四、&#128293; 连管理员也绕不过</a></li>
+    <li><a href="#env">五、两个环境,同一个结论</a></li>
+    <li><a href="#mistake">六、&#128293; 我诊断错了一次:复盘</a></li>
+    <li><a href="#status">七、两个状态字段,别看混了</a></li>
+  </ol>
+</div>
+
+<h2 id="setup">一、实验设置</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">项</th><th>内容</th></tr></thead>
+<tbody>
+<tr><th>仓库</th><td>一个真实的公开仓库(<code>myshop-gate-demo</code>),内容就是第 6 页那个 myshop 项目</td></tr>
+<tr><th>门禁配置</th><td>第 18 页第九节那份 <code>ci.yml</code> 的三道检查版,任务名 <strong><code>三道检查</code></strong></td></tr>
+<tr><th>分支保护</th><td>主干开启保护,<strong>必需检查 = 「三道检查」</strong>,<strong>管理员同样受限</strong></td></tr>
+<tr><th>本地钩子</th><td>第 16 页那个手写的提交钩子,跑同样三道</td></tr>
+<tr><th>要证明的事</th><td><strong>本地拦得住但能绕过;云端拦得住且绕不过 —— 包括管理员</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">关于凭据的一句说明</b>
+  这次实验<strong>没有任何账号密码经过我手</strong>。用的是命令行工具的登录态,
+  它的令牌存在系统钥匙串里,我读不到也不需要读。
+  <br><br>
+  <strong>这本身也是一条规矩:</strong>让 AI 帮你操作外部服务时,
+  <strong>走已登录的命令行工具,不要把密码贴进对话框。</strong>
+</div>
+
+<h2 id="chain">二、完整证据链(六幕)</h2>
+
+<figure>
+<svg viewBox="0 0 880 400" role="img" aria-label="六幕证据链">
+  <defs><marker id="a3" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st">
+    <g font-size="11.5">
+      <rect x="16" y="20" width="196" height="66" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.4"/>
+      <text x="32" y="42" font-weight="800" fill="var(--ok)">第 1 幕 · 本地钩子拦住</text>
+      <text x="32" y="60" fill="var(--soft)">改坏代码 &rarr; 存档被拒</text>
+      <text x="32" y="77" fill="var(--faint)" font-size="10.5">8 failed &rarr; exit 1</text>
+
+      <rect x="236" y="20" width="196" height="66" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.4"/>
+      <text x="252" y="42" font-weight="800" fill="var(--bad)">第 2 幕 · 12 个字符绕过</text>
+      <text x="252" y="60" fill="var(--soft)">加一个参数 &rarr; 存档成功</text>
+      <text x="252" y="77" fill="var(--faint)" font-size="10.5">检查框根本没打印</text>
+
+      <rect x="456" y="20" width="196" height="66" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="472" y="42" font-weight="800" fill="var(--warn)">第 3 幕 · 推上去开请求</text>
+      <text x="472" y="60" fill="var(--soft)">坏代码进了远端分支</text>
+      <text x="472" y="77" fill="var(--faint)" font-size="10.5">云端门禁开始跑</text>
+
+      <rect x="676" y="20" width="188" height="66" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+      <text x="692" y="42" font-weight="800" fill="var(--bad)">第 4 幕 · 云端拦住</text>
+      <text x="692" y="60" fill="var(--soft)">合并按钮变灰</text>
+      <text x="692" y="77" fill="var(--faint)" font-size="10.5">BLOCKED</text>
+
+      <rect x="676" y="136" width="188" height="66" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2"/>
+      <text x="692" y="158" font-weight="800" fill="var(--bad)">第 5 幕 &#128293; 管理员也不行</text>
+      <text x="692" y="176" fill="var(--soft)">强制合并被服务端拒绝</text>
+      <text x="692" y="193" fill="var(--faint)" font-size="10.5">GraphQL 报错</text>
+
+      <rect x="676" y="252" width="188" height="66" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+      <text x="692" y="274" font-weight="800" fill="var(--ok)">第 6 幕 · 修好才放行</text>
+      <text x="692" y="292" fill="var(--soft)">改对代码 &rarr; 门禁变绿</text>
+      <text x="692" y="309" fill="var(--faint)" font-size="10.5">BLOCKED &rarr; CLEAN &rarr; 合并</text>
+    </g>
+
+    <g stroke="var(--faint)" stroke-width="1.3" marker-end="url(#a3)" fill="none">
+      <line x1="214" y1="53" x2="232" y2="53"/>
+      <line x1="434" y1="53" x2="452" y2="53"/>
+      <line x1="654" y1="53" x2="672" y2="53"/>
+      <line x1="770" y1="88" x2="770" y2="132"/>
+      <line x1="770" y1="204" x2="770" y2="248"/>
+    </g>
+
+    <rect x="16" y="136" width="636" height="182" rx="12" fill="none" stroke="var(--rule2)" stroke-dasharray="6 5"/>
+    <text x="36" y="164" font-size="14" font-weight="800" fill="var(--ink)">这条链证明的三件事</text>
+    <g font-size="12.5" fill="var(--soft)">
+      <text x="36" y="194">&#9312; 本地防线<tspan fill="var(--bad)" font-weight="800">有用,但可绕过</tspan> —— 第 1、2 幕</text>
+      <text x="36" y="222">&#9313; 云端防线<tspan fill="var(--ok)" font-weight="800">绕不过</tspan>,连仓库主人也一样 —— 第 4、5 幕</text>
+      <text x="36" y="250">&#9314; 门禁的出口<tspan font-weight="800">只有一个:把代码改对</tspan> —— 第 6 幕</text>
+      <text x="36" y="288" font-size="13" fill="var(--ink)" font-weight="800">
+        这就是第 17 页那句「不接受人为通融」的含义。
+      </text>
+    </g>
+
+    <text x="16" y="352" font-size="12.5" fill="var(--faint)">
+      注意第 2 幕和第 5 幕的对比:同一个人、同一份坏代码,在本地一秒就绕过去了,在云端怎么也过不去。
+    </text>
+    <text x="16" y="376" font-size="12.5" fill="var(--faint)">
+      区别不在于"谁更严格",而在于<tspan font-weight="800" fill="var(--ink)">规则跑在谁的机器上</tspan>。
+    </text>
+  </g>
+</svg>
+<figcaption>六幕证据链。第 2 幕和第 5 幕的对比,是本页的全部意义</figcaption>
+</figure>
+
+<h3>第 1 幕:本地钩子拦住了</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 我的 Mac</div>
+<pre><span class="c-dim"># 把 price.py 里的 ¥ 改成 $(第 8 页那个实验)</span>
+<span class="c-cmd">$ git add -A</span>
+<span class="c-cmd">$ git commit -m "feat: 货币符号改成美元"</span>
+
+  本地检查:提交前跑 3 道
+  [1/3] ruff   ...... <span class="c-ok">通过</span>
+  [2/3] mypy   ...... <span class="c-ok">通过</span>
+  [3/3] pytest ...... <span class="c-bad">未通过</span>
+<span class="c-bad">  ==================== 8 failed, 9 passed, 1 skipped ====================</span>
+
+<span class="c-cmd">$ git log --oneline -1</span>
+<span class="c-dim">(还是上一条,坏代码没进去)</span></pre>
+</div>
+
+<h3>第 2 幕:12 个字符绕过</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; &#128293; 同一台机器,同一份坏代码</div>
+<pre><span class="c-cmd">$ git commit --no-verify -m "feat: 货币符号改成美元"</span>
+[feat/broken-price a1c9e34] feat: 货币符号改成美元
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+<span class="c-dim"># 注意:上面那个三道检查的框,一行都没打印</span>
+<span class="c-dim"># --no-verify 让存档系统压根不执行钩子</span></pre>
+</div>
+
+<h3>第 3–4 幕:推上去,云端拦住</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 推送并开合并请求</div>
+<pre><span class="c-cmd">$ git push -u origin feat/broken-price</span>
+<span class="c-cmd">$ gh pr create --title "改货币符号" --body "把 ¥ 改成 $"</span>
+https://github.com/&lt;账号&gt;/myshop-gate-demo/pull/1
+
+<span class="c-dim"># 等云端跑完(27 秒),看状态:</span>
+<span class="c-cmd">$ gh pr checks 1</span>
+NAME        STATE          
+三道检查     <span class="c-bad">fail</span>     27s
+
+<span class="c-cmd">$ gh pr view 1 --json mergeStateStatus -q .mergeStateStatus</span>
+<span class="c-bad">BLOCKED</span></pre>
+</div>
+
+<h3>第 6 幕:修好才放行</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 把 $ 改回 ¥,再推一次</div>
+<pre><span class="c-cmd">$ git commit -m "fix: 货币符号改回 ¥"    </span><span class="c-dim"># 这次没加 --no-verify</span>
+
+  [1/3] ruff   ...... <span class="c-ok">通过</span>
+  [2/3] mypy   ...... <span class="c-ok">通过</span>
+  [3/3] pytest ...... <span class="c-ok">通过</span>
+  <span class="c-ok">全部通过,放行</span>
+
+<span class="c-cmd">$ git push</span>
+
+<span class="c-cmd">$ gh pr checks 1</span>
+NAME        STATE          
+三道检查     <span class="c-ok">pass</span>     24s
+
+<span class="c-cmd">$ gh pr view 1 --json mergeStateStatus -q .mergeStateStatus</span>
+<span class="c-ok">CLEAN</span>          <span class="c-dim">&larr; 从 BLOCKED 变成 CLEAN</span>
+
+<span class="c-cmd">$ gh pr merge 1 --squash</span>
+<span class="c-ok">&#10004; Squashed and merged pull request #1</span></pre>
+</div>
+
+<div class="box key">
+  <b class="t"><code>BLOCKED</code> &rarr; <code>CLEAN</code> 这一次状态跳变,是整页最关键的一行输出</b>
+  它证明了:<strong>状态不是人改的,是「把代码改对」这个动作换来的。</strong>
+  <br><br>
+  中间没有任何人点过「批准」、没有人改过规则、没有人重跑过流水线。
+  <strong>唯一变的是代码本身。</strong>
+</div>
+
+<h2 id="rule">三、怎么配分支保护规则</h2>
+
+<p>门禁的「拦」这个动作,<strong>不在流水线配置里,而在托管平台的分支保护规则里</strong>
+—— 这正是第 17 页说的三层拦截中的<strong>第 &#9312; 层</strong>。</p>
+
+<pre><code># 用命令行配(以 GitHub 为例)
+# 关键点全在 required_status_checks.contexts 这个数组里
+
+gh api -X PUT repos/&lt;账号&gt;/myshop-gate-demo/branches/main/protection \
+  --input - &lt;&lt;'JSON'
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ["三道检查"]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": null,
+  "restrictions": null
+}
+JSON</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">字段</th><th style="width:16%">这里填的</th><th>含义</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>contexts</code></td><td><code>["三道检查"]</code></td>
+  <td><strong>必须通过的检查名单。这个名字要和流水线里 <code>name:</code> 写的<u>一字不差</u></strong></td>
+</tr>
+<tr>
+  <td><code>strict</code></td><td><code>true</code></td>
+  <td>要求分支<strong>先同步主干最新代码</strong>再合。防止「各自都绿,合起来炸」</td>
+</tr>
+<tr>
+  <td><code>enforce_admins</code></td><td style="color:var(--bad)"><strong><code>true</code></strong></td>
+  <td><strong>管理员也受限。这一项是第 4 节的全部内容</strong></td>
+</tr>
+<tr>
+  <td><code>required_pull_request_reviews</code></td><td><code>null</code></td>
+  <td>本次实验<strong>不要求人工评审</strong> —— 为了证明「纯机器判定也能拦住」</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 名字对不上,是新手配门禁最常见的翻车点</b>
+  <code>contexts</code> 里填的必须是<strong>任务的名字</strong>,不是流水线文件的名字,也不是步骤的名字。
+  <br><br>
+  <strong>回看第 18 页那份配置:</strong>
+<pre style="margin:8px 0 0"><code>jobs:
+  gate:                    &larr; 这是任务的 id,<b>不是</b>它
+    name: 三道检查          &larr; <b>要填的是这个</b>
+</code></pre>
+  <p style="margin:8px 0 0"><strong>填错的后果不是报错,而是永久等待</strong> ——
+  平台在等一个叫这个名字的检查上报结果,而那个检查根本不存在。
+  <strong>合并请求会一直卡在「等待中」,而且没有任何错误信息告诉你为什么。</strong></p>
+  <p style="margin:8px 0 0">这和第 17 页那个 <code>paths</code> 死锁是<strong>同一类问题的两个入口</strong>:
+  <strong>第 &#9312; 层在等一个第 &#9313; 层永远不会给的答复。</strong></p>
+</div>
+
+<h2 id="admin">四、&#128293; 连管理员也绕不过</h2>
+
+<p><strong>这是全页最有力的一幕。</strong>我是这个仓库的所有者、管理员,拥有全部权限。
+我用带「强制」参数的命令去合并那个红着的请求:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; &#128293; 仓库所有者尝试强制合并</div>
+<pre><span class="c-cmd">$ gh pr merge 1 --squash --admin</span>
+
+<span class="c-bad">failed to merge pull request: GraphQL: Required status check
+"三道检查" is failing (mergePullRequest)</span>
+
+<span class="c-cmd">$ echo $?</span>
+<span class="c-bad">1</span></pre>
+</div>
+
+<div class="box key">
+  <b class="t">为什么这一幕比前面所有幕加起来都重要</b>
+  <code>--admin</code> 这个参数的字面意思就是<strong>「用管理员权限跳过保护规则」</strong>。
+  它在很多配置下是<strong>真的能跳过的</strong>。
+  <br><br>
+  <strong>它这次跳不过,唯一的原因是规则里写了 <code>enforce_admins: true</code>。</strong>
+  <br><br>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:34%"><code>enforce_admins</code></th><th>结果</th></tr></thead>
+  <tbody>
+  <tr><td><code>false</code>(<strong>默认值</strong>)</td>
+      <td style="color:var(--bad)">管理员可以强制合并 &rarr; <strong>门禁对管理员形同虚设</strong></td></tr>
+  <tr><td><code>true</code></td>
+      <td style="color:var(--ok)"><strong>所有人一视同仁</strong> &rarr; 这才符合第 17 页「不接受人为通融」的定义</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>换句话说:一个门禁是不是真门禁,取决于这一个布尔值。</strong>
+  它默认是关的 —— <strong>所以大量团队自以为有门禁,其实管理员一句话就能合。</strong></p>
+</div>
+
+<div class="box note">
+  <b class="t">注意错误信息的来源</b>
+  报错里的 <code>GraphQL</code> 说明<strong>这个拒绝发生在服务端</strong>,不是本地工具替你挡的。
+  <br><br>
+  这个细节很重要:<strong>本地工具的检查可以靠改工具、换工具、直接调接口来绕过;
+  服务端的拒绝不行 —— 除非你有权限去改规则本身。</strong>
+  <br><br>
+  这也是「门禁必须在云端」这个结论的技术根据。
+</div>
+
+<h2 id="env">五、两个环境,同一个结论</h2>
+
+<p>第 16 页给过这张对比表,这里补上它的完整意义:</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%"></th><th style="width:36%">我的 Mac</th><th>云端流水线</th></tr></thead>
+<tbody>
+<tr><th>操作系统</th><td>macOS(darwin)</td><td><strong>Linux</strong></td></tr>
+<tr><th>Python</th><td>3.9.6</td><td><strong>3.12.13</strong>(差 3 个大版本)</td></tr>
+<tr><th>测试运行器</th><td>8.4.2</td><td><strong>9.1.1</strong>(差 1 个大版本)</td></tr>
+<tr><th>依赖来源</th><td>本地虚拟环境,装了半年</td><td><strong>全新安装,当天最新</strong></td></tr>
+<tr><th>坏代码时的结果</th>
+    <td><code>8 failed, 9 passed, 1 skipped in 3.66s</code></td>
+    <td><strong><code>8 failed, 9 passed, 1 skipped in 3.66s</code></strong></td></tr>
+</tbody>
+</table>
+<p style="font-size:13px;color:var(--faint);margin:6px 0 0">注:耗时为 macOS 环境实测值;Linux 环境的红绿计数一致,耗时未逐字核录。</p>
+</div>
+
+<div class="box key">
+  <b class="t">这条数据同时证明了两件相反方向的事</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:30%">如果两边结果<strong>一致</strong></th><th>如果两边结果<strong>不一致</strong></th></tr></thead>
+  <tbody>
+  <tr>
+    <td><strong>说明这是个真 bug</strong>,和环境无关。<br>
+        &rarr; 老老实实改代码</td>
+    <td><strong>说明这是个环境问题</strong>。<br>
+        &rarr; 去查版本、依赖、配置差异,<u>而不是改业务逻辑</u></td>
+  </tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>这就是流水线最被低估的价值:它不只是「再跑一遍」,
+  它是一个和你不一样的对照组。</strong></p>
+  <p style="margin:9px 0 0">「在我机器上是好的」这句话之所以能被终结,
+  不是因为云端更权威,<strong>而是因为多了一个独立样本。</strong></p>
+</div>
+
+<h2 id="mistake">六、&#128293; 我诊断错了一次:复盘</h2>
+
+<p><strong>这一节保留了我在这次实验里犯的一个真实错误</strong>,因为它的排查过程比结论更有价值。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:12%">阶段</th><th>发生了什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>现象</strong></td>
+  <td>我用接口查这次推送触发的流水线运行记录,<strong>连查 12 次全是「找不到」</strong></td>
+</tr>
+<tr>
+  <td><strong>我的推断</strong></td>
+  <td>「平台把这次推送事件丢弃了,流水线根本没被触发」</td>
+</tr>
+<tr>
+  <td style="color:var(--bad)"><strong>事实</strong></td>
+  <td style="color:var(--bad)"><strong>流水线一直都在,而且是绿的,27 秒就跑完了</strong>
+      —— 这条绿的是建仓库时那次推送触发的运行;坏代码那次推送的运行是红的,就是第二节那个 fail。
+      用浏览器一看就在页面上</td>
+</tr>
+<tr>
+  <td><strong>真正原因</strong></td>
+  <td>我查的那个接口路径 / 参数不对,<strong>返回「找不到」不等于「东西不存在」</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 这个错误的教训,比这一页任何一条门禁知识都通用</b>
+  <strong>「我没查到」和「它不存在」是两件事。</strong>
+  <br><br>
+  我把<strong>观测手段的失败</strong>当成了<strong>被观测对象的失败</strong>。
+  更糟的是,<strong>我重复了 12 次同一个错误的观测</strong> ——
+  这只增加了我的信心,没有增加任何信息量。
+  <br><br>
+  <strong>正确的做法是换一种观测方式。</strong>换成浏览器直接看页面,三秒钟就发现真相了。
+</div>
+
+<div class="box key">
+  <b class="t">推广成一条排查规则</b>
+  <strong>同一个方法失败两次以上,不要再试第三次 —— 换一个完全不同的观测通道。</strong>
+  <br><br>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:30%">通道</th><th>例子</th></tr></thead>
+  <tbody>
+  <tr><td>命令行接口</td><td>查不到 &rarr; 换下面的</td></tr>
+  <tr><td><strong>网页界面</strong></td><td><strong>最直观,人眼一看就知道</strong></td></tr>
+  <tr><td>日志 / 事件流</td><td>看事件到底有没有到</td></tr>
+  <tr><td>换个账号 / 换台机器</td><td>排除权限和缓存问题</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>这条规则对 AI 尤其重要</strong> ——
+  AI 会非常自信地重复同一个失败的方法,并在每次失败后给出一个更详细的错误解释。
+  <strong>你要做的是打断它,让它换个通道。</strong></p>
+</div>
+
+<h2 id="status">七、两个状态字段,别看混了</h2>
+
+<p>排查合并请求为什么合不进去时,会看到两个长得很像的状态。<strong>它们回答的是不同的问题:</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:20%">字段</th><th style="width:24%">回答什么问题</th>
+  <th style="width:26%">典型取值</th><th>什么时候看它</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><code>mergeable</code></td>
+  <td><strong>代码本身能不能合?</strong></td>
+  <td><code>MERGEABLE</code> / <code>CONFLICTING</code></td>
+  <td>只管<strong>有没有冲突</strong>,<u>完全不管门禁</u></td>
+</tr>
+<tr>
+  <td><code>mergeStateStatus</code></td>
+  <td><strong>现在到底让不让合?</strong></td>
+  <td><code>CLEAN</code> / <code>BLOCKED</code> / <code>BEHIND</code> / <code>UNSTABLE</code></td>
+  <td><strong>这才是你要看的那个</strong> —— 它综合了门禁、评审、同步状态</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">最容易看混的一种情况</b>
+<pre style="margin:8px 0 0"><code>mergeable        = MERGEABLE   &larr; "能合啊,没冲突"
+mergeStateStatus = BLOCKED     &larr; "但门禁没过,不让合"</code></pre>
+  <p style="margin:8px 0 0">只看第一个字段,你会得出「一切正常但按钮是灰的,平台出 bug 了」的结论。
+  <strong>实际上两个字段都对,只是它们回答的问题不同。</strong></p>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%"><code>mergeStateStatus</code></th><th style="width:26%">含义</th><th>对应第 17 页哪一层</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--ok)"><code>CLEAN</code></td><td>全绿,可以合</td><td>&mdash;</td></tr>
+<tr><td style="color:var(--bad)"><code>BLOCKED</code></td><td><strong>被保护规则挡住</strong></td><td><strong>第 &#9312; 层</strong>(可能因为门禁红了,也可能缺评审)</td></tr>
+<tr><td style="color:var(--warn)"><code>BEHIND</code></td><td>落后于主干,要先同步</td><td>第 &#9312; 层的 <code>strict: true</code></td></tr>
+<tr><td style="color:var(--warn)"><code>UNSTABLE</code></td><td><strong>有检查红了,但那条检查不是必需的</strong></td><td>第 &#9314; 层,失败动作是<strong>降级告警</strong></td></tr>
+<tr><td><code>DIRTY</code></td><td>有代码冲突</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t"><code>UNSTABLE</code> 正好是第 17 页「降级告警」的实物</b>
+  它的意思是:<strong>确实有检查是红的,但因为你没把它写进必需名单,所以它拦不住合并。</strong>
+  <br><br>
+  <strong>这就是第 17 页那张「失败动作」表在真实平台上的样子:</strong>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:36%">想要的失败动作</th><th>怎么配</th></tr></thead>
+  <tbody>
+  <tr><td><strong>阻断</strong></td><td>把这条检查<strong>写进 <code>contexts</code> 名单</strong></td></tr>
+  <tr><td><strong>降级告警</strong></td><td>让它跑,但<strong>不写进名单</strong> &rarr; 红了只显示 <code>UNSTABLE</code></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>所以第 17 页那个「三阶段落地路径」在这个平台上的实现极其简单:
+  先不写进名单(告警),稳定后再写进名单(阻断)。改一个数组而已。</strong></p>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>199</td><td>&#128293; <strong>六幕证据链</strong></td><td>本地拦住 &rarr; 绕过 &rarr; 云端拦住 &rarr; 管理员也不行 &rarr; 改对才放行</td></tr>
+<tr><td>200</td><td><strong>分支保护规则怎么配</strong></td><td>拦的动作在托管平台,不在流水线配置里</td></tr>
+<tr><td>201</td><td>&#128293; <code>contexts</code> 填<strong>任务名</strong></td><td>填错 = 永久等待,<strong>没有任何错误提示</strong></td></tr>
+<tr><td>202</td><td>&#128293; <strong><code>enforce_admins</code> 默认是关的</strong></td><td>一个布尔值决定门禁是不是真门禁</td></tr>
+<tr><td>203</td><td>&#128293; <code>--admin</code> 被服务端拒绝</td><td>拒绝发生在服务端,本地工具改不了</td></tr>
+<tr><td>204</td><td><code>BLOCKED</code> &rarr; <code>CLEAN</code></td><td>状态跳变只由「改对代码」换来</td></tr>
+<tr><td>205</td><td><strong>两个环境是对照组</strong></td><td>一致 = 真 bug;不一致 = 环境问题</td></tr>
+<tr><td>206</td><td>&#128293; <strong>我诊断错了一次</strong></td><td>「没查到」&ne;「不存在」;<strong>失败两次就换观测通道</strong></td></tr>
+<tr><td>207</td><td><code>mergeable</code> vs <code>mergeStateStatus</code></td><td>前者只看冲突,后者才综合门禁;<code>UNSTABLE</code> = 降级告警</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="18-gate-items.html">&larr; 上一页:门禁项与阈值</a>
+  <a href="00-index.html">目录</a>
+  <a href="20-ai-boundary.html">下一页:AI 的能力边界与防作弊 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 19 页 / 共 23 页 · 覆盖知识点 199–207 · 难度 &#9733;&#9733;&#9733;&#9733; · <b style="color:var(--bad)">全书重点 3/3</b></p>
+  <p><strong>本页所有终端输出均为真机原样抄录</strong>,包括第六节那次<strong>我自己的错误诊断</strong>。
+  实验在真实公开仓库上完成,合并请求 #1 已合并。凭据全程未经手,使用系统钥匙串中的命令行登录态。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

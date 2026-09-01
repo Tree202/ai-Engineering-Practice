@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 四层测试代码逐行讲</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">07 四层代码 <span>· 逐行讲解</span></span>
+  <a href="06-myshop.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="08-break-it.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 07 页 · 难度 ★★★ · 前置:第 03、05、06 页</span>
+<h1>四层测试代码逐行讲</h1>
+<p class="lede">
+把四个测试文件的完整代码摊开。重点不在语法,在<strong>每一层的「准备」段是怎么一步步变重的</strong> ——
+以及最上面那层为什么慢 180 倍,答案会出乎你意料。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#l1">一、第 &#9312; 层:单元测试</a></li>
+    <li><a href="#l2">二、第 &#9313; 层:集成测试</a></li>
+    <li><a href="#l3">三、第 &#9314; 层:接口测试</a></li>
+    <li><a href="#slow">四、为什么接口层慢 180 倍</a></li>
+    <li><a href="#l4">五、第 &#9315; 层:E2E</a></li>
+    <li><a href="#compare">六、四层横向对比</a></li>
+  </ol>
+</div>
+
+<h2 id="l1">一、第 &#9312; 层:单元测试</h2>
+
+<p><strong>5 条 · 实测 0.00 秒 · 准备段为零</strong></p>
+
+<pre><code># 文件:tests/test_price.py
+"""第 1 层:单元测试(金字塔最底下、数量最多、跑得最快的一层)。
+
+这一层测什么:
+    一个纯函数的输入输出,包括正常值和边界值(0、进位、非法输入)。
+这一层不测什么:
+    不碰数据库、不碰网络、不启动服务。
+    如果一个「单元测试」需要连数据库,那它其实已经是集成测试了。
+"""
+
+import pytest
+
+from myshop.price import format_price
+
+
+def test_普通价格() -&gt; None:
+    assert format_price(1234) == "¥12.34"
+
+
+def test_零元是边界值() -&gt; None:
+    # 0 很容易被漏掉,专门写一条
+    assert format_price(0) == "¥0.00"
+
+
+def test_不足一角要在前面补零() -&gt; None:
+    # 5 分不能显示成 "¥0.5",必须是 "¥0.05"
+    assert format_price(5) == "¥0.05"
+
+
+def test_整数元不能丢掉小数位() -&gt; None:
+    assert format_price(10000) == "¥100.00"
+
+
+def test_负数要报错() -&gt; None:
+    # 「该报错的时候有没有报错」也是行为的一部分,同样要测
+    with pytest.raises(ValueError):
+        format_price(-1)</code></pre>
+
+<div class="box good">
+  <b class="t">注意文件开头那段说明</b>
+  每个测试文件开头都写清了<strong>「测什么 / 不测什么」</strong>。这不是形式主义 ——
+  半年后你回来加测试时,这段话决定了你会不会把一条集成测试塞进单元测试文件里。
+</div>
+
+<h3>五条测试的分工</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:34%">测试</th><th style="width:16%">输入</th><th>守着什么</th></tr></thead>
+<tbody>
+<tr><td><code>test_普通价格</code></td><td>1234</td><td>基本功能</td></tr>
+<tr><td><code>test_零元是边界值</code></td><td>0</td><td><strong>0 是最常被漏掉的值</strong></td></tr>
+<tr><td><code>test_不足一角要在前面补零</code></td><td>5</td><td>补零逻辑</td></tr>
+<tr><td><code>test_整数元不能丢掉小数位</code></td><td>10000</td><td>小数位不能被吞</td></tr>
+<tr><td><code>test_负数要报错</code></td><td>-1</td><td><strong>该拦的拦不拦得住</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; 第 8 页会证明:这五条各有各的不可替代性</b>
+  五次改坏实验里,<strong>每一次立功的都是不同的测试</strong>。
+  留任何一条、砍掉其余,都会漏掉别的 bug。
+</div>
+
+<h2 id="l2">二、第 &#9313; 层:集成测试</h2>
+
+<p><strong>5 条 · 实测 0.02 秒 · 准备段:要一个临时数据库</strong></p>
+
+<pre><code># 文件:tests/test_order.py
+"""第 2 层:集成测试(金字塔中间层)。
+
+这一层测什么:
+    多个模块拼在一起还对不对 —— order 调用 price 有没有接错,
+    数据有没有真的写进数据库、换个连接还能不能读回来。
+这一层不测什么:
+    不测 format_price 的每个边界(那是第 1 层的活,重复测是浪费)。
+    不走网络,直接调 Python 函数。
+
+tmp_path 是运行器自带的准备工作:每个测试自动分到一个全新的空目录,
+跑完自动清理。所以测试之间不会互相污染数据库。
+"""
+
+from pathlib import Path
+
+import pytest
+
+from myshop.order import create_order, get_order
+
+
+def test_下单会把总价算对并且带上价格文案(tmp_path: Path) -&gt; None:
+    数据库 = str(tmp_path / "test.db")
+
+    订单 = create_order("咖啡", unit_cents=1250, qty=2, db_path=数据库)
+
+    assert 订单["total_cents"] == 2500
+    # 这一行证明 order 模块真的用了 price 模块,而不是自己乱拼字符串
+    assert 订单["total_text"] == "¥25.00"
+
+
+def test_订单真的落盘了_换个连接还读得到(tmp_path: Path) -&gt; None:
+    数据库 = str(tmp_path / "test.db")
+
+    订单 = create_order("键盘", unit_cents=39900, qty=1, db_path=数据库)
+    # get_order 会重新连接一次数据库,读到说明数据不是只存在内存里
+    读回来 = get_order(订单["id"], db_path=数据库)
+
+    assert 读回来["item"] == "键盘"
+    assert 读回来["total_cents"] == 39900
+    assert 读回来["total_text"] == "¥399.00"
+
+
+def test_下两单会拿到两个不同的订单号(tmp_path: Path) -&gt; None:
+    数据库 = str(tmp_path / "test.db")
+
+    第一单 = create_order("茶", unit_cents=800, qty=1, db_path=数据库)
+    第二单 = create_order("茶", unit_cents=800, qty=1, db_path=数据库)
+
+    # 自增主键有没有正常工作,是数据库层面的行为,只能靠集成测试发现
+    assert 第一单["id"] != 第二单["id"]
+
+
+def test_数量为零应该被拦下来并且不写库(tmp_path: Path) -&gt; None:
+    数据库 = str(tmp_path / "test.db")
+
+    with pytest.raises(ValueError):
+        create_order("咖啡", unit_cents=1250, qty=0, db_path=数据库)
+
+    # 报错之后数据库里不该留下垃圾数据
+    with pytest.raises(LookupError):
+        get_order(1, db_path=数据库)
+
+
+def test_单价为负数也要被拦下来并且不写库(tmp_path: Path) -&gt; None:
+    """这条测的是「校验顺序」这个容易写错的地方。
+
+    如果 create_order 先写库再算 format_price,那么负数单价会
+    「先把脏数据写进库,然后才抛异常」—— 库里就留下了一条不该存在的订单。
+    校验必须全部发生在写库之前。
+    """
+    数据库 = str(tmp_path / "test.db")
+
+    with pytest.raises(ValueError):
+        create_order("退款商品", unit_cents=-100, qty=1, db_path=数据库)
+
+    # 关键断言:异常抛出之后,库里必须一条记录都没有
+    with pytest.raises(LookupError):
+        get_order(1, db_path=数据库)</code></pre>
+
+<h3>这一层的三个关键设计</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">设计</th><th style="width:34%">代码</th><th>为什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 测试隔离</strong></td>
+  <td><code>tmp_path</code> 参数</td>
+  <td>每条测试拿到<strong>不同的</strong>空目录,各写各的数据库文件。跑完自动清理</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 证明跨模块</strong></td>
+  <td><code>assert 订单["total_text"] == "¥25.00"</code></td>
+  <td>只断言 <code>total_cents == 2500</code> 是不够的 —— 那只证明乘法对了。
+      <strong>这个字符串只能来自另一个模块</strong></td>
+</tr>
+<tr>
+  <td><strong>&#9314; 证明落盘</strong></td>
+  <td><code>get_order(...)</code> 重新连接</td>
+  <td>同一个连接里没提交的数据照样能读到。<strong>换个连接读到,才算真的写进文件了</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">试试看:故意把它弄坏</b>
+  把 <code>order.py</code> 里 <code>format_price(total_cents)</code> 那一行删掉,改成自己拼字符串。
+  <br>看 <code>assert 订单["total_text"] == "¥25.00"</code> 这条变红。
+  <br><br>
+  <strong>亲眼看到测试抓住一个真实的错误,比读十页文档管用。</strong>
+</div>
+
+<h2 id="l3">三、第 &#9314; 层:接口测试</h2>
+
+<p><strong>7 条 · 实测 3.64 秒 · 准备段:要真的启动一个服务器</strong></p>
+
+<p>这一层的「准备」重到必须单独写一个函数:</p>
+
+<pre><code># 文件:tests/test_api.py (节选)——完整代码见配套 myshop 项目
+
+@pytest.fixture()                                    # &larr; 声明这是一个「准备工作」
+def 服务器(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -&gt; Iterator[str]:
+    """启动一个真的服务器,测完自动关掉。返回它的地址。"""
+    # 让接口层写到临时数据库,别碰真实的数据文件
+    monkeypatch.setattr(order, "DB_PATH", str(tmp_path / "api.db"))
+
+    服务 = api.make_server(port=0)   # 0 = 让系统分配空闲端口,避免端口冲突
+    # daemon=True:主进程结束时这个线程不会拖住不放
+    线程 = threading.Thread(target=服务.serve_forever, daemon=True)
+    线程.start()
+
+    yield f"http://127.0.0.1:{服务.server_port}"
+
+    # yield 之后的代码是「收尾」,不管测试成功失败都会执行
+    服务.shutdown()
+    服务.server_close()
+    线程.join(timeout=5)
+
+
+def 发请求(url, method, payload=None, raw_body=None):
+    """一个小助手:发一个请求,返回 (状态码, 解析好的数据)。"""
+    if raw_body is not None:
+        data = raw_body
+    elif payload is not None:
+        data = json.dumps(payload).encode("utf-8")
+    else:
+        data = None
+
+    请求 = urllib.request.Request(
+        url, data=data,
+        headers={"Content-Type": "application/json"},
+        method=method,
+    )
+    try:
+        with urllib.request.urlopen(请求) as 响应:
+            return 响应.status, json.loads(响应.read())
+    except urllib.error.HTTPError as 错误:
+        # 4xx/5xx 是以异常形式抛出来的,要接住才能断言状态码
+        return 错误.code, json.loads(错误.read())
+
+
+def test_下单接口返回_201_和订单内容(服务器: str) -&gt; None:
+    状态码, 数据 = 发请求(
+        f"{服务器}/orders", "POST",
+        {"item": "咖啡", "unit_cents": 1250, "qty": 2},
+    )
+
+    assert 状态码 == 201            # 201 = 新建资源成功
+    assert 数据["item"] == "咖啡"
+    assert 数据["total_cents"] == 2500
+    assert 数据["total_text"] == "¥25.00"
+
+
+def test_请求体不是合法_JSON_要返回_400_而不是_500(服务器: str) -&gt; None:
+    """这条测的是「解析放在 try 里面还是外面」这个容易写错的地方。
+
+    如果解析写在 try 外面,一个畸形请求会让服务器抛未捕获异常,
+    客户端拿到 500(服务器内部错误),终端还会打一屏错误。
+    正确的行为是老老实实返回 400(是你请求发错了,不是我崩了)。
+    """
+    # 注意:字节串字面量 b"..." 里只能放 ASCII 字符,
+    # 想发中文得先写成普通字符串再 .encode("utf-8")
+    畸形请求体 = "{这不是合法的 JSON".encode("utf-8")
+
+    状态码, 数据 = 发请求(f"{服务器}/orders", "POST", raw_body=畸形请求体)
+
+    assert 状态码 == 400
+    assert "error" in 数据</code></pre>
+
+<h3>四个实用技巧</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">技巧</th><th>说明</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>随机端口</strong></td>
+  <td><code>port=0</code> 让系统挑一个空闲的。写死 8000 的话,你本地开着开发服务器时测试就跑不了</td>
+</tr>
+<tr>
+  <td><strong>临时替换变量</strong></td>
+  <td><code>monkeypatch.setattr</code> 把数据库路径临时指向临时目录,<strong>测试结束自动改回来</strong></td>
+</tr>
+<tr>
+  <td><strong>4xx 是异常</strong></td>
+  <td>标准库的网络模块遇到 4xx/5xx <strong>会抛异常而不是返回响应</strong>,
+      必须接住才能断言状态码。<em>新手在这里常以为「接口挂了」</em></td>
+</tr>
+<tr>
+  <td><strong>字节串只能 ASCII</strong></td>
+  <td><code>b"中文"</code> 是语法错误。要先写普通字符串再 <code>.encode("utf-8")</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 最后那条是我自己踩过的</b>
+  写这个项目时,我第一版就写了 <code>b"{这不是合法的 JSON"</code>。
+  <strong>三个工具在同一处同时报错:</strong>
+  <div class="term-box" style="margin:9px 0 0">
+    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-bad">ruff:  invalid-syntax: bytes can only contain ASCII literal characters
+mypy:  error: Bytes can only contain ASCII literal characters.  [syntax]
+pytest: SyntaxError: bytes can only contain ASCII literal characters</span></pre>
+  </div>
+  <p style="margin:9px 0 0"><strong>这就是「让它自测」在真实场景里的样子</strong> —— 三道检查同时拦下,我修完才能继续。</p>
+</div>
+
+<h2 id="slow">四、为什么接口层慢 180 倍</h2>
+
+<div class="box key">
+  <b class="t">答案出人意料:慢的不是网络</b>
+  实测:7 条接口测试 <strong>3.64 秒</strong>,5 条集成测试只要 <strong>0.02 秒</strong>（本项目本机实测值,不可外推到其他项目）。
+  <br><br>
+  <strong>慢的是每条测试都要「启动和关闭一个服务器」</strong> ——
+  而关闭操作内部有一个固定的等待间隔。7 条测试就是 7 次启动 + 7 次关闭。
+</div>
+
+<figure>
+<svg viewBox="0 0 860 300" role="img" aria-label="接口测试的时间都花在准备和收尾上">
+  <g class="st">
+    <text x="30" y="42" font-size="13" font-weight="700" fill="var(--info)">集成测试(一条)</text>
+    <rect x="30" y="54" width="30" height="26" rx="4" fill="var(--ok)" opacity=".5"/>
+    <rect x="62" y="54" width="16" height="26" rx="4" fill="var(--info)" opacity=".8"/>
+    <rect x="80" y="54" width="10" height="26" rx="4" fill="var(--warn)" opacity=".7"/>
+    <text x="110" y="72" font-size="11.5" fill="var(--faint)">建个临时目录 + 调函数 + 断言 &asymp; 0.004 秒</text>
+
+    <text x="30" y="126" font-size="13" font-weight="700" fill="var(--bad)">接口测试(一条)</text>
+    <rect x="30" y="138" width="330" height="26" rx="4" fill="var(--ok)" opacity=".5"/>
+    <rect x="362" y="138" width="18" height="26" rx="4" fill="var(--info)" opacity=".8"/>
+    <rect x="382" y="138" width="10" height="26" rx="4" fill="var(--warn)" opacity=".7"/>
+    <rect x="394" y="138" width="330" height="26" rx="4" fill="var(--bad)" opacity=".45"/>
+    <text x="195" y="156" font-size="11" fill="var(--ink)" text-anchor="middle" font-weight="700">启动服务器</text>
+    <text x="559" y="156" font-size="11" fill="var(--ink)" text-anchor="middle" font-weight="700">关闭服务器(有固定等待)</text>
+    <text x="376" y="186" font-size="11" fill="var(--faint)" text-anchor="middle">&uarr; 真正发请求 + 断言的部分</text>
+    <text x="376" y="202" font-size="11" fill="var(--faint)" text-anchor="middle">只占这么一点</text>
+
+    <g font-size="12">
+      <rect x="30" y="234" width="16" height="14" rx="3" fill="var(--ok)" opacity=".5"/>
+      <text x="54" y="246" fill="var(--soft)">准备</text>
+      <rect x="110" y="234" width="16" height="14" rx="3" fill="var(--info)" opacity=".8"/>
+      <text x="134" y="246" fill="var(--soft)">执行</text>
+      <rect x="190" y="234" width="16" height="14" rx="3" fill="var(--warn)" opacity=".7"/>
+      <text x="214" y="246" fill="var(--soft)">断言</text>
+      <rect x="270" y="234" width="16" height="14" rx="3" fill="var(--bad)" opacity=".45"/>
+      <text x="294" y="246" fill="var(--soft)">收尾</text>
+    </g>
+  </g>
+  <text x="430" y="282" class="st" font-size="13.5" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    「准备」和「收尾」吃掉了 99% 的时间 &mdash;&mdash; 这就是第 5 页那句话的证据
+  </text>
+</svg>
+<figcaption>三段式里,重的从来不是「执行」和「断言」,而是「准备」</figcaption>
+</figure>
+
+<div class="box good">
+  <b class="t">这个数字比任何说教都能解释「为什么金字塔上窄下宽」</b>
+  <strong>不是接口测试写得不好,是「搭场景」本身就贵。</strong>
+  <br><br>
+  所以正确的做法不是「少写接口测试」,而是<strong>「把能在下层测的东西放到下层去测」</strong> ——
+  价格进位这种细节,在单元层测一次 0.000 秒,在接口层测一次要 0.5 秒。
+</div>
+
+<h2 id="l4">五、第 &#9315; 层:E2E</h2>
+
+<p><strong>示意代码 · 默认跳过 · 准备段:要开一个真浏览器</strong> · 项目文件中另有一条不用 fixture 的「写法二」测试,原理相同</p>
+
+<pre><code># 文件:tests/e2e/test_checkout_e2e.py
+"""第 4 层:E2E 测试(金字塔最顶上,数量最少、最慢、最容易「假失败」)。
+
+这一层测什么:
+    像真人一样开浏览器 -&gt; 点按钮 -&gt; 填表单 -&gt; 看页面上有没有出现「下单成功」。
+    只测最值钱的那一两条主流程(比如「能不能付钱」)。
+这一层不测什么:
+    不测价格进位、不测错误文案、不测每种分支 ——
+    那些用第 1~3 层测,又快又稳。E2E 写多了会慢到没人愿意跑。
+"""
+
+import pytest
+
+# importorskip:导入不到就跳过整个文件,而不是让测试报红
+pytest.importorskip(
+    "playwright.sync_api",
+    reason="E2E 需要:pip install pytest-playwright 然后 playwright install chromium",
+)
+
+from playwright.sync_api import Page, expect   # noqa: E402
+
+首页 = "http://127.0.0.1:8000"
+
+
+def test_用户可以从首页一路下单成功(page: Page) -&gt; None:
+    page.goto(首页)
+
+    # 按「用户看得见的东西」定位,而不是按内部的类名 ——
+    # 类名改个字测试就挂了,按钮上的字改了才是真的改了功能
+    page.get_by_role("link", name="咖啡").click()
+    page.get_by_label("数量").fill("2")
+    page.get_by_role("button", name="加入购物车").click()
+    page.get_by_role("button", name="去结算").click()
+
+    # expect(...) 会自动等待,不需要自己写 sleep
+    expect(page.get_by_test_id("order-total")).to_have_text("¥25.00")
+    expect(page.get_by_text("下单成功")).to_be_visible()</code></pre>
+
+<h3>两个值得学的写法</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">写法</th><th>为什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>导不到就跳过</strong></td>
+  <td>没装浏览器工具的人跑测试时,输出是干净的 <code>1 skipped</code> 而不是一屏错误。
+      <strong>这样别人复制你的项目也不会看到一片红。</strong></td>
+</tr>
+<tr>
+  <td><strong>按「看得见的东西」定位</strong></td>
+  <td>用「按钮上的文字」而不是内部类名。<em>类名改个字测试就挂,但按钮上的字改了才是真的改了功能。</em></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 经核实修正:那个「自动等待」的官方叫法</b>
+  很多教程管它叫「web-first assertions」。<strong>当前官方 Python 文档已经不用这个说法了。</strong>
+  <br><br>
+  官方用词是:<strong>动作侧叫「自动等待(auto-waiting)」</strong>,有专门的文档页;
+  断言侧的表述是「断言会等待直到条件满足」,<strong>默认超时 5 秒</strong>。
+  <br><br>
+  行为描述是对的 —— <strong>只是术语要改。</strong>顺带记住:
+  <code>page.wait_for_timeout</code> 和 <code>time.sleep</code> 才是官方明确劝退的「硬等待」。
+</div>
+
+<h3>它默认跳过的样子</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && .venv/bin/python -m pytest -rs -q</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出(<code>-rs</code> 会打印跳过的原因)</div>
+<pre>tests/test_api.py .......                                       [ 41%]
+tests/test_order.py .....                                       [ 70%]
+tests/test_price.py .....                                       [100%]
+
+<span class="c-dim">=========================== short test summary info ============================</span>
+<span class="c-warn">SKIPPED [1] tests/e2e/test_checkout_e2e.py:21: E2E 需要:pip install pytest-playwright</span>
+<span class="c-ok">======================== 17 passed, 1 skipped in 3.66s =========================</span></pre>
+</div>
+
+<h2 id="compare">六、四层横向对比</h2>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:18%"></th>
+  <th style="width:20%"><span style="color:var(--info)">&#9312; 单元</span></th>
+  <th style="width:21%"><span style="color:var(--warn)">&#9313; 集成</span></th>
+  <th style="width:21%"><span style="color:var(--warn)">&#9314; 接口</span></th>
+  <th style="width:20%"><span style="color:var(--bad)">&#9315; E2E</span></th>
+</tr></thead>
+<tbody>
+<tr><th>跑它的工具</th><td>pytest</td><td>pytest</td><td>pytest</td><td>pytest</td></tr>
+<tr><th>额外依赖</th><td>无</td><td>无</td><td>无(标准库)</td><td><strong>浏览器工具</strong></td></tr>
+<tr><th><strong>&#9312; 准备</strong></th><td><strong>无</strong></td><td>一个临时数据库</td><td><strong>启动服务器</strong></td><td><strong>启动浏览器</strong></td></tr>
+<tr><th><strong>&#9313; 执行</strong></th><td>调一个函数</td><td>调两个函数</td><td>发网络请求</td><td>模拟点击</td></tr>
+<tr><th><strong>&#9314; 断言</strong></th><td>比字符串</td><td>比字符串 + 查库</td><td>状态码 + 结构</td><td>页面上有什么</td></tr>
+<tr><th>条数</th><td>5</td><td>5</td><td>7</td><td>2(跳过)</td></tr>
+<tr><th>耗时</th><td style="color:var(--ok)"><strong>0.00 秒</strong></td><td style="color:var(--ok)"><strong>0.02 秒</strong></td><td style="color:var(--bad)"><strong>3.64 秒</strong></td><td style="color:var(--bad)">10 秒+/条</td></tr>
+<tr><th>慢在哪</th><td>&mdash;</td><td>&mdash;</td><td><strong>准备和收尾</strong></td><td><strong>准备和等待</strong></td></tr>
+<tr><th>失败信息</th><td>精确到字符</td><td>指向某个流程</td><td>只给个端口号</td><td>「用户下不了单」</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">看最后一行 —— 这是金字塔下宽上窄的第二个理由</b>
+  <strong>越往上层,失败信息离病根越远。</strong>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:16%">层</th><th style="width:44%">报的是</th><th>定位成本</th></tr></thead>
+  <tbody>
+  <tr><td>单元</td><td>「<code>format_price(1234)</code> 第 1 个字符错了」</td><td style="color:var(--ok)">秒级</td></tr>
+  <tr><td>集成</td><td>「下单流程有问题」</td><td>分钟级</td></tr>
+  <tr><td>接口</td><td>「<code>POST /orders</code> 返回不对」</td><td>十分钟级</td></tr>
+  <tr><td>E2E</td><td>「用户下不了单」</td><td style="color:var(--bad)">半小时起</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">不只是快 —— <strong>底层的报错更值钱</strong>。同一个 bug,你当然希望是单元测试先抓到它。</p>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>72</td><td>单元测试解剖</td><td>准备段为零;五条各有不可替代性</td></tr>
+<tr><td>73</td><td>集成测试解剖</td><td><code>tmp_path</code> 隔离 + 证明跨模块 + 证明落盘</td></tr>
+<tr><td>74</td><td>接口测试解剖</td><td>自己写准备工作启服务器;4xx 是异常</td></tr>
+<tr><td>75</td><td>E2E 解剖</td><td>导不到就跳过;按看得见的东西定位</td></tr>
+<tr><td>76</td><td><strong>慢 180 倍的真正原因</strong></td><td>启动和关闭服务器,不是网络</td></tr>
+<tr><td>77</td><td>&#128260; 自动等待的官方叫法</td><td>是 auto-waiting,不是 web-first assertions</td></tr>
+<tr><td>&mdash;</td><td>失败信息的质量随层级下降</td><td>底层精确到字符,顶层只给个现象</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="06-myshop.html">&larr; 上一页:myshop 解剖</a>
+  <a href="00-index.html">目录</a>
+  <a href="08-break-it.html">下一页:五次故意改坏实验 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 07 页 / 共 23 页 · 覆盖知识点 72–77 · 难度 &#9733;&#9733;&#9733;</p>
+  <p><strong>本页含 1 处经核实修正:</strong>浏览器工具「自动等待」的官方术语是 auto-waiting,不是流传很广的 web-first assertions。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

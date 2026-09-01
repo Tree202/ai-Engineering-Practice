@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>14 七步流程实战</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">14 七步实战 <span>· 汇总页</span></span>
+  <a href="13-claude-code.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="15-team-roles.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 14 页 · 难度 ★★★ · 汇总页 · 前置:第 01–13 页</span>
+<h1>七步流程实战</h1>
+<p class="lede">
+把前面十三页全部串起来,在真实项目上从头走一遍。
+这一页的内容<strong>可以直接复制去用</strong> —— 提示词、约束、命令,都是成品。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#s0">步骤 0 · 建安全网</a></li>
+    <li><a href="#s12">步骤 1–2 · 要方案 + 审方案</a></li>
+    <li><a href="#s3">步骤 3 · 做一步 + 自测</a></li>
+    <li><a href="#s4">步骤 4 · 你自己看改动</a></li>
+    <li><a href="#s5">步骤 5 · 三层撤销阶梯</a></li>
+    <li><a href="#s6">步骤 6 · 循环</a></li>
+    <li><a href="#s7">步骤 7 · 最后总审</a></li>
+    <li><a href="#card">完整速查卡</a></li>
+  </ol>
+</div>
+
+
+<figure>
+<svg viewBox="0 0 880 420" role="img" aria-label="七步流程全景图:从建安全网到最后总审">
+  <defs>
+    <marker id="w1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker>
+    <marker id="w2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--warn)"/></marker>
+  </defs>
+  <g class="st">
+
+    <rect x="16" y="20" width="150" height="66" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="91" y="46" font-size="12.5" font-weight="800" fill="var(--ink)" text-anchor="middle">&#9450; 建安全网</text>
+    <text x="91" y="65" font-size="10.5" fill="var(--soft)" text-anchor="middle">分支 + 基线是绿的</text>
+    <text x="91" y="80" font-size="10" fill="var(--faint)" text-anchor="middle">整个任务只做一次</text>
+
+    <rect x="196" y="20" width="150" height="66" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="271" y="46" font-size="12.5" font-weight="800" fill="var(--ink)" text-anchor="middle">&#9312; 要方案</text>
+    <text x="271" y="65" font-size="10.5" fill="var(--soft)" text-anchor="middle">明确禁止写代码</text>
+    <text x="271" y="80" font-size="10" fill="var(--faint)" text-anchor="middle">方案模式</text>
+
+    <rect x="376" y="20" width="150" height="66" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="451" y="46" font-size="12.5" font-weight="800" fill="var(--ink)" text-anchor="middle">&#9313; 审方案</text>
+    <text x="451" y="65" font-size="10.5" fill="var(--soft)" text-anchor="middle">看四件事</text>
+    <text x="451" y="80" font-size="10" fill="var(--faint)" text-anchor="middle">改哪些文件?</text>
+
+    <rect x="16" y="150" width="150" height="66" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="91" y="176" font-size="12.5" font-weight="800" fill="var(--ok)" text-anchor="middle">&#9314; 做一步 + 自测</text>
+    <text x="91" y="195" font-size="10.5" fill="var(--soft)" text-anchor="middle">只做方案的第一步</text>
+    <text x="91" y="210" font-size="10" fill="var(--faint)" text-anchor="middle">做完立刻跑三道</text>
+
+    <rect x="196" y="144" width="150" height="78" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2.4"/>
+    <text x="271" y="170" font-size="12.5" font-weight="800" fill="var(--bad)" text-anchor="middle">&#9315; 你自己看改动</text>
+    <text x="271" y="189" font-size="10.5" fill="var(--bad)" text-anchor="middle" font-weight="700">唯一不能外包的一步</text>
+    <text x="271" y="207" font-size="10" fill="var(--faint)" text-anchor="middle">git diff --stat</text>
+
+    <polygon points="451,132 566,183 451,234 336,183" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="451" y="178" font-size="12" font-weight="800" fill="var(--ink)" text-anchor="middle">这一步</text>
+    <text x="451" y="196" font-size="12" font-weight="800" fill="var(--ink)" text-anchor="middle">对不对?</text>
+
+    <rect x="596" y="20" width="132" height="60" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.4"/>
+    <text x="662" y="44" font-size="12" font-weight="800" fill="var(--ok)" text-anchor="middle">5a 满意</text>
+    <text x="662" y="63" font-size="10.5" fill="var(--soft)" text-anchor="middle">全量检查 &rarr; 存档</text>
+
+    <rect x="596" y="94" width="132" height="60" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+    <text x="662" y="118" font-size="12" font-weight="800" fill="var(--warn)" text-anchor="middle">5b 小问题</text>
+    <text x="662" y="137" font-size="10.5" fill="var(--soft)" text-anchor="middle">直接说,让它改</text>
+
+    <rect x="596" y="168" width="132" height="60" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.4"/>
+    <text x="662" y="192" font-size="12" font-weight="800" fill="var(--bad)" text-anchor="middle">5c 方向错了</text>
+    <text x="662" y="211" font-size="10.5" fill="var(--soft)" text-anchor="middle">撤销,重回 &#9312;</text>
+
+    <rect x="758" y="20" width="106" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="811" y="44" font-size="12" font-weight="800" fill="var(--ink)" text-anchor="middle">&#9317; 循环</text>
+    <text x="811" y="63" font-size="10.5" fill="var(--soft)" text-anchor="middle">做下一步</text>
+
+    <rect x="758" y="252" width="106" height="66" rx="10" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.5"/>
+    <text x="811" y="278" font-size="12" font-weight="800" fill="var(--ink)" text-anchor="middle">&#9318; 最后总审</text>
+    <text x="811" y="296" font-size="10.5" fill="var(--soft)" text-anchor="middle">跑最贵那层</text>
+    <text x="811" y="311" font-size="10" fill="var(--faint)" text-anchor="middle">通读全部改动</text>
+
+    <g stroke="var(--faint)" stroke-width="1.4" marker-end="url(#w1)" fill="none">
+      <line x1="168" y1="53" x2="192" y2="53"/>
+      <line x1="348" y1="53" x2="372" y2="53"/>
+      <path d="M 451 88 L 451 110 L 91 110 L 91 146"/>
+      <line x1="168" y1="183" x2="192" y2="183"/>
+      <line x1="348" y1="183" x2="332" y2="183"/>
+      <path d="M 566 183 L 582 183 L 582 124 L 592 124"/>
+      <path d="M 566 183 L 582 183 L 582 50 L 592 50"/>
+      <line x1="566" y1="198" x2="592" y2="198"/>
+      <line x1="730" y1="50" x2="754" y2="50"/>
+      <path d="M 811 82 L 811 100 L 750 100 L 750 128 L 96 128 L 91 146"/>
+      <path d="M 662 228 L 662 244 L 500 244 L 500 108 L 271 108 L 271 16"/>
+    </g>
+    <path d="M 811 82 L 811 248" stroke="var(--warn)" stroke-width="1.6" fill="none"
+          stroke-dasharray="6 4" marker-end="url(#w2)"/>
+
+    <text x="576" y="42" font-size="10" fill="var(--ok)" font-weight="700" text-anchor="end">对</text>
+    <text x="576" y="116" font-size="10" fill="var(--warn)" font-weight="700" text-anchor="end">凑合</text>
+    <text x="576" y="212" font-size="10" fill="var(--bad)" font-weight="700" text-anchor="end">错</text>
+    <text x="836" y="170" font-size="10" fill="var(--warn)" font-weight="700">全做完</text>
+    <text x="400" y="124" font-size="10" fill="var(--faint)">同意后</text>
+    <text x="130" y="142" font-size="10" fill="var(--faint)" text-anchor="middle">下一步</text>
+
+    <rect x="16" y="252" width="716" height="66" rx="11" fill="none" stroke="var(--rule2)" stroke-dasharray="6 5"/>
+    <text x="36" y="277" font-size="12.5" font-weight="800" fill="var(--ink)">
+      虚线框内 &#9314;&ndash;&#9317; 是主循环:每转一圈只推进一小步,每圈都必须经过红框那一步。
+    </text>
+    <text x="36" y="303" font-size="12" fill="var(--soft)">
+      一圈的时间应该在 <tspan font-weight="800" fill="var(--ink)">5&ndash;15 分钟</tspan>。超过半小时说明这一步切得太大了 &mdash; 拆开重来。
+    </text>
+
+    <text x="16" y="352" font-size="13.5" font-weight="800" fill="var(--ink)">三条最容易被跳过的边</text>
+    <g font-size="11.5" fill="var(--soft)">
+      <text x="16" y="376">
+        &#9312; <tspan font-weight="800" fill="var(--bad)">&#9314; &rarr; &#9315;</tspan>
+        &mdash; 累了就直接说"继续",不看改动。<tspan font-weight="700">这条一断,前面全部白做。</tspan>
+      </text>
+      <text x="16" y="398">
+        &#9313; <tspan font-weight="800" fill="var(--warn)">5c &rarr; &#9312;</tspan>
+        &mdash; 方向错了却舍不得撤,想"再改改看"。<tspan font-weight="700">通常越改越远。</tspan>
+      </text>
+      <text x="16" y="418">
+        &#9314; <tspan font-weight="800" fill="var(--warn)">&#9317; &rarr; &#9318;</tspan>
+        &mdash; 每步都绿了就以为完事了,不跑最贵那层。<tspan font-weight="700">局部绿 &ne; 整体绿。</tspan>
+      </text>
+    </g>
+  </g>
+</svg>
+<figcaption>七步流程全景。<strong>红框那一步是整张图唯一不能交给 AI 的环节</strong>;虚线框内是每天转几十圈的主循环</figcaption>
+</figure>
+
+<h2 id="s0">步骤 0 · 建安全网</h2>
+
+<div class="box key">
+  <b class="t">这一步有三件事,一件都不能少</b>
+</div>
+
+<h3>① 确认工作区干净</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git status</code></pre>
+
+<p>要看到 <code>nothing to commit, working tree clean</code>。<strong>不干净就先存档或先收进抽屉。</strong></p>
+
+<h3>② 开一条新分支</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git switch -c feat/order-note</code></pre>
+
+<h3>③ 确认基线是绿的</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && .venv/bin/python -m ruff check . && .venv/bin/python -m mypy && .venv/bin/python -m pytest -q</code></pre>
+
+<div class="box trap">
+  <b class="t">&#9888; 第 ③ 件事最容易被跳过,后果最隐蔽</b>
+  假设开工前就有 2 条测试是红的,而你没记下来。
+  <br><br>
+  AI 改完之后你跑检查,看到 2 条红 —— <strong>你会以为是它改坏的</strong>,
+  让它去修。它修不好,开始乱改甚至删测试。
+  <br><br>
+  <strong>真相:那 2 条在你开工之前就是红的,跟它一点关系没有。</strong>
+  <br><br>
+  <strong>规矩:开工前跑一次,把结果记下来。</strong>
+</div>
+
+<h2 id="s12">步骤 1–2 · 要方案 + 审方案</h2>
+
+<h3>怎么进</h3>
+
+<p>按 <code>Shift + Tab</code>,<strong>一直按到状态栏出现 <code>plan mode on</code></strong>(别数按几下,原因见第 13 页)。</p>
+
+<h3>提示词(可直接复制)</h3>
+
+<pre><code>读一下 @myshop/ 和 @tests/,搞清楚现状,
+给我「给订单加一个可选的备注字段」的实施方案,先别写代码。
+
+方案要说清楚:
+- 要改哪几个文件,每个文件改什么
+- 拆成几步,每步做完能独立验证
+- 每一步之后应该跑哪些检查(给出确切命令)
+- 有没有会影响到现有功能的地方</code></pre>
+
+<h3>审方案看四件事</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">看什么</th><th style="width:34%">警惕信号</th><th>你该说什么</th></tr></thead>
+<tbody>
+<tr><td><strong>方向</strong></td><td>它理解的和你想的不是一回事</td><td>「你理解错了,我要的是 X 不是 Y」</td></tr>
+<tr><td><strong>范围</strong></td><td>「顺便重构一下」「统一优化」</td><td>「这次只做 X,别碰其他文件」</td></tr>
+<tr><td><strong>步子</strong></td><td>第一步就要改五个文件</td><td>「第 1 步拆成三步,每步做完我要能验证」</td></tr>
+<tr><td><strong>幻觉</strong></td><td>提到了你没见过的函数名</td><td>「那个函数在哪个文件?先确认它存在」</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">方案阶段改十次,比代码阶段改一次便宜</b>
+  不满意就继续说,让它改方案。<strong>满意了再批准,它才开始动手。</strong>
+  <br><br>
+  嫌来回说话麻烦?按 <code>Ctrl + G</code> 把计划拉进编辑器直接改。
+</div>
+
+<div class="box note">
+  <b class="t">什么时候可以跳过这两步</b>
+  <strong>判断标准:如果你能一句话把要改的东西说清楚,就不需要方案。</strong>
+  <br>比如「把这个报错信息改成中文」—— 直接说就行。
+</div>
+
+<h2 id="s3">步骤 3 · 做一步 + 自测</h2>
+
+<h3>先把这句话拆开</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:38%">半句</th><th>在管什么</th></tr></thead>
+<tbody>
+<tr><td><strong>「实施方案第 1 步」</strong></td><td>管<strong>做多少</strong>(分量控制)</td></tr>
+<tr><td><strong>「改完跑检查,修到干净」</strong></td><td>管<strong>做完怎么验收</strong>(质量控制)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">&#128293; 一个关键的时间差:指令下发 &ne; 验证执行</b>
+  很多人看到这句会以为「还没写代码就要测试了?」<strong>不是。</strong>
+  执行顺序是<strong>先改代码 &rarr; 再跑检查</strong>。
+  <br><br>
+  但<strong>验收标准要在派活的时候就一起给出</strong>,原因是:
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:26%">时机</th><th>AI 的动机</th></tr></thead>
+  <tbody>
+  <tr><td><strong>事前给</strong></td><td style="color:var(--ok)">它带着「最后要过检查」这个约束去写代码,写的时候就在朝这个标准靠</td></tr>
+  <tr><td><strong>事后追加</strong></td><td style="color:var(--bad)">它已经进入「我做完了」的状态,动机变成<strong>「用最小改动让红变绿」</strong> —— 这正是作弊的温床</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<h3>为什么只做「第一步」</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">后果</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><strong>改动大到你读不动</strong></td><td>一步 50 行你会认真看,五步 500 行你只会拉到底说「看着还行」。<strong>步骤 4 就这样悄悄失效了</strong></td></tr>
+<tr><td><strong>错误会叠加</strong></td><td>第 1 步的设计错了,后面四步全建在这个错误上。第 5 步才发现 = 前四步全废</td></tr>
+<tr><td><strong>回退粒度太粗</strong></td><td>五步做完才发现问题,只能整个推翻</td></tr>
+<tr><td><strong>上下文越长越容易漂</strong></td><td>连续工作五步,后面它会开始忘掉你最初的约束</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">「一步」应该多大</b>
+  判断标准只有一个:<strong>这一步做完,能不能独立验证、独立存档?</strong>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:50%">&#9989; 好的一步</th><th>&#10060; 不好的一步</th></tr></thead>
+  <tbody>
+  <tr>
+    <td>给数据表加一个 <code>note</code> 字段和迁移</td>
+    <td>做备注功能</td>
+  </tr>
+  <tr>
+    <td>给某个函数加参数并补单元测试</td>
+    <td>把整个订单模块重构一遍</td>
+  </tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>新手期宁可切得太碎。</strong>碎了最多多几轮对话,大了是你彻底失去控制。</p>
+</div>
+
+<h3>提示词模板(核心成品)</h3>
+
+<pre><code>实施方案第 1 步。
+
+改完自己跑这三条,修到全绿:
+  .venv/bin/python -m ruff check .
+  .venv/bin/python -m mypy
+  .venv/bin/python -m pytest tests/test_order.py
+
+约束:
+- 不许改动任何测试文件;不许跳过、注释掉或放宽断言
+- 如果你认为测试本身有问题,停下来告诉我,不要自己改
+- 不要改本步骤范围之外的文件
+- 把命令的真实输出贴给我,不要只说"通过了"
+
+做完第 1 步就停,等我检查,不要继续做第 2 步。</code></pre>
+
+<h3>五条约束各防什么</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:42%">约束</th><th>在防什么</th></tr></thead>
+<tbody>
+<tr><td>不许改测试文件</td><td><strong>改断言让红变绿</strong> —— 最常见的作弊</td></tr>
+<tr><td>有问题先告诉我</td><td>给它一个<strong>诚实的出口</strong>,否则它只能硬来</td></tr>
+<tr><td>不改范围外文件</td><td>范围蔓延</td></tr>
+<tr><td>贴真实输出</td><td><strong>它没跑却声称跑过了</strong> —— 比你想的常见</td></tr>
+<tr><td>做完就停</td><td>防止它一路做到第 5 步</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; 注意第一条的措辞</b>
+  写的是「不许改测试文件」,不是「不许改代码」。
+  <strong>真 bug 该修还是要修,禁止的是「用改断言代替修代码」。</strong>
+</div>
+
+<h3>它执行时你会看到什么</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 会话里的真实过程</div>
+<pre><span class="c-dim">&#9679;</span> <span class="c-cmd">Bash(.venv/bin/python -m mypy)</span>
+  &#9500; <span class="c-bad">myshop/order.py:52: error: Incompatible types  [assignment]</span>
+
+<span class="c-dim">&#9679;</span> 我看到一个类型错误,正在修复...
+
+<span class="c-dim">&#9679;</span> <span class="c-cmd">Bash(.venv/bin/python -m mypy)</span>
+  &#9500; <span class="c-ok">Success: no issues found in 8 source files</span>
+
+<span class="c-dim">&#9679;</span> <span class="c-cmd">Bash(.venv/bin/python -m pytest tests/test_order.py)</span>
+  &#9500; <span class="c-ok">5 passed in 0.02s</span></pre>
+</div>
+
+<div class="box key">
+  <b class="t">为什么这比「你觉得对吗」可靠</b>
+  <strong>输出来自检查工具,不来自模型。</strong>类型检查器不会给 AI 面子,测试运行器也不会。
+  <br><br>
+  这也解释了对比表里「让它自测」为什么可靠性写「中(会作弊,要盯)」而不是「低」:
+  <em>输出本身是硬的,作弊发生在「它改了什么」这一侧。</em>
+  <strong>所以你要盯的不是输出,是改动。</strong>
+</div>
+
+<h3>两条止损规则</h3>
+
+<div class="box trap">
+  <b class="t">&#9888; 防止它在坑里越挖越深</b>
+  <ol style="margin-bottom:0">
+    <li><strong>红得超过五六个 &rarr; 停下来自己看一眼。</strong>
+        大面积飘红通常意味着方向性错误(改错文件、依赖没装),让它闷头一个个修是纯浪费,还会塞满上下文</li>
+    <li><strong>同一个测试改三轮还不绿 &rarr; 人工介入。</strong>
+        它会来回改同两个文件,每轮都说「这次应该好了」。<strong>每多一轮,改动越离谱,回退成本越高</strong></li>
+  </ol>
+</div>
+
+<h2 id="s4">步骤 4 · 你自己看改动</h2>
+
+<pre><code>!git status</code></pre>
+<pre><code>!git diff HEAD</code></pre>
+
+<div class="box key">
+  <b class="t">开头那个 <code>!</code> 是这一步的全部价值</b>
+  它让命令<strong>直接执行、不经过模型</strong>,输出直接进你的眼睛。
+  <br><br>
+  如果你让 AI 去跑再讲给你听,就等于<strong>让它评价自己的作业</strong>。
+</div>
+
+<h3>带着这四个问题看</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:38%">问自己</th><th>怎么查</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>有没有我没预期的文件?</td><td><code>git status --short</code></td></tr>
+<tr><td>2</td><td><strong>测试文件的断言被改了吗?</strong></td><td>见下面那条命令</td></tr>
+<tr><td>3</td><td>有没有它新建、我不知道的文件?</td><td><code>git status -s</code> 里的 <code>??</code></td></tr>
+<tr><td>4</td><td>改动规模和「第一步」对得上吗?</td><td><code>git diff --stat</code>;对不上就是超范围</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>一条专门揪出「测试被动过」的命令</h3>
+
+<pre><code>!git diff HEAD --name-only | grep -E '^tests/|_test\.py$'</code></pre>
+
+<div class="box good">
+  <b class="t">有输出 = 测试文件被改过了,停下来仔细看</b>
+  这不一定是坏事(补测试是好事),但<strong>它一定值得你多看一眼</strong> ——
+  因为第 9 页那场事故的引信,正是「顺手改了对应的测试」。
+</div>
+
+<h3>三类只有你能发现的问题</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">盲区</th><th style="width:38%">具体表现</th><th>在改动里怎么发现</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>① 改测试作弊</strong></td>
+  <td>改断言值、跳过、注释掉、包个空的异常捕获</td>
+  <td><strong>改动文件列表里出现 <code>tests/</code></strong> —— 一眼就能看见</td>
+</tr>
+<tr>
+  <td><strong>② 范围蔓延</strong></td>
+  <td>你让它改 A,它顺手「优化」了 B、重命名了 C</td>
+  <td>出现了你没要求改的文件</td>
+</tr>
+<tr>
+  <td><strong>③ 写了但没接上</strong></td>
+  <td>新建了函数但没有任何地方调用</td>
+  <td>只有新增、没有对应的调用点改动</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">这三类的共同点</b>
+  <strong>它们都躲在「检查通过」和「做对了」之间的那条缝里。</strong>
+  <br><br>
+  反直觉但重要:<strong>检查越绿越要看改动</strong> —— 因为绿色会让你放松,
+  而绿色偏偏不覆盖这三类。
+</div>
+
+<h2 id="s5">步骤 5 · 三层撤销阶梯</h2>
+
+<p>看完改动,你要判断:<strong>损伤有多大?</strong></p>
+
+<h3>5a · 满意 &rarr; 全量检查 &rarr; 存档</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && .venv/bin/python -m ruff check . && .venv/bin/python -m mypy && .venv/bin/python -m pytest</code></pre>
+
+<div class="box trap">
+  <b class="t">&#9888; 注意这次<strong>没有指定文件</strong> —— 是全量</b>
+  为什么步骤 3 已经跑过一次还要再跑?
+  <strong>因为它们回答的是两个不同的问题</strong>(第 9 页那场事故就是证据):
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <tbody>
+  <tr><td style="width:30%"><strong>步骤 3 · 局部</strong></td><td>我刚写的这段,自己立得住吗?</td></tr>
+  <tr><td><strong>步骤 5a · 全量</strong></td><td><strong>这次改动的爆炸半径有多大?</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">全量只要 <strong>3.66 秒</strong>。</p>
+</div>
+
+<p>全绿之后存档:</p>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git add -A && git commit -m "feat: 第1步 订单表加 note 字段"</code></pre>
+
+<h3>5b · 小问题 &rarr; 直接说</h3>
+
+<pre><code>可以,但有两个小问题:
+1. 那个字段名 n 改成 note
+2. 备注为空时不要写入数据库,保持 NULL
+
+改完还是跑一遍 mypy 和 pytest tests/test_order.py。</code></pre>
+
+<p><strong>这是成本最低的一档,零回退。大部分情况都该走这里。</strong></p>
+
+<h3>5c · 方向错了 &rarr; 撤销</h3>
+
+<p>在<strong>空的</strong>输入框里连按两次 <code>Esc</code>,选一个之前的提问点,选择「同时恢复代码和对话」。</p>
+
+<h3>兜底 · 全烂了 &rarr; 用存档系统</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && git status</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git reset --hard HEAD</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git clean -fdn</code></pre>
+<pre><code>cd &lt;你的项目&gt;/myshop && git clean -fd</code></pre>
+
+<div class="box trap">
+  <b class="t">&#128293; 记住:两步缺一不可</b>
+  <code>reset</code> 管<strong>老文件</strong>,<code>clean</code> 管<strong>新文件</strong>。
+  <br>只做第一步,你会以为「回退失败了」—— 因为 AI 新建的文件还躺在那儿(第 12 页详解)。
+</div>
+
+<h3>三档的选择规则</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:34%">损伤程度</th><th style="width:30%">走哪档</th><th>代价</th></tr></thead>
+<tbody>
+<tr><td>方向对,细节不满意</td><td><strong>5b 直接说</strong></td><td style="color:var(--ok)">零回退</td></tr>
+<tr><td>这一轮整体跑偏</td><td><strong>5c 一键撤销</strong></td><td style="color:var(--warn)">退这一轮,<strong>但命令的后果不退</strong></td></tr>
+<tr><td>好几轮都烂了</td><td><strong>存档系统兜底</strong></td><td style="color:var(--bad)">退回上一个存档点</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">规则:从上往下走,能用上面的就别用下面的</b>
+  <strong>不要一看到问题就撤销。</strong>大部分情况「直接说」就够了,而且最便宜。
+</div>
+
+<h2 id="s6">步骤 6 · 循环</h2>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 一轮的实际对话</div>
+<pre><span class="c-cmd">你:</span> 实施方案第 2 步。改完跑 ruff / mypy / pytest tests/test_api.py,
+    修到绿。约束同上。做完停。
+
+<span class="c-dim">AI:</span> [改代码 &rarr; 跑检查 &rarr; 有错自己修 &rarr; 全绿 &rarr; 停下]
+
+<span class="c-cmd">你:</span> !git status
+<span class="c-cmd">你:</span> !git diff HEAD                 <span class="c-dim">&larr; 步骤 4,你自己的眼睛</span>
+
+<span class="c-cmd">你:</span> 可以。跑一次全量再存档。
+
+<span class="c-dim">AI:</span> [全量检查 &rarr; 17 passed &rarr; git add -A && git commit]
+
+<span class="c-cmd">你:</span> 做第 3 步,同样的要求。</pre>
+</div>
+
+<div class="box good">
+  <b class="t">你会发现流程其实很轻</b>
+  真正花你时间的只有一件事:<strong>读改动</strong>。其他全是模板化的指令。
+  <br><br>
+  而且每一步的改动都很小(因为你只让它做一步),读起来很快。
+  <strong>这就是「小步」的全部意义 —— 它让唯一无法外包的那件事,变得做得动。</strong>
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; 什么时候该开新对话</b>
+  跑到第三四轮,上下文里全是旧改动和旧报错,AI 开始翻旧账。
+  <br><strong>规矩:一次存档打完 = 一次 <code>/clear</code>。</strong>
+</div>
+
+<h2 id="s7">步骤 7 · 最后总审</h2>
+
+<h3>① 跑真正的全套(含最贵的那层)</h3>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && .venv/bin/python -m ruff check . && .venv/bin/python -m mypy && .venv/bin/python -m pytest</code></pre>
+
+<p>如果项目有端到端测试:</p>
+
+<pre><code>cd &lt;你的项目&gt;/myshop && .venv/bin/python -m pytest tests/e2e/</code></pre>
+
+<div class="box trap">
+  <b class="t">&#9888; 端到端测试为什么只在这里跑一次</b>
+  它天生<strong>时红时绿</strong>。<strong>人</strong>看到偶发失败会说「重跑一下」;
+  <strong>AI</strong> 会认定「一定是我改坏的」,然后去修一个不存在的问题,
+  并且很可能用「加等待 / 放宽断言」的方式「修好」它(第 10 页详解)。
+  <br><br>
+  <strong>所以它绝不进日常循环。</strong>
+</div>
+
+<p>跑它时的提示词要堵死四条歪路:</p>
+
+<pre><code>跑一次 .venv/bin/python -m pytest tests/e2e/。
+
+如果有失败:
+- 先原样重跑一遍,确认是偶发还是稳定复现
+- 不许用增加等待、加重试、放宽断言、跳过 这四种方式让它变绿
+- 稳定复现的话告诉我是哪条、错在哪一步,先别动手改</code></pre>
+
+<h3>② 通读完整改动</h3>
+
+<pre><code>!git diff main...HEAD</code></pre>
+
+<p>这是从分支起点到现在的<strong>全部</strong>改动。这一遍看的是<strong>「整体」</strong>:
+有没有互相矛盾的设计、有没有该删没删的临时代码、命名是否一致。</p>
+
+<h3>③ 让它自己再审一遍</h3>
+
+<pre><code>/review</code></pre>
+
+<div class="box key">
+  <b class="t">注意顺序:先你看,再让它看</b>
+  <strong>不要用 <code>/review</code> 代替第 ② 步。</strong>
+  <br><br>
+  它审的是「代码质量」,你审的是<strong>「这是不是我要的东西」</strong> —— 后者它永远不知道。
+  <br><br>
+  而且如果你先看它的报告再看改动,<strong>你的判断会被它的结论锚定</strong>。先形成自己的看法。
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 关于 <code>--fix</code></b>
+  <code>/code-review --fix</code> 会直接改代码。<strong>而这类改动一键撤销救不回来</strong>
+  (官方文档明确点名了后台运行的审查修复任务)。
+  <br><br>
+  <strong>用它之前先确保你已经存过档。</strong>
+</div>
+
+<h2 id="card">完整速查卡</h2>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:7%">步骤</th><th style="width:20%">做什么</th>
+  <th style="width:38%">具体命令</th><th style="width:17%">对应防线</th><th>能省吗</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>0</strong></td><td>建安全网</td>
+  <td><code>git status</code><br><code>git switch -c feat/xxx</code><br><code>ruff &amp;&amp; mypy &amp;&amp; pytest</code>(基线)</td>
+  <td><span style="color:var(--ok)">存档系统</span></td>
+  <td style="color:var(--bad)"><strong>不能</strong></td>
+</tr>
+<tr>
+  <td><strong>1</strong></td><td>要方案</td>
+  <td><code>Shift+Tab</code> 到 plan<br><code>读一下 @myshop/,先别写代码</code></td>
+  <td><span style="color:var(--plan)">先看方案</span></td>
+  <td>小任务可省</td>
+</tr>
+<tr>
+  <td><strong>2</strong></td><td>审方案 &rarr; 批准</td>
+  <td>看方向 / 范围 / 步子 / 幻觉</td>
+  <td><span style="color:var(--plan)">先看方案</span></td>
+  <td>小任务可省</td>
+</tr>
+<tr>
+  <td><strong>3</strong></td><td>做一步 + 自测</td>
+  <td><code>ruff check .</code><br><code>mypy</code><br><code>pytest tests/test_x.py</code></td>
+  <td><span style="color:var(--info)">让它自测</span></td>
+  <td style="color:var(--warn)">尽量别省</td>
+</tr>
+<tr>
+  <td><strong>4</strong></td><td><strong>你自己看改动</strong></td>
+  <td><code>!git status</code><br><code>!git diff HEAD</code></td>
+  <td><span style="color:var(--warn)">你的眼睛</span></td>
+  <td style="color:var(--bad)"><strong>不能</strong></td>
+</tr>
+<tr>
+  <td><strong>5a</strong></td><td>满意 &rarr; 全量 &rarr; 存档</td>
+  <td><code>ruff &amp;&amp; mypy &amp;&amp; pytest</code><br><code>git add -A &amp;&amp; git commit -m "..."</code></td>
+  <td><span style="color:var(--ok)">存档系统</span></td>
+  <td style="color:var(--bad)"><strong>不能</strong></td>
+</tr>
+<tr>
+  <td><strong>5b</strong></td><td>小问题 &rarr; 直接说</td><td>「改一下 X」</td><td>—(零回退)</td><td>—</td>
+</tr>
+<tr>
+  <td><strong>5c</strong></td><td>方向错 &rarr; 撤销</td>
+  <td><code>Esc Esc</code><br>兜底:<code>reset --hard</code> + <code>clean -fd</code></td>
+  <td><span style="color:var(--bad)">一键撤销</span></td>
+  <td style="color:var(--ok)">可省</td>
+</tr>
+<tr>
+  <td><strong>6</strong></td><td>循环 3–5</td><td>一次存档打完 = 一次 <code>/clear</code></td><td>自测 &amp; 存档</td><td>—</td>
+</tr>
+<tr>
+  <td><strong>7</strong></td><td>最后总审</td>
+  <td><code>pytest tests/e2e/</code><br><code>!git diff main...HEAD</code><br><code>/review</code></td>
+  <td>检测加强版</td>
+  <td>不建议省</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">如果只记住三句话</b>
+  <ol style="margin-bottom:0">
+    <li><strong>先看方案管方向,自测管质量,撤销管这一轮,存档管全场。</strong>流程只是把它们按「什么时候会出事」排了个序</li>
+    <li><strong>新手最容易漏的是第 0 步和第 4 步。</strong>漏第 0 步是丢安全网(一次性、看得见);
+        漏第 4 步是丢对代码库的所有权(缓慢、看不见,更致命)</li>
+    <li><strong>局部检查回答「我写对了吗」,全量回答「我弄坏了谁」。</strong>后者只要 3.66 秒</li>
+  </ol>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>143</td><td>步骤 0 的三件事</td><td>干净 + 开分支 + <strong>基线必须是绿的</strong></td></tr>
+<tr><td>144</td><td>步骤 1–2</td><td>要方案 + 审四件事</td></tr>
+<tr><td>145</td><td><strong>步骤 3 拆句子</strong></td><td>分量控制 + 质量控制</td></tr>
+<tr><td>146</td><td><strong>指令下发 &ne; 验证执行</strong></td><td>事前给标准,它才朝那个标准写</td></tr>
+<tr><td>147</td><td>「一步」多大</td><td>能独立验证、独立存档</td></tr>
+<tr><td>148</td><td>五条防作弊约束</td><td>各防一种具体的作弊手法</td></tr>
+<tr><td>149</td><td>步骤 4 的四问 + 一条命令</td><td>揪出测试被改</td></tr>
+<tr><td>150</td><td><strong>三层撤销阶梯</strong></td><td>从上往下走,能用上面的别用下面的</td></tr>
+<tr><td>151</td><td>步骤 7</td><td>E2E 在这里才第一次跑;先你看再让它看</td></tr>
+<tr><td>152</td><td>两条止损规则</td><td>红超 5 个停手;同一测试改 3 轮停手</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="13-claude-code.html">&larr; 上一页:Claude Code 功能</a>
+  <a href="00-index.html">目录</a>
+  <a href="15-team-roles.html">下一页:岗位分工与工具选择 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 14 页 / 共 23 页 · 覆盖知识点 143–152 · 难度 &#9733;&#9733;&#9733; · <strong>汇总页</strong></p>
+  <p>本页所有命令实测于 macOS 15.7.4 / Python 3.9.6 / git 2.39.5。无需修正项。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

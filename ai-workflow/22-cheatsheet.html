@@ -1,0 +1,656 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>22 速查手册</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">22 速查手册 <span>· 全书汇总</span></span>
+  <a href="21-automation.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="00-index.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 22 页 · 全书汇总 · 不用从头读,直接查</span>
+<h1>速查手册</h1>
+<p class="lede">
+这一页不讲道理,只放<strong>能直接抄的东西</strong>:命令、退出码、阈值、术语对照、排错路径。
+每一条后面都标了它出自哪一页,想深入就点过去。
+</p>
+<p style="font-size:13px;color:var(--faint)">Windows 读者:本页命令的 <code>.venv/bin/</code> 写法,对照规则见 <a href="02-python-setup.html">第 2 页</a>的「Windows 读者对照」框。</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#sop">一、七步流程卡</a></li>
+    <li><a href="#six">二、六道防线卡</a></li>
+    <li><a href="#py">三、Python 与测试命令</a></li>
+    <li><a href="#exit">四、退出码速查</a></li>
+    <li><a href="#git">五、存档系统命令</a></li>
+    <li><a href="#undo">六、撤销阶梯</a></li>
+    <li><a href="#gate">七、门禁四要素 &amp; 阈值参考</a></li>
+    <li><a href="#gh">八、云端门禁命令</a></li>
+    <li><a href="#debug">九、排错路径</a></li>
+    <li><a href="#glossary">十、中英术语对照</a></li>
+    <li><a href="#rules">十一、二十条硬规矩</a></li>
+  </ol>
+</div>
+
+<h2 id="sop">一、七步流程卡</h2>
+
+<figure>
+<svg viewBox="0 0 860 300" role="img" aria-label="七步标准流程">
+  <defs><marker id="a9" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st">
+    <g font-size="11.5" text-anchor="middle">
+      <rect x="16" y="28" width="112" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="72" y="50" font-weight="800" fill="var(--ink)">&#9450; 建安全网</text>
+      <text x="72" y="68" fill="var(--soft)" font-size="10.5">存档 + 测试</text>
+      <text x="72" y="82" fill="var(--faint)" font-size="10">只做一次</text>
+
+      <rect x="140" y="28" width="112" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="196" y="50" font-weight="800" fill="var(--ink)">&#9312; 要方案</text>
+      <text x="196" y="68" fill="var(--soft)" font-size="10.5">不许写代码</text>
+
+      <rect x="264" y="28" width="112" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="320" y="50" font-weight="800" fill="var(--ink)">&#9313; 审方案</text>
+      <text x="320" y="68" fill="var(--soft)" font-size="10.5">改哪几个文件?</text>
+
+      <rect x="388" y="28" width="112" height="60" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.4"/>
+      <text x="444" y="50" font-weight="800" fill="var(--ok)">&#9314; 做一步</text>
+      <text x="444" y="68" fill="var(--soft)" font-size="10.5">+ 立刻自测</text>
+
+      <rect x="512" y="22" width="112" height="72" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2.2"/>
+      <text x="568" y="46" font-weight="800" fill="var(--bad)">&#9315; 看改动</text>
+      <text x="568" y="64" fill="var(--bad)" font-size="10.5" font-weight="700">不能外包</text>
+      <text x="568" y="82" fill="var(--faint)" font-size="10">git diff --stat</text>
+
+      <rect x="636" y="28" width="112" height="60" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="692" y="50" font-weight="800" fill="var(--warn)">&#9316; 不对就撤</text>
+      <text x="692" y="68" fill="var(--soft)" font-size="10.5">三层阶梯</text>
+
+      <rect x="760" y="28" width="88" height="60" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="804" y="50" font-weight="800" fill="var(--ink)">&#9317; 总审</text>
+      <text x="804" y="68" fill="var(--soft)" font-size="10.5">推送前</text>
+    </g>
+
+    <g stroke="var(--faint)" stroke-width="1.3" marker-end="url(#a9)" fill="none">
+      <line x1="130" y1="58" x2="136" y2="58"/><line x1="254" y1="58" x2="260" y2="58"/>
+      <line x1="378" y1="58" x2="384" y2="58"/><line x1="502" y1="58" x2="508" y2="58"/>
+      <line x1="626" y1="58" x2="632" y2="58"/><line x1="750" y1="58" x2="756" y2="58"/>
+      <path d="M 692 96 L 692 124 L 444 124 L 444 92"/>
+    </g>
+    <text x="568" y="140" font-size="11" fill="var(--faint)" text-anchor="middle">&#9314;&ndash;&#9316; 循环,每次只做一小步</text>
+
+    <rect x="16" y="164" width="832" height="118" rx="12" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="36" y="190" font-size="13.5" font-weight="800" fill="var(--ink)">三句话记住整套流程</text>
+    <g font-size="12.5" fill="var(--soft)">
+      <text x="36" y="218">&#9312; <tspan font-weight="800" fill="var(--ink)">动手之前先要方案</tspan> —— 方案错了,后面全是白干。</text>
+      <text x="36" y="244">&#9313; <tspan font-weight="800" fill="var(--ink)">一次只做一小步,做完立刻测</tspan> —— 红了就知道是这一步弄的。</text>
+      <text x="36" y="270">&#9314; <tspan font-weight="800" fill="var(--bad)">每一步都亲眼看改动落在哪些文件</tspan> —— 这一步永远不能交给它。</text>
+    </g>
+  </g>
+</svg>
+<figcaption>七步流程。出自 <a href="14-workflow.html">第 14 页</a></figcaption>
+</figure>
+
+<h2 id="six">二、六道防线卡</h2>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:5%">#</th><th style="width:18%">防线</th><th style="width:14%">在哪一层</th>
+  <th style="width:14%">能不能绕过</th><th style="width:14%">能不能外包</th><th>详见</th>
+</tr></thead>
+<tbody>
+<tr><td><strong>1</strong></td><td>先看方案</td><td>动手之前</td><td>能(你不看就不看)</td>
+    <td style="color:var(--ok)">&#10003; 能</td><td><a href="13-claude-code.html">第 13 页</a></td></tr>
+<tr><td><strong>2</strong></td><td>让它自测</td><td>本地 &#9313;</td><td>能</td>
+    <td style="color:var(--ok)">&#10003; 能</td><td><a href="03-test-basics.html">第 3 页</a></td></tr>
+<tr><td><strong>3</strong></td><td>一键撤销</td><td>本地</td><td>&mdash;</td>
+    <td style="color:var(--ok)">&#10003; 能</td><td><a href="12-git-undo.html">第 12 页</a></td></tr>
+<tr><td><strong>4</strong></td><td>存档系统</td><td>本地 &#9314;&#9315;</td><td style="color:var(--warn)"><strong>能</strong>(<code>--no-verify</code>)</td>
+    <td style="color:var(--ok)">&#10003; 能</td><td><a href="11-git-basics.html">第 11 页</a></td></tr>
+<tr><td><strong>5</strong></td><td><strong>质量门禁</strong></td><td><strong>云端 &#9316;&ndash;&#9319;</strong></td>
+    <td style="color:var(--bad)"><strong>不能</strong></td>
+    <td style="color:var(--ok)">&#10003; 能</td><td><a href="17-quality-gate.html">第 17–19 页</a></td></tr>
+<tr style="background:var(--bad-soft)">
+  <td><strong>6</strong></td><td><strong>自己看改动</strong></td><td>每一步之后</td>
+  <td style="color:var(--bad)"><strong>不能</strong></td>
+  <td style="color:var(--bad)"><strong>&#10007; 不能</strong></td><td><a href="20-ai-boundary.html">第 20 页</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="py">三、Python 与测试命令</h2>
+
+<pre><code># 全都在项目根目录下执行
+cd &lt;你的项目&gt;/myshop
+
+# ---- 建环境(只做一次)----
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install pytest mypy ruff
+
+# ---- 每天用的四条 ----
+.venv/bin/python -m ruff check .              # 规范检查(最快)
+.venv/bin/python -m ruff check . --fix        # 能自动修的直接修掉
+.venv/bin/python -m mypy                      # 类型检查
+.venv/bin/python -m pytest -q                 # 全部测试
+
+# ---- 测试的常用参数 ----
+.venv/bin/python -m pytest -q                       # 安静模式,只看结果
+.venv/bin/python -m pytest -v                       # 每条用例一行
+.venv/bin/python -m pytest tests/test_price.py      # 只跑一个文件
+.venv/bin/python -m pytest -k "价格"                 # 名字里含"价格"的
+.venv/bin/python -m pytest -m p0                    # 只跑 P0 标记的
+.venv/bin/python -m pytest -x                       # 第一条挂了就停
+.venv/bin/python -m pytest --lf                     # 只重跑上次挂的
+.venv/bin/python -m pytest -s                       # 让 print 显示出来
+
+# ---- 覆盖率 ----
+.venv/bin/python -m pip install pytest-cov
+.venv/bin/python -m pytest --cov=myshop --cov-report=term-missing -q
+#                                        &uarr; 列出哪几行没被覆盖,比总百分比有用得多</code></pre>
+
+<div class="box key">
+  <b class="t">为什么全都写成 <code>.venv/bin/python -m xxx</code></b>
+  <strong>因为它精确指定了「用哪个 Python」。</strong>
+  <br><br>
+  直接敲 <code>pytest</code> 时,你用的是<strong>系统路径里碰巧排在最前面的那个</strong> ——
+  很可能不是虚拟环境里那个,于是出现「明明装了却说找不到」。
+  <br><br>
+  <strong>多打十几个字符,换掉一整类玄学问题。</strong>出自 <a href="02-python-setup.html">第 2 页</a>。
+</div>
+
+<h2 id="exit">四、退出码速查</h2>
+
+<p><strong>退出码是所有门禁判定的基础</strong> —— 第 17 页说的「隐式硬门禁」,判的就是它。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:14%">退出码</th><th style="width:30%">测试运行器的含义</th><th>门禁怎么处理</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--ok)"><strong>0</strong></td><td><strong>全部通过</strong></td><td style="color:var(--ok)">放行</td></tr>
+<tr><td style="color:var(--bad)"><strong>1</strong></td><td><strong>有用例挂了</strong></td><td style="color:var(--bad)">阻断 —— 最常见的一种</td></tr>
+<tr><td style="color:var(--bad)"><strong>2</strong></td><td>被用户中断</td><td style="color:var(--bad)">阻断</td></tr>
+<tr><td style="color:var(--bad)"><strong>3</strong></td><td>内部错误</td><td style="color:var(--bad)">阻断</td></tr>
+<tr><td style="color:var(--bad)"><strong>4</strong></td><td>命令行用法错了</td><td style="color:var(--bad)">阻断 —— <strong>说明你的门禁配置写错了</strong></td></tr>
+<tr><td style="color:var(--warn)"><strong>5</strong></td><td><strong>一条用例都没找到</strong></td>
+    <td style="color:var(--bad)"><strong>阻断。这个最阴险</strong> —— 见下</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 退出码 5:「一条用例都没找到」</b>
+  想象一下:<strong>目录写错了、或者所有用例都被删了</strong> ——
+  <br><br>
+  如果运行器返回 0(「没有失败啊」),<strong>你的门禁会亮绿灯</strong>,而实际上一条测试都没跑。
+  <br><br>
+  <strong>返回 5 就是为了防这个。</strong>它明确区分了「跑了都过了」和「压根没跑」。
+  <br><br>
+  <strong>这也是第 20 页手法 2(删用例)会被自动挡住的原因之一 ——
+  但只在「删光了」时才挡得住,删一半照样是 0。</strong>所以还是需要用例数门禁。
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">其它退出码</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>127</code></td><td><strong>命令找不到</strong> —— 十有八九是工具没装或路径写错</td></tr>
+<tr><td><code>128 + N</code></td><td><strong>被信号 N 杀掉的</strong>。POSIX(macOS/Linux)环境下,例如 <code>130 = 128+2</code> 是被 Ctrl+C 中断、<code>143 = 128+15</code> 是被 SIGTERM 终止,
+    <strong>不是逻辑失败</strong> —— 排查时别把它当 bug 查</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="git">五、存档系统命令</h2>
+
+<pre><code># ---- 看状态(最常用的三条)----
+git status              # 现在有哪些改动
+git diff                # 改动的具体内容(还没暂存的)
+git diff --stat         # &#128293; 只看"改了哪几个文件、各改了几行" &larr; 第 20 页那一步
+
+# ---- 存档 ----
+git add -A              # 把所有改动放上传送带
+git commit -m "说明"     # 结账,存成一个档
+git log --oneline -5    # 看最近 5 个存档
+
+# ---- 分支 ----
+git switch -c feat/xxx  # 新建并切到一个新分支
+git switch main         # 切回主干
+git branch              # 看有哪些分支
+
+# ---- 推送 ----
+git push -u origin feat/xxx    # 第一次推这个分支
+git push                       # 之后就这样
+
+# ---- 绕过本地钩子(&#128293; 知道它存在,但尽量别用)----
+git commit --no-verify -m "说明"</code></pre>
+
+<div class="box note">
+  <b class="t">存档说明怎么写</b>
+  <strong>格式:<code>类型: 做了什么</code></strong>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:14%">类型</th><th style="width:30%">用在什么时候</th><th>例子</th></tr></thead>
+  <tbody>
+  <tr><td><code>feat</code></td><td>加了新功能</td><td><code>feat: 下单接口支持折扣</code></td></tr>
+  <tr><td><code>fix</code></td><td>修了 bug</td><td><code>fix: 单价为负数时不再写库</code></td></tr>
+  <tr><td><code>test</code></td><td>只动了测试</td><td><code>test: 补上非法 JSON 的用例</code></td></tr>
+  <tr><td><code>docs</code></td><td>只动了文档</td><td><code>docs: 补 CLAUDE.md 的运行说明</code></td></tr>
+  <tr><td><code>refactor</code></td><td>改结构不改行为</td><td><code>refactor: 校验逻辑提到函数开头</code></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>一条存档说清一件事</strong> —— 如果你的说明里出现了「顺便」「以及」,
+  说明这次应该拆成两条。出自 <a href="11-git-basics.html">第 11 页</a>。</p>
+</div>
+
+<h2 id="undo">六、撤销阶梯</h2>
+
+<p><strong>从轻到重,先试上面的。</strong>越往下越危险。</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:6%">级</th><th style="width:28%">命令</th>
+  <th style="width:28%">撤掉什么</th><th>危险度</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>0</strong></td><td>工具自带的一键回退</td>
+  <td>AI 这一轮做的所有改动</td>
+  <td style="color:var(--ok)"><strong>安全</strong>,首选</td>
+</tr>
+<tr>
+  <td><strong>1</strong></td><td><code>git restore &lt;文件&gt;</code></td>
+  <td>某个文件<strong>还没暂存</strong>的改动</td>
+  <td style="color:var(--ok)"><strong>安全</strong>,只影响指定文件</td>
+</tr>
+<tr>
+  <td><strong>2</strong></td><td><code>git restore --staged &lt;文件&gt;</code></td>
+  <td>把文件<strong>从传送带上拿下来</strong>(改动还在)</td>
+  <td style="color:var(--ok)"><strong>安全</strong></td>
+</tr>
+<tr>
+  <td><strong>3</strong></td><td><code>git reset --hard HEAD</code></td>
+  <td><strong>所有已跟踪文件</strong>的改动,回到最近一次存档</td>
+  <td style="color:var(--bad)"><strong>危险</strong> —— 改动<u>找不回来</u></td>
+</tr>
+<tr>
+  <td><strong>4</strong></td><td><code>git clean -fd</code></td>
+  <td><strong>所有没被跟踪的新文件和新目录</strong></td>
+  <td style="color:var(--bad)"><strong>很危险</strong> —— 会删掉你手写的新文件</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">用第 3、4 级之前,先跑一遍「预演」</b>
+<pre style="margin:8px 0 0"><code>git status              # 先看清楚现在到底有哪些改动
+git clean -nd           # &#128293; -n = 只打印会删哪些,不真删
+</code></pre>
+  <p style="margin:8px 0 0"><strong><code>git clean</code> 删掉的东西没有任何地方能找回来</strong> ——
+  它删的正是「还没进过存档系统」的文件。<strong>先 <code>-nd</code> 看一眼,再 <code>-fd</code> 动手。</strong></p>
+  <p style="margin:8px 0 0">出自 <a href="12-git-undo.html">第 12 页</a>。</p>
+</div>
+
+<h2 id="gate">七、门禁四要素 &amp; 阈值参考</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">四要素</th><th style="width:26%">回答什么</th><th>填不满说明什么</th></tr></thead>
+<tbody>
+<tr><td><strong>&#9312; 检查点</strong></td><td>在流程的哪一步查</td><td>你还没想清楚它该拦在哪</td></tr>
+<tr><td><strong>&#9313; 度量指标</strong></td><td>量什么</td><td>你其实只是想「跑一下看看」</td></tr>
+<tr><td><strong>&#9314; 阈值与判定规则</strong></td><td>多少算过</td><td><strong>这条不是门禁,是报告</strong></td></tr>
+<tr><td><strong>&#9315; 失败动作</strong></td><td>不过怎么办</td><td><strong>这条不是门禁,是装饰</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>阈值参考值</h3>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:8%">类</th><th style="width:24%">指标</th>
+  <th style="width:20%">建议阈值</th><th style="width:16%">失败动作</th><th>备注</th>
+</tr></thead>
+<tbody>
+<tr style="background:var(--ok-soft)"><td rowspan="4" style="vertical-align:middle;font-weight:800;color:var(--ok)">硬</td>
+    <td>代码规范</td><td>退出码 = 0</td><td style="color:var(--bad)">阻断</td><td>第一天就上</td></tr>
+<tr style="background:var(--ok-soft)"><td>类型检查</td><td>退出码 = 0</td><td style="color:var(--bad)">阻断</td><td>第一天就上</td></tr>
+<tr style="background:var(--ok-soft)"><td><strong>P0 用例</strong></td><td style="color:var(--bad)"><strong>100%</strong></td>
+    <td style="color:var(--bad)">阻断</td><td><strong>这条不能松</strong></td></tr>
+<tr style="background:var(--ok-soft)"><td>严重安全问题</td><td style="color:var(--bad)"><strong>= 0</strong></td>
+    <td style="color:var(--bad)">阻断</td><td>不是「总数 = 0」</td></tr>
+
+<tr style="background:var(--warn-soft)"><td rowspan="6" style="vertical-align:middle;font-weight:800;color:var(--warn)">阈<br>值</td>
+    <td>全量通过率</td><td>&ge; 95%</td><td style="color:var(--bad)">阻断</td><td>留 5% 给抖动</td></tr>
+<tr style="background:var(--warn-soft)"><td><strong>增量</strong>覆盖率</td><td>&ge; 80%</td>
+    <td style="color:var(--warn)">降级告警</td><td><strong>「本次改动行」,不是全量</strong></td></tr>
+<tr style="background:var(--warn-soft)"><td>跳过数</td><td>&le; 5 或不增长</td><td style="color:var(--bad)">阻断</td>
+    <td><strong>防作弊,不是防质量波动</strong></td></tr>
+<tr style="background:var(--warn-soft)"><td>用例总数</td><td>不得少于主干</td><td style="color:var(--bad)">阻断</td>
+    <td>堵住「删用例」(弱门禁,防纯删除;防不住语义替换)</td></tr>
+<tr style="background:var(--warn-soft)"><td>抖动率</td><td>&lt; 1%</td><td style="color:var(--warn)">告警</td>
+    <td><strong>检查点必须是定时任务</strong></td></tr>
+<tr style="background:var(--warn-soft)"><td>重复代码率</td><td>&lt; 3%</td><td style="color:var(--warn)">告警</td><td>&mdash;</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">定阈值的两条方法</b>
+  <strong>基线法(定初值):</strong>先两周不拦只记录,取实际水平<strong>略微上浮</strong>。
+  <u>不要拍脑袋抄行业数字。</u>
+  <br><br>
+  <strong>棘轮法(往上收):</strong>阈值<strong>只准朝严格方向走</strong>。
+  最省事的写法是「不得低于主干当前值」—— 阈值自动跟着涨,谁也不用管。
+  <br><br>
+  出自 <a href="18-gate-items.html">第 18 页</a>。
+</div>
+
+<h2 id="gh">八、云端门禁命令</h2>
+
+<pre><code># ---- 看合并请求的状态 ----
+gh pr checks 1                                        # 各项检查的结果
+gh pr view 1 --json mergeStateStatus -q .mergeStateStatus   # &#128293; 看这个
+gh pr view 1 --json mergeable -q .mergeable                 # 这个只管有没有冲突
+
+# ---- 配分支保护 ----
+gh api -X PUT repos/&lt;账号&gt;/&lt;仓库&gt;/branches/main/protection --input - &lt;&lt;'JSON'
+{
+  "required_status_checks": { "strict": true, "contexts": ["三道检查"] },
+  "enforce_admins": true,
+  "required_pull_request_reviews": null,
+  "restrictions": null
+}
+JSON
+
+# ---- 看当前保护规则 ----
+gh api repos/&lt;账号&gt;/&lt;仓库&gt;/branches/main/protection</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%"><code>mergeStateStatus</code></th><th style="width:26%">含义</th><th>该怎么办</th></tr></thead>
+<tbody>
+<tr><td style="color:var(--ok)"><code>CLEAN</code></td><td>全绿</td><td>合</td></tr>
+<tr><td style="color:var(--bad)"><code>BLOCKED</code></td><td>被保护规则挡住</td><td><strong>看是门禁红了还是缺评审</strong></td></tr>
+<tr><td style="color:var(--warn)"><code>BEHIND</code></td><td>落后主干</td><td>先同步主干再说</td></tr>
+<tr><td style="color:var(--warn)"><code>UNSTABLE</code></td><td>有检查红了但它不是必需的</td><td><strong>这就是「降级告警」的实物</strong></td></tr>
+<tr><td><code>DIRTY</code></td><td>有代码冲突</td><td>解冲突</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 两个必查的配置项</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:32%">配置项</th><th>配错的后果</th></tr></thead>
+  <tbody>
+  <tr><td><code>contexts</code> 里的名字</td>
+      <td><strong>必须和流水线里 <code>name:</code> 一字不差。</strong>
+          填错 &rarr; <u>永久等待,没有任何错误提示</u></td></tr>
+  <tr><td><code>enforce_admins</code></td>
+      <td><strong>默认是 <code>false</code></strong> &rarr; 管理员可以强制合并 &rarr;
+          <u>你的门禁对管理员形同虚设</u></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">出自 <a href="19-gate-demo.html">第 19 页</a>,两条都是真机验证过的。</p>
+</div>
+
+<h2 id="debug">九、排错路径</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">现象</th><th style="width:30%">最可能的原因</th><th>先查这个</th></tr></thead>
+<tbody>
+<tr><td>「明明装了却说找不到」</td><td>用的不是虚拟环境里的 Python</td>
+    <td><code>which python</code>;改用 <code>.venv/bin/python -m</code></td></tr>
+<tr><td>测试跑不起来,说找不到模块</td><td>项目根目录不在搜索路径里</td>
+    <td>配置里的 <code>pythonpath = ["."]</code></td></tr>
+<tr><td>本地全绿,云端红</td><td><strong>环境不一样</strong></td>
+    <td>比对两边的版本号(第 19 页那张表)</td></tr>
+<tr><td>本地红,云端绿</td><td>本地有残留的缓存 / 数据库文件</td>
+    <td>删掉缓存目录重跑</td></tr>
+<tr><td><strong>合并按钮灰着,但流水线是绿的</strong></td><td><strong>第 &#9312; 层:保护规则</strong></td>
+    <td><code>contexts</code> 里的名字对不对;缺不缺评审</td></tr>
+<tr><td><strong>合并请求永久卡在「等待中」</strong></td><td><strong>名字填错,或 <code>paths</code> 过滤没触发</strong></td>
+    <td>去看有没有这个名字的检查<strong>真的上报过</strong></td></tr>
+<tr><td>流水线红了但没跑到测试</td><td><strong>第 &#9313; 层:前置条件</strong></td>
+    <td>依赖装没装上、代码拉没拉下来</td></tr>
+<tr><td>同一条用例时红时绿</td><td><strong>抖动用例</strong></td>
+    <td>看等待逻辑是不是「等 N 秒」而不是「等到出现」</td></tr>
+<tr><td><strong>接口查不到东西,查了很多次</strong></td>
+    <td style="color:var(--bad)"><strong>你的观测方式错了</strong></td>
+    <td style="color:var(--bad)"><strong>换通道 —— 直接打开网页看</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">排错的元规则(第 19 页亲历)</b>
+  <strong>同一个方法失败两次,不要试第三次 —— 换一个完全不同的观测通道。</strong>
+  <br><br>
+  重复同一个失败的观测<strong>只增加信心,不增加信息</strong>。
+  <br><br>
+  「我没查到」和「它不存在」是两件事。
+</div>
+
+<h2 id="glossary">十、中英术语对照</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">本书用词</th><th style="width:24%">英文</th><th style="width:12%">首见</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>规范检查</td><td>lint</td><td><a href="04-static-check.html">04</a></td><td>查写法规不规范</td></tr>
+<tr><td>类型检查</td><td>type check</td><td><a href="04-static-check.html">04</a></td><td>查进出的类型对不对</td></tr>
+<tr><td>单元测试</td><td>unit test</td><td><a href="05-pyramid.html">05</a></td><td>只测一个函数,不碰外部</td></tr>
+<tr><td>集成 / 接口测试</td><td>integration / API test</td><td><a href="05-pyramid.html">05</a></td><td>测几块拼起来对不对</td></tr>
+<tr><td>端到端测试</td><td>E2E test</td><td><a href="10-flaky-e2e.html">10</a></td><td>模拟真人从头走一遍</td></tr>
+<tr><td><strong>抖动用例</strong></td><td><strong>flaky test</strong></td><td><a href="10-flaky-e2e.html">10</a></td>
+    <td><strong>代码没改,一会儿红一会儿绿</strong></td></tr>
+<tr><td>三段式</td><td>Arrange-Act-Assert</td><td><a href="03-test-basics.html">03</a></td><td>准备 / 执行 / 断言</td></tr>
+<tr><td>断言</td><td>assert</td><td><a href="03-test-basics.html">03</a></td><td>「我期望它等于……」</td></tr>
+<tr><td>夹具</td><td>fixture</td><td><a href="07-four-layers-code.html">07</a></td><td>测试的共用准备工作</td></tr>
+<tr><td>替身</td><td>mock / stub</td><td><a href="07-four-layers-code.html">07</a></td><td>用假的顶替真依赖</td></tr>
+<tr><td>暂存区</td><td>staging area</td><td><a href="11-git-basics.html">11</a></td><td>超市结账的传送带</td></tr>
+<tr><td>存档 / 提交</td><td>commit</td><td><a href="11-git-basics.html">11</a></td><td>一次结账</td></tr>
+<tr><td>合并请求</td><td>pull request</td><td><a href="16-pipeline.html">16</a></td><td>「请把我这个分支合进主干」</td></tr>
+<tr><td>钩子</td><td>hook</td><td><a href="16-pipeline.html">16</a></td><td>存档 / 推送时自动跑的脚本</td></tr>
+<tr><td>流水线</td><td>CI pipeline</td><td><a href="16-pipeline.html">16</a></td><td>云端那排质检工位</td></tr>
+<tr><td><strong>质量门禁</strong></td><td><strong>quality gate</strong></td><td><a href="17-quality-gate.html">17</a></td>
+    <td><strong>地铁闸机 —— 不达标就是不开</strong></td></tr>
+<tr><td>隐式硬门禁</td><td>&mdash;</td><td><a href="17-quality-gate.html">17</a></td><td>只看退出码,阈值天然是「零失败」</td></tr>
+<tr><td>阈值门禁</td><td>threshold gate</td><td><a href="17-quality-gate.html">17</a></td><td>数值比大小,阈值你自己定</td></tr>
+<tr><td>降级告警</td><td>unstable</td><td><a href="17-quality-gate.html">17</a></td><td>标黄但放行</td></tr>
+<tr><td>分支保护</td><td>branch protection</td><td><a href="19-gate-demo.html">19</a></td><td>「拦」这个动作真正配在哪</td></tr>
+<tr><td>快速失败</td><td>fail fast</td><td><a href="16-pipeline.html">16</a></td><td>便宜的先跑</td></tr>
+<tr><td>棘轮</td><td>ratchet</td><td><a href="18-gate-items.html">18</a></td><td>阈值只准往严格方向走</td></tr>
+<tr><td>上下文窗口</td><td>context window</td><td><a href="21-automation.html">21</a></td><td>一张有限大的办公桌</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="rules">十一、二十条硬规矩</h2>
+
+<p><strong>全书所有「必须 / 不准」类结论的汇总。</strong>抄进你的项目说明文件就能用。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:6%">#</th><th style="width:56%">规矩</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>命令一律写成 <code>.venv/bin/python -m xxx</code>,不要裸敲工具名</td><td><a href="02-python-setup.html">02</a></td></tr>
+<tr><td>2</td><td>虚拟环境目录必须写进忽略清单,不要提交</td><td><a href="02-python-setup.html">02</a></td></tr>
+<tr><td>3</td><td>每条测试必须有断言。没有断言的测试等于没写</td><td><a href="03-test-basics.html">03</a></td></tr>
+<tr><td>4</td><td><strong>让 AI 写测试前,先自己说清楚期望值</strong></td><td><a href="20-ai-boundary.html">20</a></td></tr>
+<tr><td>5</td><td>便宜的检查先跑(规范 &rarr; 类型 &rarr; 单元 &rarr; 集成 &rarr; 端到端)</td><td><a href="16-pipeline.html">16</a></td></tr>
+<tr><td>6</td><td>一次只做一件事,做完立刻测</td><td><a href="21-automation.html">21</a></td></tr>
+<tr><td>7</td><td><strong>每一步之后跑 <code>git diff --stat</code>,亲眼看改了哪些文件</strong></td><td><a href="20-ai-boundary.html">20</a></td></tr>
+<tr><td>8</td><td><strong>修 bug 只改源码,不改测试文件</strong>。要改测试先停下来问</td><td><a href="20-ai-boundary.html">20</a></td></tr>
+<tr><td>9</td><td>不准新增跳过标记;不准删已有用例</td><td><a href="20-ai-boundary.html">20</a></td></tr>
+<tr><td>10</td><td>不准修改门禁配置和阈值</td><td><a href="20-ai-boundary.html">20</a></td></tr>
+<tr><td>11</td><td><strong>同一个方法失败两次就换通道,不要试第三次</strong></td><td><a href="19-gate-demo.html">19</a></td></tr>
+<tr><td>12</td><td>用 <code>git clean -fd</code> 前必须先 <code>-nd</code> 预演</td><td><a href="12-git-undo.html">12</a></td></tr>
+<tr><td>13</td><td>一条存档说清一件事。出现「顺便」就该拆</td><td><a href="11-git-basics.html">11</a></td></tr>
+<tr><td>14</td><td><strong>门禁必须在云端。本地钩子只是提醒,一个参数就能绕过</strong></td><td><a href="16-pipeline.html">16</a></td></tr>
+<tr><td>15</td><td><strong><code>enforce_admins</code> 必须设为 <code>true</code></strong>,否则门禁对管理员无效</td><td><a href="19-gate-demo.html">19</a></td></tr>
+<tr><td>16</td><td>保护规则里的检查名必须和流水线 <code>name:</code> 一字不差</td><td><a href="19-gate-demo.html">19</a></td></tr>
+<tr><td>17</td><td><strong>配完门禁必须故意让它红一次</strong>,亲眼确认它真拦得住</td><td><a href="18-gate-items.html">18</a></td></tr>
+<tr><td>18</td><td>组件版本号以代码仓库为准,不以文档页为准</td><td><a href="16-pipeline.html">16</a></td></tr>
+<tr><td>19</td><td>阈值只准往严格方向调。往松调必须走流程并记录原因</td><td><a href="18-gate-items.html">18</a></td></tr>
+<tr><td>20</td><td>说明文件只写「代码里看不出来」的东西。<strong>写得越少越不容易过期</strong></td><td><a href="21-automation.html">21</a></td></tr>
+</tbody>
+</table>
+</div>
+
+<figure>
+<svg viewBox="0 0 820 200" role="img" aria-label="全书最终结论">
+  <g class="st">
+    <rect x="20" y="20" width="780" height="160" rx="14" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="2"/>
+    <text x="410" y="62" font-size="15" font-weight="800" fill="var(--bad)" text-anchor="middle">
+      如果这本书你只记住一句话
+    </text>
+    <text x="410" y="106" font-size="19" font-weight="800" fill="var(--ink)" text-anchor="middle">
+      能自动判的,全部交给机器,不要靠嘴说。
+    </text>
+    <text x="410" y="140" font-size="19" font-weight="800" fill="var(--ink)" text-anchor="middle">
+      判不了的那件事 —— 亲眼看改动 —— 永远自己做。
+    </text>
+    <text x="410" y="168" font-size="12" fill="var(--faint)" text-anchor="middle">
+      前者是第 16&ndash;19 页的全部内容,后者是第 20 页的全部内容。
+    </text>
+  </g>
+</svg>
+</figure>
+
+<div class="pager">
+  <a href="21-automation.html">&larr; 上一页:固化流程与会话管理</a>
+  <a href="00-index.html">目录</a>
+  <a href="00-index.html">回到目录 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 22 页 / 共 23 页 · 全书汇总 · <strong>全书完</strong></p>
+  <p>本手册汇总了第 1–21 页的所有可操作结论。所有命令、退出码、配置项均经过核实或真机验证;
+  全书仅有 1 条标注为 &#9888; 待验证(见 <a href="17-quality-gate.html">第 17 页第八节</a>)。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

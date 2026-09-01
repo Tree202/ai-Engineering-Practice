@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 测试金字塔四层</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">05 金字塔 <span>· 测试的四个层级</span></span>
+  <a href="04-static-check.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="06-myshop.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 05 页 · 难度 ★★ · 前置:第 03、04 页</span>
+<h1>测试金字塔四层</h1>
+<p class="lede">
+测试不是只有一种。它分四层,<strong>每层的成本差几百倍</strong>。
+这一页先纠正一个几乎人人都会犯的分类错误,再给出四层的全景 —— 附同一个项目上的真机实测耗时。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#dim">一、先纠正一个分类错误</a></li>
+    <li><a href="#names">二、几组名词的真实关系</a></li>
+    <li><a href="#pyramid">三、四层全景</a></li>
+    <li><a href="#speed">四、实测:为什么是金字塔形</a></li>
+    <li><a href="#whatnot">五、每层「测什么」和「不测什么」</a></li>
+    <li><a href="#assert2">六、两个「怎么断言才算数」的技巧</a></li>
+    <li><a href="#boundary">七、边界值口诀</a></li>
+  </ol>
+</div>
+
+<h2 id="dim">一、先纠正一个分类错误</h2>
+
+<p>很多人会问:「这是白盒测试?单元测试?接口测试?系统测试?」</p>
+
+<div class="box key">
+  <b class="t">这个问法本身混了两个正交的维度</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:20%">维度</th><th style="width:34%">分类</th><th>回答的问题</th></tr></thead>
+  <tbody>
+  <tr><td><strong>视角</strong></td><td>白盒 / 灰盒 / 黑盒</td><td>写测试的人<strong>知不知道内部实现</strong></td></tr>
+  <tr><td><strong>层级</strong></td><td>单元 &rarr; 集成 &rarr; 接口 &rarr; 系统 / E2E</td><td>一次测试<strong>覆盖多大范围</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">任何一个测试<strong>同时具有这两个属性</strong>。
+  比如「单元测试」通常是白盒的,「E2E」通常是黑盒的。</p>
+</div>
+
+<figure>
+<svg viewBox="0 0 760 340" role="img" aria-label="视角与层级是两个正交维度">
+  <g class="st">
+    <line x1="120" y1="290" x2="700" y2="290" stroke="var(--rule2)" stroke-width="1.8"/>
+    <line x1="120" y1="290" x2="120" y2="40" stroke="var(--rule2)" stroke-width="1.8"/>
+    <text x="410" y="322" font-size="13" fill="var(--soft)" text-anchor="middle" font-weight="700">层级 &rarr; 覆盖多大范围</text>
+    <text x="52" y="165" font-size="13" fill="var(--soft)" text-anchor="middle" font-weight="700" transform="rotate(-90 52 165)">视角 &rarr; 知不知道内部</text>
+
+    <g font-size="11.5" fill="var(--faint)" text-anchor="middle">
+      <text x="200" y="310">单元</text><text x="340" y="310">集成</text>
+      <text x="480" y="310">接口</text><text x="620" y="310">E2E</text>
+    </g>
+    <g font-size="11.5" fill="var(--faint)" text-anchor="end">
+      <text x="110" y="90">黑盒</text><text x="110" y="175">灰盒</text><text x="110" y="255">白盒</text>
+    </g>
+
+    <circle cx="200" cy="252" r="30" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.8"/>
+    <text x="200" y="257" font-size="11.5" font-weight="700" fill="var(--info)" text-anchor="middle">单元</text>
+
+    <circle cx="340" cy="200" r="30" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+    <text x="340" y="205" font-size="11.5" font-weight="700" fill="var(--warn)" text-anchor="middle">集成</text>
+
+    <circle cx="480" cy="150" r="30" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+    <text x="480" y="155" font-size="11.5" font-weight="700" fill="var(--warn)" text-anchor="middle">接口</text>
+
+    <circle cx="620" cy="88" r="30" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.8"/>
+    <text x="620" y="93" font-size="11.5" font-weight="700" fill="var(--bad)" text-anchor="middle">E2E</text>
+  </g>
+  <text x="410" y="30" class="st" font-size="13" fill="var(--faint)" text-anchor="middle">
+    范围越大,越倾向于「不看内部」—— 但这是趋势,不是定义
+  </text>
+</svg>
+<figcaption>两个维度是正交的。习惯上它们相关,但那是结果不是定义</figcaption>
+</figure>
+
+<h2 id="names">二、几组名词的真实关系</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">常见写法</th><th>真实关系</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>集成 / 接口</strong></td>
+  <td><strong>包含关系</strong>:接口测试是集成测试的一种。集成是大概念,接口是「专门从网络请求这个入口测」的那一类</td>
+</tr>
+<tr>
+  <td><strong>E2E / 系统</strong></td>
+  <td><strong>同一件事的两种叫法</strong>。「系统测试」是传统软件工程教材的词,「E2E」是网络开发圈的词</td>
+</tr>
+<tr>
+  <td>那个斜杠</td>
+  <td><strong>没有顺序含义</strong>,纯粹是并列写法。写成「接口 / 集成」完全一样</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">真正有顺序的是金字塔的上下,不是斜杠的左右</b>
+  <strong>执行顺序永远是从下往上</strong> —— 先跑最快的,再跑贵的。
+  理由很简单:<em>如果最便宜的检查一秒钟就报错了,你没必要花 25 分钟跑最贵的那层才发现同一个问题。</em>
+  <br><br>
+  这条原则在第 16、17 页有个正式名字,叫<strong>快速失败(fail fast)</strong>。
+</div>
+
+<h2 id="pyramid">三、四层全景</h2>
+
+<figure>
+<svg viewBox="0 0 840 420" role="img" aria-label="测试金字塔四层,含速度与 AI 能力">
+  <g class="st">
+    <polygon points="420,24 500,100 340,100" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <polygon points="340,102 500,102 552,184 288,184" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <polygon points="288,186 552,186 604,268 236,268" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <polygon points="236,270 604,270 656,352 184,352" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+
+    <text x="420" y="76"  font-size="14" font-weight="800" fill="var(--bad)"  text-anchor="middle">&#9314; E2E / 系统</text>
+    <text x="420" y="150" font-size="14" font-weight="800" fill="var(--warn)" text-anchor="middle">&#9313; 集成 / 接口</text>
+    <text x="420" y="234" font-size="14" font-weight="800" fill="var(--info)" text-anchor="middle">&#9312; 单元 / 组件</text>
+    <text x="420" y="316" font-size="14" font-weight="800" fill="var(--ok)"   text-anchor="middle">&#9311; 静态检查</text>
+
+    <g font-size="11.5" fill="var(--faint)" text-anchor="end">
+      <text x="328" y="72">10 秒+ / 条</text>
+      <text x="276" y="148">3.64 秒</text>
+      <text x="224" y="230">0.00 秒</text>
+      <text x="172" y="312">0.02 秒</text>
+    </g>
+    <g font-size="12" text-anchor="start">
+      <text x="512" y="68" fill="var(--bad)" font-weight="700">AI &#9733;&#9733;&#9734;&#9734;&#9734;</text>
+      <text x="564" y="144" fill="var(--warn)" font-weight="700">AI &#9733;&#9733;&#9733;&#9734;&#9734;</text>
+      <text x="616" y="226" fill="var(--info)" font-weight="700">AI &#9733;&#9733;&#9733;&#9733;&#9734;</text>
+      <text x="668" y="308" fill="var(--ok)" font-weight="700">AI &#9733;&#9733;&#9733;&#9733;&#9733;</text>
+    </g>
+    <text x="66" y="196" font-size="12.5" fill="var(--faint)" text-anchor="middle" transform="rotate(-90 66 196)">
+      越往上:越慢 · 越贵 · 越不稳 · AI 越弱
+    </text>
+    <text x="420" y="392" font-size="13.5" fill="var(--soft)" text-anchor="middle" font-weight="700">
+      成本金字塔和 AI 能力金字塔完全同向 &mdash;&mdash; 这不是巧合
+    </text>
+  </g>
+</svg>
+<figcaption>实测数据来自同一个 Python 项目 · macOS / Python 3.9.6 / pytest 8.4.2</figcaption>
+</figure>
+
+<div class="box key">
+  <b class="t">为什么两个金字塔同向?看「判据来自哪」</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:16%"></th><th style="width:40%">判据来自哪</th><th>AI 表现</th></tr></thead>
+  <tbody>
+  <tr><td><strong>底层</strong></td><td>编译器、检查器 —— <strong>机械的、确定的</strong></td><td>强。它不需要「理解」,只需要读报错</td></tr>
+  <tr><td><strong>顶层</strong></td><td>用户体验、业务正确性 —— <strong>语义的、主观的</strong></td><td>弱。这需要知道「产品该是什么样」</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">第 20 页会详细展开这张能力矩阵。</p>
+</div>
+
+<h2 id="speed">四、实测:为什么是金字塔形</h2>
+
+<p>同一个项目,把各层分开跑,计时。<strong>这是在真机上跑出来的数字:</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">层级</th><th style="width:12%">条数</th><th style="width:16%">实测耗时</th><th style="width:14%">相对倍数</th><th>慢在哪</th></tr></thead>
+<tbody>
+<tr>
+  <td>&#9311; ruff</td><td>&mdash;</td>
+  <td style="color:var(--ok)"><strong>0.02 秒</strong></td><td>&mdash;</td>
+  <td>不运行代码,只扫一遍文本</td>
+</tr>
+<tr>
+  <td>&#9311; mypy</td><td>&mdash;</td>
+  <td style="color:var(--ok)"><strong>0.27 秒</strong></td><td>&mdash;</td>
+  <td>不运行代码,推导全项目的类型</td>
+</tr>
+<tr>
+  <td>&#9312; 单元测试</td><td>5 条</td>
+  <td style="color:var(--ok)"><strong>0.00 秒</strong></td><td>1&times;</td>
+  <td><strong>快到测不出来</strong>。只调一个纯函数,什么外部东西都不碰</td>
+</tr>
+<tr>
+  <td>&#9313; 集成测试</td><td>5 条</td>
+  <td style="color:var(--ok)"><strong>0.02 秒</strong></td><td>&mdash;</td>
+  <td>要真的建数据库、写入、再读出来</td>
+</tr>
+<tr>
+  <td>&#9313; 接口测试</td><td>7 条</td>
+  <td style="color:var(--bad)"><strong>3.64 秒</strong></td><td><strong>&asymp;180&times;</strong></td>
+  <td>每条都要<strong>启动一个服务器再关掉</strong></td>
+</tr>
+<tr>
+  <td>&#9314; E2E</td><td>&mdash;</td>
+  <td style="color:var(--bad)"><strong>10 秒+ / 条</strong></td><td>1000&times;+</td>
+  <td>要开真浏览器,还要等页面加载、动画播完</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">这组数字比任何说教都有力</b>
+  <strong>集成层 0.02 秒 vs 接口层 3.64 秒,差约 180 倍（本项目本机实测值,不可外推到其他项目）。</strong>
+  而单元测试那 5 条快到运行器都测不出耗时,直接显示 <code>0.00s</code>。
+  <br><br>
+  <strong>而且慢的原因出人意料</strong> —— 不是网络慢,是每条测试都要<strong>启动和关闭一个服务器</strong>。
+  第 7 页会给出精确解释。
+</div>
+
+<h3>这个数字直接决定了流程怎么排</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">什么时候</th><th style="width:34%">跑哪几层</th><th>为什么</th></tr></thead>
+<tbody>
+<tr><td><strong>每改一小块</strong></td><td>&#9311; + &#9312;</td><td>加起来不到 0.3 秒,可以无限次跑</td></tr>
+<tr><td><strong>准备存档前</strong></td><td>&#9311; + &#9312; + &#9313; 全量</td><td>3.7 秒,一天跑几十次也无所谓</td></tr>
+<tr><td><strong>整个任务做完</strong></td><td>加上 &#9314;</td><td>十几分钟,所以只跑一次</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 如果顺序排反了</b>
+  假设你每改一行都跑一次 E2E:一天改 50 次 &times; 10 分钟 = <strong>8 个多小时全在等</strong>。
+  <br><br>
+  <strong>而这些等待里,绝大多数问题本来 0.02 秒的检查就能发现。</strong>
+</div>
+
+<h2 id="whatnot">五、每层「测什么」和「不测什么」</h2>
+
+<div class="box good">
+  <b class="t">&#128161; 「不测什么」比「测什么」更重要</b>
+  <strong>每一层只测这一层新增的东西,上层不重复测下层测过的。</strong>
+  <br><br>
+  重复测的代价是双重的:<em>同一个断言要维护两遍,而且跑在更慢的那一层上。</em>
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">层</th><th style="width:40%">&#9989; 测什么</th><th>&#10060; 不测什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 单元</strong></td>
+  <td>一个<strong>纯函数</strong>的输入输出,含正常值和边界值(0、进位、非法输入)</td>
+  <td>不碰数据库、不碰网络、不启动服务。<strong>如果一个「单元测试」需要连数据库,它其实已经是集成测试了</strong></td>
+</tr>
+<tr>
+  <td><strong>&#9313; 集成</strong></td>
+  <td>多个模块拼在一起还对不对;数据有没有<strong>真的写进数据库</strong>、换个连接还能不能读回来</td>
+  <td><strong>不重复测第 &#9312; 层测过的边界值</strong>。不走网络,直接调函数</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 接口</strong></td>
+  <td>真的启动服务器、真的发请求,检查<strong>状态码和返回结构</strong> —— 也就是「契约」</td>
+  <td>不测页面长什么样。也不再重复测价格进位这种细节</td>
+</tr>
+<tr>
+  <td><strong>&#9314; E2E</strong></td>
+  <td>像真人一样开浏览器走完整流程。<strong>只测最值钱的那一两条主路径</strong></td>
+  <td>不测每种错误分支、不测文案细节 —— 那些用下面三层测,又快又稳</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="assert2">六、两个「怎么断言才算数」的技巧</h2>
+
+<p>这两个技巧决定了你的测试<strong>是真在验证,还是只是看起来在验证</strong>。第 7 页会看到完整代码。</p>
+
+<h3>技巧一:怎么证明「真的跨模块了」</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:46%">断言写法</th><th>够不够</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>assert 订单["total_cents"] == 2500</code></td>
+  <td style="color:var(--bad)"><strong>&#10060; 不够</strong> —— 这只证明了乘法算对了</td>
+</tr>
+<tr>
+  <td><code>assert 订单["total_text"] == "¥25.00"</code></td>
+  <td style="color:var(--ok)"><strong>&#9989; 够</strong> —— 这个字符串只能来自另一个模块,它一旦挂了就说明两个模块之间接错了</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>技巧二:怎么证明「真的存进去了」</h3>
+
+<div class="box trap">
+  <b class="t">&#128293; 这是集成测试最容易写错的地方</b>
+  <strong>在同一个数据库连接里,「还没确认提交」的数据照样能读到。</strong>
+  <br><br>
+  所以下面这种写法<strong>什么都证明不了</strong>:
+  <pre style="margin:9px 0"><code># &#10060; 无效写法
+with 打开数据库() as 连接:
+    下单(..., 连接)
+    结果 = 连接.查询("SELECT * FROM orders")
+    assert 结果 is not None        # 照样通过,即使数据根本没落盘</code></pre>
+  <p style="margin:9px 0 0">正确写法必须<strong>重新打开一个连接</strong>:</p>
+  <pre style="margin:9px 0 0"><code># &#9989; 有效写法
+订单 = 下单(...)
+读回来 = 查订单(订单["id"])      # &larr; 这个函数内部会重新连一次数据库
+assert 读回来["item"] == "键盘"</code></pre>
+</div>
+
+<div class="box key">
+  <b class="t">一句话</b>
+  <strong>「换一个连接还能读到」,才是「真的存进去了」的唯一证明。</strong>
+  <br><br>
+  这就是<strong>集成测试和单元测试最本质的区别</strong>:单元测试验计算,集成测试验「东西真的到了另一边」。
+  <br><br>
+  第 8 页的第五个实验会证明这个写法的价值 —— 它是唯一能抓住一类「静默数据丢失」bug 的东西。
+</div>
+
+<h2 id="boundary">七、边界值口诀</h2>
+
+<p>第 &#9312; 层是你最常写的一层。给你一个能直接用的口诀:</p>
+
+<div class="box good">
+  <b class="t">一个函数至少写四条</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:22%">类型</th><th style="width:32%">例子</th><th>为什么容易出错</th></tr></thead>
+  <tbody>
+  <tr><td><strong>一条正常的</strong></td><td><code>format_price(1234)</code></td><td>基本功能</td></tr>
+  <tr><td><strong>一条零</strong></td><td><code>format_price(0)</code></td><td><strong>0 是最常被漏掉、也最常出问题的值</strong></td></tr>
+  <tr><td><strong>一条边界</strong></td><td><code>format_price(5)</code> &rarr; 要补零</td><td>进位、补位是格式化的经典 bug 温床</td></tr>
+  <tr><td><strong>一条非法的</strong></td><td><code>format_price(-1)</code> 应报错</td><td>「该报错时有没有报错」也是行为</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="box note">
+  <b class="t">&#128161; 一个第 8 页会验证的细节</b>
+  测边界时,<strong>要用「刚好越界一格」的值</strong>。
+  <br><br>
+  比如测「负数应该报错」,用 <code>-1</code> 而不是 <code>-999</code>。
+  <br><br>
+  第 8 页的第四个实验会展示:一个把边界从 <code>0</code> 挪到 <code>-1</code> 的改动,
+  <strong>只有测 <code>-1</code> 的用例能抓到它</strong> —— 测 <code>-999</code> 的用例会全绿放行。
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>48</td><td>两个正交维度</td><td>视角(白/黑盒) &times; 层级(单元/集成/E2E)</td></tr>
+<tr><td>49</td><td>名词的真实关系</td><td>接口 &sub; 集成;系统 &asymp; E2E(新旧叫法)</td></tr>
+<tr><td>50</td><td>斜杠没有顺序含义</td><td>有顺序的是金字塔上下</td></tr>
+<tr><td>51</td><td>四层全景</td><td>静态 / 单元 / 集成·接口 / E2E</td></tr>
+<tr><td>52</td><td><strong>每层不测什么</strong></td><td>比「测什么」更重要</td></tr>
+<tr><td>53</td><td>实测耗时</td><td>0.00 / 0.02 / 3.64 秒,差约 180 倍</td></tr>
+<tr><td>54</td><td><strong>准备的重量决定速度</strong></td><td>启动服务器才是慢的原因,不是网络</td></tr>
+<tr><td>55</td><td>边界值口诀</td><td>正常 / 零 / 边界 / 非法,至少四条</td></tr>
+<tr><td>56</td><td>怎么证明跨模块</td><td>断言那个<strong>只能来自另一模块</strong>的值</td></tr>
+<tr><td>57</td><td>怎么证明落盘</td><td><strong>换个连接读回来</strong>才算数</td></tr>
+<tr><td>58</td><td>接口测试测「契约」</td><td>状态码 + 返回结构</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="04-static-check.html">&larr; 上一页:静态检查</a>
+  <a href="00-index.html">目录</a>
+  <a href="06-myshop.html">下一页:练习项目 myshop 解剖 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 05 页 / 共 23 页 · 覆盖知识点 48–58 · 难度 &#9733;&#9733;</p>
+  <p>耗时数据实测于 macOS 15.7.4 / Python 3.9.6 / pytest 8.4.2 / mypy 1.19.1 / ruff 0.16.3。本页无需修正项。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

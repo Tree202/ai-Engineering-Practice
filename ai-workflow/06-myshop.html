@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 练习项目 myshop 解剖</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">06 myshop <span>· 练习项目解剖</span></span>
+  <a href="05-pyramid.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="07-four-layers-code.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 06 页 · 难度 ★★ · 前置:第 02、05 页</span>
+<h1>练习项目 myshop 解剖</h1>
+<p class="lede">
+一个 224 行的假商店。它不是拿来卖咖啡的,是拿来<strong>亲手摸一遍「为什么测试要分层」</strong>的实验台。
+后面第 7、8、9 页的所有实验都在它身上做。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#why">一、为什么要有个练习项目</a></li>
+    <li><a href="#struct">二、目录结构</a></li>
+    <li><a href="#core">三、核心设计:三个文件按依赖排列</a></li>
+    <li><a href="#price">四、最底层:纯函数</a></li>
+    <li><a href="#order">五、中间层:跨模块 + 存数据</a></li>
+    <li><a href="#api">六、最上层:只做翻译</a></li>
+    <li><a href="#run">七、跑起来验证</a></li>
+    <li><a href="#bugs">八、这个项目里曾经藏着两个真 bug</a></li>
+  </ol>
+</div>
+
+<h2 id="why">一、为什么要有个练习项目</h2>
+
+<div class="box key">
+  <b class="t">因为测试这件事,不动手是学不会的</b>
+  你可以读一百遍「测试很重要」,但只有当你亲眼看见
+  <strong>「我改了一个字符,屏幕上跳出 8 行红字」</strong>的时候,你才真的懂了。
+  <br><br>
+  myshop 就是那个让你能亲眼看见的东西。
+</div>
+
+<h3>它做的事情简单到一句话</h3>
+
+<p>你告诉它「一杯咖啡 12.5 元,买 2 杯」,它回你「一共 25 元」,并把这笔订单记下来。</p>
+
+<p>没有登录、没有支付、没有页面。<strong>但它有该有的三样东西:跨模块调用、真数据库、真网络接口</strong> ——
+正好能演示金字塔的四层。</p>
+
+<h2 id="struct">二、目录结构</h2>
+
+<pre><code>myshop/                          &larr; 项目根目录
+&#9500;&#9472;&#9472; .venv/                       虚拟环境(不进存档)
+&#9500;&#9472;&#9472; pyproject.toml               三个工具的配置(第 2 页那份)
+&#9500;&#9472;&#9472; .gitignore                   不存档黑名单(第 11 页讲)
+&#9500;&#9472;&#9472; README.md
+&#9500;&#9472;&#9472; myshop/                      &larr;&larr; 源代码
+&#9474;   &#9500;&#9472;&#9472; __init__.py              标志「这是一个包」,空文件
+&#9474;   &#9500;&#9472;&#9472; price.py                 算价格(纯函数,不碰任何外部东西)
+&#9474;   &#9500;&#9472;&#9472; order.py                 下单(调用 price + 写数据库)
+&#9474;   &#9492;&#9472;&#9472; api.py                   网络接口(把请求翻译成函数调用)
+&#9492;&#9472;&#9472; tests/                       &larr;&larr; 测试
+    &#9500;&#9472;&#9472; test_price.py            &#9312; 单元测试   5 条
+    &#9500;&#9472;&#9472; test_order.py            &#9313; 集成测试   5 条
+    &#9500;&#9472;&#9472; test_api.py              &#9313; 接口测试   7 条
+    &#9492;&#9472;&#9472; e2e/
+        &#9492;&#9472;&#9472; test_checkout_e2e.py &#9314; E2E(示意,默认跳过)</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:30%">文件</th><th style="width:14%">行数</th><th>它做什么</th></tr></thead>
+<tbody>
+<tr><td><code>myshop/price.py</code></td><td>18</td><td>纯算数,把分变成元</td></tr>
+<tr><td><code>myshop/order.py</code></td><td>108</td><td>算总价 + 记到账本(数据库)里</td></tr>
+<tr><td><code>myshop/api.py</code></td><td>98</td><td>把网络请求翻译成函数调用</td></tr>
+<tr><td colspan="2"><strong>源码合计</strong></td><td><strong>224 行</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="core">三、核心设计:三个文件按依赖排列</h2>
+
+<div class="box key">
+  <b class="t">这是整个项目最重要的一句话</b>
+  <strong>三个源码文件按「依赖从少到多」排列,而这个顺序,恰好就是测试金字塔的层级。</strong>
+</div>
+
+<figure>
+<svg viewBox="0 0 860 400" role="img" aria-label="myshop 三层源码的依赖关系与对应测试层">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st">
+    <rect x="40" y="30" width="210" height="72" rx="12" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="145" y="56" font-size="14" font-weight="800" fill="var(--bad)" text-anchor="middle">api.py</text>
+    <text x="145" y="76" font-size="11.5" fill="var(--soft)" text-anchor="middle">服务员 &mdash; 只接单和报菜名</text>
+    <text x="145" y="93" font-size="11" fill="var(--faint)" text-anchor="middle">98 行</text>
+
+    <rect x="40" y="150" width="210" height="72" rx="12" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="145" y="176" font-size="14" font-weight="800" fill="var(--warn)" text-anchor="middle">order.py</text>
+    <text x="145" y="196" font-size="11.5" fill="var(--soft)" text-anchor="middle">厨师长 &mdash; 统筹整单</text>
+    <text x="145" y="213" font-size="11" fill="var(--faint)" text-anchor="middle">108 行</text>
+
+    <rect x="40" y="270" width="210" height="72" rx="12" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="145" y="296" font-size="14" font-weight="800" fill="var(--info)" text-anchor="middle">price.py</text>
+    <text x="145" y="316" font-size="11.5" fill="var(--soft)" text-anchor="middle">计算器 &mdash; 只做一件事</text>
+    <text x="145" y="333" font-size="11" fill="var(--faint)" text-anchor="middle">18 行</text>
+
+    <g font-size="12" fill="var(--soft)">
+      <text x="300" y="52">依赖:order + 网络服务</text>
+      <text x="300" y="72" fill="var(--faint)" font-size="11">要启动一个服务器才能测</text>
+      <text x="300" y="172">依赖:price + 数据库</text>
+      <text x="300" y="192" fill="var(--faint)" font-size="11">要建一个数据库文件才能测</text>
+      <text x="300" y="292" fill="var(--ok)" font-weight="700">什么都不依赖</text>
+      <text x="300" y="312" fill="var(--faint)" font-size="11">给个数字就能测</text>
+    </g>
+
+    <g font-size="12.5" text-anchor="end">
+      <text x="820" y="58" fill="var(--bad)" font-weight="700">&rarr; &#9313; 接口测试 3.64 秒</text>
+      <text x="820" y="178" fill="var(--warn)" font-weight="700">&rarr; &#9313; 集成测试 0.02 秒</text>
+      <text x="820" y="298" fill="var(--info)" font-weight="700">&rarr; &#9312; 单元测试 0.00 秒</text>
+    </g>
+  </g>
+  <g stroke="var(--faint)" stroke-width="1.6" marker-end="url(#a1)">
+    <line x1="145" y1="146" x2="145" y2="108"/>
+    <line x1="145" y1="266" x2="145" y2="228"/>
+  </g>
+  <text x="118" y="130" class="st" font-size="11" fill="var(--faint)" text-anchor="end">使用</text>
+  <text x="118" y="250" class="st" font-size="11" fill="var(--faint)" text-anchor="end">使用</text>
+  <text x="430" y="378" class="st" font-size="13.5" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    每往上加一层依赖,验证它就贵一个数量级
+  </text>
+</svg>
+<figcaption>从 0.00 秒到 3.64 秒。代码只多了两层依赖,验证时间差了约 180 倍（本项目本机实测值,不可外推到其他项目）</figcaption>
+</figure>
+
+<div class="box good">
+  <b class="t">依赖方向是单向的 —— 注意没有任何反向箭头</b>
+  <code>price.py</code> 不知道 <code>order.py</code> 存在,<code>order.py</code> 不知道 <code>api.py</code> 存在。
+  <br><br>
+  这个约束带来两个好处:
+  <ol style="margin-bottom:0">
+    <li><strong>可以单独测最底层</strong> —— 测 price 不需要数据库、不需要服务器</li>
+    <li><strong>爆炸半径可预测</strong> —— 改 api 影响不到别人;但<strong>改 price 会波及所有上层</strong></li>
+  </ol>
+  <br>
+  第二条就是第 8、9 页那些事故的根源:<strong>一个函数的爆炸半径,和它的代码行数成反比。</strong>
+</div>
+
+<h2 id="price">四、最底层:纯函数</h2>
+
+<pre><code># 文件:项目根目录/myshop/price.py
+"""价格模块:全项目最「纯」的一块。
+
+纯 = 只做计算。不读数据库、不发网络请求、不看时间、不改全局变量。
+同样的输入永远得到同样的输出 —— 这种函数是单元测试最好啃的骨头。
+"""
+
+
+def format_price(cents: int) -&gt; str:
+    """把「分」换算成人类看的价格字符串。
+
+    1234 -&gt; "¥12.34"
+    """
+    if cents &lt; 0:
+        raise ValueError("价格不能为负数")
+    # divmod(1234, 100) 一次返回 (12, 34):12 块、34 分
+    yuan, fen = divmod(cents, 100)
+    # :02d 表示不足两位就在前面补 0,所以 5 分会变成 "05"
+    return f"¥{yuan}.{fen:02d}"</code></pre>
+
+<h3>「纯」是什么意思</h3>
+
+<div class="term">
+  <div class="term-h"><span class="zh">纯函数</span><span class="en">pure function</span><span class="badge">最好测</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个<strong>只做计算</strong>的函数:同样的输入,永远得到同样的输出,而且<strong>不改变外部世界的任何东西</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>计算器 vs 自动售货机。</strong></p>
+    <p><strong>计算器</strong>:你按 2+3,它永远显示 5。按一百遍都一样,而且不会因为你按了它就少一瓶饮料。</p>
+    <p><strong>自动售货机</strong>:你按同一个按钮,第一次给你可乐,第二次可能显示「售罄」——
+    因为<strong>它有状态,而且你的操作改变了它</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>金字塔最底层的被测对象</strong>。因为它不依赖任何外部东西,所以测它<strong>不需要任何准备工作</strong> ——
+    这就是第 5 页说的「准备段重量为零」。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:34%">它不做的事</th><th>如果做了会怎样</th></tr></thead>
+    <tbody>
+    <tr><td>不读数据库</td><td>测试就得先准备一个数据库</td></tr>
+    <tr><td>不发网络请求</td><td>测试就得联网,还可能超时</td></tr>
+    <tr><td>不看当前时间</td><td>今天跑通了,明天可能挂</td></tr>
+    <tr><td>不改全局变量</td><td>跑第二遍结果可能不一样</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「纯函数就是简单函数」。</strong>不是。一个几百行的复杂算法也可以是纯的,
+    只要它不碰外部世界。<strong>「纯」说的是有没有副作用,不是复杂度。</strong></p>
+    <p><strong>误区 2:「抛异常就不纯了」。</strong>不影响。抛异常也是一种确定的输出 ——
+    同样输入 <code>-1</code>,它永远抛同一个异常。</p>
+  </div></div>
+</div>
+
+<h3>两个值得学的细节</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:28%">写法</th><th>为什么这么写</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>divmod(1234, 100)</code></td>
+  <td>一次返回 <code>(12, 34)</code> —— 商和余数一起给你。比写两次 <code>//</code> 和 <code>%</code> 干净</td>
+</tr>
+<tr>
+  <td><code>{fen:02d}</code></td>
+  <td><code>02</code> 的意思是「不足两位就在前面补 0」。<strong>没有它,5 分会显示成 <code>¥0.5</code> 而不是 <code>¥0.05</code></strong> ——
+      这是格式化的经典 bug,第 8 页第一个实验就是它</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="order">五、中间层:跨模块 + 存数据</h2>
+
+<p>这是<strong>集成测试的主角</strong>。它在一个函数里同时干了两件单元测试盖不住的事:</p>
+
+<pre><code># 文件:项目根目录/myshop/order.py (节选)——完整代码见配套 myshop 项目
+import sqlite3
+from contextlib import closing
+from typing import Any, Dict, Optional
+
+from myshop.price import format_price     # &larr; 事件 1:依赖了另一个模块
+
+
+def create_order(
+    item: str,
+    unit_cents: int,
+    qty: int,
+    db_path: Optional[str] = None,
+) -&gt; Order:
+    """下一单:校验 -&gt; 算钱 -&gt; 写库 -&gt; 返回订单。
+
+    注意顺序:所有可能抛异常的事情都必须发生在写库 **之前**。
+    否则订单已经写进数据库了才报错,库里就留下了脏数据。
+    """
+    # ---- 1. 先把所有校验做完 ----
+    if qty &lt;= 0:
+        raise ValueError("数量必须大于 0")
+    if unit_cents &lt; 0:
+        raise ValueError("单价不能为负数")
+
+    total_cents = unit_cents * qty
+
+    # ---- 2. 再把所有可能抛异常的计算做完 ----
+    # format_price 对负数会 raise。放在写库前面调用,
+    # 保证「要么整单成功,要么库里什么都没有」。
+    total_text = format_price(total_cents)
+
+    # ---- 3. 最后才动数据库 ----
+    path = _path(db_path)
+    init_db(path)
+
+    with closing(sqlite3.connect(path)) as conn:      # &larr; 事件 2:真的写进数据库
+        cur = conn.execute(
+            "INSERT INTO orders (item, qty, total_cents) VALUES (?, ?, ?)",
+            (item, qty, total_cents),
+        )
+        # lastrowid 在类型上可能是 None,用 or 0 兜底,类型检查才不会报错
+        order_id = cur.lastrowid or 0
+        conn.commit()
+
+    return {
+        "id": order_id,
+        "item": item,
+        "qty": qty,
+        "total_cents": total_cents,
+        "total_text": total_text,
+    }</code></pre>
+
+<h3>这里的三段式顺序是整个项目最重要的一课</h3>
+
+<div class="box trap">
+  <b class="t">&#128293; 所有可能抛异常的事情,必须发生在写数据库之前</b>
+  如果把 <code>format_price</code> 挪到写库<strong>之后</strong>调用
+  (这是很自然的写法,毕竟它「只是拼个显示文案」),单价为负时就会:
+  <pre style="margin:9px 0"><code>写库 &#9989;  &rarr;  算 format_price  &rarr;  &#128165; 抛异常
+                                     &uarr;
+                          库里已经留下一条脏数据了</code></pre>
+  <p style="margin:9px 0 0"><strong>这个 bug 有多隐蔽?第 8 页会实测:类型检查完全看不出来,而且如果没人想到写那条测试,全量测试也抓不到。</strong></p>
+</div>
+
+<h3>三个值得学的细节</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">写法</th><th>为什么这么写</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>closing(...)</code></td>
+  <td>保证连接<strong>一定被关掉</strong>,哪怕中间抛了异常。不用它的话,异常路径上会漏连接</td>
+</tr>
+<tr>
+  <td><code>cur.lastrowid or 0</code></td>
+  <td>这个值在类型上可能是「空」,直接返回类型检查会报错。<code>or 0</code> 兜个底。
+      <strong>这行就是类型检查逼你考虑边界的例子</strong></td>
+</tr>
+<tr>
+  <td><code>conn.commit()</code></td>
+  <td><strong>确认提交</strong> —— 下面单独讲,它是第 8 页第五个实验的主角</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3><code>commit</code> 是什么</h3>
+
+<div class="term">
+  <div class="term-h"><span class="zh">确认提交</span><span class="en">commit</span><span class="badge">数据库概念</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>数据库有个规矩:你写进去的东西,要<strong>「确认提交」之后才算数</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>在超市结账。</strong></p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:44%">超市</th><th>数据库</th></tr></thead>
+    <tbody>
+    <tr><td>把商品放进购物车</td><td>执行写入语句</td></tr>
+    <tr><td><strong>到收银台付钱</strong></td><td><strong><code>conn.commit()</code></strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p><strong>没付钱就走出超市,东西不是你的。</strong>数据库也一样 ——
+    没提交就关闭连接,刚写的东西<strong>全部作废</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>⚠️ <strong>注意这个词有两个完全不同的含义,别混:</strong></p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:34%">出现在哪</th><th>意思</th></tr></thead>
+    <tbody>
+    <tr><td>数据库(本页)</td><td>确认提交刚写的数据</td></tr>
+    <tr><td>存档系统(第 11 页)</td><td><strong>按一次存档键</strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p>两者<strong>没有任何关系</strong>,只是碰巧同名。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>第 8 页会把这一行注释掉,然后看到这一幕:</p>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实实验输出</div>
+<pre>create_order 返回: {'id': 1, 'item': '咖啡', 'total_text': '¥25.00'}
+  <span class="c-dim">&uarr; 完全正常!有订单号、金额对、文案对</span>
+
+换个连接去数数据库里有几条订单: <span class="c-bad">0</span>
+  <span class="c-dim">&uarr; 一条都没有</span></pre>
+    </div>
+    <p><strong>函数返回「成功」,数据库里什么都没有。</strong>这是最阴险的一类 bug。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区:「同一个连接里能读到,说明存进去了」。</strong>
+    <strong>错。</strong>在同一个连接里,没提交的数据照样能读到 —— 你读的是自己那笔「还没结账的购物车」。
+    <br>这就是第 5 页那个「换个连接读回来」技巧存在的全部原因。</p>
+  </div></div>
+</div>
+
+<h2 id="api">六、最上层:只做翻译</h2>
+
+<pre><code># 文件:项目根目录/myshop/api.py (节选)——完整代码见配套 myshop 项目
+
+class ShopHandler(BaseHTTPRequestHandler):
+    def do_POST(self) -&gt; None:
+        if self.path != "/orders":
+            self._send(404, {"error": "没有这个接口"})
+            return
+
+        length = int(self.headers.get("Content-Length") or 0)
+        raw = self.rfile.read(length) if length else b"{}"
+
+        # 解析必须放在 try 里面:客户端发来的东西不一定是合法格式。
+        # 放在外面的话,一个畸形请求就会让服务器抛未捕获异常 -&gt; 500,
+        # 而设计上这应该是一个规规矩矩的 400。
+        try:
+            body: Dict[str, Any] = json.loads(raw)
+        except json.JSONDecodeError:
+            self._send(400, {"error": "请求体不是合法的 JSON"})
+            return
+
+        try:
+            order = create_order(
+                item=str(body["item"]),
+                unit_cents=int(body["unit_cents"]),
+                qty=int(body["qty"]),
+            )
+        except KeyError as exc:
+            self._send(400, {"error": f"缺少字段 {exc}"})
+            return
+        except (TypeError, ValueError) as exc:
+            self._send(400, {"error": str(exc)})
+            return
+
+        self._send(201, order)</code></pre>
+
+<div class="box good">
+  <b class="t">它自己不算钱、不写库</b>
+  它的唯一职责是:<strong>把网络请求翻译成函数调用,再把结果翻译回去。</strong>
+  <br><br>
+  这叫<strong>薄接口层</strong>,是好的分层设计。判断标准很简单:
+  <strong>把 <code>api.py</code> 整个删掉,业务逻辑一行都不会丢。</strong>
+</div>
+
+<h3>三个实用技巧藏在这里</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">技巧</th><th style="width:30%">代码</th><th>为什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>随机端口</strong></td><td><code>HTTPServer(("127.0.0.1", 0))</code></td>
+  <td><code>0</code> = 让系统挑一个空闲端口。<strong>写死端口的话,你本地开着开发服务器时测试就跑不了</strong></td>
+</tr>
+<tr>
+  <td><strong>中文不乱码</strong></td><td><code>json.dumps(..., ensure_ascii=False)</code></td>
+  <td>不加这个,「咖啡」会变成一串转义码</td>
+</tr>
+<tr>
+  <td><strong>静音日志</strong></td><td>重写空的 <code>log_message</code></td>
+  <td>默认每个请求都往终端打一行,跑测试时会淹没结果</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="run">七、跑起来验证</h2>
+
+<h3>跑全部测试</h3>
+
+<p>在 myshop 项目根目录执行:</p>
+
+<pre><code>.venv/bin/python -m pytest</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre><span class="c-dim">platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 17 items / 1 skipped</span>
+
+tests/test_api.py::test_下单接口返回_201_和订单内容 <span class="c-ok">PASSED</span>
+tests/test_api.py::test_下单之后能用_GET_查回来 <span class="c-ok">PASSED</span>
+tests/test_api.py::test_缺字段要返回_400 <span class="c-ok">PASSED</span>
+tests/test_api.py::test_数量为零要返回_400 <span class="c-ok">PASSED</span>
+tests/test_api.py::test_单价为负要返回_400 <span class="c-ok">PASSED</span>
+tests/test_api.py::test_请求体不是合法_JSON_要返回_400_而不是_500 <span class="c-ok">PASSED</span>
+tests/test_api.py::test_查不存在的订单要返回_404 <span class="c-ok">PASSED</span>
+tests/test_order.py::test_下单会把总价算对并且带上价格文案 <span class="c-ok">PASSED</span>
+tests/test_order.py::test_订单真的落盘了_换个连接还读得到 <span class="c-ok">PASSED</span>
+tests/test_order.py::test_下两单会拿到两个不同的订单号 <span class="c-ok">PASSED</span>
+tests/test_order.py::test_数量为零应该被拦下来并且不写库 <span class="c-ok">PASSED</span>
+tests/test_order.py::test_单价为负数也要被拦下来并且不写库 <span class="c-ok">PASSED</span>
+tests/test_price.py::test_普通价格 <span class="c-ok">PASSED</span>
+tests/test_price.py::test_零元是边界值 <span class="c-ok">PASSED</span>
+tests/test_price.py::test_不足一角要在前面补零 <span class="c-ok">PASSED</span>
+tests/test_price.py::test_整数元不能丢掉小数位 <span class="c-ok">PASSED</span>
+tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>
+
+<span class="c-ok">======================== 17 passed, 1 skipped in 3.66s =========================</span></pre>
+</div>
+
+<h3>单独启动接口试试</h3>
+
+<p>在 myshop 项目根目录执行:</p>
+
+<pre><code>PYTHONPATH=. .venv/bin/python -m myshop.api</code></pre>
+
+<p>另开一个终端窗口:</p>
+
+<pre><code>curl -X POST http://127.0.0.1:8000/orders -H 'Content-Type: application/json' -d '{"item":"咖啡","unit_cents":1250,"qty":2}'</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>{"id": 1, "item": "咖啡", "qty": 2, "total_cents": 2500, "total_text": "¥25.00"}</pre>
+</div>
+
+<p>再试一个畸形请求:</p>
+
+<pre><code>curl -s -w " &lt;- HTTP %{http_code}\n" -X POST http://127.0.0.1:8000/orders -d '{坏JSON'</code></pre>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>{"error": "请求体不是合法的 JSON"} <span class="c-ok">&lt;- HTTP 400</span></pre>
+</div>
+
+<p><strong>400 而不是 500</strong> —— 这正是上面那个「解析放在 <code>try</code> 里面」的效果。</p>
+
+<h2 id="bugs">八、这个项目里曾经藏着两个真 bug</h2>
+
+<p>这个项目最初的版本有两个真实的 bug。它们<strong>已经修好了</strong>,但值得单独讲 ——
+因为它们恰好演示了「<strong>全量测试也抓不到你压根没写的用例</strong>」。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">Bug</th><th style="width:34%">问题</th><th>后果</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>order.py</code></td>
+  <td><code>format_price</code> 在写库<strong>之后</strong>才调用,而且单价从头到尾没校验</td>
+  <td>单价为负时:<strong>先把订单写进数据库,然后才抛异常</strong> —— 库里留下脏数据</td>
+</tr>
+<tr>
+  <td><code>api.py</code></td>
+  <td>解析请求体写在 <code>try</code> <strong>外面</strong></td>
+  <td>一个畸形请求 &rarr; 未捕获异常 &rarr; 客户端拿到 <strong>500</strong>(设计上该是 400),终端还刷一屏错误</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>修复的同时补了两条测试</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:46%">新增的测试</th><th>它守着什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>test_单价为负数也要被拦下来并且不写库</code></td>
+  <td><strong>校验顺序</strong> —— 异常抛出后,库里必须一条记录都没有</td>
+</tr>
+<tr>
+  <td><code>test_请求体不是合法_JSON_要返回_400_而不是_500</code></td>
+  <td><strong>容错行为</strong> —— 是你请求发错了,不是我崩了</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">这两个 bug 的教学价值</b>
+  第 8 页会实测把它们改回去,然后你会看到:
+  <ul style="margin-bottom:0">
+    <li><strong>类型检查完全看不出来</strong> —— 报「一切正常」</li>
+    <li><strong>如果没有那两条新测试,全量测试也是绿的</strong> —— 原版 4 条集成测试全过</li>
+    <li><strong>只有「你想到要测这个场景」才能发现它</strong></li>
+  </ul>
+</div>
+
+<div class="box good">
+  <b class="t">这就是「测试覆盖率」的真正含义</b>
+  <em>测试只能证明「你想到要检查的东西」是对的,不能证明「代码是对的」。</em>
+  <br><br>
+  所以<strong>第 4 步(你自己看改动)永远不能省</strong> ——
+  它是唯一能发现「这里应该还有个用例没写」的环节。<strong>机器只会跑你写下的东西。</strong>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>59</td><td>为什么要练习项目</td><td>测试这件事不动手学不会</td></tr>
+<tr><td>60</td><td>三层 = 服务员/厨师长/计算器</td><td>224 行,一眼看完</td></tr>
+<tr><td>61</td><td><strong>依赖方向单向</strong></td><td>api &rarr; order &rarr; price,没有反向箭头</td></tr>
+<tr><td>62</td><td>纯函数</td><td>不碰数据库/网络/时间/全局变量</td></tr>
+<tr><td>63</td><td><code>divmod</code> 与补零</td><td>没有 <code>:02d</code>,5 分会显示成 <code>¥0.5</code></td></tr>
+<tr><td>64</td><td>&#128293; <strong>校验必须在写库之前</strong></td><td>否则先写脏数据再抛异常</td></tr>
+<tr><td>65</td><td><code>commit</code> = 超市结账</td><td>没付钱走出超市,东西不是你的</td></tr>
+<tr><td>66</td><td><code>closing(...)</code></td><td>保证连接一定关掉</td></tr>
+<tr><td>67</td><td><code>lastrowid or 0</code></td><td>类型检查逼你考虑边界</td></tr>
+<tr><td>68</td><td><code>port=0</code></td><td>让系统挑空闲端口,避免冲突</td></tr>
+<tr><td>69</td><td><code>ensure_ascii=False</code></td><td>中文不乱码</td></tr>
+<tr><td>70</td><td>薄接口层</td><td>删掉它业务逻辑一行不丢</td></tr>
+<tr><td>71</td><td>两个真 bug</td><td>全量测试抓不到「你没写的用例」</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="05-pyramid.html">&larr; 上一页:测试金字塔四层</a>
+  <a href="00-index.html">目录</a>
+  <a href="07-four-layers-code.html">下一页:四层测试代码逐行讲 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 06 页 / 共 23 页 · 覆盖知识点 59–71 · 难度 &#9733;&#9733;</p>
+  <p>全部代码与输出实测于 macOS 15.7.4 / Python 3.9.6 / pytest 8.4.2。本页无需修正项。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

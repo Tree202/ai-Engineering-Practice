@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>18 门禁检查什么 · 阈值怎么定</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">18 门禁项 <span>· 阈值怎么定</span></span>
+  <a href="17-quality-gate.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="19-gate-demo.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 18 页 · 难度 ★★★★ · 前置:第 17 页 · <b style="color:var(--bad)">全书重点 2/3</b></span>
+<h1>门禁检查什么 · 阈值怎么定</h1>
+<p class="lede">
+第 17 页讲清了「门禁是什么」。这一页回答两个最实际的问题:
+<strong>到底该量哪些指标?每个指标的阈值该定多少?</strong>
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#menu">一、门禁项全清单</a></li>
+    <li><a href="#pass">二、测试通过率:必须分级</a></li>
+    <li><a href="#skip">三、&#128260; 被遗漏的两条:跳过数 &amp; 抖动率</a></li>
+    <li><a href="#cov">四、覆盖率:最容易被误解的指标</a></li>
+    <li><a href="#new">五、&#128260; 增量优于全量:「新代码干净」原则</a></li>
+    <li><a href="#static">六、静态扫描类指标</a></li>
+    <li><a href="#howto">七、阈值怎么定:基线法与棘轮法</a></li>
+    <li><a href="#docwrong">八、&#128293; 官方文档自己也会写错(两个实例)</a></li>
+    <li><a href="#mini">九、给小项目的最小可用配置</a></li>
+  </ol>
+</div>
+
+<h2 id="menu">一、门禁项全清单</h2>
+
+<p>按第 17 页的分类,先把常见门禁项分成两类:</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:6%">类</th><th style="width:20%">门禁项</th><th style="width:22%">量什么</th>
+  <th style="width:20%">典型阈值</th><th>难度</th>
+</tr></thead>
+<tbody>
+<tr style="background:var(--ok-soft)">
+  <td rowspan="4" style="vertical-align:middle;font-weight:800;color:var(--ok)">硬<br>门<br>禁</td>
+  <td><strong>代码规范</strong></td><td>规范工具退出码</td>
+  <td>必须 = 0</td><td style="color:var(--ok)">&#9733; 第一天就能上</td></tr>
+<tr style="background:var(--ok-soft)">
+  <td><strong>类型检查</strong></td><td>类型工具退出码</td>
+  <td>必须 = 0</td><td style="color:var(--ok)">&#9733; 第一天就能上</td></tr>
+<tr style="background:var(--ok-soft)">
+  <td><strong>P0 用例</strong></td><td>核心用例通过率</td>
+  <td style="color:var(--bad)"><strong>100%</strong></td><td style="color:var(--ok)">&#9733;&#9733; 要先标出 P0</td></tr>
+<tr style="background:var(--ok-soft)">
+  <td><strong>严重安全问题</strong></td><td>高危 + 严重漏洞数</td>
+  <td style="color:var(--bad)"><strong>= 0</strong></td><td style="color:var(--warn)">&#9733;&#9733; 要接扫描工具</td></tr>
+
+<tr style="background:var(--warn-soft)">
+  <td rowspan="7" style="vertical-align:middle;font-weight:800;color:var(--warn)">阈<br>值<br>门<br>禁</td>
+  <td><strong>全量通过率</strong></td><td>所有用例的通过比例</td>
+  <td>&ge; 95%</td><td style="color:var(--warn)">&#9733;&#9733; 要能算出比例</td></tr>
+<tr style="background:var(--warn-soft)">
+  <td><strong>增量覆盖率</strong></td><td><strong>本次改动行</strong>被测到的比例</td>
+  <td>&ge; 80%</td><td style="color:var(--warn)">&#9733;&#9733;&#9733; 要能算差异</td></tr>
+<tr style="background:var(--warn-soft)">
+  <td>&#128260; <strong>跳过数</strong></td><td>被 skip 掉的用例数</td>
+  <td>&le; 5 或不增长</td><td style="color:var(--ok)">&#9733; <strong>很便宜,却常被忘</strong></td></tr>
+<tr style="background:var(--warn-soft)">
+  <td>&#128260; <strong>用例总数</strong></td><td>用例总条数:抓「注释/删除用例」类作弊——总数比主干少就红</td>
+  <td>不得少于主干(弱门禁)</td><td style="color:var(--ok)">&#9733; 很便宜。注意它防不住「删一条关键用例、补一条空用例」的语义替换,所以 diff 落在测试文件上时仍要人工读(第 20 页)</td></tr>
+<tr style="background:var(--warn-soft)">
+  <td>&#128260; <strong>抖动率</strong></td><td>不稳定用例占比</td>
+  <td>&lt; 1%</td><td style="color:var(--bad)">&#9733;&#9733;&#9733;&#9733; 要多次重跑统计</td></tr>
+<tr style="background:var(--warn-soft)">
+  <td><strong>重复代码率</strong></td><td>重复代码块占比</td>
+  <td>&lt; 3%</td><td style="color:var(--warn)">&#9733;&#9733; 要接扫描工具</td></tr>
+<tr style="background:var(--warn-soft)">
+  <td><strong>中低危问题</strong></td><td>非严重问题数</td>
+  <td>不增长(棘轮)</td><td style="color:var(--warn)">&#9733;&#9733;&#9733; 要存历史基线</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">如果只能上三条,上哪三条?</b>
+  <strong>规范 + 类型 + P0 用例 100%。</strong>
+  <br><br>
+  理由:三条全是硬门禁 —— <strong>不需要测基线、不需要定阈值、不需要接任何额外工具</strong>,
+  而且它们拦下的是最低级也最高频的错误。<strong>投入产出比远高于覆盖率。</strong>
+  <br><br>
+  第 19 页那个真实门禁配的是:规范 + 类型 + 全量测试;把第三条换成 P0 100%,就是真实项目里推荐的升级版。
+</div>
+
+<h2 id="pass">二、测试通过率:必须分级</h2>
+
+<p>第 17 页的错误 3 已经点过题,这里补上落地细节。</p>
+
+<div class="term">
+  <div class="term-h"><span class="zh">用例分级</span><span class="en">test priority</span><span class="badge">阈值前提</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>给每条测试用例打上优先级标签,<strong>不同级别配不同阈值</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>飞机起飞前的检查单。</strong></p>
+    <p>「发动机能不能点火」和「阅读灯亮不亮」<strong>不可能用同一个标准</strong>。
+    发动机一项不过就不飞;阅读灯坏两个照飞不误,记一笔下次修。</p>
+    <p><strong>把两者混成一个「检查通过率 &ge; 95%」,等于允许发动机不点火。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>阈值门禁的前提工作</strong> —— 没分级就没法定分级阈值。
+    这件事要在配门禁<strong>之前</strong>做。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>在 myshop 里,用标记给用例分级:</p>
+<pre><code># 文件:&lt;你的项目&gt;/myshop/pyproject.toml
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+markers = [
+    "p0: 核心链路,挂了就是生产事故",
+]</code></pre>
+<pre><code># 文件:&lt;你的项目&gt;/myshop/tests/test_order.py
+
+import pytest
+
+@pytest.mark.p0
+def test_订单真的落盘了_换个连接还读得到(tmp_path: Path) -&gt; None:
+    数据库 = str(tmp_path / "test.db")
+    订单 = create_order("键盘", unit_cents=39900, qty=1, db_path=数据库)
+    读回来 = get_order(订单["id"], db_path=数据库)
+    assert 读回来["item"] == "键盘"
+    assert 读回来["total_cents"] == 39900
+    assert 读回来["total_text"] == "¥399.00"</code></pre>
+    <p>(这是 <code>tests/test_order.py</code> 里已有的测试,给它打上标记即可,不需要新写)然后在流水线里跑两遍,配两条门禁:</p>
+<pre><code># 门禁 A:P0 用例,阈值 100%
+pytest -m p0 -q
+
+# 门禁 B:全量用例,阈值 &ge; 95%
+pytest -q</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「P0 越多越好」。</strong>反了。
+    <strong>P0 应该少而精</strong> —— 如果 80% 的用例都是 P0,等于没分级。
+    经验值:<strong>P0 占全部用例的 5%–15%</strong>。</p>
+    <p><strong>误区 2:「全量 95% 就够了,不用单独配 P0」。</strong>
+    <strong>危险。</strong>那 5% 的余量里正好是支付流程挂了,门禁照样放行。
+    <strong>P0 100% 这条是分级的全部意义所在。</strong></p>
+  </div></div>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 一个必须配套的动作:通过率的分母</b>
+  「通过率 &ge; 95%」这句话有个隐藏漏洞:<strong>分母是多少?</strong>
+  <br><br>
+  如果有人把 100 条用例注释掉 90 条,剩下 10 条全过 —— <strong>通过率 100%,门禁绿灯。</strong>
+  <br><br>
+  <strong>注意:被注释/删除的用例不会计入 skipped,「跳过数门禁」抓不住它。注释/删除式作弊由上面清单里新增的「用例总数门禁」(总数不得少于主干)抓住;@skip 式作弊才由下一节的「跳过数门禁」兜底。单独用通过率,等于给自己留了个后门。</strong>
+</div>
+
+<h2 id="skip">三、&#128260; 被遗漏的两条:跳过数 &amp; 抖动率</h2>
+
+<p>这两条是我第一版<strong>完全没写</strong>的,但它们恰恰堵住了通过率门禁最大的两个漏洞。</p>
+
+<h3>3.1 跳过数门禁</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">四要素</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td><strong>&#9312; 检查点</strong></td><td>提合并请求时,和通过率同一时刻</td></tr>
+<tr><td><strong>&#9313; 度量指标</strong></td><td><strong>被跳过(skipped)的用例数</strong></td></tr>
+<tr><td><strong>&#9314; 阈值</strong></td><td>绝对值 <code>&le; 5</code>,或者更好的:<strong>相比主干不增长</strong></td></tr>
+<tr><td><strong>&#9315; 失败动作</strong></td><td>阻断。<strong>因为它防的是作弊,不是质量波动</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">为什么这条比它看起来重要得多</b>
+  <strong>「跳过用例」是让门禁变绿的最省事的办法。</strong>
+  <br><br>
+  一个用例挂了,修它要一小时;在它上面加一行「暂时跳过」只要三秒,而且流水线立刻变绿。
+  <strong>没有跳过数门禁的话,这个操作零成本、零阻力、而且完全合规。</strong>
+  <br><br>
+  半年后你会发现项目里有 300 条被跳过的用例,而通过率一直是漂亮的 100%。
+  <br><br>
+  <strong>这就是第 20 页要专门讲的「防作弊」的第一个具体例子。</strong>
+</div>
+
+<p>myshop 里就有一条真实的跳过 —— 你在第 10 页见过:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真机输出</div>
+<pre><span class="c-cmd">$ .venv/bin/python -m pytest -q</span>
+<span class="c-ok">.................</span><span class="c-warn">s</span>                                        [100%]
+<span class="c-ok">17 passed</span>, <span class="c-warn">1 skipped</span> in 3.66s
+                <span class="c-dim">&uarr; 这个 1 是端到端用例,因为没装浏览器驱动被跳过</span></pre>
+</div>
+
+<div class="box note">
+  <b class="t">这个 1 是「良性跳过」还是「作弊跳过」?</b>
+  <strong>良性的。</strong>它跳过的原因是<strong>依赖缺失</strong>(没装浏览器驱动),用的是条件跳过,
+  换到装了驱动的环境上它就会真跑。
+  <br><br>
+  <strong>作弊跳过长这样:</strong>无条件跳过,理由写着「暂时先跳过,后面修」—— 而那个「后面」永远不会来。
+  <br><br>
+  <strong>门禁分不清这两种。</strong>所以现实的做法是:<strong>盯住数字不增长</strong>,
+  新增跳过时人工看一眼原因。
+</div>
+
+<h3>3.2 抖动率门禁</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">四要素</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td><strong>&#9312; 检查点</strong></td><td><strong>定时任务</strong>(比如每晚),不放在合并请求上</td></tr>
+<tr><td><strong>&#9313; 度量指标</strong></td><td><strong>同一份代码重跑 N 次,结果不一致的用例占比</strong></td></tr>
+<tr><td><strong>&#9314; 阈值</strong></td><td>&lt; 1%</td></tr>
+<tr><td><strong>&#9315; 失败动作</strong></td><td><strong>降级告警 + 通知</strong>,不阻断合并</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">为什么抖动率门禁<strong>不能</strong>挂在合并请求上</b>
+  要测抖动率,你得<strong>把同一份代码跑很多遍</strong>(通常 5–10 遍)。
+  <br><br>
+  如果每个合并请求都这么干,流水线时间<strong>直接乘 10</strong> —— 没人受得了。
+  <br><br>
+  <strong>所以它的检查点必须是「每晚定时」,失败动作必须是「告警」而不是「阻断」。</strong>
+  这是四要素里 &#9312; 和 &#9315; 必须联动的一个典型例子:
+  <strong>换了检查点,失败动作也得跟着换。</strong>
+</div>
+
+<div class="box key">
+  <b class="t">抖动率和通过率的关系(回看第 10 页 &amp; 第 17 页错误 3)</b>
+  第 17 页说「全量通过率留 5% 余量给不稳定用例」—— 那是<strong>妥协</strong>。
+  <br><br>
+  <strong>抖动率门禁是这个妥协的解药:</strong>它盯着「不稳定用例到底有多少」这个数字本身,
+  不让那 5% 的余量越吃越多。
+  <br><br>
+  <strong>没有抖动率门禁的话,通过率阈值会一路往下调:95% &rarr; 90% &rarr; 85% &rarr; 关掉。</strong>
+</div>
+
+<h2 id="cov">四、覆盖率:最容易被误解的指标</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">代码覆盖率</span><span class="en">code coverage</span><span class="badge">阈值门禁</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>跑完测试后,统计<strong>有多少行代码被执行到了</strong>,除以总行数。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>体检的「检查项覆盖率」,不是「健康度」。</strong></p>
+    <p>你做了全套体检(覆盖率 100%),只能说明<strong>每个部位都被看过一眼</strong>,
+    <strong>不能说明你健康</strong> —— 医生可能看了但没看出问题。</p>
+    <p>反过来,覆盖率 30% 一定意味着<strong>有 70% 的部位根本没人看过</strong>。</p>
+    <div class="tw" style="margin:11px 0 0">
+    <table>
+    <thead><tr><th style="width:34%">覆盖率能告诉你</th><th>覆盖率不能告诉你</th></tr></thead>
+    <tbody>
+    <tr>
+      <td style="color:var(--ok)"><strong>哪些代码<u>肯定没被测到</u></strong></td>
+      <td style="color:var(--bad)">被测到的代码<u>是不是测对了</u></td>
+    </tr>
+    <tr>
+      <td style="color:var(--ok)">测试的<strong>盲区在哪</strong></td>
+      <td style="color:var(--bad)">代码<strong>有没有 bug</strong></td>
+    </tr>
+    </tbody>
+    </table>
+    </div>
+    <p style="margin:11px 0 0"><strong>覆盖率是「盲区探测器」,不是「质量分数」。</strong>这是理解它的唯一正确姿势。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>典型的阈值门禁。<strong>必须先测基线才能定阈值</strong>,不能第一天就上。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>在 myshop 里量一下(先装工具):</p>
+<pre><code>cd &lt;你的项目&gt;/myshop
+.venv/bin/python -m pip install pytest-cov
+.venv/bin/python -m pytest --cov=myshop --cov-report=term-missing -q</code></pre>
+    <p><code>term-missing</code> 会<strong>直接列出哪几行没被覆盖</strong> —— 那才是这个工具真正有用的地方,
+    比那个总百分比有价值得多。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「覆盖率 100% = 没 bug」。</strong>
+    回看第 8 页那五次改坏实验:<strong>把 <code>divmod(cents, 100)</code> 改成 <code>divmod(cents, 10)</code>,
+    覆盖率一点没变</strong>(那一行照样被执行),但结果全错了。
+    <strong>覆盖率对「行被执行了但断言不够」完全无感。</strong></p>
+    <p><strong>误区 2:「把阈值定成 100%」。</strong>
+    会逼出<strong>为了覆盖而写的空测试</strong> —— 调用一下函数,不写任何断言。
+    覆盖率满分,防护力为零。<strong>这是第 20 页防作弊的第二个例子。</strong></p>
+    <p><strong>误区 3:「行覆盖率就够了」。</strong>
+    还有一种<strong>分支覆盖率</strong>,统计的是「每个 if 的真假两条路都走过没有」。
+    <strong>行覆盖 100% 但分支覆盖 50% 是很常见的</strong> ——
+    因为你只测了 if 成立的情况。<strong>分支覆盖率是更严格、也更有意义的指标。</strong></p>
+  </div></div>
+</div>
+
+<figure>
+<svg viewBox="0 0 860 250" role="img" aria-label="行覆盖率与分支覆盖率的区别">
+  <g class="st">
+    <text x="20" y="26" font-size="13" font-weight="800" fill="var(--ink)">同一段代码,只写了一条测试:</text>
+
+    <rect x="20" y="40" width="380" height="152" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="36" y="64" font-size="12" font-family="ui-monospace,monospace" fill="var(--soft)">def f(x):</text>
+    <text x="36" y="86" font-size="12" font-family="ui-monospace,monospace" fill="var(--ok)">    if x &gt; 0:</text>
+    <text x="36" y="108" font-size="12" font-family="ui-monospace,monospace" fill="var(--ok)">        return "正"</text>
+    <text x="36" y="130" font-size="12" font-family="ui-monospace,monospace" fill="var(--bad)">    return "非正"</text>
+    <text x="36" y="162" font-size="11.5" fill="var(--faint)">测试只有:assert f(5) == "正"</text>
+    <text x="36" y="180" font-size="11" fill="var(--ok)">绿 = 执行到了</text>
+    <text x="150" y="180" font-size="11" fill="var(--bad)">红 = 没执行到</text>
+
+    <rect x="420" y="40" width="420" height="70" rx="10" fill="var(--warn-soft)" stroke="var(--warn)"/>
+    <text x="440" y="66" font-size="13" font-weight="800" fill="var(--warn)">行覆盖率 = 3/4 = 75%</text>
+    <text x="440" y="90" font-size="11.5" fill="var(--soft)">看起来还行 —— 但这是个假象</text>
+
+    <rect x="420" y="122" width="420" height="70" rx="10" fill="var(--bad-soft)" stroke="var(--bad)"/>
+    <text x="440" y="148" font-size="13" font-weight="800" fill="var(--bad)">分支覆盖率 = 1/2 = 50%</text>
+    <text x="440" y="172" font-size="11.5" fill="var(--soft)">if 只走了「真」这一条路,「假」那条完全没测</text>
+
+    <text x="20" y="222" font-size="12.5" fill="var(--soft)" font-weight="700">
+      如果函数改成 return "非正数" 拼错字,行覆盖 75% 的测试<tspan fill="var(--bad)" font-weight="800">一样是绿的</tspan>。
+    </text>
+    <text x="20" y="242" font-size="12.5" fill="var(--soft)" font-weight="700">
+      这就是第 8 页「签名不变、行为变了」在覆盖率上的翻版。
+    </text>
+  </g>
+</svg>
+<figcaption>行覆盖率 75%,分支覆盖率只有 50%。定门禁时看哪个,差别很大</figcaption>
+</figure>
+
+<h2 id="new">五、&#128260; 增量优于全量:「新代码干净」原则</h2>
+
+<div class="box key">
+  <b class="t">核心思想</b>
+  <strong>不要求老代码达标,只要求「你这次新写 / 改动的代码」达标。</strong>
+  <br><br>
+  这是主流质量平台近年来的<strong>默认推荐姿势</strong>,通常叫「新代码干净」原则。
+</div>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:14%"></th><th style="width:38%">全量门禁</th><th>增量门禁</th></tr></thead>
+<tbody>
+<tr><th>量什么</th><td>整个项目的覆盖率 / 问题数</td><td><strong>只量本次改动涉及的行</strong></td></tr>
+<tr><th>老项目上线</th>
+    <td style="color:var(--bad)"><strong>基本不可能</strong> —— 十年老项目覆盖率 12%,定 80% 等于永远合不进去</td>
+    <td style="color:var(--ok)"><strong>第一天就能上</strong> —— 老代码原样放过</td></tr>
+<tr><th>激励方向</th>
+    <td>「先别管我,那是历史遗留」</td>
+    <td style="color:var(--ok)"><strong>「我这次写的必须干净」</strong></td></tr>
+<tr><th>长期效果</th>
+    <td>要么达标要么关掉,没有中间态</td>
+    <td style="color:var(--ok)"><strong>代码库自然地越来越干净</strong> —— 改到哪干净到哪</td></tr>
+<tr><th>实现难度</th><td>低,一个总数就行</td><td>中,要能算出「本次改了哪些行」</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 我第一版的第 4 个错误</b>
+  我原来写的是「覆盖率 &ge; 80%」,没区分增量和全量。
+  <br><br>
+  <strong>在 myshop 这种 200 行的新项目里,这个区别不明显。</strong>
+  但在任何真实项目上,<strong>不区分就等于这条门禁根本上不了线</strong> ——
+  你不可能让一个存在了五年的代码库突然达到 80%。
+  <br><br>
+  <strong>正确说法:「本次改动行的覆盖率 &ge; 80%」。</strong>多了「本次改动行」五个字,可行性天差地别。
+</div>
+
+<h2 id="static">六、静态扫描类指标</h2>
+
+<p>第 4 页讲的规范检查和类型检查是「本地能跑的静态检查」。
+门禁阶段通常还会接一个<strong>更重的扫描平台</strong>,量这几样:</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:20%">指标</th><th style="width:26%">量什么</th>
+  <th style="width:20%">建议阈值</th><th>为什么这么定</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>严重 / 高危问题</strong></td><td>确定会出事的问题(注入、越权、空指针)</td>
+  <td style="color:var(--bad)"><strong>= 0,阻断</strong></td>
+  <td><strong>这类问题没有「容忍几个」的说法</strong></td>
+</tr>
+<tr>
+  <td><strong>中低危问题</strong></td><td>可能有风险的写法</td>
+  <td style="color:var(--warn)"><strong>不增长,降级告警</strong></td>
+  <td>老项目里通常有几千个,一刀切归零不现实</td>
+</tr>
+<tr>
+  <td><strong>重复代码率</strong></td><td>大段复制粘贴的比例</td>
+  <td>&lt; 3%,降级告警</td>
+  <td>重复本身不是 bug,但改一处漏一处会变成 bug</td>
+</tr>
+<tr>
+  <td><strong>依赖漏洞</strong></td><td>你用的第三方库有没有已知漏洞</td>
+  <td style="color:var(--bad)"><strong>严重 = 0,阻断</strong></td>
+  <td><strong>这个和你写的代码质量无关,但危害一样大</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 关于「严重问题数 = 0」这个提法的一处修正</b>
+  我第一版写的是<strong>「问题总数 = 0」</strong>。<strong>这在任何真实项目上都做不到</strong> ——
+  扫描工具对一个中等规模项目动辄报几百上千条。
+  <br><br>
+  <strong>正确的做法是按严重程度分档,只对最高档要求归零</strong>,其余用「不增长」。
+  <strong>这和测试用例分级是同一个思路:分档,而不是一刀切。</strong>
+</div>
+
+<h2 id="howto">七、阈值怎么定:基线法与棘轮法</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">基线法</span><span class="en">baseline</span><span class="badge">定初值</span></div>
+  <div class="step"><div class="n">&#9312; 做法</div><div class="c">
+    <p><strong>先什么都不拦,连续跑两周,把每次的数字记下来。</strong>
+    然后取<strong>当前实际水平,略微上浮</strong>作为第一版阈值。</p>
+<pre><code>两周实测覆盖率:  61%  63%  62%  65%  64%  63%
+当前基线:        ~63%
+第一版阈值:      65%     &larr; 略高于基线,踮踮脚够得着
+错误做法:        80%     &larr; 拍脑袋定的行业"标准",团队直接放弃</code></pre>
+  </div></div>
+  <div class="step"><div class="n">&#9313; 为什么</div><div class="c">
+    <p><strong>阈值的作用是「让情况不再变坏,并缓慢变好」,不是「一步到位达到理想状态」。</strong></p>
+    <p>定得够不着的阈值,唯一的结果是这条门禁被关掉。</p>
+  </div></div>
+</div>
+
+<div class="term">
+  <div class="term-h"><span class="zh">棘轮法</span><span class="en">ratchet</span><span class="badge">往上收</span></div>
+  <div class="step"><div class="n">&#9312; 做法</div><div class="c">
+    <p><strong>阈值只允许往严格的方向走,不允许往回退。</strong></p>
+    <p>就像棘轮扳手 —— <strong>只能朝一个方向转,松不回去。</strong></p>
+<pre><code>第 1 个月   65%
+第 2 个月   68%    &larr; 上个月稳定超过 68 了,把阈值提上来
+第 3 个月   72%
+第 4 个月   74%
+第 5 个月   76%
+第 6 个月   77%
+第 7 个月   79%
+第 8 个月   80%    &larr; 一年后自然到达,而不是第一天硬定</code></pre>
+  </div></div>
+  <div class="step"><div class="n">&#9313; 更省事的写法</div><div class="c">
+    <p>与其手动调数字,不如直接写成<strong>「不得低于主干当前值」</strong> ——
+    这样阈值<strong>自动跟着涨</strong>,谁也不用管。</p>
+    <p><strong>这条规则同时适用于:</strong>覆盖率、中低危问题数、跳过数、重复率。</p>
+  </div></div>
+  <div class="step"><div class="n">&#9314; 误区</div><div class="c">
+    <p><strong>误区:「阈值定了就不能改」。</strong>
+    可以改,<strong>但只能朝严格方向改</strong>。往松改必须走正式流程并记录原因 ——
+    否则每次红了都往下调,门禁就名存实亡了。</p>
+  </div></div>
+</div>
+
+<h2 id="docwrong">八、&#128293; 官方文档自己也会写错(两个实例)</h2>
+
+<p>这一节不讲概念,讲一件事:<strong>为什么本教程反复说「自己实测,别照抄文档」。</strong>
+在核实这一页内容时,我在<strong>官方文档里</strong>发现了两处实打实的错误。</p>
+
+<div class="box trap">
+  <b class="t">&#128293; 实例 1:官方示例代码的注释,和它自己的源码相反</b>
+  某主流质量平台的官方示例里,有一个「门禁不过时怎么办」的参数。
+  <strong>示例代码的注释写着:这个参数为真时,构建会被标记为「不稳定」(降级告警)。</strong>
+  <br><br>
+  <strong>但我去翻了这个插件的源码 —— 它实际做的是把构建标记为「失败」(直接阻断)。</strong>
+  <br><br>
+  <strong>后果:</strong>照着注释理解的人以为自己配了个「温和的告警」,
+  实际上配的是「硬阻断」。<strong>上线当天全组合并请求全红。</strong>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 实例 2:官方说明文档里用了一个不存在的参数</b>
+  某覆盖率插件的官方说明文档中,示例配置写了一个参数名。
+  <strong>我在它的源码里找不到这个参数。</strong>
+  <br><br>
+  <strong>更隐蔽的是:这段配置照抄过去不会报错,也能正常工作。</strong>
+  因为配置解析器<strong>忽略了这个不认识的键</strong>,
+  而这个参数「本该实现的行为」恰好和默认行为一致 —— <strong>所以看起来一切正常。</strong>
+  <br><br>
+  <strong>后果:</strong>你以为自己显式配置了某个行为,实际上只是碰巧命中了默认值。
+  <strong>哪天默认值一变,你的门禁行为就悄悄变了,而你的配置文件看起来一个字没动。</strong>
+</div>
+
+<div class="box key">
+  <b class="t">这两个实例给出的三条操作规矩</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:8%">#</th><th style="width:30%">规矩</th><th>怎么做</th></tr></thead>
+  <tbody>
+  <tr><td>1</td><td><strong>配完门禁,先故意让它红一次</strong></td>
+      <td>改坏一行代码,推上去,<strong>亲眼确认它真的拦住了</strong>。
+          第 19 页整页都在做这件事</td></tr>
+  <tr><td>2</td><td><strong>版本号以代码仓库为准</strong></td>
+      <td>不以文档页为准 —— 第 16 页那两个 <code>@v7</code> 就是这么来的</td></tr>
+  <tr><td>3</td><td><strong>配置不报错 &ne; 配置生效</strong></td>
+      <td>大多数配置解析器<strong>会静默忽略不认识的键</strong>。
+          <strong>唯一的验证方式是看行为,不是看有没有报错</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="box note">
+  <b class="t">这跟 AI 有什么关系</b>
+  <strong>AI 生成的配置文件,来源就是这些文档和抄了这些文档的博客。</strong>
+  <br><br>
+  所以当 AI 给你一份门禁配置时,<strong>它极有可能原样复现这两类错误</strong> ——
+  而且写得非常自信,注释也很详细。
+  <br><br>
+  <strong>唯一可靠的检验是规矩 1:故意让它红一次。</strong>
+  这也是全书那句话的又一个实例 —— <strong>「自己看改动」是唯一不能外包的事。</strong>
+</div>
+
+<h2 id="mini">九、给小项目的最小可用配置</h2>
+
+<p>把这一页的结论收成一份可以直接抄的配置。<strong>适用于个人项目和小团队:</strong></p>
+
+<pre><code># 文件:&lt;你的项目&gt;/.github/workflows/ci.yml
+
+name: 质量门禁
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  gate:
+    name: 三道检查            # 这个名字要和合并保护规则里填的一字不差
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: pip install pytest mypy ruff
+
+      # ===== 硬门禁 1:代码规范(最快,先跑)=====
+      - name: 门禁 1 · 代码规范
+        run: ruff check .
+
+      # ===== 硬门禁 2:类型检查 =====
+      - name: 门禁 2 · 类型检查
+        run: mypy
+
+      # ===== 硬门禁 3:P0 用例必须 100% =====
+      - name: 门禁 3 · P0 核心用例
+        run: pytest -m p0 -q
+
+      # ===== 硬门禁 4:全量用例 =====
+      # 小项目用例少,直接要求全过;
+      # 用例上千之后,把这条换成"通过率 &ge; 95%"的阈值门禁
+      - name: 门禁 4 · 全量用例
+        run: pytest -q</code></pre>
+
+<div class="box key">
+  <b class="t">这份配置刻意<strong>没有</strong>包含什么,以及为什么</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:26%">没包含</th><th>为什么</th></tr></thead>
+  <tbody>
+  <tr><td><strong>覆盖率门禁</strong></td>
+      <td>要先测两周基线才知道阈值定多少。<strong>先跑起来,一个月后再加</strong></td></tr>
+  <tr><td><strong>静态扫描平台</strong></td>
+      <td>要额外接服务、注册账号。<strong>小项目投入产出比低</strong></td></tr>
+  <tr><td><strong>抖动率门禁</strong></td>
+      <td>要跑 10 遍。<strong>用例少的时候抖动本来就少,不划算</strong></td></tr>
+  <tr><td><strong><code>paths</code> 过滤</strong></td>
+      <td><strong>刻意不加</strong> —— 见第 16、17 页那个永久阻塞的死锁</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>四条硬门禁,零个阈值需要拍板,十分钟配完。这就是「先上硬门禁」的意思。</strong></p>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>182</td><td><strong>门禁项全清单</strong></td><td>4 条硬门禁 + 7 条阈值门禁</td></tr>
+<tr><td>183</td><td><strong>用例分级怎么落地</strong></td><td>用标记打 P0,跑两遍,配两条门禁</td></tr>
+<tr><td>184</td><td>&#128260; P0 应占 5%–15%</td><td>都是 P0 等于没分级</td></tr>
+<tr><td>185</td><td>&#128260; <strong>通过率的分母漏洞</strong></td><td>注释掉 90 条,通过率 100% &rarr; 必须配用例总数门禁</td></tr>
+<tr><td>186</td><td>&#128260; <strong>跳过数门禁</strong></td><td>第一版完全遗漏;防的是作弊,不是质量波动</td></tr>
+<tr><td>187</td><td>&#128260; 良性跳过 vs 作弊跳过</td><td>门禁分不清,所以盯「不增长」</td></tr>
+<tr><td>188</td><td>&#128260; <strong>抖动率门禁</strong></td><td>第一版完全遗漏;检查点必须是定时任务,动作是告警</td></tr>
+<tr><td>189</td><td>&#128260; 检查点和失败动作联动</td><td>换了 &#9312;,&#9315; 也得跟着换</td></tr>
+<tr><td>190</td><td><strong>覆盖率是盲区探测器</strong></td><td>不是质量分数;100% 也可能全是 bug</td></tr>
+<tr><td>191</td><td>&#128260; <strong>行覆盖 vs 分支覆盖</strong></td><td>行 75% / 分支 50% 很常见,分支更有意义</td></tr>
+<tr><td>192</td><td>覆盖率对第 8 页的实验无感</td><td>改 100 为 10,覆盖率一点不变</td></tr>
+<tr><td>193</td><td>&#128260; <strong>增量优于全量</strong></td><td>「本次改动行的覆盖率」——多五个字,可行性天差地别</td></tr>
+<tr><td>194</td><td>&#128260; <strong>严重问题 = 0,不是总数 = 0</strong></td><td>分档,不一刀切</td></tr>
+<tr><td>195</td><td><strong>基线法</strong></td><td>先跑两周不拦,取实际水平略上浮</td></tr>
+<tr><td>196</td><td><strong>棘轮法</strong></td><td>只准往严格方向走;最省事写法是「不得低于主干」</td></tr>
+<tr><td>197</td><td>&#128293; <strong>官方文档的两个真实错误</strong></td><td>注释和源码相反 / 用了不存在的参数还静默生效</td></tr>
+<tr><td>198</td><td>&#128260; <strong>配置不报错 &ne; 配置生效</strong></td><td>唯一验证方式是<strong>故意让它红一次</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="17-quality-gate.html">&larr; 上一页:质量门禁定义</a>
+  <a href="00-index.html">目录</a>
+  <a href="19-gate-demo.html">下一页:门禁实战复盘(真机实证) &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 18 页 / 共 23 页 · 覆盖知识点 182–198 · 难度 &#9733;&#9733;&#9733;&#9733; · <b style="color:var(--bad)">全书重点 2/3</b></p>
+  <p><strong>本页含 11 处经核实修正</strong>,其中 2 处是在<strong>官方文档中发现的实际错误</strong>
+  (示例注释与源码相反、示例配置使用不存在的参数)。这两处直接支撑了本页第八节的三条操作规矩。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>01 全景:五道防线与七步流程</title>
+<style>
+  :root{
+    color-scheme:dark;
+    --paper:#13151B; --raised:#1B1E26; --sunk:#0E1015;
+    --ink:#E9EBF1; --soft:#ABB1C2; --faint:#7C8394;
+    --rule:#2A2E39; --rule2:#414755;
+    --accent:#91AFE2; --accent-soft:#1E2634; --code:#1E222B;
+    --ok:#6FBF8B; --ok-soft:#17251C;
+    --warn:#DCAC4C; --warn-soft:#241E12;
+    --bad:#DD7A5F; --bad-soft:#25170F;
+    --info:#5AB3AB; --info-soft:#0F2321;
+    --plan:#A895DA; --plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  :root[data-theme="light"]{
+    color-scheme:light;
+    --paper:#F8F9FB; --raised:#FFFFFF; --sunk:#EEF0F5;
+    --ink:#16181F; --soft:#464B59; --faint:#767C8C;
+    --rule:#DFE2EA; --rule2:#C3C9D6;
+    --accent:#2E4A7D; --accent-soft:#E8EDF6; --code:#F0F2F7;
+    --ok:#2C7A4B; --ok-soft:#E6F4EB;
+    --warn:#96700F; --warn-soft:#FBF2DC;
+    --bad:#A8452F; --bad-soft:#FBEAE5;
+    --info:#1F6B65; --info-soft:#E2F2F0;
+    --plan:#5B4A94; --plan-soft:#EEE9F8;
+  }
+  @media (prefers-color-scheme:light){
+    :root[data-theme="system"]{
+      color-scheme:light;
+      --paper:#F8F9FB; --raised:#FFFFFF; --sunk:#EEF0F5;
+      --ink:#16181F; --soft:#464B59; --faint:#767C8C;
+      --rule:#DFE2EA; --rule2:#C3C9D6;
+      --accent:#2E4A7D; --accent-soft:#E8EDF6; --code:#F0F2F7;
+      --ok:#2C7A4B; --ok-soft:#E6F4EB;
+      --warn:#96700F; --warn-soft:#FBF2DC;
+      --bad:#A8452F; --bad-soft:#FBEAE5;
+      --info:#1F6B65; --info-soft:#E2F2F0;
+      --plan:#5B4A94; --plan-soft:#EEE9F8;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+       font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);
+       backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;
+         border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}
+  .nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;
+                 color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:60px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}
+  h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+          color:var(--faint);border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;
+      overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);
+       padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;
+         padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;
+           border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);
+        padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;
+          border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;
+                 border:1px solid currentColor;font-weight:600}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);
+           padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .term[data-c="plan"] .term-h .badge{color:var(--plan)}
+  .term[data-c="test"] .term-h .badge{color:var(--info)}
+  .term[data-c="undo"] .term-h .badge{color:var(--bad)}
+  .term[data-c="git"]  .term-h .badge{color:var(--ok)}
+  .term[data-c="eye"]  .term-h .badge{color:var(--warn)}
+  .term[data-c="gate"] .term-h .badge{color:var(--warn)}
+  @media(max-width:640px){
+    .wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}
+  }
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+
+<div class="nav"><div class="nav-in">
+  <span class="who">01 全景 <span>· 五道防线与七步流程</span></span>
+  <a href="00-index.html">← 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="02-python-setup.html">下一页 →</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+
+<div class="wrap">
+
+<span class="kicker">第 01 页 · 难度 ★ · 无前置</span>
+<h1>全景:五道防线与七步流程</h1>
+<p class="lede">
+这一页是整套教程的地图。<strong>不出现任何命令、不需要装任何软件</strong> ——
+只用日常语言把「为什么需要这套东西」和「它由哪几块拼成」讲清楚。
+读完你会知道后面 21 页各自在解决什么问题。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#why">一、AI 写代码,会以哪两种方式失控</a></li>
+    <li><a href="#four">二、四道「保护你自己」的防线</a></li>
+    <li><a href="#fifth">三、第六件事:自己看改动</a></li>
+    <li><a href="#gate">四、第五道防线:保护所有人</a></li>
+    <li><a href="#axis">五、把六件事排到时间轴上</a></li>
+    <li><a href="#trap">六、一个几乎所有人都会看漏的地方</a></li>
+    <li><a href="#sop">七、串成一套流程:七个步骤</a></li>
+    <li><a href="#cut">八、哪几步能省,哪几步不能</a></li>
+    <li><a href="#next">九、下一步</a></li>
+  </ol>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="why">一、AI 写代码,会以哪两种方式失控</h2>
+
+<p>先说清楚问题,再谈方法。</p>
+
+<p>你让 AI 帮你改代码。它很快回你「做完了」。<strong>这时候可能出了两种完全不同的岔子:</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">失控类型</th><th style="width:38%">它做了什么</th><th>你的感受</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>① 方向错了</strong></td>
+  <td>你要的是 A,它理解成了 B,然后<strong>非常认真地把 B 做得很好</strong></td>
+  <td>「你做的这是什么?我根本没让你改这个」</td>
+</tr>
+<tr>
+  <td><strong>② 实现错了</strong></td>
+  <td>方向对,是 A,但<strong>代码里有 bug</strong></td>
+  <td>「看着挺像的,但跑起来不对」</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>一个具体例子</h3>
+
+<p>假设你说:<em>「给订单加个满减优惠。」</em></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%"></th><th>可能发生的事</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>方向错</strong></td>
+  <td>它决定「顺便把整个价格模块重构一下,这样以后加优惠更方便」。<br>
+      <strong>结果:它改了 12 个文件,你只想改 2 个。</strong></td>
+</tr>
+<tr>
+  <td><strong>实现错</strong></td>
+  <td>它老老实实加了满减,但算错了 —— 满 100 减 20,它写成了满 100 打 8 折。<br>
+      <strong>结果:改动范围完全正确,金额全是错的。</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">为什么「你自己盯着」挡不住</b>
+  因为它写得比你读得快。
+  <br><br>
+  一次对话它可能改 300 行、新建 5 个文件。你要么一行行读完(比自己写还慢),
+  要么拉到底说「看着还行」—— <strong>而后者等于没检查。</strong>
+</div>
+
+<p>所以需要一套方法,在<strong>不同的时间点</strong>各设一道网。</p>
+
+<!-- ================================================================ -->
+<h2 id="four">二、四道「保护你自己」的防线</h2>
+
+<p>下面四个名词,每个按 5 步讲。<strong>现在只需建立印象</strong>,细节各有专门章节。</p>
+
+<!-- 名词 1 -->
+<div class="term" data-c="plan">
+  <div class="term-h">
+    <span class="zh">先看方案模式</span>
+    <span class="en">Plan Mode</span>
+    <span class="badge">防「方向错」</span>
+  </div>
+
+  <div class="step"><div class="n">① 定义</div><div class="c">
+    <p>一种<strong>不准改你源文件</strong>的工作模式。AI 在这个模式下会先给你一份「我打算怎么做」的方案,
+    <strong>你说「可以,开始吧」之后它才能动手改代码</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">② 类比</div><div class="c">
+    <p><strong>装修先出图纸。</strong></p>
+    <p>设计师来了,先量房、画图、报价。你签字之后他才动锤子。
+    没人会让装修队直接进门砸墙,然后指望砸完了你正好满意。</p>
+    <p><strong>注意这个类比里有个细节后面很重要:图纸阶段设计师照样要进门量尺寸。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">③ 位置</div><div class="c">
+    <p>它和后面三道防线是<strong>并列关系</strong>,各管一段时间。它管最早的那一段:<strong>还没动手之前</strong>。</p>
+    <p>它防的是<strong>方向错</strong>。这是唯一一道防「方向错」的网 —— 后面几道全都防不了。</p>
+  </div></div>
+
+  <div class="step"><div class="n">④ 例子</div><div class="c">
+    <p>你在这个模式下说的话大概是这样:</p>
+<pre><code>读一下我的代码,搞清楚现状,
+给我「给订单加满减优惠」的实施方案,先别写代码。
+
+方案要说清楚:
+- 要改哪几个文件,每个文件改什么
+- 拆成几步,每步做完能独立验证</code></pre>
+    <p>然后它给你一份方案,你读、你挑刺、你让它改,满意了才批准。</p>
+  </div></div>
+
+  <div class="step"><div class="n">⑤ 误区</div><div class="c">
+    <p><strong>误区 1:「它答应我不改,那就不会改」。</strong>不对。这不靠它自觉 ——
+    这是<strong>工具层面的限制</strong>,它在这个模式下拿不到修改源文件的权限。这也是它可靠的原因。</p>
+    <p><strong>误区 2(这一条我核实后修正过):「这个模式下它什么都不能做」。</strong>
+    <strong>它能运行命令去探索代码</strong> —— 就像设计师能进门量尺寸。
+    被限制的只是「编辑源文件」这一件事。第 13 页有官方原文。</p>
+  </div></div>
+</div>
+
+<!-- 名词 2 -->
+<div class="term" data-c="test">
+  <div class="term-h">
+    <span class="zh">让它自测</span>
+    <span class="en">self-verification</span>
+    <span class="badge">防「实现错」</span>
+  </div>
+
+  <div class="step"><div class="n">① 定义</div><div class="c">
+    <p>派活的时候<strong>顺带把验收标准也说清楚</strong>,要求它自己跑检查、自己修到全部通过,再回来找你。</p>
+  </div></div>
+
+  <div class="step"><div class="n">② 类比</div><div class="c">
+    <p><strong>交作业前先自己对答案。</strong></p>
+    <p>你让学生做一道题,同时告诉他「做完拿答案自己核一遍,不对的改到对」。
+    这比他做完直接交给你、你再批改要省事得多。</p>
+  </div></div>
+
+  <div class="step"><div class="n">③ 位置</div><div class="c">
+    <p>它管中间那一段:<strong>正在动手的时候</strong>。</p>
+    <p>它和「先看方案模式」是<strong>接力关系</strong> —— 方案定了方向,自测保证方向对的前提下代码也对。
+    <strong>它挡不住方向错</strong>:如果它把整个模块重构了而检查全过,检查会告诉你「没问题」。</p>
+  </div></div>
+
+  <div class="step"><div class="n">④ 例子</div><div class="c">
+    <p>关键是「顺带」两个字 —— 验收标准和任务写在<strong>同一句话</strong>里:</p>
+<pre><code>做方案的第 1 步。
+改完自己跑检查,有问题自己修到干净。
+做完停下来,等我看过再继续。</code></pre>
+    <p>这里的「跑检查」具体是什么,从第 3 页开始讲。</p>
+  </div></div>
+
+  <div class="step"><div class="n">⑤ 误区</div><div class="c">
+    <p><strong>误区 1:「验收标准可以做完再说」。</strong>后果很不一样 ——
+    做完再说,它已经进入「我完成了」的状态,这时候让它跑检查,它的动机会变成
+    <em>「用最小的改动让红变绿」</em>,而这正是作弊的温床。</p>
+    <p><strong>误区 2:「检查全过就等于做对了」。</strong>这是全书反复要拆的一个错觉。
+    第 8、9、20 页会用真机实验证明它错得有多厉害。</p>
+  </div></div>
+</div>
+
+<!-- 名词 3 -->
+<div class="term" data-c="undo">
+  <div class="term-h">
+    <span class="zh">一键撤销</span>
+    <span class="en">rewind</span>
+    <span class="badge">出事后 · 会话内</span>
+  </div>
+
+  <div class="step"><div class="n">① 定义</div><div class="c">
+    <p>在和 AI 的这一轮对话里,<strong>退回到你之前某一句话之前的状态</strong> —— 代码和对话都能退。</p>
+  </div></div>
+
+  <div class="step"><div class="n">② 类比</div><div class="c">
+    <p><strong>文字冒险游戏里的「回到上一句选择」。</strong></p>
+    <p>你选错了一个分支,故事走歪了,点一下回到分岔口重选。
+    <strong>它是自动记录的</strong>,你不需要做任何准备动作。</p>
+  </div></div>
+
+  <div class="step"><div class="n">③ 位置</div><div class="c">
+    <p>它管出事之后。<strong>但它和第四道防线(存档系统)是替代关系,而且是能力较弱的那一方。</strong></p>
+    <p>凡是它能干的事,存档系统都能干,而且更彻底。所以 ——
+    <strong>四道防线里,只有这一道是可以完全不用的。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">④ 例子</div><div class="c">
+    <p>你发现这一轮改得完全不对,不想一句句让它改回来,就整轮作废重说:</p>
+<pre><code>(在输入框里连按两次 Esc 键)
+→ 弹出一个菜单,选一个之前的提问点
+→ 选择「同时恢复代码和对话」
+→ 重新组织语言,再说一遍</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">⑤ 误区</div><div class="c">
+    <p><strong>误区 1:「有它就不用存档了」。</strong>严重错误。它有五个管不了的死角(第 13 页详列),
+    比如<strong>它执行过的命令造成的后果,它退不回来</strong>。</p>
+    <p><strong>误区 2:「它能精确回到某一次文件修改」。</strong>不能。
+    它的最小颗粒度是<strong>你发的每一条消息</strong>,不是每一次改文件。</p>
+  </div></div>
+</div>
+
+<!-- 名词 4 -->
+<div class="term" data-c="git">
+  <div class="term-h">
+    <span class="zh">存档系统 · 小步存档</span>
+    <span class="en">git</span>
+    <span class="badge">绝对不能省</span>
+  </div>
+
+  <div class="step"><div class="n">① 定义</div><div class="c">
+    <p>一个记录代码历史的工具。你在关键时刻<strong>手动按一下「存档」</strong>,
+    之后不管怎么乱改,都能一条命令退回任何一个存过的档。</p>
+    <p>「小步」的意思是<strong>存得勤一点</strong> —— 每完成一小块就存一次,而不是一天存一次。</p>
+  </div></div>
+
+  <div class="step"><div class="n">② 类比</div><div class="c">
+    <p><strong>游戏存档。</strong>这个类比全书都会用,请记牢:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:36%">游戏里</th><th>代码里</th></tr></thead>
+    <tbody>
+    <tr><td>按存档键</td><td>提交一次</td></tr>
+    <tr><td>读档</td><td>回退到某次提交</td></tr>
+    <tr><td>开一条新存档位打 BOSS</td><td>开一条新分支做新功能</td></tr>
+    <tr><td>存档列表</td><td>提交历史</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">③ 位置</div><div class="c">
+    <p><strong>它是唯一横跨全程的一道防线</strong>,也是其他三道的地基:</p>
+    <ul>
+      <li><strong>动手前</strong>:开一条新分支,把「爆炸半径」限制住</li>
+      <li><strong>动手中</strong>:每完成一步存一次档</li>
+      <li><strong>出事后</strong>:定位是哪一步改坏的 + 退回去</li>
+    </ul>
+    <p>它和「一键撤销」是替代关系,而且是<strong>能力更强</strong>的那一方。</p>
+  </div></div>
+
+  <div class="step"><div class="n">④ 例子</div><div class="c">
+    <p>一天的工作大概是这个节奏(命令的具体含义在第 11 页):</p>
+<pre><code>开工:  开一条新分支,确认工作区是干净的
+第1步做完 → 检查 → 满意 → 存档
+第2步做完 → 检查 → 满意 → 存档
+第3步做完 → 检查 → 不满意 → 一条命令退回第2步的存档
+再来一次第3步 → 检查 → 满意 → 存档</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">⑤ 误区</div><div class="c">
+    <p><strong>误区 1:「等出事了再学」。</strong>来不及。存档必须在<strong>事故之前</strong>按下 ——
+    出事之后你已经没有可退回的点了。</p>
+    <p><strong>误区 2:「一天提交一次就够了」。</strong>那你出问题时只能整天回滚。
+    <strong>判断标准:一次提交要能用一句话讲清楚。讲不清就说明该拆成两次。</strong></p>
+    <p><strong>误区 3:「它能救回所有东西」。</strong>不能。第 12 页会讲它的死角,
+    其中有一个坑会让你误以为「回退失败了」。</p>
+  </div></div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="fifth">三、第六件事:自己看改动</h2>
+
+<div class="term" data-c="eye">
+  <div class="term-h">
+    <span class="zh">自己看改动</span>
+    <span class="en">review the diff</span>
+    <span class="badge">唯一不能外包</span>
+  </div>
+
+  <div class="step"><div class="n">① 定义</div><div class="c">
+    <p>AI 说「做完了」之后,<strong>你自己用眼睛把它改的每一行看一遍</strong>。</p>
+    <p>「改动」这个东西有个专门的名字叫<strong>差异(diff)</strong> ——
+    就是「改之前」和「改之后」逐行对比的结果,减号是删掉的,加号是新增的。</p>
+  </div></div>
+
+  <div class="step"><div class="n">② 类比</div><div class="c">
+    <p><strong>结账前把传送带上的东西再扫一眼。</strong></p>
+    <p>购物车推到收银台,东西已经放上传送带了。付钱之前你会瞄一眼:
+    有没有多出来什么我没拿的?有没有该拿的忘了放?
+    <strong>这一眼花五秒,但它是你最后一次能改主意的机会。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">③ 位置</div><div class="c">
+    <p>它<strong>不属于</strong>前面四道防线,是独立的第六件事。而它的重要性排第二(仅次于存档系统)。</p>
+    <p>为什么?因为<strong>前四道全都可以交给工具,只有这一道不能</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">④ 例子</div><div class="c">
+    <p>你看的时候,脑子里带着这四个问题:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:8%">#</th><th>问自己</th></tr></thead>
+    <tbody>
+    <tr><td>1</td><td>有没有<strong>我没让它改</strong>的文件出现在列表里?</td></tr>
+    <tr><td>2</td><td>它有没有<strong>动检查用的那些文件</strong>?(这条最关键,第 20 页解释为什么)</td></tr>
+    <tr><td>3</td><td>有没有它<strong>新建的、我不知道的</strong>文件?</td></tr>
+    <tr><td>4</td><td>改动规模和「方案里说的第一步」<strong>对得上吗</strong>?</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">⑤ 误区</div><div class="c">
+    <p><strong>误区 1:「让 AI 把改动总结给我看就行」。</strong>
+    那等于<strong>让它评价自己的作业</strong>。第 20 页有三类问题只有你亲眼看才能发现。</p>
+    <p><strong>误区 2:「检查全绿就不用看了」。</strong>恰恰相反 ——
+    <strong>检查越绿越要看</strong>,因为绿色会让你放松,而绿色偏偏不覆盖那三类问题。</p>
+  </div></div>
+</div>
+
+<div class="box trap">
+  <b class="t">漏掉第六件事,后果和漏掉存档不一样</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:26%">漏掉</th><th>后果</th></tr></thead>
+  <tbody>
+  <tr><td><strong>存档系统</strong></td><td>你丢了安全网。但这是<strong>一次性的、看得见的</strong>损失 —— 出事那天你就知道了</td></tr>
+  <tr><td><strong>自己看改动</strong></td><td>你丢的是<strong>对自己代码的所有权</strong>。这是个缓慢的、看不见的过程:
+      几个月后你面对一个自己完全看不懂的项目,而它已经在给真实用户提供服务了</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="gate">四、第五道防线:保护所有人</h2>
+
+<p>前面五件事有一个共同的软肋:<strong>它们全都靠你自觉。</strong></p>
+
+<p>你赶时间的时候,可以不看方案、不看改动、不存档。<strong>没有任何东西阻止你。</strong>
+一个人写代码时这还能靠自律撑住;三个人以上,自律就不管用了。</p>
+
+<div class="term" data-c="gate">
+  <div class="term-h">
+    <span class="zh">质量门禁</span>
+    <span class="en">Quality Gate</span>
+    <span class="badge">别人也绕不过</span>
+  </div>
+
+  <div class="step"><div class="n">① 定义</div><div class="c">
+    <p>一道<strong>跑在你控制不了的机器上</strong>的自动检查。检查不通过,你的代码<strong>就是进不了主干</strong> ——
+    不是「会被提醒」,是<strong>按钮点不了</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">② 类比</div><div class="c">
+    <p><strong>地铁闸机。</strong></p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:42%">地铁</th><th>代码</th></tr></thead>
+    <tbody>
+    <tr><td>你刷卡</td><td>你提交代码</td></tr>
+    <tr><td>闸机检查余额够不够</td><td>流水线检查测试过不过</td></tr>
+    <tr><td>够 → 门开</td><td>过 → 允许合并进主干</td></tr>
+    <tr><td>不够 → 门不开</td><td>不过 → <strong>合并按钮变灰</strong></td></tr>
+    <tr><td><strong>闸机不听你解释</strong></td><td><strong>机器不看你是谁、不管你多急</strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p><strong>最后一行是重点。门禁的价值恰恰在于它不通人情。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">③ 位置</div><div class="c">
+    <p>它和前五件事是<strong>包含关系的反面</strong> —— 前五件事在「你的机器上」,门禁在「云端」。</p>
+    <p><strong>它不替代前面任何一道</strong>:门禁只保证「下限」,不保证「质量」。
+    一个人赶时间可以写一堆没意义的测试把门禁糊过去 —— 那时候只有「自己看改动」能发现。</p>
+  </div></div>
+
+  <div class="step"><div class="n">④ 例子</div><div class="c">
+    <p>本教程第 19 页会在真机上完整演示这一幕。先给你看结论 ——
+    <strong>拿仓库拥有者的管理员权限强行合并一个检查失败的改动:</strong></p>
+<pre><code>$ gh pr merge 1 --merge --admin
+
+GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</code></pre>
+    <p><strong>被拒了。</strong>（第 19 页的真机演示开启了 enforce_admins——GitHub 默认并不约束管理员,详见第 19 页）而同样的检查在本地,多打 12 个字符（指 " --no-verify",含前导空格,详见第 16 页）就能绕过。</p>
+  </div></div>
+
+  <div class="step"><div class="n">⑤ 误区</div><div class="c">
+    <p><strong>误区 1:「门禁越严越好」。</strong>错。门禁太严,团队会想办法绕过它 ——
+    然后它就彻底失效了。第 18 页有五条设计原则。</p>
+    <p><strong>误区 2:「一个人的项目也要建门禁」。</strong>没必要。
+    <strong>门禁解决的是「人会偷懒、会赶时间、会忘」</strong>,一个人时你就是唯一的人,自律够了。
+    三个人以上才需要机器守门。</p>
+  </div></div>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="axis">五、把六件事排到时间轴上</h2>
+
+<figure>
+<svg viewBox="0 0 920 380" role="img" aria-label="六件事在时间轴上的位置">
+  <defs>
+    <marker id="a1" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <polygon points="0 0, 9 3.5, 0 7" fill="var(--rule2)"/>
+    </marker>
+  </defs>
+  <line x1="40" y1="192" x2="876" y2="192" stroke="var(--rule2)" stroke-width="2" marker-end="url(#a1)"/>
+  <g class="st" font-size="13" fill="var(--faint)" text-anchor="middle">
+    <line x1="168" y1="182" x2="168" y2="202" stroke="var(--rule2)" stroke-width="2"/>
+    <line x1="398" y1="182" x2="398" y2="202" stroke="var(--rule2)" stroke-width="2"/>
+    <line x1="628" y1="182" x2="628" y2="202" stroke="var(--rule2)" stroke-width="2"/>
+    <line x1="800" y1="182" x2="800" y2="202" stroke="var(--rule2)" stroke-width="2"/>
+    <text x="168" y="222">动手前</text><text x="398" y="222">动手中</text>
+    <text x="628" y="222">出事后</text><text x="800" y="222">交给团队时</text>
+  </g>
+  <g class="st" font-size="12" fill="var(--faint)" text-anchor="middle">
+    <text x="168" y="30">预防</text><text x="398" y="30">检测</text>
+    <text x="628" y="30">撤销</text><text x="800" y="30">强制</text>
+  </g>
+
+  <g>
+    <rect x="90" y="46" width="156" height="44" rx="10" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.6"/>
+    <text x="168" y="66" class="st" font-size="13.5" font-weight="700" fill="var(--plan)" text-anchor="middle">① 先看方案</text>
+    <text x="168" y="82" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">方向 / 范围错</text>
+  </g>
+  <g>
+    <rect x="320" y="46" width="156" height="44" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="398" y="66" class="st" font-size="13.5" font-weight="700" fill="var(--info)" text-anchor="middle">② 让它自测</text>
+    <text x="398" y="82" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">实现有 bug</text>
+  </g>
+  <g>
+    <rect x="550" y="46" width="156" height="44" rx="10" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="628" y="66" class="st" font-size="13.5" font-weight="700" fill="var(--bad)" text-anchor="middle">③ 一键撤销</text>
+    <text x="628" y="82" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">刚才那几轮</text>
+  </g>
+  <g>
+    <rect x="722" y="42" width="156" height="52" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
+    <text x="800" y="62" class="st" font-size="13.5" font-weight="800" fill="var(--warn)" text-anchor="middle">⑤ 质量门禁</text>
+    <text x="800" y="78" class="st" font-size="11" fill="var(--faint)" text-anchor="middle">别人也绕不过</text>
+    <text x="800" y="90" class="st" font-size="10.5" fill="var(--faint)" text-anchor="middle">跑在云端</text>
+  </g>
+
+  <g>
+    <rect x="256" y="112" width="290" height="40" rx="10" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+    <text x="401" y="137" class="st" font-size="13" font-weight="700" fill="var(--warn)" text-anchor="middle">
+      ⑥ 自己看改动 —— 每一轮都要做
+    </text>
+  </g>
+
+  <g>
+    <rect x="60" y="252" width="816" height="50" rx="12" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.8"/>
+    <text x="468" y="274" class="st" font-size="14" font-weight="700" fill="var(--ok)" text-anchor="middle">
+      ④ 存档系统 —— 唯一横跨全程的一道防线
+    </text>
+    <text x="468" y="292" class="st" font-size="11.5" fill="var(--faint)" text-anchor="middle">
+      动手前:开分支铺网 · 动手中:每步存档 · 出事后:定位 + 回退
+    </text>
+  </g>
+  <g stroke="var(--ok)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".5">
+    <line x1="168" y1="192" x2="168" y2="252"/><line x1="398" y1="192" x2="398" y2="252"/>
+    <line x1="628" y1="192" x2="628" y2="252"/><line x1="800" y1="192" x2="800" y2="252"/>
+  </g>
+
+  <line x1="712" y1="24" x2="712" y2="320" stroke="var(--rule2)" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="640" y="336" class="st" font-size="12.5" fill="var(--soft)" text-anchor="end" font-weight="600">← 你的机器上,全靠自觉</text>
+  <text x="724" y="336" class="st" font-size="12.5" fill="var(--warn)" text-anchor="start" font-weight="600">云端,绕不过 →</text>
+
+  <text x="468" y="366" class="st" font-size="13" fill="var(--faint)" text-anchor="middle">
+    ①②③ 只在自己那一格有效 · ④ 贯穿全程 · ⑥ 每轮都做 · ⑤ 在那条虚线右边
+  </text>
+</svg>
+<figcaption>六件事各就各位。那条竖虚线是全书最重要的一条分界:左边靠自觉,右边靠强制</figcaption>
+</figure>
+
+<h3>一张对照表</h3>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:15%"></th>
+  <th style="width:17%"><span style="color:var(--plan)">① 先看方案</span></th>
+  <th style="width:17%"><span style="color:var(--info)">② 让它自测</span></th>
+  <th style="width:17%"><span style="color:var(--bad)">③ 一键撤销</span></th>
+  <th style="width:17%"><span style="color:var(--ok)">④ 存档系统</span></th>
+  <th style="width:17%"><span style="color:var(--warn)">⑤ 质量门禁</span></th>
+</tr></thead>
+<tbody>
+<tr><th>什么时候救你</th><td>动手前</td><td>动手中</td><td>出事后<br>(这一轮内)</td><td>出事后<br>(永久有效)</td><td>要合并进主干时</td></tr>
+<tr><th>性质</th><td>预防</td><td>检测</td><td>撤销</td><td>撤销 + 定位</td><td><strong>强制</strong></td></tr>
+<tr><th>防什么</th><td>方向 / 范围错</td><td>实现有 bug</td><td>刚才那几轮改坏</td><td>任何时候的任何问题</td><td><strong>人会偷懒</strong></td></tr>
+<tr><th>跑在哪</th><td>你的机器</td><td>你的机器</td><td>你的机器</td><td>你的机器</td><td><strong>云端</strong></td></tr>
+<tr><th>你要付出什么</th><td>几分钟读方案</td><td>一句提示词</td><td><strong>零</strong>(自动记录)</td><td><strong>一点纪律</strong></td><td>一次配置</td></tr>
+<tr><th>可靠性</th><td>高(工具限制)</td><td>中(会作弊,要盯)</td><td>中(有五个死角)</td><td><strong>最高</strong></td><td><strong>最高</strong></td></tr>
+<tr><th>能不能省</th><td>小任务可省</td><td style="color:var(--warn)">尽量别省</td><td style="color:var(--ok)"><strong>可以省</strong></td><td style="color:var(--bad)"><strong>绝对不能省</strong></td><td>一个人时可省</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="trap">六、一个几乎所有人都会看漏的地方</h2>
+
+<p>看上表第一行:「什么时候救你」。</p>
+
+<p><strong>注意我用的措辞不是「你什么时候操作它」。</strong>
+对其他几道防线这两件事重合;<strong>唯独存档系统,这两件事是分开的:</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%">防线</th><th style="width:30%">你操作它的时刻</th><th style="width:26%">它生效的时刻</th><th>重合?</th></tr></thead>
+<tbody>
+<tr><td>① 先看方案</td><td>动手前</td><td>动手前</td><td style="color:var(--ok)">✅</td></tr>
+<tr><td>② 让它自测</td><td>动手中</td><td>动手中</td><td style="color:var(--ok)">✅</td></tr>
+<tr><td>③ 一键撤销</td><td>出事后</td><td>出事后</td><td style="color:var(--ok)">✅</td></tr>
+<tr>
+  <td><strong>④ 存档系统</strong></td>
+  <td><strong>动手前就要铺好<br>+ 全程持续存档</strong></td>
+  <td><strong>出事之后</strong></td>
+  <td style="color:var(--bad)"><strong>❌ 分开的</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">这就是为什么它的成本被写成「一点纪律」</b>
+  纪律的意思正是:<strong>在还看不到收益的时候就要付出。</strong>
+  <br><br>
+  回到游戏存档那个类比:<strong>存档发挥作用的时刻是你死掉之后,但你必须在死之前存。</strong>
+  没人会说「存档是死后才做的事」。
+  <br><br>
+  这一条是全书最容易被跳过、也最不能跳过的一步。
+</div>
+
+<div class="box trap">
+  <b class="t">推论:漏了它,后面几道全是空的</b>
+  假设你没存档,AI 改了 300 行、新建了 8 个文件,然后你发现方向从一开始就错了。
+  <br><br>
+  这时候「一键撤销」有五个死角救不全你,「自测」只会告诉你现在的代码通过了检查,
+  「先看方案」已经过去了,「质量门禁」拦的是「合不合得进主干」而不是帮你回退。
+  <br><br>
+  <strong>你唯一能做的,是靠记忆一个个手动撤销。记漏一个,项目就带着一处来源不明的改动继续往下走。</strong>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="sop">七、串成一套流程:七个步骤</h2>
+
+<p>六件事按「什么时候会出事」排个序,就得到一套可以照着做的流程。</p>
+
+<figure>
+<svg viewBox="0 0 900 540" role="img" aria-label="七步流程的流程图,含 5a/5b/5c 三个分支">
+  <defs>
+    <marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/>
+    </marker>
+  </defs>
+  <g class="st" text-anchor="middle" font-size="13">
+    <rect x="320" y="12" width="260" height="44" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="2"/>
+    <text x="450" y="31" font-weight="800" fill="var(--ok)">步骤 0 · 建安全网</text>
+    <text x="450" y="47" font-size="11.5" fill="var(--faint)">开新分支 + 确认工作区干净</text>
+
+    <rect x="320" y="76" width="260" height="44" rx="11" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.6"/>
+    <text x="450" y="95" font-weight="700" fill="var(--plan)">步骤 1 · 先要方案</text>
+    <text x="450" y="111" font-size="11.5" fill="var(--faint)">进「不准改源文件」的模式</text>
+
+    <rect x="320" y="140" width="260" height="44" rx="11" fill="var(--plan-soft)" stroke="var(--plan)" stroke-width="1.6"/>
+    <text x="450" y="159" font-weight="700" fill="var(--plan)">步骤 2 · 读方案 → 批准</text>
+    <text x="450" y="175" font-size="11.5" fill="var(--faint)">看方向 / 范围 / 步子 / 有没有编造</text>
+
+    <rect x="320" y="204" width="260" height="44" rx="11" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="450" y="223" font-weight="700" fill="var(--info)">步骤 3 · 做一步 + 自测</text>
+    <text x="450" y="239" font-size="11.5" fill="var(--faint)">只做一步,自己修到检查全过</text>
+
+    <rect x="320" y="268" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.2"/>
+    <text x="450" y="287" font-weight="800" fill="var(--warn)">步骤 4 · 你自己看改动</text>
+    <text x="450" y="303" font-size="11.5" fill="var(--faint)">唯一不能外包的一步</text>
+
+    <rect x="18" y="336" width="196" height="58" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="116" y="356" font-weight="800" fill="var(--ok)">5a · 满意</text>
+    <text x="116" y="373" font-size="11" fill="var(--faint)">跑一次全量检查</text>
+    <text x="116" y="388" font-size="11" fill="var(--faint)">→ 存档</text>
+
+    <rect x="234" y="336" width="196" height="58" rx="11" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
+    <text x="332" y="356" font-weight="800" fill="var(--info)">5b · 小问题</text>
+    <text x="332" y="373" font-size="11" fill="var(--faint)">直接说,让它改</text>
+    <text x="332" y="388" font-size="11" fill="var(--faint)">零回退,最便宜</text>
+
+    <rect x="450" y="336" width="196" height="58" rx="11" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
+    <text x="548" y="356" font-weight="800" fill="var(--bad)">5c · 方向错了</text>
+    <text x="548" y="373" font-size="11" fill="var(--faint)">一键撤销</text>
+    <text x="548" y="388" font-size="11" fill="var(--faint)">或用存档退回</text>
+
+    <rect x="666" y="336" width="216" height="58" rx="11" fill="var(--raised)" stroke="var(--rule2)" stroke-width="1.6"/>
+    <text x="774" y="356" font-weight="800" fill="var(--ink)">兜底 · 全烂了</text>
+    <text x="774" y="373" font-size="11" fill="var(--faint)">用存档系统</text>
+    <text x="774" y="388" font-size="11" fill="var(--faint)">彻底回到原点</text>
+
+    <rect x="320" y="420" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="450" y="439" font-weight="700" fill="var(--warn)">步骤 7 · 最后总审</text>
+    <text x="450" y="455" font-size="11.5" fill="var(--faint)">跑最贵的那层检查 + 通读全部改动</text>
+
+    <rect x="320" y="486" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.4"/>
+    <text x="450" y="505" font-weight="800" fill="var(--warn)">推上去 → 质量门禁</text>
+    <text x="450" y="521" font-size="11.5" fill="var(--faint)">跑在云端,你绕不过 · 第 17–19 页</text>
+  </g>
+
+  <g stroke="var(--faint)" stroke-width="1.4" marker-end="url(#a2)" fill="none">
+    <line x1="450" y1="56" x2="450" y2="74"/>
+    <line x1="450" y1="120" x2="450" y2="138"/>
+    <line x1="450" y1="184" x2="450" y2="202"/>
+    <line x1="450" y1="248" x2="450" y2="266"/>
+    <path d="M 410 312 L 410 324 L 116 324 L 116 334"/>
+    <path d="M 435 312 L 435 324 L 332 324 L 332 334"/>
+    <path d="M 465 312 L 465 324 L 548 324 L 548 334"/>
+    <path d="M 490 312 L 490 324 L 774 324 L 774 334"/>
+    <line x1="450" y1="464" x2="450" y2="484"/>
+  </g>
+
+  <path d="M 18 365 L 8 365 L 8 226 L 316 226" fill="none" stroke="var(--ok)"
+        stroke-width="1.7" stroke-dasharray="5 4" marker-end="url(#a2)"/>
+  <text x="28" y="295" class="st" font-size="12" fill="var(--ok)" font-weight="700"
+        transform="rotate(-90 28 295)">步骤 6 · 循环做下一步</text>
+
+  <path d="M 116 394 L 116 410 L 316 410" fill="none" stroke="var(--ok)"
+        stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a2)"/>
+</svg>
+<figcaption>七步流程。步骤 5 有三个分支,取决于你看完改动后的判断;最下面那一格才是「别人也绕不过」的</figcaption>
+</figure>
+
+<h3>每一步对应哪道防线</h3>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:8%">步骤</th><th style="width:25%">做什么</th>
+  <th style="width:25%">对应哪道防线</th><th>细节在哪页</th>
+</tr></thead>
+<tbody>
+<tr><td><strong>0</strong></td><td>建安全网</td><td><span style="color:var(--ok)">④ 存档系统</span></td><td>第 11 页</td></tr>
+<tr><td><strong>1</strong></td><td>先要方案,别写代码</td><td><span style="color:var(--plan)">① 先看方案</span></td><td>第 13 页</td></tr>
+<tr><td><strong>2</strong></td><td>读方案 → 提意见 → 批准</td><td><span style="color:var(--plan)">① 先看方案</span></td><td>第 13、14 页</td></tr>
+<tr><td><strong>3</strong></td><td>只做第一步,并且自带验收</td><td><span style="color:var(--info)">② 让它自测</span></td><td>第 3–10、14 页</td></tr>
+<tr><td><strong>4</strong></td><td><strong>你自己看改动</strong></td><td><span style="color:var(--warn)">⑥ 你的眼睛</span></td><td>第 11、14、20 页</td></tr>
+<tr><td><strong>5a</strong></td><td>满意 → 全量检查 → 存档</td><td><span style="color:var(--ok)">④ 存档系统</span></td><td>第 9、11 页</td></tr>
+<tr><td><strong>5b</strong></td><td>小问题 → 直接说</td><td>—(不动用任何撤销)</td><td>第 14 页</td></tr>
+<tr><td><strong>5c</strong></td><td>方向错 → 撤销</td><td><span style="color:var(--bad)">③</span> / <span style="color:var(--ok)">④</span></td><td>第 12、13 页</td></tr>
+<tr><td><strong>6</strong></td><td>循环 3–5,直到方案做完</td><td>②④ 反复咬合</td><td>第 14 页</td></tr>
+<tr><td><strong>7</strong></td><td>最后总审</td><td>② 的加强版</td><td>第 10、14 页</td></tr>
+<tr><td><strong>推上去</strong></td><td>过质量门禁</td><td><span style="color:var(--warn)">⑤ 质量门禁</span></td><td><strong>第 17–19 页</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>步骤 5 的三个分支,是一道「损伤评估」题</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:34%">损伤程度</th><th style="width:30%">走哪条</th><th>代价</th></tr></thead>
+<tbody>
+<tr><td>方向对,只是细节不满意</td><td><strong>5b · 直接说</strong></td><td style="color:var(--ok)">零回退,成本最低</td></tr>
+<tr><td>这一轮整体跑偏了</td><td><strong>5c · 一键撤销</strong></td><td style="color:var(--warn)">退掉这一轮的对话和代码</td></tr>
+<tr><td>好几轮都烂了 / 撤销兜不住</td><td><strong>兜底 · 用存档系统</strong></td><td style="color:var(--bad)">退回上一个存档点</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">规则:从上往下走,能用上面的就别用下面的</b>
+  <strong>不要一看到问题就撤销。</strong>大部分情况「直接说」就够了,而且最便宜。
+  <br><br>
+  这三档的粒度正好对应前面那张表「防什么」那一行:
+  <em>实现有 bug → 刚才那几轮 → 任何时候的任何问题。</em>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="cut">八、哪几步能省,哪几步不能</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:20%">步骤</th><th style="width:22%">能不能省</th><th>判断标准</th></tr></thead>
+<tbody>
+<tr><td><strong>0</strong> 建安全网</td><td style="color:var(--bad)"><strong>绝对不能省</strong></td><td>省了,后面所有网都是空的</td></tr>
+<tr><td><strong>1–2</strong> 方案</td><td>小任务可省</td><td><strong>你能一句话说清要改什么吗?</strong>能就省</td></tr>
+<tr><td><strong>3</strong> 自测</td><td style="color:var(--warn)">尽量别省</td><td>它是「改坏了」和「你发现改坏了」之间唯一的东西</td></tr>
+<tr><td><strong>4</strong> 看改动</td><td style="color:var(--bad)"><strong>绝对不能省</strong></td><td>唯一不能外包的一步</td></tr>
+<tr><td><strong>5a</strong> 全量检查 + 存档</td><td style="color:var(--bad)"><strong>绝对不能省</strong></td><td>存档点本身必须干净,否则退回去没意义</td></tr>
+<tr><td><strong>5c</strong> 一键撤销</td><td style="color:var(--ok)"><strong>可以省</strong></td><td>有存档系统就够了</td></tr>
+<tr><td><strong>7</strong> 最后总审</td><td>不建议省</td><td>它是唯一一次看「整体」的机会</td></tr>
+<tr><td><strong>质量门禁</strong></td><td>一个人时可省</td><td><strong>三个人以上就必须有</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">最精简的一套(小任务用)</b>
+  <ol style="margin-bottom:0">
+    <li>开分支,确认干净 <span style="color:var(--faint)">(步骤 0)</span></li>
+    <li>直接说要改什么,带上「改完自己跑检查」<span style="color:var(--faint)">(步骤 3)</span></li>
+    <li><strong>自己看一遍改动</strong> <span style="color:var(--faint)">(步骤 4)</span></li>
+    <li>跑全量检查,存档 <span style="color:var(--faint)">(步骤 5a)</span></li>
+  </ol>
+  <br>
+  <strong>四步。这是底线,不能再少了。</strong>
+</div>
+
+<!-- ================================================================ -->
+<h2 id="next">九、下一步</h2>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">接下来</th><th style="width:28%">讲什么</th><th>为什么排在这个位置</th></tr></thead>
+<tbody>
+<tr><td><strong>第 2 页</strong></td><td>Python 环境</td><td>后面所有例子都要在你电脑上跑起来,先打地基</td></tr>
+<tr><td><strong>第 3–10 页</strong></td><td><span style="color:var(--info)">② 让它自测</span> 的全部细节</td>
+    <td>内容最多的一道 —— 也是唯一「你多写一行提示词,它就多做一轮验证」的</td></tr>
+<tr><td><strong>第 11–12 页</strong></td><td><span style="color:var(--ok)">④ 存档系统</span></td>
+    <td>放在测试之后,因为很多回退操作要配合检查一起用</td></tr>
+<tr><td><strong>第 13 页</strong></td><td><span style="color:var(--plan)">①</span> 和 <span style="color:var(--bad)">③</span></td>
+    <td>要先知道存档系统,才能理解「撤销为什么可以省」</td></tr>
+<tr><td><strong>第 14 页</strong></td><td>七步流程实战</td><td>汇总页,在真实项目上走一遍</td></tr>
+<tr><td><strong>第 16 页</strong></td><td>流水线基础</td><td><strong>门禁的前置</strong> —— 不懂流水线不可能懂门禁</td></tr>
+<tr><td><strong>第 17–19 页</strong></td><td><span style="color:var(--warn)">⑤ 质量门禁</span></td>
+    <td>本版重点。概念 → 检查什么 → 真机实战</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:38%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>两种失控</td><td>方向错 / 实现错,要用不同方法防</td></tr>
+<tr><td>2</td><td>四道防线 + 门禁</td><td>先看方案 / 让它自测 / 一键撤销 / 存档系统 / 质量门禁</td></tr>
+<tr><td>3</td><td>时间轴</td><td>动手前 / 动手中 / 出事后 / 交给团队时</td></tr>
+<tr><td>4</td><td>「什么时候救你」≠「什么时候操作它」</td><td>只有存档系统这两件事是分开的</td></tr>
+<tr><td>5</td><td>存档系统横跨全程</td><td>其他几道只在自己那一格有效</td></tr>
+<tr><td>6</td><td>第六件事:自己看改动</td><td><strong>唯一不能外包</strong></td></tr>
+<tr><td>7</td><td>七步流程 + 三层撤销阶梯</td><td>六件事按「什么时候会出事」排序的结果</td></tr>
+<tr><td>8</td><td>裁剪规则</td><td>0 / 4 / 5a 不能省,1–2 小任务可省,5c 可省</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="00-index.html">← 上一页:目录</a>
+  <a href="00-index.html">目录</a>
+  <a href="02-python-setup.html">下一页:Python 环境从零开始 →</a>
+</div>
+
+<div class="foot">
+  <p>第 01 页 / 共 23 页 · 覆盖知识点 1–8 · 难度 ★</p>
+  <p>本页不含需要核实的命令。含 1 处经核实修正:「先看方案模式」下 AI <strong>能</strong>运行命令做探索,只是不能编辑源文件(官方原文见第 13 页)。</p>
+</div>
+
+</div>
+
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

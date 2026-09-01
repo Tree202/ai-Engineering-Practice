@@ -1,0 +1,22 @@
+# ---- myshop 有自己的 git 仓库,由它自己管 ----
+# (那 6 条提交是教程第 19 页的门禁演示现场,是教学资产)
+myshop/
+
+# ---- Python 垃圾 ----
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- 虚拟环境 ----
+.venv/
+venv/
+
+# ---- 系统垃圾 ----
+.DS_Store
+Thumbs.db
+
+# ---- 编辑器 ----
+.idea/
+.vscode/

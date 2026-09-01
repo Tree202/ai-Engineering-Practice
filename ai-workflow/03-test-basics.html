@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 测试到底是什么</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">03 测试基础 <span>· 测试到底是什么</span></span>
+  <a href="02-python-setup.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="04-static-check.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 03 页 · 难度 ★★ · 前置:第 02 页</span>
+<h1>测试到底是什么</h1>
+<p class="lede">
+「让 AI 自测」这四个字里的「测」到底指什么?是几百条用例?是一段自然语言?
+这一页从「一个测试长什么样」讲起,把所有零件拆开。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#what">一、测试是代码,不是文档</a></li>
+    <li><a href="#assert">二、断言:整个测试的心脏</a></li>
+    <li><a href="#runner">三、运行器做的三件事</a></li>
+    <li><a href="#aaa">四、所有测试共用的骨架:三段式</a></li>
+    <li><a href="#raises">五、测「该报错的时候有没有报错」</a></li>
+    <li><a href="#fixture">六、准备工作再讲一遍</a></li>
+    <li><a href="#three">七、三种容易混淆的「测试」</a></li>
+    <li><a href="#count">八、「几百上千条」是怎么来的</a></li>
+  </ol>
+</div>
+
+<h2 id="what">一、测试是代码,不是文档</h2>
+
+<div class="box key">
+  <b class="t">一句话回答</b>
+  <strong>测试是真实的、可执行的代码文件。不是自然语言,不是文档,也不是让 AI「在心里过一遍」。</strong>
+</div>
+
+<h3>一个测试长什么样</h3>
+
+<p>假设你有这么一个函数(这是第 6 页那个练习项目里真实的代码):</p>
+
+<pre><code># 文件:项目根目录下的 myshop/price.py
+
+def format_price(cents: int) -&gt; str:
+    """把「分」换算成人类看的价格字符串。1234 -&gt; "¥12.34" """
+    if cents &lt; 0:
+        raise ValueError("价格不能为负数")
+    yuan, fen = divmod(cents, 100)     # divmod(1234,100) -&gt; (12, 34)
+    return f"¥{yuan}.{fen:02d}"        # :02d = 不足两位前面补 0</code></pre>
+
+<p>它的测试是<strong>另一个真实存在的文件</strong>:</p>
+
+<pre><code># 文件:项目根目录下的 tests/test_price.py
+
+import pytest
+
+from myshop.price import format_price
+
+
+def test_普通价格() -&gt; None:
+    assert format_price(1234) == "¥12.34"
+
+
+def test_零元是边界值() -&gt; None:
+    # 0 很容易被漏掉,专门写一条
+    assert format_price(0) == "¥0.00"
+
+
+def test_不足一角要在前面补零() -&gt; None:
+    # 5 分不能显示成 "¥0.5",必须是 "¥0.05"
+    assert format_price(5) == "¥0.05"
+
+
+def test_整数元不能丢掉小数位() -&gt; None:
+    assert format_price(10000) == "¥100.00"
+
+
+def test_负数要报错() -&gt; None:
+    # 「该报错的时候有没有报错」也是行为的一部分,同样要测
+    with pytest.raises(ValueError):
+        format_price(-1)</code></pre>
+
+<h3>逐行解剖</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:32%">部分</th><th>是什么</th></tr></thead>
+<tbody>
+<tr><td><code>test_price.py</code></td>
+    <td><strong>文件名里的 <code>test_</code> 是硬规则</strong>。运行器启动时会自动扫描全项目,把符合命名的文件找出来执行</td></tr>
+<tr><td><code>from myshop.price import ...</code></td><td>把要测的那个函数<strong>真的引进来</strong></td></tr>
+<tr><td><code>def test_普通价格()</code></td>
+    <td><strong>一条测试用例</strong>。函数名必须以 <code>test</code> 开头,后面可以用中文</td></tr>
+<tr><td><code>assert A == B</code></td>
+    <td><strong>断言 —— 整个测试的心脏</strong>。意思是「我期望 A 等于 B」,不等就判定失败</td></tr>
+<tr><td><code>pytest.raises(ValueError)</code></td><td>断言「这里<strong>应该</strong>抛异常」。没抛反而算失败</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box good">
+  <b class="t">中文测试名真的可以用</b>
+  <code>def test_零元是边界值()</code> 完全正常,输出里中文照常显示。
+  <strong>唯一前提:函数名必须以 <code>test</code> 开头</strong>,中文只能出现在后面。
+  写成 <code>def 测试_零元()</code> 是不会被找到的。
+  <br><br>
+  对初学者来说这个非常值钱 —— 测试名用中文写,你一眼就知道每条在测什么。
+</div>
+
+<h3>跑起来是什么样</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 全绿(真实输出)</div>
+<pre>tests/test_price.py::test_普通价格 <span class="c-ok">PASSED</span>                  <span class="c-dim">[ 20%]</span>
+tests/test_price.py::test_零元是边界值 <span class="c-ok">PASSED</span>              <span class="c-dim">[ 40%]</span>
+tests/test_price.py::test_不足一角要在前面补零 <span class="c-ok">PASSED</span>      <span class="c-dim">[ 60%]</span>
+tests/test_price.py::test_整数元不能丢掉小数位 <span class="c-ok">PASSED</span>      <span class="c-dim">[ 80%]</span>
+tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>                <span class="c-dim">[100%]</span>
+
+<span class="c-ok">========================= 5 passed in 0.01s =========================</span></pre>
+</div>
+
+<p>故意把 <code>{fen:02d}</code> 改成 <code>{fen}</code>(去掉补零)之后:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 飘红(真实输出)</div>
+<pre><span class="c-dim">___________________ test_不足一角要在前面补零 ____________________</span>
+
+    def test_不足一角要在前面补零() -&gt; None:
+&gt;       assert format_price(5) == "¥0.05"
+<span class="c-bad">E       AssertionError: assert '¥0.5' == '¥0.05'
+E
+E         - ¥0.05
+E         ?    -           &larr; 精确指出:这里少了一个字符
+E         + ¥0.5</span>
+
+<span class="c-bad">=================== 3 failed, 2 passed in 0.04s ====================</span></pre>
+</div>
+
+<h2 id="assert">二、断言:整个测试的心脏</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">断言</span><span class="en">assert</span><span class="badge">核心</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一句「我打包票这里应该是这样」。<strong>是就继续,不是就当场失败。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>质检员的卡尺。</strong></p>
+    <p>零件下线,质检员拿卡尺一量:「应该是 10.0 毫米。」量出来 10.0 就放行,量出来 9.7 就当场拦下。
+    <strong>卡尺不商量、不通融、不看你今天心情好不好。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是 Python <strong>自带的关键字</strong>,不是测试工具提供的 —— 你在任何代码里都能用。</p>
+    <p>它和「测试运行器」是<strong>被使用与使用的关系</strong>:断言负责判断对错,运行器负责组织执行和汇报。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>规则只有一条:</p>
+<pre><code>assert 条件        # 条件为真 -&gt; 什么都不发生
+                  # 条件为假 -&gt; 抛出 AssertionError</code></pre>
+    <p>你可以现在就在终端里试(在 myshop 项目根目录执行):</p>
+<pre><code>.venv/bin/python -c "assert 1 + 1 == 2; print('通过了')"</code></pre>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>通过了</pre>
+    </div>
+    <p>把 <code>2</code> 改成 <code>3</code> 再跑:</p>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>Traceback (most recent call last):
+  File "&lt;string&gt;", line 1, in &lt;module&gt;
+<span class="c-bad">AssertionError</span></pre>
+    </div>
+    <p><strong>注意这里只有孤零零一行 <code>AssertionError</code>,什么信息都没有。</strong>下一节讲为什么在测试里不是这样。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「<code>assert</code> 是测试专用的」。</strong>不是,它是 Python 内置关键字。</p>
+    <p><strong>误区 2:「断言可以不写具体值」。</strong>
+    <code>assert result</code> 这种只判断「非空」的断言,几乎测不出任何东西。
+    <strong>好断言里一定有一个写死的期望值</strong> —— 第 20 页会用这条标准来识别垃圾测试。</p>
+  </div></div>
+</div>
+
+<div class="box note">
+  <b class="t">为什么测试里的报错信息这么详细</b>
+  上面终端里的原生断言只打印一行 <code>AssertionError</code>。而测试里却能打印出两边的值、还标出差在第几个字符。
+  <br><br>
+  因为运行器在加载测试文件时,<strong>会重写你写的 <code>assert</code> 语句</strong>,
+  让它在失败时把两边的值都抓出来做对比。这个功能叫 <strong>断言重写(assertion rewriting)</strong>。
+  <br><br>
+  <strong>这是 pytest 比 Python 自带测试框架好用的最大原因。</strong>
+</div>
+
+<h2 id="runner">三、运行器做的三件事</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">测试运行器</span><span class="en">test runner / pytest</span><span class="badge">工具</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个程序,负责<strong>把你写的测试找出来、挨个执行、汇总报告</strong>。它本身不知道你的业务。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>监考老师 + 阅卷机。</strong></p>
+    <p>它收卷、批改、报分数。<strong>但题目和标准答案是你自己出的</strong> —— 它一道题都不会出。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它和「测试文件」是<strong>执行与被执行的关系</strong>。很多人把两者混为一谈,记住这个区分:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:30%"></th><th>是什么</th></tr></thead>
+    <tbody>
+    <tr><td><strong>pytest</strong></td><td>工具。你 <code>pip install</code> 装的那个</td></tr>
+    <tr><td><strong>test_*.py</strong></td><td><strong>你写的普通 Python 代码</strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>它做的三件事:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:14%">第几件</th><th style="width:20%">做什么</th><th>怎么做</th></tr></thead>
+    <tbody>
+    <tr><td><strong>&#9312;</strong></td><td><strong>找</strong></td>
+        <td>按四条规则扫描:文件名 <code>test_*.py</code>、函数名 <code>test</code> 开头、类名 <code>Test</code> 开头、类不能有 <code>__init__</code></td></tr>
+    <tr><td><strong>&#9313;</strong></td><td><strong>跑</strong></td>
+        <td>把找到的每个函数<strong>当普通函数调用一次</strong>。就这么简单,没别的魔法</td></tr>
+    <tr><td><strong>&#9314;</strong></td><td><strong>报</strong></td>
+        <td>判定标准只有一条:<strong>正常跑完 = 通过;抛出任何异常 = 失败</strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「pytest 会自动测我的代码」。</strong>不会。<strong>它只执行你写下的东西。</strong>
+    你没想到要检查的场景,它一个也不会替你想。</p>
+    <p><strong>误区 2:「没有红字就是全跑了」。</strong>不一定 ——
+    文件名不匹配的测试会<strong>静默地完全不运行</strong>(第 2 页讲过)。
+    <strong>要看 <code>collected N items</code> 那个数字。</strong></p>
+  </div></div>
+</div>
+
+<h3>退出码:给机器看的结果</h3>
+
+<p>人看的是绿字红字,<strong>机器看的是退出码</strong>。这个概念在第 17 页讲质量门禁时是核心。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">退出码</th><th style="width:34%">含义</th><th>什么时候会遇到</th></tr></thead>
+<tbody>
+<tr><td><strong>0</strong></td><td>全部通过</td><td>正常情况</td></tr>
+<tr><td><strong>1</strong></td><td>有测试失败</td><td>最常见的失败</td></tr>
+<tr><td><strong>2</strong></td><td>被中断</td><td>收集阶段就出错,比如 import 失败</td></tr>
+<tr><td><strong>3</strong></td><td>内部错误</td><td>很少见</td></tr>
+<tr><td><strong>4</strong></td><td>命令行用法错误</td><td>参数打错了</td></tr>
+<tr><td><strong>5</strong></td><td>一条都没收集到</td><td>文件名/函数名不符合规则</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">记住这个「0 与非 0」的规则</b>
+  几乎所有命令行工具都遵守:<strong>0 表示成功,任何非 0 表示失败。</strong>
+  <br><br>
+  <strong>第 16、17 页整套流水线和质量门禁,判定依据就只有这一个数字。</strong>
+</div>
+
+<h2 id="aaa">四、所有测试共用的骨架:三段式</h2>
+
+<p>不管哪一层测试,骨架都是同一个:</p>
+
+<figure>
+<svg viewBox="0 0 840 250" role="img" aria-label="测试的三段式骨架">
+  <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st" text-anchor="middle">
+    <rect x="30" y="50" width="220" height="76" rx="12" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.8"/>
+    <text x="140" y="76" font-size="15" font-weight="800" fill="var(--ok)">&#9312; 准备</text>
+    <text x="140" y="96" font-size="12" fill="var(--faint)">Arrange</text>
+    <text x="140" y="115" font-size="12" fill="var(--soft)">把场景搭好</text>
+
+    <rect x="310" y="50" width="220" height="76" rx="12" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.8"/>
+    <text x="420" y="76" font-size="15" font-weight="800" fill="var(--info)">&#9313; 执行</text>
+    <text x="420" y="96" font-size="12" fill="var(--faint)">Act</text>
+    <text x="420" y="115" font-size="12" fill="var(--soft)">调用要测的那个东西</text>
+
+    <rect x="590" y="50" width="220" height="76" rx="12" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+    <text x="700" y="76" font-size="15" font-weight="800" fill="var(--warn)">&#9314; 断言</text>
+    <text x="700" y="96" font-size="12" fill="var(--faint)">Assert</text>
+    <text x="700" y="115" font-size="12" fill="var(--soft)">检查结果对不对</text>
+  </g>
+  <g stroke="var(--faint)" stroke-width="1.5" marker-end="url(#a2)">
+    <line x1="253" y1="88" x2="304" y2="88"/>
+    <line x1="533" y1="88" x2="584" y2="88"/>
+  </g>
+  <text x="420" y="172" class="st" font-size="14" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    关键洞察:「准备」这一段的重量,决定了这一层测试有多慢
+  </text>
+  <g class="st" font-size="12.5" fill="var(--faint)" text-anchor="middle">
+    <text x="420" y="202">什么都不用准备 &rarr; 要个临时数据库 &rarr; 要启动服务器 &rarr; 要开浏览器</text>
+    <text x="420" y="226">0.00 秒 &rarr; 0.02 秒 &rarr; 3.64 秒 &rarr; 10 秒以上(第 5 页有实测)</text>
+  </g>
+</svg>
+<figcaption>业内叫 AAA 模式。第 5、7 页会用它来解释四层测试的速度差异</figcaption>
+</figure>
+
+<p>看一个最小的例子 —— 这一层的「准备」是空的:</p>
+
+<pre><code>def test_普通价格() -&gt; None:
+    #  &#9312; 准备:这一层不需要准备什么
+    #  &#9313; 执行 + &#9314; 断言 写在了同一行
+    assert format_price(1234) == "¥12.34"
+    #      &#9492;&#9472;&#9472;&#9472;&#9472; 执行 &#9472;&#9472;&#9472;&#9472;&#9496;    &#9492;&#9472; 断言 &#9472;&#9496;</code></pre>
+
+<h2 id="raises">五、测「该报错的时候有没有报错」</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">异常断言</span><span class="en">pytest.raises</span><span class="badge">特殊</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一种<strong>反过来的断言</strong>:我期望这段代码<strong>抛异常</strong>。抛了才算通过,没抛算失败。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>测试安全气囊。</strong></p>
+    <p>你不能只测「正常开车时气囊不弹出来」,还得测「撞上去时气囊<strong>必须</strong>弹出来」。
+    <strong>该响没响,和不该响乱响,是同样严重的两种故障。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是运行器提供的,不是 Python 自带的(<code>assert</code> 才是自带的)。</p>
+    <p>它和普通断言是<strong>互补关系</strong>:普通断言测「算得对不对」,它测「拦得住拦不住」。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+<pre><code>def test_负数要报错() -&gt; None:
+    with pytest.raises(ValueError):
+        format_price(-1)</code></pre>
+    <p>如果这段代码<strong>没有</strong>抛异常,失败信息长这样:</p>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
+<pre>    def test_负数要报错() -&gt; None:
+        with pytest.raises(ValueError):
+&gt;           format_price(-1)
+<span class="c-bad">E           Failed: DID NOT RAISE &lt;class 'ValueError'&gt;</span></pre>
+    </div>
+    <p><strong><code>DID NOT RAISE</code> —— 「你说这里该报错的,结果它没报」。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「<code>with</code> 块里可以放好几行」。</strong>能放,但<strong>不该放</strong> ——
+    如果放了三行,你不知道是哪一行抛的异常,测试就失去了精确性。<strong>只放期望抛异常的那一句。</strong></p>
+    <p><strong>&#128260; 误区 2(经核实修正):「可以在自己的脚本里断言那句 <code>DID NOT RAISE</code> 文案」。</strong>
+    不建议。实测这句话的完整形态是 <code>Failed: DID NOT RAISE &lt;class 'ValueError'&gt;</code>,
+    后面还跟着期望异常的类型;传异常元组时又变成 <code>DID NOT RAISE any of (...)</code>。
+    <strong>而且这串文字不在官方文档里,是实现细节</strong> —— 版本一变就可能改。要匹配就只匹配 <code>DID NOT RAISE</code> 这个子串。</p>
+  </div></div>
+</div>
+
+<div class="box note">
+  <b class="t">进阶:还能顺便检查报错信息</b>
+  <pre style="margin:9px 0"><code>with pytest.raises(ValueError, match=r"不能为负数"):
+    format_price(-1)</code></pre>
+  <p style="margin:9px 0 0"><strong>注意 <code>match=</code> 里面是正则表达式,而且用的是「搜索」语义(不是全匹配)。</strong>
+  所以括号、点号、<code>$</code> 这些字符要转义 —— 这是最常见的坑。</p>
+</div>
+
+<h2 id="fixture">六、准备工作再讲一遍</h2>
+
+<p>第 2 页已经介绍过准备工作(fixture)。这里补一个第 7 页会用到的关键点:<strong>它怎么保证测试之间互不干扰。</strong></p>
+
+<figure>
+<svg viewBox="0 0 860 240" role="img" aria-label="tmp_path 让每条测试拿到独立的临时目录">
+  <g class="st" text-anchor="middle">
+    <rect x="30" y="30" width="180" height="52" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <text x="120" y="52" font-size="12.5" font-weight="700" fill="var(--info)">test_A(tmp_path)</text>
+    <text x="120" y="70" font-size="11" fill="var(--faint)">参数里点个名</text>
+
+    <rect x="30" y="100" width="180" height="52" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <text x="120" y="122" font-size="12.5" font-weight="700" fill="var(--info)">test_B(tmp_path)</text>
+
+    <rect x="30" y="170" width="180" height="52" rx="10" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.5"/>
+    <text x="120" y="192" font-size="12.5" font-weight="700" fill="var(--info)">test_C(tmp_path)</text>
+
+    <rect x="300" y="86" width="150" height="80" rx="12" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.8"/>
+    <text x="375" y="118" font-size="13" font-weight="800" fill="var(--warn)">pytest</text>
+    <text x="375" y="138" font-size="11" fill="var(--faint)">按名字准备</text>
+
+    <rect x="540" y="30" width="290" height="52" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+    <text x="685" y="52" font-size="11.5" font-family="var(--mono)" fill="var(--ok)">/tmp/pytest-of-you/pytest-0/test_A0/</text>
+    <text x="685" y="70" font-size="11" fill="var(--faint)">全新空目录,跑完自动删</text>
+
+    <rect x="540" y="100" width="290" height="52" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+    <text x="685" y="122" font-size="11.5" font-family="var(--mono)" fill="var(--ok)">/tmp/pytest-of-you/pytest-0/test_B0/</text>
+    <text x="685" y="140" font-size="11" fill="var(--faint)">另一个,和上面无关</text>
+
+    <rect x="540" y="170" width="290" height="52" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+    <text x="685" y="192" font-size="11.5" font-family="var(--mono)" fill="var(--ok)">/tmp/pytest-of-you/pytest-0/test_C0/</text>
+    <text x="685" y="210" font-size="11" fill="var(--faint)">又一个</text>
+  </g>
+  <g stroke="var(--faint)" stroke-width="1.3" fill="none" opacity=".7">
+    <path d="M 212 56 L 296 110"/><path d="M 212 126 L 296 126"/><path d="M 212 196 L 296 142"/>
+    <path d="M 452 110 L 536 56"/><path d="M 452 126 L 536 126"/><path d="M 452 142 L 536 196"/>
+  </g>
+</svg>
+<figcaption>三条测试写同一个参数名,却拿到三个不同的文件夹 —— 这就叫测试隔离</figcaption>
+</figure>
+
+<div class="box good">
+  <b class="t">为什么这件事很重要</b>
+  假设三条测试都往同一个数据库文件里写数据:
+  <br><br>
+  <strong>测试 A</strong> 写了一条订单 &rarr; <strong>测试 B</strong> 查询「一共有几条订单」&rarr; 数出来是 1 而不是 0 &rarr; <strong>B 失败了</strong>
+  <br><br>
+  <strong>而 B 本身的代码完全没问题。</strong> 这种「测试互相污染」会让你花几小时排查一个不存在的 bug。
+  <br><br>
+  更糟的是:<strong>换个执行顺序,失败的可能变成 A。</strong>这就是第 10 页要讲的「时红时绿」的成因之一。
+</div>
+
+<h2 id="three">七、三种容易混淆的「测试」</h2>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:20%"></th><th style="width:18%">形态</th><th style="width:18%">谁执行</th>
+  <th style="width:18%">能否重复</th><th>可靠性</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 自动化测试</strong></td><td><strong>代码文件</strong></td><td>机器,秒级</td>
+  <td>&#9989; 无限次</td><td style="color:var(--ok)"><strong>高</strong>,客观</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 手动测试</strong></td><td>人的操作</td><td>你,鼠标键盘</td>
+  <td>&#10060; 每次靠人</td><td style="color:var(--warn)">中,会漏</td>
+</tr>
+<tr>
+  <td><strong>&#9314; 自然语言验收标准</strong></td><td>一段话</td><td>AI 自己判断</td>
+  <td>&#9888; 结论可能不同</td><td style="color:var(--bad)"><strong>低</strong>,主观</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p><strong>本教程说的「测试」只指 &#9312;。</strong></p>
+
+<p>&#9314; 确实存在也有用,但它不叫测试。比如你写:</p>
+
+<pre><code>改完自己检查一下:登录失败时应该显示错误提示,不应该跳转。</code></pre>
+
+<p>这是<strong>验收标准</strong>,AI 会去读代码判断「嗯,看起来是这样」。问题在于:</p>
+
+<ul>
+<li>它是在<strong>读自己刚写的代码</strong>,倾向于确认自己是对的</li>
+<li>结论是「我觉得应该没问题」,不是「我执行了,结果是 X」</li>
+<li>同一份代码问两次可能给两个答案</li>
+</ul>
+
+<div class="box key">
+  <b class="t">&#9312; 和 &#9314; 的本质区别:证据来自谁</b>
+  <strong>&#9312; 的证据来自运行器和检查工具</strong> —— 它们不会撒谎,也不会给 AI 面子。<br>
+  <strong>&#9314; 的证据来自模型自己的判断</strong> —— 那正是你要防的东西。
+</div>
+
+<h3>AI 在这一步到底做了什么</h3>
+
+<p>很多人以为「让它自测」是让它反思一下。不是。你会<strong>看到它真的在执行命令</strong>:</p>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 会话里的真实过程</div>
+<pre><span class="c-dim">&#9679;</span> <span class="c-cmd">Bash(.venv/bin/python -m mypy)</span>
+  &#9500; <span class="c-bad">myshop/price.py:14: error: Incompatible return value type
+     (got "int", expected "str")  [return-value]</span>
+
+<span class="c-dim">&#9679;</span> 我看到一个类型错误,正在修复...
+
+<span class="c-dim">&#9679;</span> <span class="c-cmd">Bash(.venv/bin/python -m mypy)</span>
+  &#9500; <span class="c-ok">Success: no issues found in 8 source files</span></pre>
+</div>
+
+<p>它调用的是<strong>真实的命令</strong>,拿到的是<strong>真实的程序输出</strong>。</p>
+
+<h2 id="count">八、「几百上千条」是怎么来的</h2>
+
+<p>看前面的例子:<strong>一个 5 行的小函数就有 5 条测试用例</strong>。一条用例 &asymp; 一个具体场景。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:44%">项目状态</th><th>测试数量</th></tr></thead>
+<tbody>
+<tr><td>你刚建的新项目</td><td><strong>0 条</strong></td></tr>
+<tr><td>写了两个月的小项目</td><td>几十条</td></tr>
+<tr><td>一个成熟的开源库</td><td>几百到几千条</td></tr>
+<tr><td>大型商业项目</td><td>上万条</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">关键认知</b>
+  这些<strong>不是谁在某一天一口气准备出来的</strong>,是几个月几年里一条一条累积的。
+  每加一个功能加几条,每修一个 bug 加一条。
+  <br><br>
+  <strong>你现在没有测试,不代表你用不了这套流程 —— 跟着流程走,测试会自己长出来。</strong>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>24</td><td><strong>测试是代码</strong></td><td>不是文档、不是自然语言、不是让 AI 反思</td></tr>
+<tr><td>25</td><td>断言</td><td>整个测试的心脏;好断言里一定有写死的期望值</td></tr>
+<tr><td>26</td><td>一条测试 = 一个哨兵</td><td>不知疲倦、不会忘记、跑一次 0.001 秒</td></tr>
+<tr><td>27</td><td>运行器 &ne; 测试内容</td><td>监考老师 vs 题目</td></tr>
+<tr><td>28</td><td>三件事:找 &rarr; 跑 &rarr; 报</td><td>判定标准:跑完 = 通过,抛异常 = 失败</td></tr>
+<tr><td>29–31</td><td>发现规则的四条</td><td>&#128260; <code>test</code> 前缀;类不能有 <code>__init__</code>(静默跳过)</td></tr>
+<tr><td>32</td><td>退出码 0–5</td><td><strong>0 成功,非 0 失败</strong> —— 门禁的判定依据</td></tr>
+<tr><td>33</td><td><strong>三段式 AAA</strong></td><td>准备 &rarr; 执行 &rarr; 断言;准备的重量决定速度</td></tr>
+<tr><td>34</td><td>&#128260; <code>pytest.raises</code></td><td>唯一「不抛异常反而算失败」;<code>DID NOT RAISE</code> 不在官方文档里</td></tr>
+<tr><td>35–37</td><td>准备工作与 <code>yield</code></td><td>参数位置写名字;测试隔离靠它</td></tr>
+<tr><td>38</td><td>断言重写</td><td>为什么测试里的报错这么详细</td></tr>
+<tr><td>39</td><td>三种混淆的「测试」</td><td>自动化 / 手动 / 自然语言验收标准</td></tr>
+<tr><td>40</td><td>测试数量是长出来的</td><td>中文测试名可用,前提是 <code>test</code> 开头</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="02-python-setup.html">&larr; 上一页:Python 环境</a>
+  <a href="00-index.html">目录</a>
+  <a href="04-static-check.html">下一页:静态检查 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 03 页 / 共 23 页 · 覆盖知识点 24–40 · 难度 &#9733;&#9733;</p>
+  <p><strong>本页含 3 处经核实修正:</strong>发现规则是 <code>test</code> 前缀而非 <code>test_</code>;<code>DID NOT RAISE</code> 的完整文案及其「不在官方文档里」的性质;<code>match=</code> 用的是搜索语义的正则。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

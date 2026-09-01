@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>21 固化流程与会话管理</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">21 固化流程 <span>· 会话管理</span></span>
+  <a href="20-ai-boundary.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="22-cheatsheet.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 21 页 · 难度 ★★☆ · 前置:第 13、14、20 页 · 让流程不靠记忆</span>
+<h1>固化流程与会话管理</h1>
+<p class="lede">
+前二十页讲的规矩,如果每次都要你想起来再说一遍,<strong>三天之后你就不会说了。</strong>
+这一页讲怎么把它们<strong>写进文件、变成命令、挂成钩子</strong> —— 以及一件同样重要的事:怎么管好一次会话。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#why">一、为什么要固化</a></li>
+    <li><a href="#md">二、项目说明文件</a></li>
+    <li><a href="#layer">三、三个层级,各放什么</a></li>
+    <li><a href="#what">四、&#128260; 什么该写、什么不该写</a></li>
+    <li><a href="#cmd">五、自定义命令:把七步变成一句话</a></li>
+    <li><a href="#hook">六、钩子:让规矩强制生效</a></li>
+    <li><a href="#session">七、会话管理:上下文是有限的</a></li>
+    <li><a href="#one">八、一次一件事</a></li>
+  </ol>
+</div>
+
+<h2 id="why">一、为什么要固化</h2>
+
+<div class="box key">
+  <b class="t">三种「让规矩生效」的方式,可靠性差着数量级</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:8%">级别</th><th style="width:24%">方式</th><th style="width:22%">可靠性</th><th>失效原因</th></tr></thead>
+  <tbody>
+  <tr><td><strong>最弱</strong></td><td>每次对话里口头说一遍</td>
+      <td style="color:var(--bad)"><strong>很低</strong></td>
+      <td>你会忘;换个会话就没了;说法每次不一样</td></tr>
+  <tr><td><strong>中</strong></td><td><strong>写进项目说明文件</strong></td>
+      <td style="color:var(--warn)"><strong>中</strong></td>
+      <td>AI 每次会读到,但<strong>遵不遵守靠它自觉</strong></td></tr>
+  <tr><td><strong>最强</strong></td><td><strong>挂成钩子 / 云端门禁</strong></td>
+      <td style="color:var(--ok)"><strong>高</strong></td>
+      <td>机器执行,不商量。<u>但只能表达能自动判定的规则</u></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>这三级正好对应第 16 页那张八关图的三个位置:</strong>
+  口头 = 什么都不是;说明文件 = 本地提醒;钩子和门禁 = 真拦。</p>
+  <p style="margin:9px 0 0"><strong>策略:能自动判的往下沉到最强级,判不了的写进说明文件。</strong></p>
+</div>
+
+<h2 id="md">二、项目说明文件</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">项目说明文件</span><span class="en">CLAUDE.md</span><span class="badge">每次自动读</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>项目根目录下一个叫 <code>CLAUDE.md</code> 的普通文本文件。
+    <strong>每次在这个项目里开始对话时,它的内容会自动被读进上下文</strong>,不用你贴。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>贴在工位上的便签条。</strong></p>
+    <p>新来的同事不用问你「咖啡机怎么用、代码怎么提交、周会几点」——
+    <strong>这些事写在墙上,他自己会看。</strong></p>
+    <p>关键在于:<strong>便签条上该写的是「本工位特有的规矩」,不是通用常识。</strong>
+    写「电脑要开机才能用」纯属浪费墙面 —— 这条对应第四节。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>第 13 页那些工具用法的「持久化版本」</strong>。
+    你在对话里说的话只活一次;写进这个文件的话每次都在。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>给 myshop 写一份完整的:</p>
+<pre><code># 文件:&lt;你的项目&gt;/myshop/CLAUDE.md
+
+# myshop
+
+一个用来练习「AI 协作标准流程」的最小 Python 项目。
+
+## 怎么跑
+
+本项目<b>必须</b>用虚拟环境里的 Python,不要用系统的:
+
+```bash
+cd &lt;你的项目&gt;/myshop
+.venv/bin/python -m ruff check .     # 代码规范
+.venv/bin/python -m mypy             # 类型检查
+.venv/bin/python -m pytest -m p0 -q  # 只跑 P0 核心用例
+.venv/bin/python -m pytest -q        # 全部测试
+```
+
+四条命令的顺序不要变:<b>便宜的先跑</b>(fail fast)。
+
+## 目录
+
+- `myshop/price.py` — 纯函数,分转价格字符串。<b>没有任何依赖,最好测</b>
+- `myshop/order.py` — 下单,会写 SQLite
+- `myshop/api.py`   — HTTP 接口
+- `tests/`          — 单元 / 集成 / 接口
+- `tests/e2e/`      — 端到端,<b>没装浏览器驱动时会自动跳过</b>
+
+## 改代码的规矩
+
+1. <b>修 bug 时只准改源码,不准改测试文件。</b>
+   如果你认为测试本身写错了,先停下来告诉我,由我决定。
+2. <b>不准新增跳过标记。</b>需要跳过时先说明理由等我同意。
+3. <b>不准删除已有的测试用例。</b>用例只能增加。
+4. <b>新写的每条测试必须有断言。</b>
+5. <b>不准修改门禁配置</b>(`.github/workflows/`、`pyproject.toml` 里的阈值)。
+6. <b>同一个方法失败两次就停下来问我</b>,不要试第三次。
+7. 每做完一步跑一遍测试,然后<b>告诉我你改了哪几个文件</b>。
+
+## 已知的坑
+
+- 系统 Python 是 3.9.6,虚拟环境里也是 3.9.6,
+  但云端流水线用 3.12 &mdash; <b>写代码时不要用 3.10+ 才有的语法</b>。
+- `tests/e2e/` 下的用例在本地默认跳过,这是<b>预期行为</b>,不用去"修"它。</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「写得越全越好」。</strong>反了。
+    <strong>它每次都会占用上下文</strong> —— 写成一本书,等于每次对话都先浪费一大截额度,
+    而且重点被淹没。<strong>目标是一屏能看完。</strong></p>
+    <p><strong>误区 2:「写了它就一定会遵守」。</strong>
+    <strong>不一定。</strong>它属于上表的「中」级 —— 是很强的提示,但不是强制。
+    真要强制,得靠第六节的钩子。</p>
+  </div></div>
+</div>
+
+<h2 id="layer">三、三个层级,各放什么</h2>
+
+<figure>
+<svg viewBox="0 0 820 260" role="img" aria-label="说明文件的三个层级">
+  <g class="st">
+    <rect x="20" y="24" width="780" height="64" rx="11" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="40" y="48" font-size="13" font-weight="800" fill="var(--ink)">个人层 · <tspan font-family="ui-monospace,monospace" font-size="12">~/.claude/CLAUDE.md</tspan></text>
+    <text x="40" y="70" font-size="11.5" fill="var(--soft)">你在<tspan font-weight="700">所有项目</tspan>里都想要的偏好 —— 回答用中文、先给方案再动手、不要自动提交</text>
+    <text x="780" y="60" font-size="11" fill="var(--faint)" text-anchor="end">只影响你</text>
+
+    <rect x="20" y="100" width="780" height="64" rx="11" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+    <text x="40" y="124" font-size="13" font-weight="800" fill="var(--ok)">项目层 · <tspan font-family="ui-monospace,monospace" font-size="12">&lt;项目根&gt;/CLAUDE.md</tspan> &nbsp;&nbsp;&larr; 最常用</text>
+    <text x="40" y="146" font-size="11.5" fill="var(--soft)">这个项目怎么跑、目录结构、改代码的规矩、已知的坑。<tspan font-weight="700">进版本控制,全组共享</tspan></text>
+    <text x="780" y="136" font-size="11" fill="var(--ok)" text-anchor="end" font-weight="700">影响全组</text>
+
+    <rect x="20" y="176" width="780" height="64" rx="11" fill="var(--raised)" stroke="var(--rule2)"/>
+    <text x="40" y="200" font-size="13" font-weight="800" fill="var(--ink)">子目录层 · <tspan font-family="ui-monospace,monospace" font-size="12">&lt;子目录&gt;/CLAUDE.md</tspan></text>
+    <text x="40" y="222" font-size="11.5" fill="var(--soft)">只在动这个子目录时才需要知道的事。<tspan font-weight="700">大项目才用得上,小项目别搞</tspan></text>
+    <text x="780" y="212" font-size="11" fill="var(--faint)" text-anchor="end">局部生效</text>
+  </g>
+</svg>
+<figcaption>三层。<strong>90% 的情况你只需要中间那一层</strong></figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:16%">层级</th><th style="width:34%">该写什么</th><th>不该写什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>个人层</strong></td>
+  <td>「回答用中文」「先给方案,我同意了再动手」「不要主动 commit」</td>
+  <td style="color:var(--bad)"><strong>任何项目相关的东西</strong> —— 换个项目就错了</td>
+</tr>
+<tr>
+  <td><strong>项目层</strong></td>
+  <td>命令、目录、规矩、坑。<strong>这一层最重要</strong></td>
+  <td style="color:var(--bad)">你个人的偏好 —— 同事不一定同意</td>
+</tr>
+<tr>
+  <td><strong>子目录层</strong></td>
+  <td>只有动这块代码才需要知道的约定</td>
+  <td style="color:var(--bad)">和项目层重复的内容</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="what">四、&#128260; 什么该写、什么不该写</h2>
+
+<p><strong>这是写说明文件时最容易犯的错。</strong>判据只有一条:</p>
+
+<blockquote style="border-left:3px solid var(--bad);margin:20px 0;padding:6px 20px;font-size:17px;font-weight:700;color:var(--ink)">
+只写「看代码看不出来」的东西。
+</blockquote>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:46%" style="color:var(--ok)">&#10003; 该写(代码里看不出来)</th><th style="color:var(--bad)">&#10007; 不该写(代码里写着呢)</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>必须用 <code>.venv/bin/python</code> 不能用系统的</strong><br>
+      <span style="color:var(--faint);font-size:12px">—— 这条只存在于你的习惯里</span></td>
+  <td>「本项目用 Python 写」<br>
+      <span style="color:var(--faint);font-size:12px">—— 看文件后缀就知道</span></td>
+</tr>
+<tr>
+  <td><strong>为什么这么设计</strong>(比如「校验必须在写库之前」)<br>
+      <span style="color:var(--faint);font-size:12px">—— 意图,代码只体现结果</span></td>
+  <td>逐个函数解释它在干什么<br>
+      <span style="color:var(--faint);font-size:12px">—— 读函数更准,而且不会过期</span></td>
+</tr>
+<tr>
+  <td><strong>已知的坑</strong>(「e2e 跳过是预期的,别去修」)<br>
+      <span style="color:var(--faint);font-size:12px">—— 不写的话它每次都会去"修"</span></td>
+  <td>完整的目录树<br>
+      <span style="color:var(--faint);font-size:12px">—— 它自己会看,而且你会忘了更新</span></td>
+</tr>
+<tr>
+  <td><strong>改代码的规矩</strong>(第 20 页那七条)<br>
+      <span style="color:var(--faint);font-size:12px">—— 纯约定,代码里没有</span></td>
+  <td>过去修过什么 bug<br>
+      <span style="color:var(--faint);font-size:12px">—— 存档系统的历史记录里有</span></td>
+</tr>
+<tr>
+  <td><strong>命令的正确写法和顺序</strong><br>
+      <span style="color:var(--faint);font-size:12px">—— 尤其是那些反直觉的</span></td>
+  <td>通用的语言知识<br>
+      <span style="color:var(--faint);font-size:12px">—— AI 本来就会</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 一个反复出现的坑:说明文件会过期</b>
+  <strong>代码改了,说明文件不会自动跟着改。</strong>
+  <br><br>
+  一份过期的说明文件<strong>比没有更糟</strong> —— 它会让 AI 自信地按错误信息行事,
+  而且你还以为自己已经交代清楚了。
+  <br><br>
+  <strong>防守办法:少写。</strong>写得越少,过期的概率越低。
+  <strong>目录树、函数说明这类「代码一改就过期」的内容,坚决不写。</strong>
+</div>
+
+<h2 id="cmd">五、自定义命令:把七步变成一句话</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">自定义命令</span><span class="en">custom slash command</span><span class="badge">可复用</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>把一段常用的指令<strong>存成一个文件</strong>,以后打一个短名字就能调用它。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>手机上的快捷指令。</strong></p>
+    <p>「回家模式」= 开灯 + 开空调 + 放音乐。你不用每次说三句话,说一句就行 ——
+    <strong>而且不会漏掉其中一步。</strong></p>
+    <p><strong>「不会漏」比「省字」重要得多。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>放在项目里的 <code>.claude/commands/</code> 目录下,<strong>文件名就是命令名</strong>。
+    这个目录<strong>进版本控制</strong>,所以全组共用同一套命令。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>把第 14 页那套七步流程固化成一个命令:</p>
+<pre><code># 文件:&lt;你的项目&gt;/myshop/.claude/commands/step.md
+
+按下面的流程处理我提出的需求,<b>一次只做一步,做完停下来等我确认</b>。
+
+## 流程
+
+1. **先给方案,不要写代码。** 说清楚:改哪几个文件、每个文件改什么、
+   为什么这么改、有没有别的方案。
+2. 等我说「可以」之后,**只做方案里的第一步**。
+3. 做完立刻跑:
+   `.venv/bin/python -m ruff check . && .venv/bin/python -m mypy && .venv/bin/python -m pytest -q`
+4. 跑完<b>告诉我三件事</b>:改了哪几个文件、测试结果、有没有超出方案范围的改动。
+5. 停下来等我确认,再做下一步。
+
+## 红线
+
+- 修 bug 只改源码,不改测试文件。
+- 不新增跳过标记,不删测试用例。
+- 同一个方法失败两次就停下来问我。</code></pre>
+    <p>以后你只要打 <code>/step</code> 加上你的需求,这一整套就自动生效了。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区:「命令越多越好」。</strong>
+    <strong>三五个就够了。</strong>命令多到你记不住名字的时候,你又会回去手打了。</p>
+  </div></div>
+</div>
+
+<div class="box key">
+  <b class="t">说明文件 vs 自定义命令:什么放哪</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:24%"></th><th style="width:32%">项目说明文件</th><th>自定义命令</th></tr></thead>
+  <tbody>
+  <tr><th>什么时候生效</th><td><strong>每次对话,自动</strong></td><td><strong>你主动调用时</strong></td></tr>
+  <tr><th>放什么</th><td><strong>永远成立的事实</strong><br>(怎么跑、有什么坑、红线)</td>
+      <td><strong>某类任务的操作流程</strong><br>(七步流程、发版检查单、写测试的套路)</td></tr>
+  <tr><th>判据</th><td>「这个我<u>每次</u>都要它知道」</td><td>「这个我<u>做某类事</u>时才要」</td></tr>
+  <tr><th>代价</th><td><strong>每次占用上下文</strong> &rarr; 要短</td><td>不调用就不占 &rarr; <strong>可以写长</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>所以第 20 页那七条红线两边都出现了 —— 短的摘要放说明文件(每次生效),
+  完整的流程放命令(需要时展开)。这不是重复,是分工。</strong></p>
+</div>
+
+<h2 id="hook">六、钩子:让规矩强制生效</h2>
+
+<p>说明文件和命令都属于「提示」。<strong>要真拦住,得用钩子</strong> —— 也就是第 16 页那个机制。</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">规矩</th><th style="width:26%">能不能自动判</th><th>怎么落地</th></tr></thead>
+<tbody>
+<tr><td>不准改测试文件</td>
+    <td style="color:var(--ok)"><strong>能</strong> —— 看改动路径</td>
+    <td>写个钩子:改动里同时含源码和测试就警告</td></tr>
+<tr><td>不准新增跳过</td>
+    <td style="color:var(--ok)"><strong>能</strong> —— 数数量</td>
+    <td><strong>第 18 页的跳过数门禁</strong>,云端强制</td></tr>
+<tr><td>不准删测试用例</td>
+    <td style="color:var(--ok)"><strong>能</strong> —— 比用例总数(弱门禁:防纯删除,防不住删一条补一条空用例的替换)</td>
+    <td>同上,加一条「用例数不得低于主干」</td></tr>
+<tr><td>不准改门禁配置</td>
+    <td style="color:var(--ok)"><strong>能</strong> —— 看路径</td>
+    <td>把配置目录设为<strong>受保护路径</strong>,改它需额外审批</td></tr>
+<tr><td>先给方案再动手</td>
+    <td style="color:var(--bad)"><strong>不能</strong></td>
+    <td style="color:var(--warn)"><strong>只能写进说明文件 + 用方案模式</strong></td></tr>
+<tr><td>失败两次就停</td>
+    <td style="color:var(--bad)"><strong>不能</strong></td>
+    <td style="color:var(--warn)"><strong>只能靠你自己数</strong>(第 20 页盲区三)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">这张表就是全书的收束</b>
+  <strong>能自动判的,全部沉到最强级(钩子 / 云端门禁),不要靠嘴说。</strong>
+  <br><br>
+  <strong>不能自动判的那两条 —— 恰好就是第 20 页说的「唯一不能外包」的部分。</strong>
+  <br><br>
+  它们逃不掉,因为它们要的是<strong>判断</strong>,而不是<strong>执行</strong>。
+</div>
+
+<h2 id="session">七、会话管理:上下文是有限的</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">上下文窗口</span><span class="en">context window</span><span class="badge">有上限</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>AI 一次能「同时看到」的内容总量。<strong>你说的话、它的回答、它读过的每个文件、
+    每条命令的输出 —— 全都占用这个额度。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>一张办公桌的桌面。</strong></p>
+    <p>你可以在上面同时摊开十几份文件。<strong>但桌子就那么大</strong> ——
+    再多就得把旧的收进抽屉,而收进去的东西它就不再"一眼看得见"了。</p>
+    <p><strong>所以:桌上摊的东西越少、越相关,它干活越准。</strong>
+    摊了一堆无关的旧文件,它会被干扰。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它解释了<strong>为什么长会话会越聊越差</strong>,也解释了为什么第二节说「说明文件要短」。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <div class="tw" style="margin:0">
+    <table>
+    <thead><tr><th style="width:22%">动作</th><th style="width:32%">效果</th><th>什么时候用</th></tr></thead>
+    <tbody>
+    <tr><td><strong>清空</strong></td><td><strong>把桌面全清掉</strong>,从零开始</td>
+        <td><strong>换了一个完全无关的任务时</strong>。最常用</td></tr>
+    <tr><td><strong>压缩</strong></td><td>把之前的对话<strong>浓缩成摘要</strong>,留住结论丢掉过程</td>
+        <td>同一个任务做得很久,快满了,但你还需要前面的结论</td></tr>
+    <tr><td><strong>新开会话</strong></td><td>等同于清空,但保留旧会话可以回去看</td>
+        <td>想留个记录时</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「一个会话从早用到晚最省事」。</strong>
+    <strong>恰恰相反。</strong>桌面上堆了三个不相关任务的资料,
+    它会把上午那个任务的假设,带到下午这个任务里来。</p>
+    <p><strong>误区 2:「清空了它就什么都不知道了」。</strong>
+    <strong>不会。</strong><u>项目说明文件会重新读一遍</u> ——
+    <strong>这正是把关键信息写进文件、而不是留在对话里的理由。</strong></p>
+  </div></div>
+</div>
+
+<div class="box key">
+  <b class="t">一条实用规则</b>
+  <strong>换任务就清空。</strong>
+  <br><br>
+  代价几乎为零(说明文件会自动重读),收益是<strong>每个任务都从干净桌面开始</strong>。
+  <br><br>
+  判断标准很简单:<strong>如果新任务不需要前面的任何结论,就清空。</strong>
+</div>
+
+<h2 id="one">八、一次一件事</h2>
+
+<p><strong>本页最后一条,也是最容易被忽略的一条工作习惯。</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:44%" style="color:var(--bad)">&#10007; 一次说一堆</th><th style="color:var(--ok)">&#10003; 一次一件</th></tr></thead>
+<tbody>
+<tr>
+  <td>「帮我把价格格式化修一下,顺便加个折扣功能,再把接口改成返回 JSON,
+      对了测试也补一下」</td>
+  <td>「先只做一件事:把 <code>format_price</code> 的货币符号改回 ¥。改完跑测试,告诉我改了哪些文件。」</td>
+</tr>
+<tr>
+  <td style="color:var(--bad)">改动几百行,散在八个文件里</td>
+  <td style="color:var(--ok)">改动几行,一个文件</td>
+</tr>
+<tr>
+  <td style="color:var(--bad)"><strong>测试红了,你不知道是哪件事弄红的</strong></td>
+  <td style="color:var(--ok)"><strong>红了就是这一件事的问题</strong></td>
+</tr>
+<tr>
+  <td style="color:var(--bad)">看改动要看十分钟,于是你不看了</td>
+  <td style="color:var(--ok)"><strong>看改动三十秒</strong> &rarr; 第 20 页那一步真的会被执行</td>
+</tr>
+<tr>
+  <td style="color:var(--bad)">撤销只能全撤,好的坏的一起丢</td>
+  <td style="color:var(--ok)">撤销精确到这一件</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">「一次一件事」为什么能同时救活其它所有防线</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:26%">防线</th><th>在「一次一件」下</th></tr></thead>
+  <tbody>
+  <tr><td><strong>让它自测</strong></td><td>红了 &rarr; <strong>立刻知道是哪一步弄的</strong></td></tr>
+  <tr><td><strong>看改动</strong></td><td>三十秒能看完 &rarr; <strong>你真的会去看</strong></td></tr>
+  <tr><td><strong>撤销</strong></td><td>只丢掉这一件,不牵连其它</td></tr>
+  <tr><td><strong>存档</strong></td><td>每条记录说清一件事 &rarr; <strong>以后能查</strong></td></tr>
+  <tr><td><strong>门禁</strong></td><td>失败原因单一 &rarr; 一眼定位</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:11px 0 0"><strong>反过来说:一次做十件事的时候,上面这五条防线会同时退化 ——
+  不是因为它们失效了,而是因为你不再有精力用它们。</strong></p>
+  <p style="margin:9px 0 0"><strong>这是全书唯一一条「不需要任何工具、不需要任何配置,今天就能用」的建议。</strong></p>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>218</td><td><strong>三级可靠性</strong></td><td>口头 &lt; 说明文件 &lt; 钩子/门禁;能自动判的就往下沉</td></tr>
+<tr><td>219</td><td><strong>项目说明文件</strong></td><td>放项目根,每次自动读;贴在工位上的便签条</td></tr>
+<tr><td>220</td><td><strong>三个层级</strong></td><td>个人 / 项目 / 子目录;90% 只需要项目层</td></tr>
+<tr><td>221</td><td>&#128260; <strong>只写「代码里看不出来」的</strong></td><td>目录树和函数说明<strong>坚决不写</strong> —— 会过期</td></tr>
+<tr><td>222</td><td><strong>自定义命令</strong></td><td>把七步流程存成文件,一个短名字调用;<strong>「不会漏」比「省字」重要</strong></td></tr>
+<tr><td>223</td><td>说明文件 vs 命令</td><td>每次生效(要短)vs 需要时展开(可以长)</td></tr>
+<tr><td>224</td><td><strong>上下文是有限的</strong></td><td>办公桌桌面;<strong>换任务就清空</strong>,代价几乎为零</td></tr>
+<tr><td>225</td><td><strong>一次一件事</strong></td><td><strong>同时救活其它五条防线</strong>;不需要任何工具,今天就能用</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="20-ai-boundary.html">&larr; 上一页:AI 边界与防作弊</a>
+  <a href="00-index.html">目录</a>
+  <a href="22-cheatsheet.html">下一页:速查手册 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 21 页 / 共 23 页 · 覆盖知识点 218–225 · 难度 &#9733;&#9733;&#9734;</p>
+  <p>本页第二、五节的两份文件可以直接抄进你自己的项目。第六节那张表把全书的所有规矩
+  按「能不能自动判」分了类 —— 这是理解「哪些能外包、哪些不能」的最终判据。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

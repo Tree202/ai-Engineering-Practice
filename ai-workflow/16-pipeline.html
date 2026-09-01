@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>16 流水线:8 道关卡与本地/云端</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">16 流水线 <span>· 8 道关卡</span></span>
+  <a href="15-team-roles.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="17-quality-gate.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 16 页 · 难度 ★★★ · 前置:第 14、15 页 · 门禁的前置</span>
+<h1>流水线:8 道关卡与本地/云端</h1>
+<p class="lede">
+代码从你手里到生产,要过八道关。<strong>这一页建立的坐标系,是理解第 17–19 页「质量门禁」的前提</strong> ——
+不懂流水线,不可能懂门禁。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#ci">一、什么是流水线</a></li>
+    <li><a href="#gates">二、8 道关卡</a></li>
+    <li><a href="#twice">三、为什么同一层要跑两遍</a></li>
+    <li><a href="#hook">四、本地钩子:能被一个参数绕过</a></li>
+    <li><a href="#failfast">五、快速失败:便宜的先跑</a></li>
+    <li><a href="#env">六、真机实证:两个完全不同的环境</a></li>
+    <li><a href="#yml">七、一个最小的流水线配置</a></li>
+  </ol>
+</div>
+
+<h2 id="ci">一、什么是流水线</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">持续集成流水线</span><span class="en">CI pipeline</span><span class="badge">云端</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一台<strong>不属于你的机器</strong>,在你每次推送代码时自动把它拉下来、装好环境、跑一遍检查,然后告诉大家结果。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>工厂流水线上的质检工位。</strong></p>
+    <p>零件做好之后,<strong>不是你自己说「我觉得没问题」就能进下一道工序</strong> ——
+    它要经过一排质检工位,每个工位查一样东西。任何一个工位不放行,零件就停在那儿。</p>
+    <p><strong>关键在于:那些工位不归你管,你也没法让它们「通融一下」。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是七步流程的<strong>下游</strong>:</p>
+<pre><code>你在本地走完七步 &rarr; 推送 &rarr; 流水线接手</code></pre>
+    <p>它和本地检查<strong>不是替代关系</strong>,而是<strong>同一批检查在两个地方各跑一次</strong> ——
+    第三节专门解释为什么要这样。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>常见的流水线服务有好几家,本教程用 GitHub Actions 举例,因为它<strong>免费且配置就是仓库里一个文件</strong>。
+    Jenkins 是另一个常见选择。</p>
+    <p>你要做的只有一件事:<strong>在仓库里放一个配置文件</strong>。它会被自动发现,不需要在网页上点任何按钮。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「有了流水线就不用本地检查了」。</strong>
+    大错。<strong>用流水线当调试工具是最慢最贵的开发方式</strong> ——
+    一个来回 10 分钟,而本地一个来回 3 秒。</p>
+    <p><strong>误区 2:「流水线红了 = 我的代码有问题」。</strong>
+    不一定 —— 也可能是环境问题、依赖服务挂了、或者别人的改动。第 19 页有一次真实的故障排查实录。</p>
+  </div></div>
+</div>
+
+<h2 id="gates">二、8 道关卡</h2>
+
+<figure>
+<svg viewBox="0 0 900 300" role="img" aria-label="代码从本地到生产的 8 道关卡">
+  <defs><marker id="a1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st" text-anchor="middle">
+    <rect x="14" y="52" width="404" height="112" rx="14" fill="var(--ok-soft)" stroke="var(--ok)"
+          stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="216" y="42" font-size="13.5" font-weight="800" fill="var(--ok)">【本地 · 你的机器】</text>
+
+    <rect x="434" y="52" width="452" height="112" rx="14" fill="var(--bad-soft)" stroke="var(--bad)"
+          stroke-width="1.5" stroke-dasharray="5 4"/>
+    <text x="660" y="42" font-size="13.5" font-weight="800" fill="var(--bad)">【云端 · 流水线】</text>
+
+    <g font-size="11.5">
+      <rect x="28" y="78" width="86" height="62" rx="9" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="71" y="98" font-weight="700" fill="var(--ink)">&#9312; 编辑器</text>
+      <text x="71" y="115" fill="var(--soft)" font-size="10.5">实时标红</text>
+      <text x="71" y="131" fill="var(--faint)" font-size="10">毫秒级</text>
+
+      <rect x="124" y="78" width="86" height="62" rx="9" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="167" y="98" font-weight="700" fill="var(--ink)">&#9313; 手动跑</text>
+      <text x="167" y="115" fill="var(--soft)" font-size="10.5">命令行</text>
+      <text x="167" y="131" fill="var(--faint)" font-size="10">你 / AI</text>
+
+      <rect x="220" y="78" width="86" height="62" rx="9" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="263" y="98" font-weight="700" fill="var(--ink)">&#9314; 存档时</text>
+      <text x="263" y="115" fill="var(--soft)" font-size="10.5">提交钩子</text>
+      <text x="263" y="131" fill="var(--warn)" font-size="10">可跳过</text>
+
+      <rect x="316" y="78" width="86" height="62" rx="9" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="359" y="98" font-weight="700" fill="var(--ink)">&#9315; 推送时</text>
+      <text x="359" y="115" fill="var(--soft)" font-size="10.5">推送钩子</text>
+      <text x="359" y="131" fill="var(--warn)" font-size="10">可跳过</text>
+
+      <rect x="448" y="78" width="98" height="62" rx="9" fill="var(--raised)" stroke="var(--bad)" stroke-width="1.4"/>
+      <text x="497" y="98" font-weight="700" fill="var(--ink)">&#9316; 合并请求</text>
+      <text x="497" y="115" fill="var(--soft)" font-size="10.5">质量门禁</text>
+      <text x="497" y="131" fill="var(--bad)" font-size="10">不可跳过</text>
+
+      <rect x="556" y="78" width="98" height="62" rx="9" fill="var(--raised)" stroke="var(--bad)" stroke-width="1.4"/>
+      <text x="605" y="98" font-weight="700" fill="var(--ink)">&#9317; 合并后</text>
+      <text x="605" y="115" fill="var(--soft)" font-size="10.5">构建 + 打包</text>
+      <text x="605" y="131" fill="var(--bad)" font-size="10">不可跳过</text>
+
+      <rect x="664" y="78" width="98" height="62" rx="9" fill="var(--raised)" stroke="var(--bad)" stroke-width="1.4"/>
+      <text x="713" y="98" font-weight="700" fill="var(--ink)">&#9318; 部署后</text>
+      <text x="713" y="115" fill="var(--soft)" font-size="10.5">回归测试</text>
+      <text x="713" y="131" fill="var(--bad)" font-size="10">不可跳过</text>
+
+      <rect x="772" y="78" width="98" height="62" rx="9" fill="var(--raised)" stroke="var(--bad)" stroke-width="1.4"/>
+      <text x="821" y="98" font-weight="700" fill="var(--ink)">&#9319; 生产后</text>
+      <text x="821" y="115" fill="var(--soft)" font-size="10.5">冒烟 + 拨测</text>
+      <text x="821" y="131" fill="var(--bad)" font-size="10">不可跳过</text>
+    </g>
+
+    <g stroke="var(--faint)" stroke-width="1.3" marker-end="url(#a1)">
+      <line x1="116" y1="109" x2="121" y2="109"/><line x1="212" y1="109" x2="217" y2="109"/>
+      <line x1="308" y1="109" x2="313" y2="109"/><line x1="404" y1="109" x2="444" y2="109"/>
+      <line x1="548" y1="109" x2="553" y2="109"/><line x1="656" y1="109" x2="661" y2="109"/>
+      <line x1="764" y1="109" x2="769" y2="109"/>
+    </g>
+    <text x="424" y="102" font-size="11" fill="var(--faint)">推送</text>
+
+    <line x1="426" y1="30" x2="426" y2="200" stroke="var(--rule2)" stroke-width="2" stroke-dasharray="7 5"/>
+    <text x="410" y="222" font-size="13" fill="var(--soft)" text-anchor="end" font-weight="700">&larr; 靠自觉,你能跳过</text>
+    <text x="442" y="222" font-size="13" fill="var(--bad)" text-anchor="start" font-weight="700">绕不过 &rarr;</text>
+
+    <text x="450" y="262" font-size="13.5" fill="var(--soft)" font-weight="700">
+      那条竖虚线是全书最重要的一条分界
+    </text>
+    <text x="450" y="286" font-size="12.5" fill="var(--faint)">
+      本教程前 15 页讲的全在左边;第 17–19 页讲的全在右边
+    </text>
+  </g>
+</svg>
+<figcaption>八道关卡。左边四道你想跳就能跳,右边四道你跳不了</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:7%">关卡</th><th style="width:14%">在哪</th><th style="width:28%">谁触发</th><th>能不能跳过</th></tr></thead>
+<tbody>
+<tr><td><strong>&#9312;</strong></td><td>本地</td><td>你打字(编辑器自动)</td><td>自动的,想跳也跳不掉</td></tr>
+<tr><td><strong>&#9313;</strong></td><td>本地</td><td>你 / AI 敲命令</td><td>能,你不跑就不跑</td></tr>
+<tr><td><strong>&#9314;</strong></td><td>本地</td><td>存档时(提交钩子)</td><td style="color:var(--warn)"><strong>能</strong> —— 加一个参数就绕过</td></tr>
+<tr><td><strong>&#9315;</strong></td><td>本地</td><td>推送时(推送钩子)</td><td style="color:var(--warn)"><strong>能</strong> —— 同上</td></tr>
+<tr><td><strong>&#9316;</strong></td><td><strong>云端</strong></td><td>提合并请求</td><td style="color:var(--bad)"><strong>不能</strong></td></tr>
+<tr><td><strong>&#9317;</strong></td><td><strong>云端</strong></td><td>合并进主干</td><td style="color:var(--bad)"><strong>不能</strong></td></tr>
+<tr><td><strong>&#9318;</strong></td><td><strong>云端</strong></td><td>部署完成</td><td style="color:var(--bad)"><strong>不能</strong></td></tr>
+<tr><td><strong>&#9319;</strong></td><td><strong>云端</strong></td><td>上线</td><td style="color:var(--bad)"><strong>不能</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="twice">三、为什么同一层要跑两遍</h2>
+
+<div class="box key">
+  <b class="t">同一条命令,在两个地方跑,目的完全不同</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:18%"></th><th style="width:40%">本地跑</th><th>云端跑</th></tr></thead>
+  <tbody>
+  <tr><th>目的</th><td><strong>快速反馈</strong></td><td><strong>强制执行</strong></td></tr>
+  <tr><th>给谁看</th><td>你自己</td><td>团队 / 主干</td></tr>
+  <tr><th>范围</th><td>局部(只跑改动相关的)</td><td>全量</td></tr>
+  <tr><th>能否绕过</th><td style="color:var(--warn)">&#9989; 能</td><td style="color:var(--bad)">&#10060; 不能</td></tr>
+  <tr><th>环境</th><td>你的机器(每个人都不一样)</td><td><strong>统一的干净环境</strong></td></tr>
+  <tr><th>失败代价</th><td>你自己再改一次</td><td>合不进主干</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+
+<h3>两个理由,缺一不可</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">理由</th><th>说明</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 本地可以被绕过</strong></td>
+  <td>加一个参数,一秒钟就绕过所有本地钩子。<strong>赶时间的时候人人都会这么干,包括你。</strong>
+      云端不行 —— 它跑在你控制不了的机器上</td>
+</tr>
+<tr>
+  <td><strong>&#9313;「在我机器上是好的」</strong></td>
+  <td>你本地一个 Python 版本、同事另一个、生产第三个;你装了某个包、云端没装;
+      你的配置文件里有个设置别人没有。<strong>云端是唯一的权威裁判</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<blockquote style="border-left:3px solid var(--rule2);margin:20px 0;padding:6px 20px;font-size:17px;font-weight:700;color:var(--ink)">
+本地跑是为了「快」,云端跑是为了「不可绕过」。<br>同一条命令,两种角色。
+</blockquote>
+
+<div class="box note">
+  <b class="t">对本教程前 15 页的一个推论</b>
+  那套七步流程<strong>覆盖的全是「云端之前」的部分</strong>。
+  它的目标是:<em>让你推上去的代码,在进流水线之前就已经是绿的。</em>
+  <br><br>
+  <strong>流水线是最后一道保险,不是你的调试工具。</strong>
+</div>
+
+<h2 id="hook">四、本地钩子:能被一个参数绕过</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">提交钩子</span><span class="en">pre-commit hook</span><span class="badge">本地</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>一个脚本,放在存档系统的特定位置。<strong>你每次存档时它会自动运行</strong>,
+    脚本返回失败就<strong>拦下这次存档</strong>。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>自家门口的地垫。</strong></p>
+    <p>你在门口放了块「进门请擦鞋」的垫子。它确实有用 ——
+    <strong>但它拦不住任何一个决定不擦的人。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它属于<strong>关卡 &#9314;</strong>。和云端门禁最大的区别在于:<strong>它在你自己机器上,归你管。</strong></p>
+    <p>还有一个结构性局限:<strong>钩子文件不会被存档、也不会被推送</strong> ——
+    别人拉你的仓库,不会自动得到它。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>手写一个最简单的(不需要装任何东西),在 myshop 项目根目录执行:</p>
+<pre><code>cat &gt; .git/hooks/pre-commit &lt;&lt;'SH'
+#!/bin/sh
+PY=.venv/bin/python
+
+echo ""
+echo "本地检查:提交前跑 3 道"
+
+printf "  [1/3] ruff   ...... "
+$PY -m ruff check . &gt; /tmp/g1.log 2&gt;&amp;1 || { echo "未通过"; cat /tmp/g1.log; exit 1; }
+echo "通过"
+
+printf "  [2/3] mypy   ...... "
+$PY -m mypy &gt; /tmp/g2.log 2&gt;&amp;1 || { echo "未通过"; cat /tmp/g2.log; exit 1; }
+echo "通过"
+
+printf "  [3/3] pytest ...... "
+$PY -m pytest -q &gt; /tmp/g3.log 2&gt;&amp;1 || { echo "未通过"; tail -18 /tmp/g3.log; exit 1; }
+echo "通过"
+
+echo "  全部通过,放行"
+exit 0
+SH
+chmod +x .git/hooks/pre-commit</code></pre>
+    <p><strong>规则只有一条:脚本返回 0 = 放行,返回非 0 = 拦下。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「装了钩子就安全了」。</strong>
+    <strong>加一个参数就能完全绕过它</strong> —— 下面有真机实测。</p>
+    <p><strong>误区 2:「钩子会跟着仓库分发给同事」。</strong>
+    <strong>不会。</strong>它在存档系统的内部目录里,那个目录不进版本控制。
+    要让全组都有,得用专门的工具(见下)。</p>
+  </div></div>
+</div>
+
+<h3>真机实测:三个场景</h3>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 场景 1:代码是好的</div>
+<pre><span class="c-cmd">$ git commit -m "docs: 好代码应该被放行"</span>
+
+  本地检查:提交前跑 3 道
+  [1/3] ruff   ...... <span class="c-ok">通过</span>
+  [2/3] mypy   ...... <span class="c-ok">通过</span>
+  [3/3] pytest ...... <span class="c-ok">通过</span>
+  <span class="c-ok">全部通过,放行</span>
+
+[main b27d579] docs: 好代码应该被放行</pre>
+</div>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 场景 2:代码坏了(把 ¥ 改成 $)</div>
+<pre><span class="c-cmd">$ git commit -m "feat: 这次改动有问题"</span>
+
+  [1/3] ruff   ...... <span class="c-ok">通过</span>
+  [2/3] mypy   ...... <span class="c-ok">通过</span>
+  [3/3] pytest ...... <span class="c-bad">未通过</span>
+<span class="c-bad">  ==================== 8 failed, 9 passed, 1 skipped ====================</span>
+
+<span class="c-cmd">$ echo $?</span>
+<span class="c-bad">1</span>
+
+<span class="c-cmd">$ git log --oneline -1</span>
+b27d579 docs: 好代码应该被放行     <span class="c-dim">&larr; 坏代码没进去</span></pre>
+</div>
+
+<div class="term-box">
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; &#128293; 场景 3:加一个参数</div>
+<pre><span class="c-cmd">$ git commit --no-verify -m "我绕过了检查,坏代码就这么进来了"</span>
+
+[main 4c5dd7c] 我绕过了检查,坏代码就这么进来了
+ 4 files changed, 26 insertions(+), 1 deletion(-)
+
+<span class="c-cmd">$ echo $?</span>
+<span class="c-ok">0</span>
+
+<span class="c-cmd">$ .venv/bin/python -m pytest -q</span>
+<span class="c-bad">==================== 8 failed, 9 passed, 1 skipped ====================</span>
+<span class="c-dim">&larr; 主干上的代码现在是坏的</span></pre>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 场景 3 是本页的核心结论</b>
+  注意:<strong>那个检查的框根本没打印出来</strong> ——
+  <code>--no-verify</code> 让存档系统<strong>压根不执行钩子</strong>。
+  <br><br>
+  <strong>多打 12 个字符,一道防线就形同不存在。</strong>
+  <br><br>
+  这就是为什么<strong>本地的检查叫「提醒」,云端的才叫「门禁」</strong>。
+  推送时的钩子同理,也有对应的绕过参数。
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 想让全组共享钩子:用 <code>pre-commit</code> 框架</b>
+  它是一个专门管理钩子的工具,配置文件<strong>会进版本控制</strong>,所以全组一致。
+  <br><br>
+  <strong>经核实的一处修正:</strong>规范检查工具的钩子标识符<strong>现在官方推荐用带 <code>-check</code> 后缀的那个</strong>,
+  老的写法虽然还能用,但已被官方在配置里明确标注为「遗留别名」。
+  <strong>写配置时请去该工具的官方仓库确认当前标识符</strong> —— 这类名字会随版本变。
+</div>
+
+<h2 id="failfast">五、快速失败:便宜的先跑</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">快速失败</span><span class="en">fail fast</span><span class="badge">排序原则</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>把<strong>又快又便宜</strong>的检查排在前面。前面挂了,后面的全都不跑。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>机场安检的顺序。</strong></p>
+    <p>先查证件(3 秒),再过安检门(10 秒),最后才开箱细检(3 分钟)。
+    <strong>如果你证件就不对,没人会先花 3 分钟给你开箱。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是<strong>流水线的排序原则</strong>,和第 5 页的测试金字塔<strong>方向一致</strong> ——
+    金字塔从下往上跑,流水线也从便宜往贵排。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+<pre><code>规范检查(30 秒)&rarr; 单元测试(2 分钟)&rarr; 集成(8 分钟)&rarr; 端到端(25 分钟)
+      &uarr;
+   第一道就挡住,后面 35 分钟全省了</code></pre>
+    <p><strong>规范检查挂了,就没必要花 25 分钟跑端到端才告诉你「你有个变量没用到」。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区:「顺序无所谓,反正都要跑」。</strong>
+    <strong>不是。</strong>假设 30% 的推送会被规范检查挡下,把它排最后意味着这 30% 的人
+    <strong>每次都白等 35 分钟</strong>。</p>
+  </div></div>
+</div>
+
+<h2 id="env">六、真机实证:两个完全不同的环境</h2>
+
+<p>这是本页最有说服力的一段。<strong>同一份代码,在两个完全不同的环境上跑:</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%"></th><th style="width:38%">你的 Mac</th><th>云端流水线</th></tr></thead>
+<tbody>
+<tr><th>操作系统</th><td>macOS(darwin)</td><td><strong>Linux</strong></td></tr>
+<tr><th>Python</th><td><strong>3.9.6</strong></td><td><strong>3.12.13</strong></td></tr>
+<tr><th>测试运行器</th><td><strong>8.4.2</strong></td><td><strong>9.1.1</strong></td></tr>
+<tr>
+  <th>结果</th>
+  <td><code>8 failed, 9 passed, 1 skipped in 3.66s</code></td>
+  <td><strong><code>8 failed, 9 passed, 1 skipped in 3.66s</code></strong></td>
+</tr>
+</tbody>
+</table>
+<p style="font-size:13px;color:var(--faint);margin:6px 0 0">注:耗时为 macOS 环境实测值;Linux 环境的红绿计数一致,耗时未逐字核录。</p>
+</div>
+
+<div class="box key">
+  <b class="t">完全不同的操作系统、差三个大版本的 Python、差一个大版本的运行器 —— 结论一字不差</b>
+  <br>
+  这正好验证了第三节那句「在我机器上是好的」:
+  <strong>流水线的价值就在于它是一个和你不一样的干净环境。</strong>
+  <br><br>
+  如果代码只在你这个版本上能过、在新版本上挂了,<strong>流水线会当场抓住</strong>;
+  而这次两边一致,说明那个 bug 是<strong>真 bug,不是环境问题</strong>。
+</div>
+
+<h2 id="yml">七、一个最小的流水线配置</h2>
+
+<p>在仓库里建一个文件,路径(相对项目根目录)必须是这个:</p>
+
+<pre><code>.github/workflows/ci.yml</code></pre>
+
+<pre><code>name: 检查
+
+on:
+  push:
+    branches: [main]
+  pull_request:            # &larr; 提合并请求时也跑
+
+jobs:
+  check:
+    name: 三道检查         # &larr; 这个名字很重要,第 19 页会用到
+    runs-on: ubuntu-latest # 云端提供的一台干净 Linux
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v7
+
+      - name: 装 Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      # 云端机器是一次性的,跑完就销毁,
+      # 不存在「污染系统环境」的问题,所以直接装,不用虚拟环境
+      - name: 装检查工具
+        run: pip install pytest mypy ruff
+
+      # ===== 便宜的先跑 =====
+      - name: 规范检查
+        run: ruff check .
+
+      - name: 类型检查
+        run: mypy
+
+      - name: 测试
+        run: pytest -q</code></pre>
+
+<h3>三段结构</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:18%">段</th><th style="width:22%">关键字</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><strong>什么时候跑</strong></td><td><code>on:</code></td><td>推送时、提合并请求时</td></tr>
+<tr><td><strong>在哪跑</strong></td><td><code>runs-on:</code></td><td>云端提供的一台干净机器</td></tr>
+<tr><td><strong>跑什么</strong></td><td><code>steps:</code></td><td>一步一步执行,<strong>任何一步返回非 0 就整个失败</strong></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">判定规则和你本地的钩子完全一样</b>
+  <strong>任何一个 <code>run</code> 的命令返回非 0,这个任务就失败。</strong>
+  <br><br>
+  <strong>同样的三条命令、同样的判定逻辑。唯一的区别是它跑在别人的机器上。</strong>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 关于那两个 <code>@v7</code> —— 一个真实的过期陷阱</b>
+  这里引用了两个现成的动作组件,后面的 <code>@v7</code> 是版本号。
+  <br><br>
+  <strong>核实时发现:官方教程页上写的还是更老的版本号,比它自己的代码仓库落后了两个大版本。</strong>
+  <br><br>
+  <strong>规矩:版本号以该组件的代码仓库为准,不要以文档页为准。</strong>
+  这也是本教程反复强调「自己实测,别抄博客」的一个具体例子。
+  <br><br>
+  <em>(本页版本号核实于 2026-08。你读到时可能又变了 —— 去仓库看最新标签。)</em>
+</div>
+
+<div class="box note">
+  <b class="t">&#128260; 还有一个和后面直接相关的坑</b>
+  你可能想加 <code>paths:</code> 过滤来省流水线时间(「只有改了某些文件才跑」)。
+  <strong>这里有一个会导致永久卡死的陷阱:</strong>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:40%">情况</th><th>结果</th></tr></thead>
+  <tbody>
+  <tr><td>任务因<strong>条件判断</strong>为假被跳过</td><td style="color:var(--ok)">上报为成功,<strong>不阻塞</strong></td></tr>
+  <tr><td>整个流程因 <code>paths</code> 过滤<strong>没被触发</strong></td>
+      <td style="color:var(--bad)"><strong>检查根本不上报</strong> &rarr; 一直停在「等待中」&rarr; <strong>永久阻塞合并</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>上面那份配置没有加 <code>paths</code> 过滤 —— 这恰好避开了这个死锁,是个安全的入门默认。</strong>
+  第 17 页讲门禁时会再回到这个问题。</p>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>162</td><td><strong>8 道关卡</strong></td><td>四道本地(能跳过)+ 四道云端(跳不了)</td></tr>
+<tr><td>163</td><td><strong>为什么跑两遍</strong></td><td>本地为「快」,云端为「不可绕过」</td></tr>
+<tr><td>164</td><td>&#128293; 一个参数绕过本地钩子</td><td>真机实测:检查框根本没打印</td></tr>
+<tr><td>165</td><td>「在我机器上是好的」</td><td>云端是唯一的权威裁判</td></tr>
+<tr><td>166</td><td>&#128293; <strong>两个环境结论一致</strong></td><td>darwin/3.9.6 vs Linux/3.12.13,一字不差</td></tr>
+<tr><td>167</td><td>&#128260; 钩子管理框架</td><td>钩子标识符已更名,老写法是遗留别名</td></tr>
+<tr><td>168</td><td>手写钩子</td><td>返回 0 放行,非 0 拦下;<strong>钩子不进版本控制</strong></td></tr>
+<tr><td>169</td><td><strong>快速失败</strong></td><td>便宜的先跑,像机场安检</td></tr>
+<tr><td>170</td><td>&#128260; 组件版本号</td><td><strong>以代码仓库为准,文档页会落后</strong></td></tr>
+<tr><td>&mdash;</td><td>&#128260; <code>paths</code> 过滤的死锁</td><td>没被触发 &ne; 跳过,会永久阻塞</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="15-team-roles.html">&larr; 上一页:岗位分工</a>
+  <a href="00-index.html">目录</a>
+  <a href="17-quality-gate.html">下一页:质量门禁 · 定义与四要素 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 16 页 / 共 23 页 · 覆盖知识点 162–170 · 难度 &#9733;&#9733;&#9733; · <strong>门禁三页的前置</strong></p>
+  <p><strong>本页含 3 处经核实修正:</strong>钩子管理框架的标识符已更名(老写法为遗留别名)、
+  组件版本号应以代码仓库为准(文档页落后两个大版本)、<code>paths</code> 过滤导致的永久阻塞陷阱。
+  钩子与环境对比数据为真机实测。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

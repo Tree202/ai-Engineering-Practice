@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>17 质量门禁:定义与四要素</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">17 质量门禁 <span>· 定义与四要素</span></span>
+  <a href="16-pipeline.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="18-gate-items.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 17 页 · 难度 ★★★★ · 前置:第 16 页 · <b style="color:var(--bad)">全书重点 1/3</b></span>
+<h1>质量门禁:定义与四要素</h1>
+<p class="lede">
+「质量门禁」是全书<strong>最容易被讲错</strong>的概念。
+我在写这份教程的第一版时就讲错了三处 —— 这一页把错的地方原样列出来,再讲对的。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#def">一、定义:什么才算门禁</a></li>
+    <li><a href="#three">二、三问判别法</a></li>
+    <li><a href="#four">三、四要素框架</a></li>
+    <li><a href="#kinds">四、两种门禁:硬门禁 vs 阈值门禁</a></li>
+    <li><a href="#wrong">五、&#128260; 我第一版讲错的三处</a></li>
+    <li><a href="#layers">六、三层拦截:别把它们混为一谈</a></li>
+    <li><a href="#actions">七、失败动作:阻断 vs 降级告警</a></li>
+    <li><a href="#docs">八、&#9888; 全书唯一一条「未找到出处」的说法</a></li>
+  </ol>
+</div>
+
+<h2 id="def">一、定义:什么才算门禁</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">质量门禁</span><span class="en">quality gate</span><span class="badge">云端 · 强制</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>流水线里的一个<strong>自动判定环节</strong>:它按<strong>事先约定好的指标和阈值</strong>去衡量这次改动,
+    <strong>没达标就自动阻断后续流程</strong>,而且<strong>不接受人为通融</strong>。</p>
+    <p>拆开看,这句话里有四个不可省的成分,少一个就不是门禁:</p>
+<pre><code>&#9312; 自动           &larr; 不是人工审批
+&#9313; 有明确的指标   &larr; 不是"我觉得质量还行"
+&#9314; 有明确的阈值   &larr; 不是"差不多就行"
+&#9315; 不达标会阻断   &larr; 不是"记录一下继续走"</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>地铁闸机。</strong></p>
+    <p>不是保安看你一眼放你过去(那是<strong>人工评审</strong>),
+    也不是门口贴张告示写「请自觉刷卡」(那是<strong>本地钩子</strong>)。</p>
+    <p>是一台机器:<strong>卡里余额 &lt; 门槛就是不开</strong>。
+    你是谁、赶不赶时间、跟站长熟不熟,都不影响判定。</p>
+    <div class="tw" style="margin:11px 0 0">
+    <table>
+    <thead><tr><th style="width:30%">闸机的成分</th><th>对应门禁的哪一要素</th></tr></thead>
+    <tbody>
+    <tr><td>读卡器</td><td><strong>检查点</strong>(在流程的哪一步查)</td></tr>
+    <tr><td>读出来的余额</td><td><strong>度量指标</strong>(量什么)</td></tr>
+    <tr><td>「余额 &ge; 起步价」</td><td><strong>阈值与判定规则</strong>(多少算过)</td></tr>
+    <tr><td>门不开</td><td><strong>失败动作</strong>(不过怎么办)</td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>回到第 16 页那张八关图:<strong>门禁只可能在虚线右边</strong>,也就是关卡 &#9316;–&#9319;。</p>
+    <p>左边四道<strong>永远不是门禁</strong>,因为它们能被一个参数绕过 —— 而门禁的定义里写着「不接受人为通融」。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>你在第 19 页会看到的那个真实门禁:</p>
+<pre><code>检查点:  提合并请求时
+指标:    ruff / mypy / pytest 的退出码
+阈值:    三个都必须为 0
+失败动作:合并按钮变灰,任何人都点不动(包括仓库管理员)</code></pre>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「跑了测试就算有门禁」。</strong>
+    不算。<strong>跑测试只是「量」,门禁还得有「判」和「拦」。</strong>
+    只跑不拦的叫<strong>报告</strong>,不叫门禁。</p>
+    <p><strong>误区 2:「门禁 = 代码评审」。</strong>
+    完全两回事。评审是<strong>人</strong>看,门禁是<strong>机器</strong>判。
+    两者互补:<strong>机器管「能不能过」,人管「该不该这么写」。</strong></p>
+  </div></div>
+</div>
+
+<h2 id="three">二、三问判别法</h2>
+
+<p>拿到任何一个检查环节,问三个问题。<strong>三个全是「是」,才是门禁。</strong></p>
+
+<figure>
+<svg viewBox="0 0 860 340" role="img" aria-label="三问判别流程图">
+  <defs><marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+    <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/></marker></defs>
+  <g class="st">
+    <g text-anchor="middle">
+      <rect x="16" y="24" width="150" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="91" y="47" font-size="12.5" font-weight="700" fill="var(--ink)">拿到一个</text>
+      <text x="91" y="64" font-size="12.5" font-weight="700" fill="var(--ink)">检查环节</text>
+
+      <polygon points="270,16 380,50 270,84 160,50" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="270" y="46" font-size="11.5" font-weight="700" fill="var(--ink)">问 1</text>
+      <text x="270" y="62" font-size="10.5" fill="var(--soft)">是自动跑的吗?</text>
+
+      <polygon points="500,16 620,50 500,84 380,50" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="500" y="46" font-size="11.5" font-weight="700" fill="var(--ink)">问 2</text>
+      <text x="500" y="62" font-size="10.5" fill="var(--soft)">有明确阈值吗?</text>
+
+      <polygon points="730,16 850,50 730,84 610,50" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.4"/>
+      <text x="730" y="46" font-size="11.5" font-weight="700" fill="var(--ink)">问 3</text>
+      <text x="730" y="62" font-size="10.5" fill="var(--soft)">不过会阻断吗?</text>
+
+      <rect x="640" y="128" width="180" height="54" rx="10" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
+      <text x="730" y="151" font-size="13" font-weight="800" fill="var(--ok)">&#10004; 是质量门禁</text>
+      <text x="730" y="169" font-size="10.5" fill="var(--soft)">三个都是「是」</text>
+
+      <rect x="150" y="212" width="150" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="225" y="234" font-size="11.5" font-weight="700" fill="var(--soft)">人工评审</text>
+      <text x="225" y="251" font-size="10" fill="var(--faint)">不是门禁</text>
+
+      <rect x="380" y="212" width="160" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="460" y="234" font-size="11.5" font-weight="700" fill="var(--soft)">只出报告</text>
+      <text x="460" y="251" font-size="10" fill="var(--faint)">量了不判 &rarr; 不是门禁</text>
+
+      <rect x="608" y="212" width="176" height="52" rx="10" fill="var(--raised)" stroke="var(--rule2)"/>
+      <text x="696" y="234" font-size="11.5" font-weight="700" fill="var(--soft)">红了也能合</text>
+      <text x="696" y="251" font-size="10" fill="var(--faint)">判了不拦 &rarr; 不是门禁</text>
+    </g>
+
+    <g stroke="var(--faint)" stroke-width="1.3" marker-end="url(#a2)" fill="none">
+      <line x1="168" y1="50" x2="176" y2="50"/>
+      <line x1="382" y1="50" x2="390" y2="50"/>
+      <line x1="622" y1="50" x2="630" y2="50"/>
+      <line x1="730" y1="86" x2="730" y2="124"/>
+      <path d="M 270 86 L 270 160 L 225 160 L 225 208"/>
+      <path d="M 500 86 L 500 160 L 460 160 L 460 208"/>
+      <path d="M 800 86 L 830 120 L 750 190 L 700 208"/>
+    </g>
+    <g font-size="10.5" fill="var(--ok)" font-weight="700">
+      <text x="196" y="44">是</text><text x="410" y="44">是</text><text x="650" y="44">是</text>
+    </g>
+    <g font-size="10.5" fill="var(--bad)" font-weight="700">
+      <text x="278" y="120">否</text><text x="508" y="120">否</text><text x="812" y="112">否</text>
+    </g>
+
+    <text x="16" y="308" font-size="12.5" fill="var(--soft)" font-weight="700">
+      最常见的错判是问 3:很多团队跑了一堆检查、也定了阈值,
+    </text>
+    <text x="16" y="328" font-size="12.5" fill="var(--bad)" font-weight="700">
+      但红了照样能合 —— 那就只是一份没人看的报告。
+    </text>
+  </g>
+</svg>
+<figcaption>三问判别法。三个全是「是」才叫门禁,少一个就降级成别的东西</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:26%">问题</th><th style="width:24%">答「否」的话</th><th>它其实是什么</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>1. 自动跑的吗?</strong></td>
+  <td>要人点一下才跑</td>
+  <td><strong>人工评审</strong> / 手工测试 —— 有价值,但不是门禁</td>
+</tr>
+<tr>
+  <td><strong>2. 有明确阈值吗?</strong></td>
+  <td>「差不多就行」</td>
+  <td><strong>质量报告</strong> —— 只提供数字,判定权在人手里</td>
+</tr>
+<tr>
+  <td><strong>3. 不过会阻断吗?</strong></td>
+  <td>红了照样能合</td>
+  <td><strong>装饰</strong> —— 最常见的一种失败;
+      团队看久了就麻木,红色变成背景噪音</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">「破窗效应」:第 3 问答否的真实代价</b>
+  一旦「红了也能合」成为常态,红色就<strong>失去了信号价值</strong>。
+  三个月后没人再看流水线结果,那笔投入等于全废。
+  <br><br>
+  <strong>宁可只设一条能真正阻断的门禁,也不要设十条红了没人管的。</strong>
+</div>
+
+<h2 id="four">三、四要素框架</h2>
+
+<p><strong>这是本页最该记住的一张表。</strong>任何一条门禁,都必须能填满这四格 —— 填不满就说明你还没想清楚。</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:16%">要素</th><th style="width:16%">回答什么</th>
+  <th style="width:30%">举例</th><th>常见错误</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312; 检查点</strong><br><span style="color:var(--faint);font-size:12px">checkpoint</span></td>
+  <td><strong>在流程的哪一步查?</strong></td>
+  <td>提合并请求时 / 合并后 / 部署前</td>
+  <td>放太靠后 —— 等部署完才发现,回滚成本高</td>
+</tr>
+<tr>
+  <td><strong>&#9313; 度量指标</strong><br><span style="color:var(--faint);font-size:12px">metric</span></td>
+  <td><strong>量什么?</strong></td>
+  <td>测试通过率 / 覆盖率 / 严重问题数 / 跳过数</td>
+  <td>量了一堆没人在乎的数字</td>
+</tr>
+<tr>
+  <td><strong>&#9314; 阈值与判定规则</strong><br><span style="color:var(--faint);font-size:12px">threshold &amp; rule</span></td>
+  <td><strong>多少算过?</strong></td>
+  <td>P0 用例 100%、全量 &ge; 95%、严重问题 = 0</td>
+  <td><strong>一刀切</strong> —— 所有指标都写「100%」,结果没人达得到</td>
+</tr>
+<tr>
+  <td><strong>&#9315; 失败动作</strong><br><span style="color:var(--faint);font-size:12px">action</span></td>
+  <td><strong>不过怎么办?</strong></td>
+  <td>阻断 / 降级告警 / 通知负责人</td>
+  <td><strong>没有动作</strong> —— 第 3 问答「否」,门禁沦为装饰</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">用四要素改写「我们有质量门禁」这句话</b>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:36%">含糊的说法</th><th>填满四要素之后</th></tr></thead>
+  <tbody>
+  <tr>
+    <td>「我们跑测试」</td>
+    <td><strong>提合并请求时</strong>(&#9312;),看<strong>全量用例通过率</strong>(&#9313;),
+        要求 <strong>P0 100% 且全量 &ge; 95%</strong>(&#9314;),不达标<strong>阻断合并</strong>(&#9315;)</td>
+  </tr>
+  <tr>
+    <td>「我们看覆盖率」</td>
+    <td><strong>提合并请求时</strong>(&#9312;),看<strong>本次改动行的覆盖率</strong>(&#9313;),
+        要求 <strong>&ge; 80%</strong>(&#9314;),不达标<strong>降级告警不阻断</strong>(&#9315;)</td>
+  </tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0">左边是口号,右边是可以写进配置文件的东西。<strong>差别就是四要素。</strong></p>
+</div>
+
+<h2 id="kinds">四、两种门禁:硬门禁 vs 阈值门禁</h2>
+
+<p>这一节直接对应我第一版讲错的第一处。</p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:12%"></th><th style="width:32%">隐式硬门禁</th><th>阈值门禁</th>
+</tr></thead>
+<tbody>
+<tr><th>判定方式</th><td><strong>非黑即白</strong> —— 命令退出码是不是 0</td><td><strong>数值比大小</strong> —— 指标和阈值比</td></tr>
+<tr><th>要不要配阈值</th><td style="color:var(--ok)"><strong>不用</strong> —— 阈值天然就是「零失败」</td><td style="color:var(--warn)"><strong>必须配</strong>,而且要分级</td></tr>
+<tr><th>典型例子</th>
+    <td>规范检查、类型检查、测试是否全过、编译能否通过</td>
+    <td>覆盖率 &ge; 80%、严重问题 = 0、重复率 &lt; 3%、跳过数 &le; 5</td></tr>
+<tr><th>为什么叫「隐式」</th>
+    <td><strong>你没写任何阈值,但它就是有阈值</strong> ——「必须为 0」这条藏在工具的退出码约定里</td>
+    <td>阈值是你自己写在配置里的,明明白白</td></tr>
+<tr><th>调整空间</th><td>基本没有 —— 要么过要么不过</td><td>大 —— 可以随团队水平逐步收紧</td></tr>
+<tr><th>落地难度</th><td style="color:var(--ok)"><strong>低</strong>,第一天就能上</td><td style="color:var(--warn)"><strong>中</strong>,得先测基线才知道阈值定多少</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">两者的关系:先上硬门禁,再加阈值门禁</b>
+  <strong>硬门禁是地板,阈值门禁是台阶。</strong>
+  <br><br>
+  新项目第一天就该把三条硬门禁开起来(规范 / 类型 / 测试全过),因为它们<strong>不需要任何决策</strong>。
+  阈值门禁要等你<strong>有了一段时间的数据</strong>,知道当前基线在哪,才谈得上定阈值。
+  <br><br>
+  <strong>顺序反了的后果:</strong>一上来就定「覆盖率 90%」,团队达不到,于是关掉门禁 —— 回到零。
+</div>
+
+<h2 id="wrong">五、&#128260; 我第一版讲错的三处</h2>
+
+<p><strong>这一节是本页最有价值的部分。</strong>不是为了自我批评,而是因为
+<strong>这三个错误极其常见</strong> —— 你在网上看到的很多资料都是这么写的。</p>
+
+<div class="box trap">
+  <b class="t">&#128260; 错误 1:把「隐式硬门禁」和「阈值门禁」混为一谈</b>
+  <p style="margin:8px 0 0"><strong>我原来的写法:</strong>把规范检查、类型检查、测试、覆盖率<strong>并排列成一张表</strong>,
+  统称「门禁项」,好像它们是同一类东西。</p>
+  <p style="margin:8px 0 0"><strong>错在哪:</strong>前三个是<strong>退出码判定</strong>,阈值是隐含的、不可调的;
+  覆盖率是<strong>数值判定</strong>,阈值是你自己定的、可调的。<strong>两者的落地节奏完全不同</strong>
+  —— 前三个第一天就能开,覆盖率必须先测基线。混在一起讲,读者会以为它们同时上线。</p>
+  <p style="margin:8px 0 0"><strong>改法:</strong>就是上面第四节那张表,先分成两类,再各讲各的。</p>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 错误 2:把「构建能否成功」当成一条门禁</b>
+  <p style="margin:8px 0 0"><strong>我原来的写法:</strong>在门禁清单里列了一条「构建成功」。</p>
+  <p style="margin:8px 0 0"><strong>错在哪:</strong><strong>构建失败的话,后面根本没有产物可以检查</strong>
+  —— 测试跑不了、覆盖率算不出来、扫描无从下手。所以它<strong>不是一条和其它并列的门禁</strong>,
+  而是<strong>整个门禁阶段的前置条件</strong>。</p>
+  <p style="margin:8px 0 0">对回第 16 页的八关图:构建属于<strong>关卡 &#9317;</strong>的组成部分,
+  它是「门禁能不能开始跑」的先决条件,不是「门禁判不判得过」的一项。</p>
+  <p style="margin:8px 0 0"><strong>为什么这个区分重要:</strong>失败动作不一样。
+  构建失败 &rarr; <strong>流程直接终止,连报告都没有</strong>;
+  门禁不过 &rarr; <strong>有完整报告,告诉你差多少</strong>。</p>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 错误 3:把测试通过率当成二元的</b>
+  <p style="margin:8px 0 0"><strong>我原来的写法:</strong>「测试必须全过」。</p>
+  <p style="margin:8px 0 0"><strong>错在哪:</strong>在只有 18 个用例的玩具项目里这么定没问题。
+  但真实项目有几千上万条用例,里面必然混着<strong>不稳定用例</strong>(第 10 页讲过的 flaky)。
+  要求 100% 意味着<strong>每次都有人被随机的抖动挡住</strong>,最后大家学会的不是修 bug,
+  <strong>而是点「重跑」</strong> —— 门禁失效。</p>
+  <p style="margin:8px 0 0"><strong>改法:分级。</strong></p>
+  <div class="tw" style="margin:9px 0 0">
+  <table>
+  <thead><tr><th style="width:24%">用例分级</th><th style="width:18%">阈值</th><th>理由</th></tr></thead>
+  <tbody>
+  <tr><td><strong>P0 核心用例</strong></td><td style="color:var(--bad)"><strong>100%</strong></td>
+      <td>下单、支付、登录这类。挂一条就是生产事故,<strong>没有商量余地</strong></td></tr>
+  <tr><td><strong>全量用例</strong></td><td style="color:var(--warn)"><strong>&ge; 95%</strong></td>
+      <td>留出 5% 给不稳定用例和环境抖动,<strong>让门禁可持续</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p style="margin:9px 0 0"><strong>关键在于「P0 100%」这条不能松。</strong>
+  如果全量 95% 是唯一的门禁,那 5% 里正好是支付流程挂了,照样放行 —— 分级的意义就在这。</p>
+</div>
+
+<div class="box note">
+  <b class="t">这三个错误的共同根源</b>
+  <strong>我把「跑什么命令」当成了门禁的全部,忽略了「怎么判」。</strong>
+  <br><br>
+  跑命令是<strong>度量</strong>(四要素的 &#9313;),而门禁的难点全在
+  <strong>阈值与判定规则</strong>(&#9314;)和<strong>失败动作</strong>(&#9315;)上。
+  <br><br>
+  <strong>这也是为什么我把四要素框架放在错误清单前面 —— 有了框架,这三个错自己就露出来了。</strong>
+</div>
+
+<h2 id="layers">六、三层拦截:别把它们混为一谈</h2>
+
+<p>「代码合不进主干」这件事,在真实项目里可能是<strong>三个完全不同的机制</strong>造成的。
+排查问题时分不清这三层,会浪费大量时间。</p>
+
+<figure>
+<svg viewBox="0 0 860 300" role="img" aria-label="三层拦截机制">
+  <g class="st">
+    <rect x="20" y="24" width="820" height="72" rx="12" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.5"/>
+    <text x="40" y="50" font-size="13.5" font-weight="800" fill="var(--bad)">第 &#9312; 层 · 合并保护规则</text>
+    <text x="40" y="70" font-size="11.5" fill="var(--soft)">配在代码托管平台上(不在流水线里)。规定「这个分支必须满足哪些条件才能被合并」</text>
+    <text x="40" y="87" font-size="11" fill="var(--faint)">例:必须有 1 个人批准 · 必须有名为「三道检查」的检查通过 · 管理员也不例外</text>
+    <text x="820" y="62" font-size="11" fill="var(--bad)" text-anchor="end" font-weight="700">谁配:仓库管理员</text>
+
+    <rect x="20" y="110" width="820" height="72" rx="12" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.5"/>
+    <text x="40" y="136" font-size="13.5" font-weight="800" fill="var(--warn)">第 &#9313; 层 · 流水线前置条件</text>
+    <text x="40" y="156" font-size="11.5" fill="var(--soft)">流水线自己的先决条件。不满足就<tspan font-weight="700">根本跑不到门禁那一步</tspan></text>
+    <text x="40" y="173" font-size="11" fill="var(--faint)">例:代码拉取失败 · 依赖装不上 · <tspan font-weight="700">构建失败</tspan> · 环境起不来</text>
+    <text x="820" y="148" font-size="11" fill="var(--warn)" text-anchor="end" font-weight="700">谁配:流水线维护者</text>
+
+    <rect x="20" y="196" width="820" height="72" rx="12" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.5"/>
+    <text x="40" y="222" font-size="13.5" font-weight="800" fill="var(--ok)">第 &#9314; 层 · 质量门禁</text>
+    <text x="40" y="242" font-size="11.5" fill="var(--soft)">真正按指标和阈值判定的那一层。<tspan font-weight="700">前两层都过了,才轮到它</tspan></text>
+    <text x="40" y="259" font-size="11" fill="var(--faint)">例:测试通过率 · 覆盖率 · 严重问题数 · 跳过数</text>
+    <text x="820" y="234" font-size="11" fill="var(--ok)" text-anchor="end" font-weight="700">谁配:质量负责人 + 开发</text>
+
+    <text x="20" y="292" font-size="12.5" fill="var(--soft)" font-weight="700">
+      合不进去时,先问自己:是被规则挡了(&#9312;),还是根本没跑起来(&#9313;),还是真的没达标(&#9314;)?
+    </text>
+  </g>
+</svg>
+<figcaption>三层拦截。同样是「合不进去」,原因和解法完全不同</figcaption>
+</figure>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:8%">层</th><th style="width:20%">典型现象</th>
+  <th style="width:26%">你看到的信息</th><th>怎么解</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>&#9312;</strong></td>
+  <td>合并按钮是灰的,但流水线是<strong>绿的</strong></td>
+  <td>「还需要 1 个批准」/「缺少必需的检查」</td>
+  <td>找人评审;或检查规则里写的检查名字<strong>是否和流水线里的一字不差</strong></td>
+</tr>
+<tr>
+  <td><strong>&#9313;</strong></td>
+  <td>流水线红了,但<strong>没跑到测试那一步</strong></td>
+  <td>「依赖安装失败」/「构建失败」</td>
+  <td>修环境、修依赖、修编译错误。<strong>和代码质量无关</strong></td>
+</tr>
+<tr>
+  <td><strong>&#9314;</strong></td>
+  <td>流水线跑完了,报告有了,<strong>但判定不通过</strong></td>
+  <td>「8 failed」/「覆盖率 62% &lt; 80%」</td>
+  <td><strong>真的去改代码</strong>。这才是门禁想让你做的事</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128260; 一个真会让人卡住半天的组合陷阱</b>
+  第 16 页末尾提到的 <code>paths</code> 过滤,就是 &#9312; 和 &#9313; 交叉产生的:
+  <br><br>
+  第 &#9312; 层要求「必须有名为 X 的检查通过」,
+  但第 &#9313; 层因为路径过滤<strong>压根没触发这条流水线</strong> &rarr;
+  检查 X <strong>从来没上报过任何结果</strong> &rarr; 第 &#9312; 层永远等不到 &rarr;
+  <strong>合并请求永久卡在「等待中」</strong>。
+  <br><br>
+  <strong>注意区分:</strong>任务因<strong>条件判断为假</strong>而跳过时,平台<strong>会上报一个成功状态</strong>,不阻塞;
+  而整个流程<strong>没被触发</strong>时,<strong>什么都不上报</strong>。
+  <strong>「跳过」和「没触发」是两回事。</strong>
+</div>
+
+<h2 id="actions">七、失败动作:阻断 vs 降级告警</h2>
+
+<p>四要素的第 &#9315; 项。<strong>很多人以为门禁只有「过 / 不过」两种结果 —— 其实至少有三种。</strong></p>
+
+<div class="tw">
+<table>
+<thead><tr>
+  <th style="width:16%">失败动作</th><th style="width:14%">流程</th>
+  <th style="width:26%">适用场景</th><th>代价</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td><strong>阻断</strong><br><span style="color:var(--faint);font-size:12px">error / failure</span></td>
+  <td style="color:var(--bad)"><strong>立即终止</strong></td>
+  <td>P0 用例挂了、有严重安全问题、编译不过</td>
+  <td>最高。<strong>用在真正不能放过的事情上</strong></td>
+</tr>
+<tr>
+  <td><strong>降级告警</strong><br><span style="color:var(--faint);font-size:12px">unstable</span></td>
+  <td style="color:var(--warn)"><strong>继续走,但标黄</strong></td>
+  <td>覆盖率略低、有中低危问题、跳过数偏多</td>
+  <td>中。<strong>新引入一条门禁时的过渡状态</strong></td>
+</tr>
+<tr>
+  <td><strong>只通知</strong><br><span style="color:var(--faint);font-size:12px">notify</span></td>
+  <td style="color:var(--soft)">完全不影响</td>
+  <td>刚开始收集基线数据的阶段</td>
+  <td>低。<strong>但要设期限,否则永远停在这</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">推荐的三阶段落地路径</b>
+<pre style="margin:9px 0 0"><code>第 1&ndash;2 周   只通知     &rarr; 收集数据,搞清楚当前基线到底在哪
+第 3&ndash;6 周   降级告警   &rarr; 定一个略高于基线的阈值,让大家看到黄
+第 7 周起    阻断       &rarr; 阈值稳定后转硬,不达标真的合不进去</code></pre>
+  <p style="margin:9px 0 0"><strong>跳过前两步直接上阻断,是新引入门禁最常见的翻车原因。</strong>
+  但注意:<strong>这条路径只适用于「阈值门禁」。</strong>
+  硬门禁(规范 / 类型 / 测试全过)第一天就该直接阻断 —— 它们没有基线可测。</p>
+</div>
+
+<h2 id="docs">八、&#9888; 全书唯一一条「未找到出处」的说法</h2>
+
+<p>本教程的核实规矩是:<strong>找不到可靠依据的,宁可标出来,也不用猜的内容糊过去。</strong>
+全书 193 条断言里,只有下面这一条落到了这个格子里。</p>
+
+<div class="box note">
+  <b class="t">&#9888; 待验证:「把判定写在脚本里、只看退出码」这种做法</b>
+  你会在很多地方看到这个建议:<strong>不用平台的插件,自己写个脚本算指标,不达标就 <code>exit 1</code>。</strong>
+  <br><br>
+  <strong>核实说明:我查了主流平台的官方文档,没有找到把这个写成「官方推荐做法」的原文。</strong>
+  所以本教程把它标注为<strong>「社区常见做法」</strong>,而不是「官方推荐」。
+  <br><br>
+  <strong>它确实有实打实的好处:</strong>不依赖任何平台插件、本地能原样重现、换平台不用重写。
+  <strong>坏处是:</strong>你得自己解析报告、自己算指标,而插件通常已经把这些做好了。
+  <br><br>
+  <em>&#9888; 这是本书唯一一条「未在官方文档中找到出处」的说法,特此标注。</em>
+</div>
+
+<div class="box trap">
+  <b class="t">&#128293; 顺带一提:官方文档本身也会写错</b>
+  在核实这一章的过程中,我在<strong>官方文档里</strong>发现了两处实打实的错误 ——
+  一处是示例代码的注释和它自己的源码相反,另一处是示例配置用了一个不存在的参数、
+  <strong>而且照抄过去不报错、看起来还能正常工作</strong>。
+  <br><br>
+  <strong>两个实例的完整经过和由此得出的三条操作规矩,见
+  <a href="18-gate-items.html#docwrong">第 18 页第八节</a>。</strong>
+  <br><br>
+  提前说一句最关键的那条:<strong>配完门禁,先故意让它红一次。</strong>
+  这是验证门禁真的生效的<u>唯一</u>可靠方式 —— 第 19 页整页都在做这件事。
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:32%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>171</td><td><strong>门禁的定义</strong></td><td>自动 + 有指标 + 有阈值 + 会阻断,缺一不可</td></tr>
+<tr><td>172</td><td><strong>三问判别法</strong></td><td>自动跑?有阈值?会阻断?三个全「是」才算</td></tr>
+<tr><td>173</td><td>&#128260; <strong>四要素框架</strong></td><td>检查点 / 度量指标 / 阈值与判定规则 / 失败动作</td></tr>
+<tr><td>174</td><td>&#128260; <strong>硬门禁 vs 阈值门禁</strong></td><td>退出码判定 vs 数值判定;地板 vs 台阶</td></tr>
+<tr><td>175</td><td>&#128260; 错误 1:两类混为一谈</td><td>落地节奏完全不同,不该并排列表</td></tr>
+<tr><td>176</td><td>&#128260; 错误 2:构建不是门禁</td><td>它是<strong>门禁阶段的前置条件</strong></td></tr>
+<tr><td>177</td><td>&#128260; 错误 3:通过率不是二元的</td><td>P0 = 100%,全量 &ge; 95%</td></tr>
+<tr><td>178</td><td>&#128260; <strong>三层拦截</strong></td><td>合并保护 / 流水线前置条件 / 质量门禁</td></tr>
+<tr><td>179</td><td>&#128260; 「跳过」&ne;「没触发」</td><td>前者上报成功,后者什么都不报 &rarr; 永久阻塞</td></tr>
+<tr><td>180</td><td>&#128260; <strong>阻断 vs 降级告警</strong></td><td>失败动作至少三种,不只「过 / 不过」</td></tr>
+<tr><td>181</td><td>&#128260; 三阶段落地路径</td><td>只通知 &rarr; 降级告警 &rarr; 阻断(仅适用阈值门禁)</td></tr>
+<tr><td>&#9888;</td><td>脚本 + 退出码</td><td><strong>社区常见做法,非官方推荐</strong>(全书唯一待验证项)</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="16-pipeline.html">&larr; 上一页:流水线</a>
+  <a href="00-index.html">目录</a>
+  <a href="18-gate-items.html">下一页:门禁检查什么 · 阈值怎么定 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 17 页 / 共 23 页 · 覆盖知识点 171–181 · 难度 &#9733;&#9733;&#9733;&#9733; · <b style="color:var(--bad)">全书重点 1/3</b></p>
+  <p><strong>本页含 8 处经核实修正</strong>(其中 3 处是对本教程第一版内容的直接更正)。
+  另含全书唯一 1 条 &#9888; 待验证项,已在正文中明确标注为「社区常见做法」而非「官方推荐」。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>

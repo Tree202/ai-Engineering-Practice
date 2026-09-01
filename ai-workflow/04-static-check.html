@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 静态检查:不运行代码的检查</title>
+<style>
+  :root{color-scheme:dark;--paper:#13151B;--raised:#1B1E26;--sunk:#0E1015;--ink:#E9EBF1;--soft:#ABB1C2;--faint:#7C8394;
+    --rule:#2A2E39;--rule2:#414755;--accent:#91AFE2;--accent-soft:#1E2634;--code:#1E222B;
+    --ok:#6FBF8B;--ok-soft:#17251C;--warn:#DCAC4C;--warn-soft:#241E12;--bad:#DD7A5F;--bad-soft:#25170F;
+    --info:#5AB3AB;--info-soft:#0F2321;--plan:#A895DA;--plan-soft:#1D1830;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;}
+  :root[data-theme="light"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;--ink:#16181F;--soft:#464B59;--faint:#767C8C;
+    --rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}
+  @media (prefers-color-scheme:light){:root[data-theme="system"]{color-scheme:light;--paper:#F8F9FB;--raised:#FFFFFF;--sunk:#EEF0F5;
+    --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
+    --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
+    --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
+  .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
+  .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+  .nav a{color:var(--soft);text-decoration:none;font-size:13.5px;padding:5px 12px;border-radius:7px;border:1px solid var(--rule);white-space:nowrap}
+  .nav a:hover{background:var(--accent-soft);color:var(--ink);border-color:var(--rule2)}
+  .nav .who{font-weight:700;font-size:14px;margin-right:auto}.nav .who span{color:var(--faint);font-weight:400}
+  .themer{display:flex;gap:2px;background:var(--sunk);border:1px solid var(--rule);border-radius:9px;padding:3px}
+  .themer button{font:inherit;font-size:12px;padding:4px 9px;cursor:pointer;background:transparent;color:var(--faint);border:0;border-radius:6px;line-height:1.5}
+  .themer button:hover{color:var(--ink)}
+  .themer button[aria-pressed="true"]{background:var(--accent);color:var(--paper);font-weight:600}
+  .wrap{max-width:1140px;margin:0 auto;padding:40px 22px 110px}
+  h1{font-size:32px;line-height:1.28;margin:0 0 12px;letter-spacing:-.01em}
+  h2{font-size:24px;margin:58px 0 16px;padding-top:20px;border-top:2px solid var(--rule);line-height:1.35}
+  h3{font-size:18.5px;margin:34px 0 10px}h4{font-size:16px;margin:24px 0 8px;color:var(--soft)}
+  p{margin:13px 0}a{color:var(--accent)}
+  .lede{font-size:17px;color:var(--soft);max-width:70ch}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);
+    border:1px solid var(--rule2);border-radius:999px;padding:3px 12px;margin-bottom:15px}
+  code{font-family:var(--mono);font-size:.89em;background:var(--code);padding:2px 6px;border-radius:5px}
+  pre{background:var(--code);border:1px solid var(--rule);border-radius:11px;padding:15px 17px;overflow-x:auto;
+    font-family:var(--mono);font-size:13px;line-height:1.65;margin:15px 0}
+  pre code{background:none;padding:0;font-size:inherit}
+  .term-box{background:var(--sunk);border:1px solid var(--rule);border-radius:11px;overflow:hidden;margin:16px 0}
+  .term-bar{display:flex;align-items:center;gap:7px;padding:7px 13px;border-bottom:1px solid var(--rule);
+    background:var(--raised);font-size:12px;color:var(--faint);font-family:var(--mono)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--rule2)}
+  .term-box pre{margin:0;border:0;border-radius:0;background:transparent}
+  .c-cmd{color:var(--accent);font-weight:600}.c-ok{color:var(--ok)}.c-bad{color:var(--bad)}
+  .c-dim{color:var(--faint)}.c-warn{color:var(--warn)}
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+  th,td{border:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--raised);font-weight:600;font-size:13.5px}
+  tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--raised) 45%,transparent)}
+  .box{border-left:3px solid var(--rule2);border-radius:0 11px 11px 0;background:var(--raised);padding:14px 19px;margin:20px 0}
+  .box>:first-child{margin-top:0}.box>:last-child{margin-bottom:0}
+  .box b.t{display:block;font-size:14px;margin-bottom:5px}
+  .box.trap{border-color:var(--bad);background:var(--bad-soft)}.box.trap b.t{color:var(--bad)}
+  .box.key{border-color:var(--warn);background:var(--warn-soft)}.box.key b.t{color:var(--warn)}
+  .box.good{border-color:var(--ok);background:var(--ok-soft)}.box.good b.t{color:var(--ok)}
+  .box.note{border-color:var(--info);background:var(--info-soft)}.box.note b.t{color:var(--info)}
+  figure{margin:24px 0}figure svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13px;color:var(--faint);margin-top:9px;text-align:center}
+  .st{font-family:var(--sans)}
+  ul,ol{padding-left:24px}li{margin:6px 0}
+  .toc{border:1px solid var(--rule);border-radius:13px;background:var(--raised);padding:17px 23px;margin:26px 0}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:32px}
+  .toc li{margin:5px 0;break-inside:avoid}
+  .toc a{text-decoration:none;color:var(--soft);font-size:14.5px}
+  .toc a:hover{color:var(--accent);text-decoration:underline}
+  @media(max-width:720px){.toc ol{columns:1}}
+  .foot{margin-top:78px;padding-top:24px;border-top:1px solid var(--rule);color:var(--faint);font-size:13.5px}
+  .pager{display:flex;gap:10px;justify-content:space-between;margin-top:48px;padding-top:22px;border-top:1px solid var(--rule);flex-wrap:wrap}
+  .pager a{color:var(--accent);text-decoration:none;font-size:14.5px;padding:8px 14px;border:1px solid var(--rule);border-radius:9px;background:var(--raised)}
+  .pager a:hover{border-color:var(--rule2)}
+  .term{border:1px solid var(--rule);border-radius:14px;background:var(--raised);padding:2px 23px 19px;margin:26px 0}
+  .term-h{display:flex;align-items:baseline;gap:10px;margin:19px 0 4px;padding-bottom:11px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+  .term-h .zh{font-size:19px;font-weight:700}
+  .term-h .en{font-size:13px;color:var(--faint);font-family:var(--mono)}
+  .term-h .badge{margin-left:auto;font-size:11.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;font-weight:600;color:var(--ok)}
+  .step{display:grid;grid-template-columns:72px 1fr;gap:12px;margin:13px 0;align-items:start}
+  .step .n{font-size:12px;font-weight:700;color:var(--faint);font-family:var(--mono);padding-top:3px;letter-spacing:.03em}
+  .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
+  @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
+  .chk{list-style:none;padding-left:0}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
+  @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
+    pre{font-size:12px}.term{padding:2px 15px 17px}}
+</style>
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('kb2-theme')}catch(e){}
+   document.documentElement.setAttribute('data-theme',t||'dark')})();
+</script>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="who">04 静态检查 <span>· 不运行代码的检查</span></span>
+  <a href="03-test-basics.html">&larr; 上一页</a>
+  <a href="00-index.html">目录</a>
+  <a href="05-pyramid.html">下一页 &rarr;</a>
+  <div class="themer" role="group" aria-label="主题">
+    <button type="button" data-set="light" aria-pressed="false">浅色</button>
+    <button type="button" data-set="dark" aria-pressed="true">深色</button>
+    <button type="button" data-set="system" aria-pressed="false">跟随系统</button>
+  </div>
+</div></div>
+<div class="wrap">
+<span class="kicker">第 04 页 · 难度 ★★ · 前置:第 02、03 页</span>
+<h1>静态检查:不运行代码的检查</h1>
+<p class="lede">
+有一类检查<strong>连代码都不运行</strong>,却能在一秒内扫完你整个项目。
+它极便宜、极快、覆盖 100% 的代码 —— 但它有一个结构性盲区,后面第 8 页会用五次真机实验把这个盲区暴露得干干净净。
+</p>
+
+<div class="toc">
+  <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
+  <ol>
+    <li><a href="#what">一、静态分析:不运行代码的检查</a></li>
+    <li><a href="#mypy">二、类型检查器</a></li>
+    <li><a href="#ruff">三、代码规范检查器</a></li>
+    <li><a href="#complement">四、广而浅 vs 窄而深</a></li>
+    <li><a href="#blind">五、致命的结构性盲区</a></li>
+    <li><a href="#aitrap">六、一个 AI 协作专属的坑</a></li>
+  </ol>
+</div>
+
+<h2 id="what">一、静态分析:不运行代码的检查</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">静态分析</span><span class="en">static analysis</span><span class="badge">最便宜的检查</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p><strong>不执行你的程序</strong>,只把代码当文本读一遍,从中找出问题。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>校对 vs 试吃。</strong></p>
+    <p>一份菜谱交上来,<strong>校对员</strong>不用进厨房 —— 他看一眼就知道「第 3 步写的『放入烤箱』,但前面根本没提到烤箱」,
+    或者「配料表里的鸡蛋在步骤里从没用到」。这些错误<strong>不需要真做一遍菜就能发现</strong>。</p>
+    <p>而<strong>试吃员</strong>必须真的把菜做出来,才知道咸淡如何。</p>
+    <p><strong>静态分析是校对员,测试是试吃员。</strong></p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它和「测试」是<strong>并列且互补</strong>的两类检查,不是替代关系:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:26%"></th><th style="width:34%">测试</th><th>静态分析</th></tr></thead>
+    <tbody>
+    <tr><td>运行代码吗</td><td>&#9989; 真的执行</td><td>&#10060; <strong>完全不运行</strong></td></tr>
+    <tr><td>覆盖范围</td><td>只覆盖你写了测试的部分</td><td><strong>100% 代码</strong></td></tr>
+    <tr><td>能发现什么</td><td>逻辑错、算错了</td><td>类型错、拼写错、没用到的变量</td></tr>
+    <tr><td>需要人写用例吗</td><td>&#9989; 要</td><td>&#10060; <strong>不用</strong>,配置一次永久生效</td></tr>
+    <tr><td>速度</td><td>毫秒到几十分钟</td><td><strong>秒级</strong></td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p><strong>最后一行的「不用写用例」是它性价比无敌的原因</strong> —— 投入一次性,收益永久。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>本教程用两个:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:14%">工具</th><th style="width:26%">中文叫法</th><th>命令</th></tr></thead>
+    <tbody>
+    <tr><td><code>mypy</code></td><td>类型检查器</td><td><code>.venv/bin/python -m mypy</code></td></tr>
+    <tr><td><code>ruff</code></td><td>代码规范检查器</td><td><code>.venv/bin/python -m ruff check .</code></td></tr>
+    </tbody>
+    </table>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>误区 1:「静态检查过了 = 代码没问题」。</strong>
+    这是全书要反复拆的最大错觉。<strong>第 5 节和第 8 页会用五次实验证明它错得多离谱。</strong></p>
+    <p><strong>误区 2:「有测试了就不用静态检查」。</strong>
+    反了 —— 静态检查<strong>更便宜</strong>,应该跑得更勤。它能挡掉的问题,不该浪费测试的时间去发现。</p>
+  </div></div>
+</div>
+
+<h2 id="mypy">二、类型检查器</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">类型检查</span><span class="en">type checking / mypy</span><span class="badge">广而浅</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>检查<strong>数据的「种类」对不对</strong> —— 该给数字的地方是不是给了文字,该返回文字的函数是不是返回了数字。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>检查插头的形状。</strong></p>
+    <p>两脚插头插不进三孔插座 —— 这个问题<strong>不用通电就能看出来</strong>,拿眼睛比一比形状就行。</p>
+    <p><strong>但形状对了,不代表通上电灯就会亮。</strong>这句话是本页的核心,请记住它。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>它是静态分析的一种。和另一种(代码规范检查)是<strong>并列关系</strong>,管的东西完全不重叠:</p>
+    <ul>
+      <li><strong>类型检查</strong>:数据种类对不对</li>
+      <li><strong>规范检查</strong>:写法规不规矩、有没有低级陷阱</li>
+    </ul>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>Python 本身<strong>不检查类型</strong>。你写这样的代码它照跑不误:</p>
+<pre><code>def add(a, b):
+    return a + b
+
+add("3", 5)      # 运行时才会炸</code></pre>
+    <p>加上类型标注之后,检查器就能提前发现:</p>
+<pre><code>def add(a: int, b: int) -&gt; int:
+    return a + b
+
+add("3", 5)      # mypy 直接报错,代码根本不用运行</code></pre>
+    <p>它骂人长这样(<strong>真实输出</strong>):</p>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; mypy 真实报错格式</div>
+<pre><span class="c-bad">myshop/_demo_bad.py:6: error: Incompatible return value type (got "int", expected "str")  [return-value]</span>
+<span class="c-dim">Found 1 error in 1 file (checked 1 source file)</span></pre>
+    </div>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>&#128260; 误区 1(经核实修正):报错格式里有列号。</strong>
+    <strong>默认没有列号</strong>,只有 <code>文件:行号:</code>。要列号得显式加 <code>--show-column-numbers</code>。
+    另外 message 和 <code>[错误码]</code> 之间是<strong>两个空格</strong>,不是一个 —— 如果你写脚本解析它,这个细节会咬人。</p>
+    <p><strong>误区 2:「它能发现所有 bug」。</strong>见第 5 节 —— 它有一整类问题永远发现不了。</p>
+  </div></div>
+</div>
+
+<div class="box good">
+  <b class="t">类型检查对 AI 协作的独特价值</b>
+  AI 改了一个函数的签名(比如加了个参数),可能<strong>只改了它注意到的几个调用点</strong>。
+  <br><br>
+  <strong>类型检查会把它漏掉的全部一次性揪出来</strong>,精确到文件和行号。人工找一定会漏。
+  <br><br>
+  这一条在第 8 页有反面案例:当改动<strong>不涉及签名</strong>时,它就完全失效了。
+</div>
+
+<h2 id="ruff">三、代码规范检查器</h2>
+
+<div class="term">
+  <div class="term-h"><span class="zh">代码规范检查</span><span class="en">linting / ruff</span><span class="badge">最快</span></div>
+
+  <div class="step"><div class="n">&#9312; 定义</div><div class="c">
+    <p>检查<strong>写法规不规矩</strong>,以及有没有踩到已知的低级陷阱 —— 比如定义了变量却从没用过。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9313; 类比</div><div class="c">
+    <p><strong>作文的错别字和格式检查。</strong></p>
+    <p>它不管你文章写得好不好,只管:有没有错别字、标点用没用对、段落格式乱不乱。
+    <strong>这些问题不影响「意思」,但会让读的人难受。</strong></p>
+    <p>而其中「定义了变量却没用过」这类,往往是<strong>真 bug 的信号</strong> ——
+    你本来想用它的,结果打字打错了名字。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9314; 位置</div><div class="c">
+    <p>和类型检查并列。<strong>它通常是所有检查里最快的一个</strong>(实测 0.02 秒),
+    所以在第 16、17 页的流水线里,它总是排第一个跑。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9315; 例子</div><div class="c">
+    <p>它骂人长这样(<strong>真实输出</strong>):</p>
+    <div class="term-box">
+      <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; ruff 真实报错</div>
+<pre><span class="c-bad">B006</span> Do not use mutable data structures for argument defaults
+  --&gt; myshop/_demo_bad.py:9:32
+   |
+ 9 | def collect(items: List[str] = []) -&gt; None:
+   |                                <span class="c-bad">^^</span>
+   |
+<span class="c-dim">help: Replace with `None`; initialize within function</span>
+
+<span class="c-bad">F841</span> Local variable `unused` is assigned to but never used
+  --&gt; myshop/_demo_bad.py:10:5
+
+<span class="c-dim">...(另 1 条诊断略)</span>
+
+<span class="c-bad">Found 3 errors.</span>
+<span class="c-dim">[*] 1 fixable with the `--fix` option.</span></pre>
+    </div>
+    <p><strong>注意最后那行 <code>[*] 1 fixable</code></strong> —— 有些问题它能自己改掉:</p>
+<pre><code>.venv/bin/python -m ruff check . --fix</code></pre>
+    <p>import 排序、多余空行这类,一秒钟全部搞定,不用麻烦 AI。</p>
+  </div></div>
+
+  <div class="step"><div class="n">&#9316; 误区</div><div class="c">
+    <p><strong>&#128260; 误区(经核实,这条对第 18 页很重要):「可以设置『违规数不超过 N』的阈值」。</strong>
+    <strong>不能。</strong>实测 ruff 0.16.3 只有布尔式判定:<strong>有违规就退出码 1,没违规就 0</strong>。
+    相关开关只有两个:</p>
+    <div class="tw">
+    <table>
+    <thead><tr><th style="width:32%">参数</th><th>作用</th></tr></thead>
+    <tbody>
+    <tr><td><code>--exit-zero</code></td><td>有违规也返回 0(做「软门禁」用)</td></tr>
+    <tr><td><code>--exit-non-zero-on-fix</code></td><td>改过文件就返回非 0</td></tr>
+    </tbody>
+    </table>
+    </div>
+    <p>想要真正的阈值,只能自己数 —— 用 <code>--output-format=json</code> 拿到结构化数据再判定。
+    <strong>第 18 页会讲这个做法。</strong></p>
+  </div></div>
+</div>
+
+<h2 id="complement">四、广而浅 vs 窄而深</h2>
+
+<p>这是理解「为什么两种检查都要跑」的关键图:</p>
+
+<figure>
+<svg viewBox="0 0 820 330" role="img" aria-label="静态检查与测试的覆盖形状对比">
+  <g class="st">
+    <rect x="60" y="50" width="320" height="200" rx="14" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.8"/>
+    <text x="220" y="80" font-size="15" font-weight="800" fill="var(--ok)" text-anchor="middle">静态检查</text>
+    <text x="220" y="102" font-size="12.5" fill="var(--faint)" text-anchor="middle">广 而 浅</text>
+
+    <rect x="90" y="126" width="260" height="26" rx="5" fill="var(--ok)" opacity=".28"/>
+    <rect x="90" y="158" width="260" height="26" rx="5" fill="var(--ok)" opacity=".28"/>
+    <rect x="90" y="190" width="260" height="26" rx="5" fill="var(--ok)" opacity=".28"/>
+    <text x="220" y="144" font-size="11.5" fill="var(--ink)" text-anchor="middle">扫过 100% 的代码</text>
+    <text x="220" y="176" font-size="11.5" fill="var(--ink)" text-anchor="middle">但只回答「类型对不对」</text>
+    <text x="220" y="208" font-size="11.5" fill="var(--ink)" text-anchor="middle">秒级出结果</text>
+
+    <rect x="440" y="50" width="320" height="200" rx="14" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.8"/>
+    <text x="600" y="80" font-size="15" font-weight="800" fill="var(--info)" text-anchor="middle">测试</text>
+    <text x="600" y="102" font-size="12.5" fill="var(--faint)" text-anchor="middle">窄 而 深</text>
+
+    <rect x="470" y="126" width="86" height="90" rx="5" fill="var(--info)" opacity=".28"/>
+    <text x="513" y="176" font-size="11.5" fill="var(--ink)" text-anchor="middle">只覆盖</text>
+    <text x="513" y="194" font-size="11.5" fill="var(--ink)" text-anchor="middle">写了的</text>
+    <text x="660" y="150" font-size="11.5" fill="var(--faint)" text-anchor="middle">剩下这一大片</text>
+    <text x="660" y="170" font-size="11.5" fill="var(--faint)" text-anchor="middle">是黑箱</text>
+    <text x="660" y="200" font-size="11.5" fill="var(--ink)" text-anchor="middle">但覆盖到的地方</text>
+    <text x="660" y="218" font-size="11.5" fill="var(--ink)" text-anchor="middle">能验「算得对不对」</text>
+  </g>
+  <text x="410" y="286" class="st" font-size="14" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    只跑静态检查 &rarr; 类型全对但算错了,照样过
+  </text>
+  <text x="410" y="312" class="st" font-size="14" fill="var(--soft)" text-anchor="middle" font-weight="700">
+    只跑测试 &rarr; 没写测试的地方全是盲区
+  </text>
+</svg>
+<figcaption>两个形状是互补的。所以本教程的所有检查命令,永远是两个一起跑</figcaption>
+</figure>
+
+<h2 id="blind">五、致命的结构性盲区</h2>
+
+<div class="box trap">
+  <b class="t">&#128293; 这是全书最重要的知识点之一</b>
+  <strong>当一个改动「签名不变、行为变了」时,类型检查永远发现不了。</strong>
+</div>
+
+<h3>看这个例子</h3>
+
+<pre><code>def format_price(cents: int) -&gt; str:   # 改前:返回 "¥0.00"
+def format_price(cents: int) -&gt; str:   # 改后:返回 "免费"
+                                        # &uarr; 签名一个字符都没变</code></pre>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:24%"></th><th style="width:38%">它看到的</th><th>它的判断</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>类型检查器</strong></td>
+  <td>进去一个 <code>int</code>,出来一个 <code>str</code></td>
+  <td style="color:var(--ok)"><code>"¥0.00"</code> 和 <code>"免费"</code> <strong>都是合法的 <code>str</code></strong> &rarr; 没问题</td>
+</tr>
+<tr>
+  <td><strong>测试</strong></td>
+  <td>期望 <code>"¥0.00"</code>,实际 <code>"免费"</code></td>
+  <td style="color:var(--bad)"><strong>不相等 &rarr; 失败</strong></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">一句话概括这个盲区</b>
+  <ul style="margin-bottom:0">
+    <li><strong>类型系统</strong>管的是:调用方能不能<strong>安全地把返回值当字符串用</strong>?能。</li>
+    <li><strong>测试</strong>管的是:这个字符串的<strong>具体内容</strong>是不是业务上正确的那个?不是。</li>
+  </ul>
+  <br>
+  <strong>这不是配置问题。</strong>把严格程度开到最高也抓不到 —— 这是类型系统<strong>结构性的盲区</strong>。
+</div>
+
+<h3>为什么不能靠「写得更精确」来解决</h3>
+
+<p>理论上类型检查<strong>有可能</strong>抓到,如果你把签名写成这样:</p>
+
+<pre><code>def format_price(cents: int) -&gt; Literal["¥0.00", "¥12.34", "¥25.00", ...]:  # 荒谬</code></pre>
+
+<p>价格有无穷多种,不可能穷举。<strong>所以现实里 <code>-&gt; str</code> 就是唯一合理的写法,而它必然对返回值内容一无所知。</strong></p>
+
+<h3>两个比喻,选你喜欢的记</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:22%">比喻</th><th>说明</th></tr></thead>
+<tbody>
+<tr>
+  <td><strong>插头与灯</strong></td>
+  <td>类型检查看<strong>插头形状</strong>对不对(两脚还是三脚),测试看<strong>通上电灯亮不亮</strong>。
+      <strong>形状对了,灯照样可能不亮。</strong></td>
+</tr>
+<tr>
+  <td><strong>杯子与醋</strong></td>
+  <td>杯子里的水被换成了醋。<strong>杯子还是杯子</strong>(类型对),但你喝下去会知道不对(行为错)。</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box note">
+  <b class="t">这个盲区会被验证五次</b>
+  第 8 页会在真机上做五次「故意改坏代码」的实验。<strong>五次改动全都是「签名不变、行为变了」这一类</strong>,
+  结果是:
+  <br><br>
+  <strong>两个静态检查工具,五战五败 —— 每一次都报「一切正常」。</strong>
+  <br><br>
+  那不是巧合,正是这一节讲的结构性原因。
+</div>
+
+<h2 id="aitrap">六、一个 AI 协作专属的坑</h2>
+
+<div class="box trap">
+  <b class="t">&#9888; 类型检查默认不检查「没写标注」的函数体</b>
+  <strong>AI 生成的测试函数经常忘了写返回类型标注</strong>(那个 <code>-&gt; None</code>),
+  于是类型检查器对整个测试文件<strong>视而不见</strong>,你却以为「类型检查过了」。
+</div>
+
+<h3>怎么办</h3>
+
+<p>第 2 页给的配置里,<code>strict = true</code> 已经处理了这个问题。但要理解<strong>是哪个开关在起作用</strong>:</p>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:34%">配置项</th><th style="width:30%">它管什么</th><th>包含在 strict 里吗</th></tr></thead>
+<tbody>
+<tr>
+  <td><code>check_untyped_defs</code></td>
+  <td>「连没写标注的函数体<strong>也检查</strong>」</td>
+  <td style="color:var(--ok)">&#9989; 是</td>
+</tr>
+<tr>
+  <td><code>disallow_untyped_defs</code></td>
+  <td><strong>「不许有没写标注的函数」</strong></td>
+  <td style="color:var(--ok)">&#9989; 是</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="box key">
+  <b class="t">&#128260; 经核实修正:是后者在防 AI 漏写</b>
+  很多人(包括我一开始)以为防「AI 漏写 <code>-&gt; None</code>」靠的是 <code>check_untyped_defs</code>。<strong>不准确。</strong>
+  <br><br>
+  实测:严格模式下,一个没写标注的函数会被 <code>disallow_untyped_defs</code> 直接报成
+  <code>error: Function is missing a type annotation  [no-untyped-def]</code>。
+  <br><br>
+  <code>check_untyped_defs</code> 的作用是<strong>「函数体里面也查」</strong>,是另一件事。
+  <br><br>
+  <strong>好消息:<code>strict = true</code> 把两个都打开了</strong>,所以第 2 页那份配置是够用的。
+</div>
+
+<div class="box trap">
+  <b class="t">&#9888; 再提醒一次那个静默失效的坑</b>
+  <strong>类型检查器对拼错的配置键名只打一条 Warning,然后照常报成功。</strong>
+  <br><br>
+  实测把 <code>strict</code> 拼成 <code>strictt</code>:
+  <pre style="margin:9px 0"><code>pyproject.toml: [mypy]: Unrecognized option: strictt = True
+Success: no issues found in 8 source files</code></pre>
+  <p style="margin:9px 0 0"><strong>严格模式根本没开,报的却是 Success。</strong>
+  这是一个「假绿」—— 而假绿比直接报错危险得多,因为它让你放松警惕。</p>
+</div>
+
+<h3>本页知识点回顾</h3>
+
+<div class="tw">
+<table>
+<thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
+<tbody>
+<tr><td>41</td><td>静态分析 vs 测试</td><td>校对员 vs 试吃员;运行不运行代码</td></tr>
+<tr><td>42</td><td>类型检查</td><td>检查数据种类;不用写用例,配一次永久生效</td></tr>
+<tr><td>43</td><td>代码规范检查</td><td>最快的检查;<code>--fix</code> 能自动改一部分</td></tr>
+<tr><td>44</td><td><strong>广而浅 vs 窄而深</strong></td><td>互补不可替代,所以永远两个一起跑</td></tr>
+<tr><td>45</td><td>&#128293; <strong>结构性盲区</strong></td><td>签名不变、行为变了 &rarr; 类型检查永远抓不到</td></tr>
+<tr><td>46</td><td>两个比喻</td><td>插头形状 vs 灯亮不亮;杯子 vs 醋</td></tr>
+<tr><td>47</td><td>&#128260; 报错格式</td><td>默认<strong>无列号</strong>;message 与 <code>[码]</code> 之间是<strong>两个空格</strong></td></tr>
+<tr><td>—</td><td>&#128260; ruff 没有数量阈值</td><td>只有布尔判定;要阈值得自己数 json(第 18 页)</td></tr>
+<tr><td>—</td><td>&#128260; 防 AI 漏写标注</td><td>靠 <code>disallow_untyped_defs</code>,不是 <code>check_untyped_defs</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="pager">
+  <a href="03-test-basics.html">&larr; 上一页:测试到底是什么</a>
+  <a href="00-index.html">目录</a>
+  <a href="05-pyramid.html">下一页:测试金字塔四层 &rarr;</a>
+</div>
+
+<div class="foot">
+  <p>第 04 页 / 共 23 页 · 覆盖知识点 41–47 · 难度 &#9733;&#9733;</p>
+  <p><strong>本页含 3 处经核实修正:</strong>mypy 报错默认无列号、双空格分隔;ruff 无数量阈值只有布尔判定;防 AI 漏标注靠的是 <code>disallow_untyped_defs</code>。</p>
+</div>
+</div>
+<script>
+  (function(){
+    var r=document.documentElement, b=document.querySelectorAll('.themer button');
+    function p(m){r.setAttribute('data-theme',m);
+      b.forEach(function(x){x.setAttribute('aria-pressed',String(x.dataset.set===m))});
+      try{localStorage.setItem('kb2-theme',m)}catch(e){}}
+    var s=null;try{s=localStorage.getItem('kb2-theme')}catch(e){}
+    p(s||'dark');
+    b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
+  })();
+</script>
+</body>
+</html>
