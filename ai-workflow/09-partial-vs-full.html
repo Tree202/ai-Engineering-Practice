@@ -181,6 +181,12 @@
   为了把这个事故复现得足够干净,我另外搭了一个只有 4 个文件的最小项目来跑。
   <strong>两个版本的行为完全一样</strong>,下面所有绿字红字都是那个项目里真实跑出来的。
   <em>事故的道理和用哪种写法无关。</em>
+  <br><br>
+  <strong>顺带说清楚耗时:</strong>本页开头那个「全量 3.66 秒」是 myshop 的
+  &mdash;&mdash; 它有 18 条测试,还包含要真启动 HTTP 服务的接口层。
+  而下面这个复现项目只有 4 个文件、7 条纯函数测试,所以全量只要 <strong>0.03 秒</strong>。
+  <strong>两个数字都是真的,只是量的不是同一个项目。</strong>
+  后面「算一笔账」用的是 0.03 秒 &mdash;&mdash; 数字再大十倍,结论也一样。
 </div>
 
 <h3>改完之后,AI(或者你自己)很负责任地想了一件事</h3>
@@ -282,7 +288,7 @@ tests/test_price.py <span class="c-ok">...</span>                             <s
 <tr><th>检查范围</th><td><code>price.py</code> + 它的测试</td><td>整个项目</td></tr>
 <tr><th>结果</th><td style="color:var(--ok)"><strong>3 passed</strong> &#9989;</td>
     <td style="color:var(--bad)"><strong>2 failed, 5 passed</strong> &#10060;</td></tr>
-<tr><th>耗时</th><td>0.01 秒</td><td><strong>0.03 秒</strong></td></tr>
+<tr><th>耗时</th><td>0.01 秒</td><td><strong>0.03 秒</strong><br><span style="font-size:11.5px;color:var(--faint)">复现项目,7 条测试</span></td></tr>
 </tbody>
 </table>
 </div>
@@ -435,7 +441,7 @@ def format_price(cents: int) -&gt; str:   # 改后 —— 签名一个字符都�
 <table>
 <thead><tr><th style="width:44%">情况</th><th>成本</th></tr></thead>
 <tbody>
-<tr><td>步骤 5a 跑一次全量</td><td style="color:var(--ok)"><strong>0.03 秒</strong></td></tr>
+<tr><td>步骤 5a 跑一次全量</td><td style="color:var(--ok)"><strong>0.03 秒</strong><span style="font-size:11.5px;color:var(--faint)">(复现项目;myshop 是 3.66 秒)</span></td></tr>
 <tr><td>漏掉之后:自动化流水线拦下,回来重查</td><td style="color:var(--warn)">20 分钟 + 打断心流</td></tr>
 <tr><td>更糟:上线后财务对账异常倒查</td><td style="color:var(--bad)">一个上午 + 一次线上事故复盘</td></tr>
 </tbody>
@@ -473,7 +479,7 @@ def format_price(cents: int) -&gt; str:   # 改后 —— 签名一个字符都�
 
 <div class="foot">
   <p>第 09 页 / 共 23 页 · 覆盖知识点 90–96 · 难度 &#9733;&#9733;&#9733;</p>
-  <p>事故复现于一个独立的精简项目,输出为真实运行结果。本页无需修正项。</p>
+  <p>事故复现于一个独立的精简项目,输出为真实运行结果 &mdash;&mdash; 正文已标明它与 myshop 在函数写法与耗时口径上的差别(3.66 秒 vs 0.03 秒,量的不是同一个项目)。</p>
 </div>
 </div>
 <script>

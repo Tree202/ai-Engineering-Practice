@@ -490,6 +490,18 @@ ENV/
 
 <h2 id="diff">六、看改动</h2>
 
+<div class="box note">
+  <b class="t">说明:这一节和下一节的终端输出,来自一个更小的练习仓库</b>
+  下面几个「真实输出」框里你会看到 <code>app.py</code>、<code>report.py</code>,
+  以及「读取分数 / 计算平均分 / 输出报告」这样的存档说明 &mdash;&mdash;
+  <strong>那不是 myshop,是我另外建的一个三步小练习</strong>。
+  <br><br>
+  原因很简单:myshop 的一次改动动辄牵扯几个文件,
+  贴出来的 diff 长到看不清重点;而这一节要讲的是<strong>怎么读一段 diff</strong>,
+  用一个只有一两行改动的小仓库最清楚。
+  <em>命令的用法、输出的格式完全一样,换个项目不影响任何结论。</em>
+</div>
+
 <h3>三条命令的分工</h3>
 
 <div class="tw">
@@ -538,7 +550,7 @@ ENV/
 
 <h3>只看规模</h3>
 
-<pre><code>cd &lt;你的项目&gt;/myshop && git diff --stat</code></pre>
+<pre><code>git diff --stat</code></pre>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
@@ -562,9 +574,19 @@ ENV/
  1 file changed, 2 insertions(+)</pre>
 </div>
 
+<div class="box trap">
+  <b class="t">&#9888; 注意开头那个 <code>main</code></b>
+  这条输出是在<strong>没开分支</strong>的情况下跑的 &mdash;&mdash; 方括号里显示的是当前分支名。
+  <br><br>
+  你要是照第二节做过 <code>git switch -c feat/&hellip;</code>,这里应该显示<strong>你自己的分支名</strong>,
+  比如 <code>[feat/add-discount 9f3c1a2]</code>。
+  <strong>如果你看到的是 <code>[main &hellip;]</code>,说明分支没开成 &mdash;&mdash; 停下来先补上。</strong>
+  直接在 main 上攒改动,正是第 <a class="pg" href="12-git-undo.html">12</a> 页那些回退死角最难收拾的场景。
+</div>
+
 <h3>看存档列表</h3>
 
-<pre><code>cd &lt;你的项目&gt;/myshop && git log --oneline</code></pre>
+<pre><code>git log --oneline</code></pre>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
