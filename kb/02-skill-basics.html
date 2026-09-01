@@ -229,6 +229,7 @@ disable-model-invocation: true
       <code>/Users/你的用户名/.claude/skills/</code>。</p>
     <p>目录名以点开头（<code>.claude</code>）表示<b>隐藏文件夹</b>，在访达里默认看不见。
       在访达里按 <kbd>Command + Shift + .</kbd> 可以显示隐藏文件。</p>
+    <p><b>Windows 对照（全课唯一一处，记住这三条）</b>：① <code>~</code> 对应 <code>C:\Users\你的用户名\</code>，PowerShell 里也能直接写 <code>~</code>；② 本课的 <code>mkdir -p</code> 在 PowerShell 里去掉 <code>-p</code> 直接 <code>mkdir</code>，它默认就会建出中间目录；③ 访达显示隐藏文件 → 资源管理器里是「查看 → 显示 → 隐藏的项目」。</p>
   </div>
 
   <h3>项目技能还会往上找</h3>
@@ -414,6 +415,7 @@ disable-model-invocation: true
       <div class="codeblock">
         <div class="cb-title">终端里执行</div>
         <pre><code>mkdir -p ~/.claude/skills/summarize-changes</code></pre>
+        <p style="font-size:13px;color:var(--muted);margin-top:6px">Windows：见本章前面的 Windows 对照（去掉 <code>-p</code> 即可）。</p>
       </div>
       <p><code>mkdir</code> = 建目录，<code>-p</code> = 中间缺哪层就补哪层。</p>
     </li>

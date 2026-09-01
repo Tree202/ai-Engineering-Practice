@@ -275,6 +275,12 @@ model: sonnet
 
   <p>更实用的做法：<b>把分身写进技能的配置里</b>，这样每次调用这个技能都自动在分身里跑。</p>
 
+  <div class="callout warn">
+    <span class="label">⚠️ 分身里的改动，一键撤销救不回来</span>
+    <p><b>后台跑的 fork 技能写的文件，撤销菜单还原不了</b>（官方限制，详见主线<a href="../ai-workflow/13-claude-code.html">第 13 页</a>的撤销死角清单；只有前台跑的能还原）。</p>
+    <p>所以让带 <code>context: fork</code> 的技能批量写文件之前，<b>先 <code>git add -A && git commit</code> 一次</b>——安全网要在动手前就位，不是出事后。</p>
+  </div>
+
   <div class="codeblock">
     <div class="cb-title">~/.claude/skills/kb/SKILL.md（片段）</div>
     <pre><code>---

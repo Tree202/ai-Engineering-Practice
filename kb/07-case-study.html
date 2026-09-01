@@ -117,6 +117,7 @@
   <div class="codeblock">
     <div class="cb-title">终端：建目录</div>
     <pre><code>mkdir -p ~/.claude/output-styles</code></pre>
+    <p style="font-size:13px;color:var(--muted);margin-top:6px">Windows PowerShell：去掉 <code>-p</code> 直接 <code>mkdir</code>（它默认就会建出中间目录；详见 <a href="02-skill-basics.html#s3">02 章的 Windows 对照</a>）。</p>
   </div>
 
   <div class="codeblock">
@@ -194,7 +195,7 @@ keep-coding-instructions: true
   <div class="callout tip">
     <span class="label">💡 三条经验</span>
     <p><b>（1）保持在 200 行以内</b>——它每次会话都全文加载。</p>
-    <p><b>（2）写<b>能验证</b>的话</b>。「600–900 行」比「适合阅读的长度」有用得多。</p>
+    <p><b>（2）写<b>能验证</b>的话</b>。「600–900 行」比「适合阅读的长度」有用得多。但定了就要真去验——本知识库 8 页实测正文 197–667 行，<b>5 页不在区间内</b>：可验证的约束配上不执行的检查，等于没写。</p>
     <p><b>（3）想确认它真的被加载了</b>，打 <code>/context</code> 看 <b>Memory files</b> 一栏。</p>
   </div>
 
@@ -204,6 +205,7 @@ keep-coding-instructions: true
   <div class="codeblock">
     <div class="cb-title">终端：建目录</div>
     <pre><code>mkdir -p ~/.claude/skills/kb</code></pre>
+    <p style="font-size:13px;color:var(--muted);margin-top:6px">Windows PowerShell：去掉 <code>-p</code> 直接 <code>mkdir</code>（它默认就会建出中间目录；详见 <a href="02-skill-basics.html#s3">02 章的 Windows 对照</a>）。</p>
   </div>
 
   <div class="codeblock">
@@ -265,6 +267,15 @@ allowed-tools: Read, Write, Glob, WebSearch, WebFetch
 - 每个概念至少配一张对比表格或一个可运行例子；每章至少一张流程图
 - 图示用手写内联 SVG；不引任何外部 CDN、字体、图片
 - 代码块可直接复制，路径写完整，不写省略号</code></pre>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 这份 SKILL.md 踩了第 03 章讲过的坑（故意留着当教学点）</span>
+    <p>第 03 章说过：<b><code>allowed-tools</code> 的预授权只在调用它的那一轮有效</b>。
+      而这份流程第 1 步要求「停下等我说‘继续’」——“继续”是下一条消息，
+      <b>真正批量写文件的那一轮，预授权已经失效了</b>，会重新弹窗。</p>
+    <p>两条出路：接受第二轮重新授权（多点一次确认，换来一次人工把关，不亏）；
+      或把「盘点」与「生成」拆成两个技能分两次调用，每次各自带预授权。</p>
   </div>
 
   <h3>逐条解释这个文件里的每个决定</h3>
