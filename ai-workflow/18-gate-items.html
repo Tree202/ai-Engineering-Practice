@@ -108,10 +108,10 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 18 页 · 难度 ★★★★ · 前置:第 16、17 页 · <b style="color:var(--bad)">全书重点 2/3</b></span>
+<span class="kicker">第 18 页 · 难度 ★★★★ · 前置:第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="17-quality-gate.html">17</a> 页 · <b style="color:var(--bad)">全书重点 2/3</b></span>
 <h1>门禁检查什么 · 阈值怎么定</h1>
 <p class="lede">
-第 17 页讲清了「门禁是什么」。这一页回答两个最实际的问题:
+第 <a class="pg" href="17-quality-gate.html">17</a> 页讲清了「门禁是什么」。这一页回答两个最实际的问题:
 <strong>到底该量哪些指标?每个指标的阈值该定多少?</strong>
 </p>
 
@@ -132,7 +132,7 @@
 
 <h2 id="menu">一、门禁项全清单</h2>
 
-<p>按第 17 页的分类,先把常见门禁项分成两类:</p>
+<p>按第 <a class="pg" href="17-quality-gate.html">17</a> 页的分类,先把常见门禁项分成两类:</p>
 
 <div class="tw">
 <table>
@@ -167,7 +167,7 @@
   <td>&le; 5 或不增长</td><td style="color:var(--ok)">&#9733; <strong>很便宜,却常被忘</strong></td></tr>
 <tr style="background:var(--warn-soft)">
   <td>&#128260; <strong>用例总数</strong></td><td>用例总条数:抓「注释/删除用例」类作弊——总数比主干少就红</td>
-  <td>不得少于主干(弱门禁)</td><td style="color:var(--ok)">&#9733; 很便宜。注意它防不住「删一条关键用例、补一条空用例」的语义替换,所以 diff 落在测试文件上时仍要人工读(第 20 页)</td></tr>
+  <td>不得少于主干(弱门禁)</td><td style="color:var(--ok)">&#9733; 很便宜。注意它防不住「删一条关键用例、补一条空用例」的语义替换,所以 diff 落在测试文件上时仍要人工读(第 <a class="pg" href="20-ai-boundary.html">20</a> 页)</td></tr>
 <tr style="background:var(--warn-soft)">
   <td>&#128260; <strong>抖动率</strong></td><td>不稳定用例占比</td>
   <td>&lt; 1%</td><td style="color:var(--bad)">&#9733;&#9733;&#9733;&#9733; 要多次重跑统计</td></tr>
@@ -188,12 +188,12 @@
   理由:三条全是硬门禁 —— <strong>不需要测基线、不需要定阈值、不需要接任何额外工具</strong>,
   而且它们拦下的是最低级也最高频的错误。<strong>投入产出比远高于覆盖率。</strong>
   <br><br>
-  第 19 页那个真实门禁配的是:规范 + 类型 + 全量测试;把第三条换成 P0 100%,就是真实项目里推荐的升级版。
+  第 <a class="pg" href="19-gate-demo.html">19</a> 页那个真实门禁配的是:规范 + 类型 + 全量测试;把第三条换成 P0 100%,就是真实项目里推荐的升级版。
 </div>
 
 <h2 id="pass">二、测试通过率:必须分级</h2>
 
-<p>第 17 页的错误 3 已经点过题,这里补上落地细节。</p>
+<p>第 <a class="pg" href="17-quality-gate.html">17</a> 页的错误 3 已经点过题,这里补上落地细节。</p>
 
 <div class="term">
   <div class="term-h"><span class="zh">用例分级</span><span class="en">test priority</span><span class="badge">阈值前提</span></div>
@@ -289,10 +289,10 @@ pytest -q</code></pre>
   <br><br>
   半年后你会发现项目里有 300 条被跳过的用例,而通过率一直是漂亮的 100%。
   <br><br>
-  <strong>这就是第 20 页要专门讲的「防作弊」的第一个具体例子。</strong>
+  <strong>这就是第 <a class="pg" href="20-ai-boundary.html">20</a> 页要专门讲的「防作弊」的第一个具体例子。</strong>
 </div>
 
-<p>myshop 里就有一条真实的跳过 —— 你在第 10 页见过:</p>
+<p>myshop 里就有一条真实的跳过 —— 你在第 <a class="pg" href="10-flaky-e2e.html">10</a> 页见过:</p>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真机输出</div>
@@ -339,8 +339,8 @@ pytest -q</code></pre>
 </div>
 
 <div class="box key">
-  <b class="t">抖动率和通过率的关系(回看第 10 页 &amp; 第 17 页错误 3)</b>
-  第 17 页说「全量通过率留 5% 余量给不稳定用例」—— 那是<strong>妥协</strong>。
+  <b class="t">抖动率和通过率的关系(回看第 <a class="pg" href="10-flaky-e2e.html">10</a> 页 &amp; 第 <a class="pg" href="17-quality-gate.html">17</a> 页错误 3)</b>
+  第 <a class="pg" href="17-quality-gate.html">17</a> 页说「全量通过率留 5% 余量给不稳定用例」—— 那是<strong>妥协</strong>。
   <br><br>
   <strong>抖动率门禁是这个妥协的解药:</strong>它盯着「不稳定用例到底有多少」这个数字本身,
   不让那 5% 的余量越吃越多。
@@ -395,12 +395,12 @@ pytest -q</code></pre>
 
   <div class="step"><div class="n">&#9316; 误区</div><div class="c">
     <p><strong>误区 1:「覆盖率 100% = 没 bug」。</strong>
-    回看第 8 页那五次改坏实验:<strong>把 <code>divmod(cents, 100)</code> 改成 <code>divmod(cents, 10)</code>,
+    回看第 <a class="pg" href="08-break-it.html">8</a> 页那五次改坏实验:<strong>把 <code>divmod(cents, 100)</code> 改成 <code>divmod(cents, 10)</code>,
     覆盖率一点没变</strong>(那一行照样被执行),但结果全错了。
     <strong>覆盖率对「行被执行了但断言不够」完全无感。</strong></p>
     <p><strong>误区 2:「把阈值定成 100%」。</strong>
     会逼出<strong>为了覆盖而写的空测试</strong> —— 调用一下函数,不写任何断言。
-    覆盖率满分,防护力为零。<strong>这是第 20 页防作弊的第二个例子。</strong></p>
+    覆盖率满分,防护力为零。<strong>这是第 <a class="pg" href="20-ai-boundary.html">20</a> 页防作弊的第二个例子。</strong></p>
     <p><strong>误区 3:「行覆盖率就够了」。</strong>
     还有一种<strong>分支覆盖率</strong>,统计的是「每个 if 的真假两条路都走过没有」。
     <strong>行覆盖 100% 但分支覆盖 50% 是很常见的</strong> ——
@@ -482,7 +482,7 @@ pytest -q</code></pre>
 
 <h2 id="static">六、静态扫描类指标</h2>
 
-<p>第 4 页讲的规范检查和类型检查是「本地能跑的静态检查」。
+<p>第 <a class="pg" href="04-static-check.html">4</a> 页讲的规范检查和类型检查是「本地能跑的静态检查」。
 门禁阶段通常还会接一个<strong>更重的扫描平台</strong>,量这几样:</p>
 
 <div class="tw">
@@ -606,9 +606,9 @@ pytest -q</code></pre>
   <tbody>
   <tr><td>1</td><td><strong>配完门禁,先故意让它红一次</strong></td>
       <td>改坏一行代码,推上去,<strong>亲眼确认它真的拦住了</strong>。
-          第 19 页整页都在做这件事</td></tr>
+          第 <a class="pg" href="19-gate-demo.html">19</a> 页整页都在做这件事</td></tr>
   <tr><td>2</td><td><strong>版本号以代码仓库为准</strong></td>
-      <td>不以文档页为准 —— 第 16 页那两个 <code>@v7</code> 就是这么来的</td></tr>
+      <td>不以文档页为准 —— 第 <a class="pg" href="16-pipeline.html">16</a> 页那两个 <code>@v7</code> 就是这么来的</td></tr>
   <tr><td>3</td><td><strong>配置不报错 &ne; 配置生效</strong></td>
       <td>大多数配置解析器<strong>会静默忽略不认识的键</strong>。
           <strong>唯一的验证方式是看行为,不是看有没有报错</strong></td></tr>
@@ -684,7 +684,7 @@ jobs:
   <tr><td><strong>抖动率门禁</strong></td>
       <td>要跑 10 遍。<strong>用例少的时候抖动本来就少,不划算</strong></td></tr>
   <tr><td><strong><code>paths</code> 过滤</strong></td>
-      <td><strong>刻意不加</strong> —— 见第 16、17 页那个永久阻塞的死锁</td></tr>
+      <td><strong>刻意不加</strong> —— 见第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="17-quality-gate.html">17</a> 页那个永久阻塞的死锁</td></tr>
   </tbody>
   </table>
   </div>
@@ -707,7 +707,7 @@ jobs:
 <tr><td>189</td><td>&#128260; 检查点和失败动作联动</td><td>换了 &#9312;,&#9315; 也得跟着换</td></tr>
 <tr><td>190</td><td><strong>覆盖率是盲区探测器</strong></td><td>不是质量分数;100% 也可能全是 bug</td></tr>
 <tr><td>191</td><td>&#128260; <strong>行覆盖 vs 分支覆盖</strong></td><td>行 75% / 分支 50% 很常见,分支更有意义</td></tr>
-<tr><td>192</td><td>覆盖率对第 8 页的实验无感</td><td>改 100 为 10,覆盖率一点不变</td></tr>
+<tr><td>192</td><td>覆盖率对第 <a class="pg" href="08-break-it.html">8</a> 页的实验无感</td><td>改 100 为 10,覆盖率一点不变</td></tr>
 <tr><td>193</td><td>&#128260; <strong>增量优于全量</strong></td><td>「本次改动行的覆盖率」——多五个字,可行性天差地别</td></tr>
 <tr><td>194</td><td>&#128260; <strong>严重问题 = 0,不是总数 = 0</strong></td><td>分档,不一刀切</td></tr>
 <tr><td>195</td><td><strong>基线法</strong></td><td>先跑两周不拦,取实际水平略上浮</td></tr>

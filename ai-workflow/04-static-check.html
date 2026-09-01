@@ -108,11 +108,11 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 04 页 · 难度 ★★ · 前置:第 02、03 页</span>
+<span class="kicker">第 04 页 · 难度 ★★ · 前置:第 <a class="pg" href="02-python-setup.html">02</a>、<a class="pg" href="03-test-basics.html">03</a> 页</span>
 <h1>静态检查:不运行代码的检查</h1>
 <p class="lede">
 有一类检查<strong>连代码都不运行</strong>,却能在一秒内扫完你整个项目。
-它极便宜、极快、覆盖 100% 的代码 —— 但它有一个结构性盲区,后面第 8 页会用五次真机实验把这个盲区暴露得干干净净。
+它极便宜、极快、覆盖 100% 的代码 —— 但它有一个结构性盲区,后面第 <a class="pg" href="08-break-it.html">8</a> 页会用五次真机实验把这个盲区暴露得干干净净。
 </p>
 
 <div class="toc">
@@ -176,7 +176,7 @@
 
   <div class="step"><div class="n">&#9316; 误区</div><div class="c">
     <p><strong>误区 1:「静态检查过了 = 代码没问题」。</strong>
-    这是全书要反复拆的最大错觉。<strong>第 5 节和第 8 页会用五次实验证明它错得多离谱。</strong></p>
+    这是全书要反复拆的最大错觉。<strong>第 5 节和第 <a class="pg" href="08-break-it.html">8</a> 页会用五次实验证明它错得多离谱。</strong></p>
     <p><strong>误区 2:「有测试了就不用静态检查」。</strong>
     反了 —— 静态检查<strong>更便宜</strong>,应该跑得更勤。它能挡掉的问题,不该浪费测试的时间去发现。</p>
   </div></div>
@@ -238,7 +238,7 @@ add("3", 5)      # mypy 直接报错,代码根本不用运行</code></pre>
   <br><br>
   <strong>类型检查会把它漏掉的全部一次性揪出来</strong>,精确到文件和行号。人工找一定会漏。
   <br><br>
-  这一条在第 8 页有反面案例:当改动<strong>不涉及签名</strong>时,它就完全失效了。
+  这一条在第 <a class="pg" href="08-break-it.html">8</a> 页有反面案例:当改动<strong>不涉及签名</strong>时,它就完全失效了。
 </div>
 
 <h2 id="ruff">三、代码规范检查器</h2>
@@ -260,7 +260,7 @@ add("3", 5)      # mypy 直接报错,代码根本不用运行</code></pre>
 
   <div class="step"><div class="n">&#9314; 位置</div><div class="c">
     <p>和类型检查并列。<strong>它通常是所有检查里最快的一个</strong>(实测 0.02 秒),
-    所以在第 16、17 页的流水线里,它总是排第一个跑。</p>
+    所以在第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="17-quality-gate.html">17</a> 页的流水线里,它总是排第一个跑。</p>
   </div></div>
 
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
@@ -289,7 +289,7 @@ add("3", 5)      # mypy 直接报错,代码根本不用运行</code></pre>
   </div></div>
 
   <div class="step"><div class="n">&#9316; 误区</div><div class="c">
-    <p><strong>&#128260; 误区(经核实,这条对第 18 页很重要):「可以设置『违规数不超过 N』的阈值」。</strong>
+    <p><strong>&#128260; 误区(经核实,这条对第 <a class="pg" href="18-gate-items.html">18</a> 页很重要):「可以设置『违规数不超过 N』的阈值」。</strong>
     <strong>不能。</strong>实测 ruff 0.16.3 只有布尔式判定:<strong>有违规就退出码 1,没违规就 0</strong>。
     相关开关只有两个:</p>
     <div class="tw">
@@ -302,7 +302,7 @@ add("3", 5)      # mypy 直接报错,代码根本不用运行</code></pre>
     </table>
     </div>
     <p>想要真正的阈值,只能自己数 —— 用 <code>--output-format=json</code> 拿到结构化数据再判定。
-    <strong>第 18 页会讲这个做法。</strong></p>
+    <strong>第 <a class="pg" href="18-gate-items.html">18</a> 页会讲这个做法。</strong></p>
   </div></div>
 </div>
 
@@ -416,7 +416,7 @@ def format_price(cents: int) -&gt; str:   # 改后:返回 "免费"
 
 <div class="box note">
   <b class="t">这个盲区会被验证五次</b>
-  第 8 页会在真机上做五次「故意改坏代码」的实验。<strong>五次改动全都是「签名不变、行为变了」这一类</strong>,
+  第 <a class="pg" href="08-break-it.html">8</a> 页会在真机上做五次「故意改坏代码」的实验。<strong>五次改动全都是「签名不变、行为变了」这一类</strong>,
   结果是:
   <br><br>
   <strong>两个静态检查工具,五战五败 —— 每一次都报「一切正常」。</strong>
@@ -434,7 +434,7 @@ def format_price(cents: int) -&gt; str:   # 改后:返回 "免费"
 
 <h3>怎么办</h3>
 
-<p>第 2 页给的配置里,<code>strict = true</code> 已经处理了这个问题。但要理解<strong>是哪个开关在起作用</strong>:</p>
+<p>第 <a class="pg" href="02-python-setup.html">2</a> 页给的配置里,<code>strict = true</code> 已经处理了这个问题。但要理解<strong>是哪个开关在起作用</strong>:</p>
 
 <div class="tw">
 <table>
@@ -463,7 +463,7 @@ def format_price(cents: int) -&gt; str:   # 改后:返回 "免费"
   <br><br>
   <code>check_untyped_defs</code> 的作用是<strong>「函数体里面也查」</strong>,是另一件事。
   <br><br>
-  <strong>好消息:<code>strict = true</code> 把两个都打开了</strong>,所以第 2 页那份配置是够用的。
+  <strong>好消息:<code>strict = true</code> 把两个都打开了</strong>,所以第 <a class="pg" href="02-python-setup.html">2</a> 页那份配置是够用的。
 </div>
 
 <div class="box trap">
@@ -490,7 +490,7 @@ Success: no issues found in 8 source files</code></pre>
 <tr><td>45</td><td>&#128293; <strong>结构性盲区</strong></td><td>签名不变、行为变了 &rarr; 类型检查永远抓不到</td></tr>
 <tr><td>46</td><td>两个比喻</td><td>插头形状 vs 灯亮不亮;杯子 vs 醋</td></tr>
 <tr><td>47</td><td>&#128260; 报错格式</td><td>默认<strong>无列号</strong>;message 与 <code>[码]</code> 之间是<strong>两个空格</strong></td></tr>
-<tr><td>—</td><td>&#128260; ruff 没有数量阈值</td><td>只有布尔判定;要阈值得自己数 json(第 18 页)</td></tr>
+<tr><td>—</td><td>&#128260; ruff 没有数量阈值</td><td>只有布尔判定;要阈值得自己数 json(第 <a class="pg" href="18-gate-items.html">18</a> 页)</td></tr>
 <tr><td>—</td><td>&#128260; 防 AI 漏写标注</td><td>靠 <code>disallow_untyped_defs</code>,不是 <code>check_untyped_defs</code></td></tr>
 </tbody>
 </table>

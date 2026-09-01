@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 05 页 · 难度 ★★ · 前置:第 03、04 页</span>
+<span class="kicker">第 05 页 · 难度 ★★ · 前置:第 <a class="pg" href="03-test-basics.html">03</a>、<a class="pg" href="04-static-check.html">04</a> 页</span>
 <h1>测试金字塔四层</h1>
 <p class="lede">
 测试不是只有一种。它分四层,<strong>每层的成本差几百倍</strong>。
@@ -209,7 +209,7 @@
   <strong>执行顺序永远是从下往上</strong> —— 先跑最快的,再跑贵的。
   理由很简单:<em>如果最便宜的检查一秒钟就报错了,你没必要花 25 分钟跑最贵的那层才发现同一个问题。</em>
   <br><br>
-  这条原则在第 16、17 页有个正式名字,叫<strong>快速失败(fail fast)</strong>。
+  这条原则在第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="17-quality-gate.html">17</a> 页有个正式名字,叫<strong>快速失败(fail fast)</strong>。
 </div>
 
 <h2 id="pyramid">三、四层全景</h2>
@@ -261,7 +261,7 @@
   </tbody>
   </table>
   </div>
-  <p style="margin:9px 0 0">第 20 页会详细展开这张能力矩阵。</p>
+  <p style="margin:9px 0 0">第 <a class="pg" href="20-ai-boundary.html">20</a> 页会详细展开这张能力矩阵。</p>
 </div>
 
 <h2 id="speed">四、实测:为什么是金字塔形</h2>
@@ -312,7 +312,7 @@
   而单元测试那 5 条快到运行器都测不出耗时,直接显示 <code>0.00s</code>。
   <br><br>
   <strong>而且慢的原因出人意料</strong> —— 不是网络慢,是每条测试都要<strong>启动和关闭一个服务器</strong>。
-  第 7 页会给出精确解释。
+  第 <a class="pg" href="07-four-layers-code.html">7</a> 页会给出精确解释。
 </div>
 
 <h3>这个数字直接决定了流程怎么排</h3>
@@ -374,7 +374,7 @@
 
 <h2 id="assert2">六、两个「怎么断言才算数」的技巧</h2>
 
-<p>这两个技巧决定了你的测试<strong>是真在验证,还是只是看起来在验证</strong>。第 7 页会看到完整代码。</p>
+<p>这两个技巧决定了你的测试<strong>是真在验证,还是只是看起来在验证</strong>。第 <a class="pg" href="07-four-layers-code.html">7</a> 页会看到完整代码。</p>
 
 <h3>技巧一:怎么证明「真的跨模块了」</h3>
 
@@ -419,7 +419,7 @@ assert 读回来["item"] == "键盘"</code></pre>
   <br><br>
   这就是<strong>集成测试和单元测试最本质的区别</strong>:单元测试验计算,集成测试验「东西真的到了另一边」。
   <br><br>
-  第 8 页的第五个实验会证明这个写法的价值 —— 它是唯一能抓住一类「静默数据丢失」bug 的东西。
+  第 <a class="pg" href="08-break-it.html">8</a> 页的第五个实验会证明这个写法的价值 —— 它是唯一能抓住一类「静默数据丢失」bug 的东西。
 </div>
 
 <h2 id="boundary">七、边界值口诀</h2>
@@ -442,12 +442,12 @@ assert 读回来["item"] == "键盘"</code></pre>
 </div>
 
 <div class="box note">
-  <b class="t">&#128161; 一个第 8 页会验证的细节</b>
+  <b class="t">&#128161; 一个第 <a class="pg" href="08-break-it.html">8</a> 页会验证的细节</b>
   测边界时,<strong>要用「刚好越界一格」的值</strong>。
   <br><br>
   比如测「负数应该报错」,用 <code>-1</code> 而不是 <code>-999</code>。
   <br><br>
-  第 8 页的第四个实验会展示:一个把边界从 <code>0</code> 挪到 <code>-1</code> 的改动,
+  第 <a class="pg" href="08-break-it.html">8</a> 页的第四个实验会展示:一个把边界从 <code>0</code> 挪到 <code>-1</code> 的改动,
   <strong>只有测 <code>-1</code> 的用例能抓到它</strong> —— 测 <code>-999</code> 的用例会全绿放行。
 </div>
 

@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 19 页 · 难度 ★★★★ · 前置:第 17、18 页 · <b style="color:var(--bad)">全书重点 3/3 · 全程真机</b></span>
+<span class="kicker">第 19 页 · 难度 ★★★★ · 前置:第 <a class="pg" href="17-quality-gate.html">17</a>、<a class="pg" href="18-gate-items.html">18</a> 页 · <b style="color:var(--bad)">全书重点 3/3 · 全程真机</b></span>
 <h1>门禁实战复盘(真机实证)</h1>
 <p class="lede">
 前两页讲的是道理。这一页是<strong>在真实代码托管平台上、用真实仓库、真实分支保护规则跑出来的完整记录</strong> ——
@@ -134,10 +134,10 @@
 <table>
 <thead><tr><th style="width:22%">项</th><th>内容</th></tr></thead>
 <tbody>
-<tr><th>仓库</th><td>一个真实的公开仓库(<code>myshop-gate-demo</code>),内容就是第 6 页那个 myshop 项目</td></tr>
-<tr><th>门禁配置</th><td>第 18 页第九节那份 <code>ci.yml</code> 的三道检查版,任务名 <strong><code>三道检查</code></strong></td></tr>
+<tr><th>仓库</th><td>一个真实的公开仓库(<code>myshop-gate-demo</code>),内容就是第 <a class="pg" href="06-myshop.html">6</a> 页那个 myshop 项目</td></tr>
+<tr><th>门禁配置</th><td>第 <a class="pg" href="18-gate-items.html">18</a> 页第九节那份 <code>ci.yml</code> 的三道检查版,任务名 <strong><code>三道检查</code></strong></td></tr>
 <tr><th>分支保护</th><td>主干开启保护,<strong>必需检查 = 「三道检查」</strong>,<strong>管理员同样受限</strong></td></tr>
-<tr><th>本地钩子</th><td>第 16 页那个手写的提交钩子,跑同样三道</td></tr>
+<tr><th>本地钩子</th><td>第 <a class="pg" href="16-pipeline.html">16</a> 页那个手写的提交钩子,跑同样三道</td></tr>
 <tr><th>要证明的事</th><td><strong>本地拦得住但能绕过;云端拦得住且绕不过 —— 包括管理员</strong></td></tr>
 </tbody>
 </table>
@@ -303,7 +303,7 @@ NAME        STATE
 <h2 id="rule">三、怎么配分支保护规则</h2>
 
 <p>门禁的「拦」这个动作,<strong>不在流水线配置里,而在托管平台的分支保护规则里</strong>
-—— 这正是第 17 页说的三层拦截中的<strong>第 &#9312; 层</strong>。</p>
+—— 这正是第 <a class="pg" href="17-quality-gate.html">17</a> 页说的三层拦截中的<strong>第 &#9312; 层</strong>。</p>
 
 <pre><code># 用命令行配(以 GitHub 为例)
 # 关键点全在 required_status_checks.contexts 这个数组里
@@ -349,7 +349,7 @@ JSON</code></pre>
   <b class="t">&#128293; 名字对不上,是新手配门禁最常见的翻车点</b>
   <code>contexts</code> 里填的必须是<strong>任务的名字</strong>,不是流水线文件的名字,也不是步骤的名字。
   <br><br>
-  <strong>回看第 18 页那份配置:</strong>
+  <strong>回看第 <a class="pg" href="18-gate-items.html">18</a> 页那份配置:</strong>
 <pre style="margin:8px 0 0"><code>jobs:
   gate:                    &larr; 这是任务的 id,<b>不是</b>它
     name: 三道检查          &larr; <b>要填的是这个</b>
@@ -357,7 +357,7 @@ JSON</code></pre>
   <p style="margin:8px 0 0"><strong>填错的后果不是报错,而是永久等待</strong> ——
   平台在等一个叫这个名字的检查上报结果,而那个检查根本不存在。
   <strong>合并请求会一直卡在「等待中」,而且没有任何错误信息告诉你为什么。</strong></p>
-  <p style="margin:8px 0 0">这和第 17 页那个 <code>paths</code> 死锁是<strong>同一类问题的两个入口</strong>:
+  <p style="margin:8px 0 0">这和第 <a class="pg" href="17-quality-gate.html">17</a> 页那个 <code>paths</code> 死锁是<strong>同一类问题的两个入口</strong>:
   <strong>第 &#9312; 层在等一个第 &#9313; 层永远不会给的答复。</strong></p>
 </div>
 
@@ -391,7 +391,7 @@ JSON</code></pre>
   <tr><td><code>false</code>(<strong>默认值</strong>)</td>
       <td style="color:var(--bad)">管理员可以强制合并 &rarr; <strong>门禁对管理员形同虚设</strong></td></tr>
   <tr><td><code>true</code></td>
-      <td style="color:var(--ok)"><strong>所有人一视同仁</strong> &rarr; 这才符合第 17 页「不接受人为通融」的定义</td></tr>
+      <td style="color:var(--ok)"><strong>所有人一视同仁</strong> &rarr; 这才符合第 <a class="pg" href="17-quality-gate.html">17</a> 页「不接受人为通融」的定义</td></tr>
   </tbody>
   </table>
   </div>
@@ -411,7 +411,7 @@ JSON</code></pre>
 
 <h2 id="env">五、两个环境,同一个结论</h2>
 
-<p>第 16 页给过这张对比表,这里补上它的完整意义:</p>
+<p>第 <a class="pg" href="16-pipeline.html">16</a> 页给过这张对比表,这里补上它的完整意义:</p>
 
 <div class="tw">
 <table>
@@ -548,7 +548,7 @@ mergeStateStatus = BLOCKED     &larr; "但门禁没过,不让合"</code></pre>
 
 <div class="tw">
 <table>
-<thead><tr><th style="width:22%"><code>mergeStateStatus</code></th><th style="width:26%">含义</th><th>对应第 17 页哪一层</th></tr></thead>
+<thead><tr><th style="width:22%"><code>mergeStateStatus</code></th><th style="width:26%">含义</th><th>对应第 <a class="pg" href="17-quality-gate.html">17</a> 页哪一层</th></tr></thead>
 <tbody>
 <tr><td style="color:var(--ok)"><code>CLEAN</code></td><td>全绿,可以合</td><td>&mdash;</td></tr>
 <tr><td style="color:var(--bad)"><code>BLOCKED</code></td><td><strong>被保护规则挡住</strong></td><td><strong>第 &#9312; 层</strong>(可能因为门禁红了,也可能缺评审)</td></tr>
@@ -560,10 +560,10 @@ mergeStateStatus = BLOCKED     &larr; "但门禁没过,不让合"</code></pre>
 </div>
 
 <div class="box key">
-  <b class="t"><code>UNSTABLE</code> 正好是第 17 页「降级告警」的实物</b>
+  <b class="t"><code>UNSTABLE</code> 正好是第 <a class="pg" href="17-quality-gate.html">17</a> 页「降级告警」的实物</b>
   它的意思是:<strong>确实有检查是红的,但因为你没把它写进必需名单,所以它拦不住合并。</strong>
   <br><br>
-  <strong>这就是第 17 页那张「失败动作」表在真实平台上的样子:</strong>
+  <strong>这就是第 <a class="pg" href="17-quality-gate.html">17</a> 页那张「失败动作」表在真实平台上的样子:</strong>
   <div class="tw" style="margin:9px 0 0">
   <table>
   <thead><tr><th style="width:36%">想要的失败动作</th><th>怎么配</th></tr></thead>
@@ -573,7 +573,7 @@ mergeStateStatus = BLOCKED     &larr; "但门禁没过,不让合"</code></pre>
   </tbody>
   </table>
   </div>
-  <p style="margin:11px 0 0"><strong>所以第 17 页那个「三阶段落地路径」在这个平台上的实现极其简单:
+  <p style="margin:11px 0 0"><strong>所以第 <a class="pg" href="17-quality-gate.html">17</a> 页那个「三阶段落地路径」在这个平台上的实现极其简单:
   先不写进名单(告警),稳定后再写进名单(阻断)。改一个数组而已。</strong></p>
 </div>
 

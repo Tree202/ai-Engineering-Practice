@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 12 页 · 难度 ★★★ · 前置:第 11 页</span>
+<span class="kicker">第 12 页 · 难度 ★★★ · 前置:第 <a class="pg" href="11-git-basics.html">11</a> 页</span>
 <h1>git 回退:三件套与它们的死角</h1>
 <p class="lede">
 全书<strong>最容易出人命</strong>的一页。这里的命令能一秒钟抹掉你几小时的工作,而且<strong>没有回收站</strong>。
@@ -527,7 +527,7 @@ report.py  src
   <b class="t">前提:让 AI 动手之前,你的工作区必须是干净的</b>
   否则这套四步会<strong>把你自己没存档的活儿一起抹平</strong>。
   <br><br>
-  这就是第 11 页那句「工作区必须干净」的第二个理由 —— <strong>它不只影响看改动,还影响你能不能安全回退。</strong>
+  这就是第 <a class="pg" href="11-git-basics.html">11</a> 页那句「工作区必须干净」的第二个理由 —— <strong>它不只影响看改动,还影响你能不能安全回退。</strong>
 </div>
 
 <h2 id="old">七、回到某个旧存档</h2>
@@ -635,7 +635,7 @@ report.py  src
 <thead><tr><th style="width:46%">看到什么</th><th>怎么办</th></tr></thead>
 <tbody>
 <tr><td><code>fatal: not a git repository</code></td><td>当前目录没有仓库 &rarr; <code>git init</code>,或者你 cd 错地方了</td></tr>
-<tr><td><code>Please tell me who you are</code></td><td>第一次用,没配名字 &rarr; 见第 11 页第二节</td></tr>
+<tr><td><code>Please tell me who you are</code></td><td>第一次用,没配名字 &rarr; 见第 <a class="pg" href="11-git-basics.html">11</a> 页第二节</td></tr>
 <tr><td><code>refusing to clean</code></td><td>忘了加 <code>-f</code> &rarr; 先用 <code>git clean -fdn</code> 预演</td></tr>
 <tr><td><code>nothing to commit, working tree clean</code></td><td><strong>不是报错</strong>,是「干净」的意思 —— 好消息</td></tr>
 <tr><td><code>You are in 'detached HEAD' state</code></td><td><strong>不是报错</strong>。你切到了一次存档而不是分支 &rarr; <code>git switch -</code> 回去</td></tr>
@@ -698,7 +698,7 @@ report.py  src
 <tr><td>122</td><td>add 过 vs 没 add 过</td><td>命运完全相反</td></tr>
 <tr><td>123</td><td>回到旧存档三种方式</td><td>看看 / 真退 / <strong>反做(最安全)</strong></td></tr>
 <tr><td>124</td><td>后悔药的边界</td><td><strong>存过档的救得回,没存过的救不回</strong></td></tr>
-<tr><td>125</td><td>&#128260; 忽略清单改进版</td><td>见第 11 页</td></tr>
+<tr><td>125</td><td>&#128260; 忽略清单改进版</td><td>见第 <a class="pg" href="11-git-basics.html">11</a> 页</td></tr>
 <tr><td>126</td><td>&#9888; 忽略清单管不了已存档的</td><td><code>git rm --cached</code>;<code>check-ignore -v</code> 调试</td></tr>
 <tr><td>127</td><td>&#128260; 报错速查</td><td><strong>路径不匹配有四种措辞</strong>;<code>switch</code> 报的是人话</td></tr>
 <tr><td>128</td><td>&#128260; <code>switch</code>/<code>restore</code> 的状态</td><td>2.51 起不再实验性,旧版手册仍写着</td></tr>
@@ -716,7 +716,7 @@ report.py  src
   <p>第 12 页 / 共 23 页 · 覆盖知识点 116–128 · 难度 &#9733;&#9733;&#9733;</p>
   <p><strong>本页含 4 处经核实修正:</strong><code>-d</code> 的真实机制(不进入目录而非不列目录)、
   嵌套仓库需 <code>-ff</code>、reset 到非 HEAD 时会静默覆盖未跟踪文件、路径报错的四种措辞
-  (<code>switch</code>/<code>restore</code> 实验性标签一条在第 11 页讲授并计数)。全部实测于 git 2.39.5。</p>
+  (<code>switch</code>/<code>restore</code> 实验性标签一条在第 <a class="pg" href="11-git-basics.html">11</a> 页讲授并计数)。全部实测于 git 2.39.5。</p>
 </div>
 </div>
 <script>

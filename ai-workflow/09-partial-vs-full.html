@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 09 页 · 难度 ★★★ · 前置:第 08 页</span>
+<span class="kicker">第 09 页 · 难度 ★★★ · 前置:第 <a class="pg" href="08-break-it.html">08</a> 页</span>
 <h1>局部 vs 全量 + 一场真实事故</h1>
 <p class="lede">
 同一批测试,为什么要跑两次?这一页用一场完整复盘回答:
@@ -309,7 +309,7 @@ tests/test_price.py <span class="c-ok">...</span>                             <s
 <span class="c-bad">2 failed, 5 passed</span>                              <span class="c-dim">&larr; 同一份代码</span></pre>
 </div>
 
-<p>不是「局部绿、全量红」,而是<strong>类型检查在任何范围下都发现不了这个问题</strong>。原因就是第 4 页那个结构性盲区:</p>
+<p>不是「局部绿、全量红」,而是<strong>类型检查在任何范围下都发现不了这个问题</strong>。原因就是第 <a class="pg" href="04-static-check.html">4</a> 页那个结构性盲区:</p>
 
 <pre><code>def format_price(cents: int) -&gt; str:   # 改前
 def format_price(cents: int) -&gt; str:   # 改后 —— 签名一个字符都没变</code></pre>
@@ -426,7 +426,7 @@ def format_price(cents: int) -&gt; str:   # 改后 —— 签名一个字符都�
   <br><br>
   <strong>如果你看到 AI 的改动里包含测试文件,那不是「它很周到」,那是一个需要停下来核对的信号。</strong>
   <br><br>
-  第 20 页会给一条命令,专门揪出这件事。
+  第 <a class="pg" href="20-ai-boundary.html">20</a> 页会给一条命令,专门揪出这件事。
 </div>
 
 <h3>最后算一笔账</h3>

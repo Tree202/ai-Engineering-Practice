@@ -263,7 +263,7 @@ python3 -m venv .venv
 
 <h2 id="exit">四、退出码速查</h2>
 
-<p><strong>退出码是所有门禁判定的基础</strong> —— 第 17 页说的「隐式硬门禁」,判的就是它。</p>
+<p><strong>退出码是所有门禁判定的基础</strong> —— 第 <a class="pg" href="17-quality-gate.html">17</a> 页说的「隐式硬门禁」,判的就是它。</p>
 
 <div class="tw">
 <table>
@@ -288,7 +288,7 @@ python3 -m venv .venv
   <br><br>
   <strong>返回 5 就是为了防这个。</strong>它明确区分了「跑了都过了」和「压根没跑」。
   <br><br>
-  <strong>这也是第 20 页手法 2(删用例)会被自动挡住的原因之一 ——
+  <strong>这也是第 <a class="pg" href="20-ai-boundary.html">20</a> 页手法 2(删用例)会被自动挡住的原因之一 ——
   但只在「删光了」时才挡得住,删一半照样是 0。</strong>所以还是需要用例数门禁。
 </div>
 
@@ -515,7 +515,7 @@ gh api repos/&lt;账号&gt;/&lt;仓库&gt;/branches/main/protection</code></pre>
 <tr><td>测试跑不起来,说找不到模块</td><td>项目根目录不在搜索路径里</td>
     <td>配置里的 <code>pythonpath = ["."]</code></td></tr>
 <tr><td>本地全绿,云端红</td><td><strong>环境不一样</strong></td>
-    <td>比对两边的版本号(第 19 页那张表)</td></tr>
+    <td>比对两边的版本号(第 <a class="pg" href="19-gate-demo.html">19</a> 页那张表)</td></tr>
 <tr><td>本地红,云端绿</td><td>本地有残留的缓存 / 数据库文件</td>
     <td>删掉缓存目录重跑</td></tr>
 <tr><td><strong>合并按钮灰着,但流水线是绿的</strong></td><td><strong>第 &#9312; 层:保护规则</strong></td>
@@ -534,7 +534,7 @@ gh api repos/&lt;账号&gt;/&lt;仓库&gt;/branches/main/protection</code></pre>
 </div>
 
 <div class="box key">
-  <b class="t">排错的元规则(第 19 页亲历)</b>
+  <b class="t">排错的元规则(第 <a class="pg" href="19-gate-demo.html">19</a> 页亲历)</b>
   <strong>同一个方法失败两次,不要试第三次 —— 换一个完全不同的观测通道。</strong>
   <br><br>
   重复同一个失败的观测<strong>只增加信心,不增加信息</strong>。
@@ -637,7 +637,7 @@ gh api repos/&lt;账号&gt;/&lt;仓库&gt;/branches/main/protection</code></pre>
 
 <div class="foot">
   <p>第 22 页 / 共 23 页 · 全书汇总 · <strong>全书完</strong></p>
-  <p>本手册汇总了第 1–21 页的所有可操作结论。所有命令、退出码、配置项均经过核实或真机验证;
+  <p>本手册汇总了第 <a class="pg" href="01-overview.html">1</a>–<a class="pg" href="21-automation.html">21</a> 页的所有可操作结论。所有命令、退出码、配置项均经过核实或真机验证;
   全书仅有 1 条标注为 &#9888; 待验证(见 <a href="17-quality-gate.html">第 17 页第八节</a>)。</p>
 </div>
 </div>

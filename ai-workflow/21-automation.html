@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 21 页 · 难度 ★★☆ · 前置:第 13、14、20 页 · 让流程不靠记忆</span>
+<span class="kicker">第 21 页 · 难度 ★★☆ · 前置:第 <a class="pg" href="13-claude-code.html">13</a>、<a class="pg" href="14-workflow.html">14</a>、<a class="pg" href="20-ai-boundary.html">20</a> 页 · 让流程不靠记忆</span>
 <h1>固化流程与会话管理</h1>
 <p class="lede">
 前二十页讲的规矩,如果每次都要你想起来再说一遍,<strong>三天之后你就不会说了。</strong>
@@ -149,7 +149,7 @@
   </tbody>
   </table>
   </div>
-  <p style="margin:11px 0 0"><strong>这三级正好对应第 16 页那张八关图的三个位置:</strong>
+  <p style="margin:11px 0 0"><strong>这三级正好对应第 <a class="pg" href="16-pipeline.html">16</a> 页那张八关图的三个位置:</strong>
   口头 = 什么都不是;说明文件 = 本地提醒;钩子和门禁 = 真拦。</p>
   <p style="margin:9px 0 0"><strong>策略:能自动判的往下沉到最强级,判不了的写进说明文件。</strong></p>
 </div>
@@ -173,7 +173,7 @@
   </div></div>
 
   <div class="step"><div class="n">&#9314; 位置</div><div class="c">
-    <p>它是<strong>第 13 页那些工具用法的「持久化版本」</strong>。
+    <p>它是<strong>第 <a class="pg" href="13-claude-code.html">13</a> 页那些工具用法的「持久化版本」</strong>。
     你在对话里说的话只活一次;写进这个文件的话每次都在。</p>
   </div></div>
 
@@ -313,7 +313,7 @@ cd &lt;你的项目&gt;/myshop
       <span style="color:var(--faint);font-size:12px">—— 它自己会看,而且你会忘了更新</span></td>
 </tr>
 <tr>
-  <td><strong>改代码的规矩</strong>(第 20 页那七条)<br>
+  <td><strong>改代码的规矩</strong>(第 <a class="pg" href="20-ai-boundary.html">20</a> 页那七条)<br>
       <span style="color:var(--faint);font-size:12px">—— 纯约定,代码里没有</span></td>
   <td>过去修过什么 bug<br>
       <span style="color:var(--faint);font-size:12px">—— 存档系统的历史记录里有</span></td>
@@ -361,7 +361,7 @@ cd &lt;你的项目&gt;/myshop
   </div></div>
 
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
-    <p>把第 14 页那套七步流程固化成一个命令:</p>
+    <p>把第 <a class="pg" href="14-workflow.html">14</a> 页那套七步流程固化成一个命令:</p>
 <pre><code># 文件:&lt;你的项目&gt;/myshop/.claude/commands/step.md
 
 按下面的流程处理我提出的需求,<b>一次只做一步,做完停下来等我确认</b>。
@@ -404,13 +404,13 @@ cd &lt;你的项目&gt;/myshop
   </tbody>
   </table>
   </div>
-  <p style="margin:11px 0 0"><strong>所以第 20 页那七条红线两边都出现了 —— 短的摘要放说明文件(每次生效),
+  <p style="margin:11px 0 0"><strong>所以第 <a class="pg" href="20-ai-boundary.html">20</a> 页那七条红线两边都出现了 —— 短的摘要放说明文件(每次生效),
   完整的流程放命令(需要时展开)。这不是重复,是分工。</strong></p>
 </div>
 
 <h2 id="hook">六、钩子:让规矩强制生效</h2>
 
-<p>说明文件和命令都属于「提示」。<strong>要真拦住,得用钩子</strong> —— 也就是第 16 页那个机制。</p>
+<p>说明文件和命令都属于「提示」。<strong>要真拦住,得用钩子</strong> —— 也就是第 <a class="pg" href="16-pipeline.html">16</a> 页那个机制。</p>
 
 <div class="tw">
 <table>
@@ -421,7 +421,7 @@ cd &lt;你的项目&gt;/myshop
     <td>写个钩子:改动里同时含源码和测试就警告</td></tr>
 <tr><td>不准新增跳过</td>
     <td style="color:var(--ok)"><strong>能</strong> —— 数数量</td>
-    <td><strong>第 18 页的跳过数门禁</strong>,云端强制</td></tr>
+    <td><strong>第 <a class="pg" href="18-gate-items.html">18</a> 页的跳过数门禁</strong>,云端强制</td></tr>
 <tr><td>不准删测试用例</td>
     <td style="color:var(--ok)"><strong>能</strong> —— 比用例总数(弱门禁:防纯删除,防不住删一条补一条空用例的替换)</td>
     <td>同上,加一条「用例数不得低于主干」</td></tr>
@@ -433,7 +433,7 @@ cd &lt;你的项目&gt;/myshop
     <td style="color:var(--warn)"><strong>只能写进说明文件 + 用方案模式</strong></td></tr>
 <tr><td>失败两次就停</td>
     <td style="color:var(--bad)"><strong>不能</strong></td>
-    <td style="color:var(--warn)"><strong>只能靠你自己数</strong>(第 20 页盲区三)</td></tr>
+    <td style="color:var(--warn)"><strong>只能靠你自己数</strong>(第 <a class="pg" href="20-ai-boundary.html">20</a> 页盲区三)</td></tr>
 </tbody>
 </table>
 </div>
@@ -442,7 +442,7 @@ cd &lt;你的项目&gt;/myshop
   <b class="t">这张表就是全书的收束</b>
   <strong>能自动判的,全部沉到最强级(钩子 / 云端门禁),不要靠嘴说。</strong>
   <br><br>
-  <strong>不能自动判的那两条 —— 恰好就是第 20 页说的「唯一不能外包」的部分。</strong>
+  <strong>不能自动判的那两条 —— 恰好就是第 <a class="pg" href="20-ai-boundary.html">20</a> 页说的「唯一不能外包」的部分。</strong>
   <br><br>
   它们逃不掉,因为它们要的是<strong>判断</strong>,而不是<strong>执行</strong>。
 </div>
@@ -527,7 +527,7 @@ cd &lt;你的项目&gt;/myshop
 </tr>
 <tr>
   <td style="color:var(--bad)">看改动要看十分钟,于是你不看了</td>
-  <td style="color:var(--ok)"><strong>看改动三十秒</strong> &rarr; 第 20 页那一步真的会被执行</td>
+  <td style="color:var(--ok)"><strong>看改动三十秒</strong> &rarr; 第 <a class="pg" href="20-ai-boundary.html">20</a> 页那一步真的会被执行</td>
 </tr>
 <tr>
   <td style="color:var(--bad)">撤销只能全撤,好的坏的一起丢</td>

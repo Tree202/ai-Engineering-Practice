@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 11 页 · 难度 ★★ · 前置:第 02 页</span>
+<span class="kicker">第 11 页 · 难度 ★★ · 前置:第 <a class="pg" href="02-python-setup.html">02</a> 页</span>
 <h1>git 基础:代码的存档系统</h1>
 <p class="lede">
 这一页把 git 当<strong>游戏存档</strong>来讲。它是五道防线里唯一横跨全程的一道,
@@ -151,7 +151,7 @@
     <tr><td>看看这段打了什么</td><td>看改动</td><td><code>git diff</code></td></tr>
     <tr><td><strong>按存档键</strong></td><td><strong>提交</strong></td><td><code>git commit</code></td></tr>
     <tr><td>存档列表</td><td>提交历史</td><td><code>git log</code></td></tr>
-    <tr><td>读档</td><td>回退(第 12 页)</td><td><code>git restore</code> 等</td></tr>
+    <tr><td>读档</td><td>回退(第 <a class="pg" href="12-git-undo.html">12</a> 页)</td><td><code>git restore</code> 等</td></tr>
     </tbody>
     </table>
     </div>
@@ -162,7 +162,7 @@
     <ul>
       <li>没有它,「一键撤销」的死角就没人兜底</li>
       <li>没有它,「你自己看改动」根本无从看起 —— 因为你不知道「改之前」是什么样</li>
-      <li>没有它,第 8 页那五个实验一个都做不了</li>
+      <li>没有它,第 <a class="pg" href="08-break-it.html">8</a> 页那五个实验一个都做不了</li>
     </ul>
   </div></div>
 
@@ -303,7 +303,7 @@ On branch main
   <tr><td><code>&nbsp;M&nbsp;</code></td><td>改了,<strong>没</strong>勾选(注意 M 前面有个空格)</td></tr>
   <tr><td><code>MM</code></td><td>两种都有:勾选之后又改了</td></tr>
   <tr><td><code>A&nbsp;&nbsp;</code></td><td>新文件,已勾选</td></tr>
-  <tr><td><code>??</code></td><td><strong>git 完全不认识的新文件</strong> —— 最危险的一类,第 12 页详讲</td></tr>
+  <tr><td><code>??</code></td><td><strong>git 完全不认识的新文件</strong> —— 最危险的一类,第 <a class="pg" href="12-git-undo.html">12</a> 页详讲</td></tr>
   </tbody>
   </table>
   </div>
@@ -573,7 +573,7 @@ ENV/
 <span class="c-warn">74412a5</span> feat: 第1步 读取分数</pre>
 </div>
 
-<p>前面那串字符是<strong>存档编号</strong>,第 12 页回退时要用它。加个 <code>--stat</code> 能顺便看每次改了多少:</p>
+<p>前面那串字符是<strong>存档编号</strong>,第 <a class="pg" href="12-git-undo.html">12</a> 页回退时要用它。加个 <code>--stat</code> 能顺便看每次改了多少:</p>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
@@ -636,7 +636,7 @@ ENV/
   </tbody>
   </table>
   </div>
-  <p style="margin:9px 0 0"><strong>四步一循环。</strong>循环得越勤,第 12 页那些回退命令的杀伤范围就越小。</p>
+  <p style="margin:9px 0 0"><strong>四步一循环。</strong>循环得越勤,第 <a class="pg" href="12-git-undo.html">12</a> 页那些回退命令的杀伤范围就越小。</p>
 </div>
 
 <div class="box note">
@@ -657,7 +657,7 @@ ENV/
 <tr><td>108</td><td><code>status</code> 五种状态</td><td><code>-s</code> 的<strong>左右两列</strong>是关键</td></tr>
 <tr><td>109</td><td>&#128293; <strong>工作区必须干净</strong></td><td>它是「看改动」这一步的基线</td></tr>
 <tr><td>110</td><td>暂存区 = 结账传送带</td><td>拿东西 / 放上带 / 打单</td></tr>
-<tr><td>111</td><td><code>??</code> = 没贴条码的商品</td><td>git 不认识它,第 12 页详讲</td></tr>
+<tr><td>111</td><td><code>??</code> = 没贴条码的商品</td><td>git 不认识它,第 <a class="pg" href="12-git-undo.html">12</a> 页详讲</td></tr>
 <tr><td>112</td><td><code>diff</code> 三条命令的分工</td><td>步骤 4 用 <code>git diff HEAD</code></td></tr>
 <tr><td>113</td><td>&#9888; <code>add</code> 后 <code>diff</code> 变空</td><td>改动跑传送带上去了</td></tr>
 <tr><td>114</td><td><code>add -A</code> / <code>commit -m</code> / <code>log</code></td><td>四步循环</td></tr>

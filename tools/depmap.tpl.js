@@ -130,7 +130,10 @@
     '#dm-bx a{cursor:pointer}#dm-bx a:hover rect{stroke-width:2.8}' +
     '#dm-bx a:focus-visible rect{stroke:var(--accent);stroke-width:2.8}' +
     '#dm-lg{font-size:12px;color:var(--faint);text-align:center;margin:9px 0 2px;line-height:1.7}' +
-    '@media(max-width:700px){#dm-ov{padding:10px}#dm-bx{padding:10px 12px}#dm-bx svg{min-width:900px}}';
+    '@media(max-width:700px){#dm-ov{padding:10px}#dm-bx{padding:10px 12px}#dm-bx svg{min-width:900px}}' +
+    /* 正文里的「第 N 页」页码链接:低调一点,别让 273 个下划线把正文搅乱 */
+    'a.pg{text-decoration:none;border-bottom:1px dotted var(--rule2);padding:0 1px}' +
+    'a.pg:hover{border-bottom-style:solid;border-bottom-color:var(--accent);background:var(--accent-soft)}';
 
   function build() {
     var st = document.createElement("style");

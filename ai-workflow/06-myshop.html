@@ -108,11 +108,11 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 06 页 · 难度 ★★ · 前置:第 02、05 页</span>
+<span class="kicker">第 06 页 · 难度 ★★ · 前置:第 <a class="pg" href="02-python-setup.html">02</a>、<a class="pg" href="05-pyramid.html">05</a> 页</span>
 <h1>练习项目 myshop 解剖</h1>
 <p class="lede">
 一个 224 行的假商店。它不是拿来卖咖啡的,是拿来<strong>亲手摸一遍「为什么测试要分层」</strong>的实验台。
-后面第 7、8、9 页的所有实验都在它身上做。
+后面第 <a class="pg" href="07-four-layers-code.html">7</a>、<a class="pg" href="08-break-it.html">8</a>、<a class="pg" href="09-partial-vs-full.html">9</a> 页的所有实验都在它身上做。
 </p>
 
 <div class="toc">
@@ -242,7 +242,7 @@
     <li><strong>爆炸半径可预测</strong> —— 改 api 影响不到别人;但<strong>改 price 会波及所有上层</strong></li>
   </ol>
   <br>
-  第二条就是第 8、9 页那些事故的根源:<strong>一个函数的爆炸半径,和它的代码行数成反比。</strong>
+  第二条就是第 <a class="pg" href="08-break-it.html">8</a>、<a class="pg" href="09-partial-vs-full.html">9</a> 页那些事故的根源:<strong>一个函数的爆炸半径,和它的代码行数成反比。</strong>
 </div>
 
 <h2 id="price">四、最底层:纯函数</h2>
@@ -285,7 +285,7 @@ def format_price(cents: int) -&gt; str:
 
   <div class="step"><div class="n">&#9314; 位置</div><div class="c">
     <p>它是<strong>金字塔最底层的被测对象</strong>。因为它不依赖任何外部东西,所以测它<strong>不需要任何准备工作</strong> ——
-    这就是第 5 页说的「准备段重量为零」。</p>
+    这就是第 <a class="pg" href="05-pyramid.html">5</a> 页说的「准备段重量为零」。</p>
   </div></div>
 
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
@@ -323,7 +323,7 @@ def format_price(cents: int) -&gt; str:
 <tr>
   <td><code>{fen:02d}</code></td>
   <td><code>02</code> 的意思是「不足两位就在前面补 0」。<strong>没有它,5 分会显示成 <code>¥0.5</code> 而不是 <code>¥0.05</code></strong> ——
-      这是格式化的经典 bug,第 8 页第一个实验就是它</td>
+      这是格式化的经典 bug,第 <a class="pg" href="08-break-it.html">8</a> 页第一个实验就是它</td>
 </tr>
 </tbody>
 </table>
@@ -395,7 +395,7 @@ def create_order(
   <pre style="margin:9px 0"><code>写库 &#9989;  &rarr;  算 format_price  &rarr;  &#128165; 抛异常
                                      &uarr;
                           库里已经留下一条脏数据了</code></pre>
-  <p style="margin:9px 0 0"><strong>这个 bug 有多隐蔽?第 8 页会实测:类型检查完全看不出来,而且如果没人想到写那条测试,全量测试也抓不到。</strong></p>
+  <p style="margin:9px 0 0"><strong>这个 bug 有多隐蔽?第 <a class="pg" href="08-break-it.html">8</a> 页会实测:类型检查完全看不出来,而且如果没人想到写那条测试,全量测试也抓不到。</strong></p>
 </div>
 
 <h3>三个值得学的细节</h3>
@@ -415,7 +415,7 @@ def create_order(
 </tr>
 <tr>
   <td><code>conn.commit()</code></td>
-  <td><strong>确认提交</strong> —— 下面单独讲,它是第 8 页第五个实验的主角</td>
+  <td><strong>确认提交</strong> —— 下面单独讲,它是第 <a class="pg" href="08-break-it.html">8</a> 页第五个实验的主角</td>
 </tr>
 </tbody>
 </table>
@@ -452,7 +452,7 @@ def create_order(
     <thead><tr><th style="width:34%">出现在哪</th><th>意思</th></tr></thead>
     <tbody>
     <tr><td>数据库(本页)</td><td>确认提交刚写的数据</td></tr>
-    <tr><td>存档系统(第 11 页)</td><td><strong>按一次存档键</strong></td></tr>
+    <tr><td>存档系统(第 <a class="pg" href="11-git-basics.html">11</a> 页)</td><td><strong>按一次存档键</strong></td></tr>
     </tbody>
     </table>
     </div>
@@ -460,7 +460,7 @@ def create_order(
   </div></div>
 
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
-    <p>第 8 页会把这一行注释掉,然后看到这一幕:</p>
+    <p>第 <a class="pg" href="08-break-it.html">8</a> 页会把这一行注释掉,然后看到这一幕:</p>
     <div class="term-box">
       <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实实验输出</div>
 <pre>create_order 返回: {'id': 1, 'item': '咖啡', 'total_text': '¥25.00'}
@@ -475,7 +475,7 @@ def create_order(
   <div class="step"><div class="n">&#9316; 误区</div><div class="c">
     <p><strong>误区:「同一个连接里能读到,说明存进去了」。</strong>
     <strong>错。</strong>在同一个连接里,没提交的数据照样能读到 —— 你读的是自己那笔「还没结账的购物车」。
-    <br>这就是第 5 页那个「换个连接读回来」技巧存在的全部原因。</p>
+    <br>这就是第 <a class="pg" href="05-pyramid.html">5</a> 页那个「换个连接读回来」技巧存在的全部原因。</p>
   </div></div>
 </div>
 
@@ -651,7 +651,7 @@ tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>
 
 <div class="box key">
   <b class="t">这两个 bug 的教学价值</b>
-  第 8 页会实测把它们改回去,然后你会看到:
+  第 <a class="pg" href="08-break-it.html">8</a> 页会实测把它们改回去,然后你会看到:
   <ul style="margin-bottom:0">
     <li><strong>类型检查完全看不出来</strong> —— 报「一切正常」</li>
     <li><strong>如果没有那两条新测试,全量测试也是绿的</strong> —— 原版 4 条集成测试全过</li>
