@@ -691,10 +691,28 @@ jobs:
       <td>要跑 10 遍。<strong>用例少的时候抖动本来就少,不划算</strong></td></tr>
   <tr><td><strong><code>paths</code> 过滤</strong></td>
       <td><strong>刻意不加</strong> —— 见第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="17-quality-gate.html">17</a> 页那个永久阻塞的死锁</td></tr>
+  <tr><td><strong>把 action 钉到 SHA</strong><br><span style="font-size:12.5px;color:var(--faint)">写 <code>@3d3c42e5&hellip;</code> 而不是 <code>@v7</code></span></td>
+      <td>钉 SHA 防的是「标签被改指向别的提交」这一手。<strong>本书刻意用 <code>@v7</code></strong> ——
+      第 <a class="pg" href="16-pipeline.html">16</a> 页那个真实的过期陷阱教的正是「以代码仓库的最新标签为准」,
+      两件事都对,只是对不同的人。<br>
+      <strong>你该钉 SHA,如果</strong>:流水线里有密钥、能写仓库、或者公司有合规要求。<br>
+      <strong>钉了要付的代价</strong>:action 发安全更新时不会自动跟上,得有人定期升 ——
+      <strong>没人升的 SHA 比浮动标签更危险</strong></td></tr>
+  <tr><td><strong>钉工具版本</strong><br><span style="font-size:12.5px;color:var(--faint)"><code>pytest==8.4.2</code> 而不是 <code>pytest</code></span></td>
+      <td>钉版本能让「今天绿、明天红」少发生。<strong>本书刻意不钉</strong> ——
+      第 <a class="pg" href="16-pipeline.html">16</a>、<a class="pg" href="19-gate-demo.html">19</a> 页那两张环境对照表靠的就是
+      「本地虚拟环境装了半年」对「云端每次全新安装」;钉死了两边同版本,那个对照组就没了,
+      而它恰恰是「云端才是干净环境」最有力的证据。<br>
+      <strong>你该钉版本,如果</strong>:这是要交付的生产项目,不是教材。做法是把版本写进
+      <code>pyproject.toml</code> 或 <code>requirements.txt</code>,让本地和云端读同一份</td></tr>
   </tbody>
   </table>
   </div>
   <p style="margin:9px 0 0"><strong>四条硬门禁,零个阈值需要拍板,十分钟配完。这就是「先上硬门禁」的意思。</strong></p>
+  <p style="margin:9px 0 0"><em>另有三样是「加了没代价」的,所以不在上表里</em> ——
+  <code>permissions: contents: read</code>(令牌只读)、<code>concurrency</code>(同分支新推送自动取消旧的)、
+  <code>timeout-minutes</code>(卡住的任务默认能跑六小时)。这三样不需要权衡,直接加进配置就行;
+  本书配套项目的 <code>ci.yml</code> 已经带上了。</p>
 </div>
 
 <h3>本页知识点回顾</h3>
