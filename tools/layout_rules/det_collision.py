@@ -620,4 +620,8 @@ def _selftest():
 
 
 if __name__ == "__main__":
+    try:                       # Windows 控制台默认 cp1252,中文直接崩
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     sys.exit(_selftest())
