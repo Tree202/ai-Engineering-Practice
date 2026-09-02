@@ -70,22 +70,29 @@ for m in re.finditer(r'href="(\d\d)-[a-z-]+\.html">(?:(?!</a>).)*?含 (\d+) 处�
 check("「%d 处发现有误」出现次数" % 合计, 2, len(re.findall(r"%d 处发现有误" % 合计, t00)))
 
 # ---------------- 2. myshop:测试条数 / 源码行数 ----------------
+# myshop/ 是独立仓库,不进教程仓库(.gitignore)。CI 的 checkout 里没有它,
+# 这一节只在本机(目录存在时)跑 —— 跳过时明说,不装作检查过。
 MS = os.path.join(ROOT, "myshop")
-条 = sum(len(re.findall(r"^def test_", read(f), re.M))
-        for f in glob.glob(os.path.join(MS, "tests", "**", "*.py"), recursive=True))
-check("myshop def test_ 总数", 19, 条)
+if not os.path.isdir(MS):
+    print("  跳过  myshop 实数比对(目录不存在 —— CI 环境;本机提交前已跑)")
+else:
+    条 = sum(len(re.findall(r"^def test_", read(f), re.M))
+            for f in glob.glob(os.path.join(MS, "tests", "**", "*.py"), recursive=True))
+    check("myshop def test_ 总数", 19, 条)
+
+    核心 = sum(len(io.open(os.path.join(MS, "myshop", f + ".py"), encoding="utf-8").readlines())
+              for f in ("price", "order", "api"))
+    全部 = 核心 + len(io.open(os.path.join(MS, "myshop", "web.py"), encoding="utf-8").readlines())
+    check("核心三模块行数(教程写 224)", 224, 核心)
+    t06 = read(os.path.join(AW, "06-myshop.html"))
+    check("06 页含核心 224 口径", True, "224 行" in t06)
+    check("06 页含全量 %d 口径" % 全部, True, ("%d 行" % 全部) in t06)
+
+# 教程侧对测试数的引用(不依赖 myshop 目录,CI 也跑)
 for 页, 词 in [("09-partial-vs-full.html", "19 条测试"), ("17-quality-gate.html", "19 个用例")]:
     check("%s 引用测试数" % 页[:2], 1, len(re.findall(词, read(os.path.join(AW, 页)))))
 check("旧口径「18 条测试/18 个用例」残留", 0,
       sum(len(re.findall(r"18 (?:条测试|个用例)", read(p))) for p in pages()))
-
-核心 = sum(len(io.open(os.path.join(MS, "myshop", f + ".py"), encoding="utf-8").readlines())
-          for f in ("price", "order", "api"))
-全部 = 核心 + len(io.open(os.path.join(MS, "myshop", "web.py"), encoding="utf-8").readlines())
-check("核心三模块行数(教程写 224)", 224, 核心)
-t06 = read(os.path.join(AW, "06-myshop.html"))
-check("06 页含核心 224 口径", True, "224 行" in t06)
-check("06 页含全量 %d 口径" % 全部, True, ("%d 行" % 全部) in t06)
 
 # ---------------- 3. 关键词全书口径唯一 ----------------
 def 全书(词):
