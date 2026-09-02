@@ -392,8 +392,15 @@
 
 <div class="box note">
   <b class="t">&#128161; 一个省时的快捷键</b>
-  <strong><code>Ctrl + G</code></strong> 可以把计划拉进你的外部编辑器直接改 ——
-  比反复说「再改改」快得多。
+  <strong><code>Ctrl + G</code></strong>(等价写法 <code>Ctrl+X Ctrl+E</code>)把
+  <strong>你正在输入的那段话</strong>拉进默认文本编辑器去写 —— 要写长指令时,
+  比在终端里一行行敲舒服得多。
+  <br><br>
+  <strong>注意它改的不是计划,是你的输入。</strong>想把 Claude 上一条回复(比如刚出的那份计划)
+  一起带进编辑器当参照,得先在 <code>/config</code> 里打开
+  <b>Show last response in external editor</b>;但那段内容是以 <code>#</code> 注释形式垫在
+  你的输入上方的,<strong>保存时会被剥掉</strong> —— 你能照着它写,不能直接改它。
+  要改计划,还是得把要求说出来让它改。
 </div>
 
 <h2 id="rewind">四、一键撤销</h2>
@@ -565,7 +572,7 @@
   <td><code>Esc Esc</code></td>
   <td>空输入框 = 打开撤销菜单;<strong>有文字时第一次先清空</strong>(按 ↑ 可恢复)</td>
 </tr>
-<tr><td><code>Ctrl + G</code></td><td><strong>把计划拉进外部编辑器改</strong></td></tr>
+<tr><td><code>Ctrl + G</code><br><small>= <code>Ctrl+X Ctrl+E</code></small></td><td><strong>把你正在输入的内容拉进默认编辑器写</strong>(不是改计划)</td></tr>
 <tr><td><code>Alt + M</code></td><td>Windows 上某些终端里,代替 <code>Shift+Tab</code></td></tr>
 </tbody>
 </table>
@@ -589,7 +596,7 @@
 <tr><td>138</td><td>三个限制</td><td>粒度是每条消息 / 100 个 / 30 天</td></tr>
 <tr><td>139</td><td>撤销 vs 存档</td><td><strong>零食 vs 主食</strong></td></tr>
 <tr><td>140</td><td><code>/review</code> 等命令</td><td><code>--fix</code> 的改动撤销救不回</td></tr>
-<tr><td>141</td><td><code>Ctrl+G</code></td><td>把计划拉进编辑器</td></tr>
+<tr><td>141</td><td><code>Ctrl+G</code></td><td>把<strong>你的输入</strong>拉进编辑器写</td></tr>
 <tr><td>142</td><td><code>/clear</code> vs <code>/compact</code></td><td>一次存档打完 = 一次 <code>/clear</code></td></tr>
 </tbody>
 </table>

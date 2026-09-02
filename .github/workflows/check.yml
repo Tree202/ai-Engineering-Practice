@@ -1,19 +1,28 @@
 # 教程仓库自己的门禁 —— 消费巡检脚本的退出码。
 #
-# 四步都在云端跑。此前只跑前两步,注释里给的理由是「check_layout 需要本机
+# 五步都在云端跑。曾经只跑前两步,注释里给的理由是「check_layout 需要本机
 # 只读基线,云端没有」—— 第三轮核验发现这个理由不成立:脚本本来就有
 # --allow-missing-baseline,真正卡住的是无基线时退出码恒为非零(干净退 2、
 # 有发现退 1),永远拿不到绿灯。现在把两页真值样本随仓库发布
 # (tools/layout_rules/fixtures/,约 100 KB,见该目录 README),
 # 云端也能跑完整的准入自检,版式巡检才算真门禁。
+#
+# 第五步是检查器**自己**的测试。为什么单独有这一步:
+#   前两步(链接、口径)查的是站点,而它们自身长期零测试,并且真的出过
+#   「检查器静默变成空操作、门禁照样报绿」——把 ai-workflow/ 改个名就能拿到
+#   RESULT: PASS。绿灯只证明「这次没报错」,不证明「检查器还在干活」。
+#   合成夹具测试就是用来证明后者的:测试在修复前的版本上必须红。
 name: checks
 on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   site:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -31,3 +40,23 @@ jobs:
             echo "--- $f ---"
             python "$f" > /dev/null || { echo "自测失败:$f"; exit 1; }
           done
+      - name: 检查器自己的测试（合成夹具）
+        run: python -m unittest discover -s tools/tests -p 'test_*.py' -v
+
+  # 跨仓库一致性:教程里写死的那些「配套项目应该是什么样」,和 myshop 仓库的实际情况
+  # 对不对得上。这两个是**独立仓库**,任何一边单独改都不会惊动另一边 ——
+  # 此前没有任何东西在看这件事,是登记多轮的工程债。
+  #
+  # 只读地 clone 公开的 myshop 仓库,不需要任何密钥。
+  cross-repo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: 取配套项目（公开仓库，只读）
+        run: git clone --depth 1 https://github.com/Tree202/myshop-gate-demo.git _myshop
+      - name: 教程 ↔ 配套项目一致性
+        run: python tools/check_crossrepo.py _myshop
