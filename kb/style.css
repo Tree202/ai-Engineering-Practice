@@ -51,7 +51,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);
 .theme-switch button{border:0;background:transparent;color:var(--muted);cursor:pointer;
   font:inherit;font-size:12.5px;padding:3px 11px;border-radius:999px;transition:.12s}
 .theme-switch button:hover{color:var(--text)}
-.theme-switch button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.theme-switch button[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
 
 /* ---------- 页面骨架 ---------- */
 main{max-width:var(--maxw);margin:0 auto;padding:34px 20px 90px}
@@ -95,7 +95,9 @@ mark{background:var(--accent-bg);color:var(--accent);padding:.05em .3em;border-r
   display:flex;align-items:center;gap:8px}
 .concept dt:first-child{margin-top:0}
 .concept dt .n{display:inline-grid;place-items:center;width:20px;height:20px;flex:0 0 20px;
-  border-radius:50%;background:var(--accent);color:#fff;font-size:11.5px;font-weight:700}
+  border-radius:50%;background:var(--accent);color:var(--bg);font-size:11.5px;font-weight:700}
+/* 用 var(--bg) 而不是写死 #fff:深色主题的 --accent 是浅橙 #e8935c,
+   白字压上去只有 2.40:1,低于 WCAG 的 4.5。换成背景色后深色 7.6:1、浅色仍 4.52:1。 */
 .concept dd{margin:.25em 0 0 28px}
 .concept dd p{margin:.4em 0}
 
@@ -133,7 +135,7 @@ td code{font-size:.85em}
   border-left:2px solid var(--border);margin-left:14px}
 .steps>li:last-child{border-left-color:transparent;padding-bottom:0}
 .steps>li::before{content:counter(s);position:absolute;left:-15px;top:-2px;
-  width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+  width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--bg);
   display:grid;place-items:center;font-size:13.5px;font-weight:700}
 .steps>li>b:first-child{display:block;margin-bottom:2px}
 

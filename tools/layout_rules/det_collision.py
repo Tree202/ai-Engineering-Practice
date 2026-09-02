@@ -11,6 +11,7 @@ XML 解析完全正常、链接锚点也都对,但渲染出来是一团糟。
   R3 text-spill      文字从自己的框里溢出,溢出部分压到了另一个方框上
   R4 text-overlap    两段文字互相压住
   R5 text-clipped    文字被 viewBox 边缘裁掉(被画布遮挡)
+  R6 path-over-text  连线(<path>/<line>)从文字中间穿过去
 
 设计原则是「宁可漏报,不可滥报」:阈值都取在实测数据的安全余量之外,
 容器框(自身完整包住别的框、或占画布近半)一律不作为受害者参与文字类判定。
@@ -66,6 +67,15 @@ VB_MIN_FRAC = 0.08       # 且至少占文字宽度的 8%
 
 # 容器框判定:占画布面积超过这个比例,视为底板
 CONTAINER_AREA_FRAC = 0.45
+
+# --- R6 path-over-text ---
+# 只抓「穿过去」,不抓「指过来」:连线必须在文字盒的**中间带**里连续走一段,
+# 且它在盒外两侧都还有轨迹(说明是穿越,不是端点停在标签旁边)。
+PT_INNER_X = 0.16        # 盒左右各内缩这个比例,避开贴边而过的线
+PT_INNER_Y = 0.22        # 盒上下各内缩,避开擦着字顶/字底走的线
+PT_MIN_RUN_EM = 0.30     # 在中间带里连续走过的横向距离,至少这么多个字号
+PT_OUT_PAD = 3.0         # 判断「盒外」时给的余量
+PT_SAMPLES = 240         # 每段曲线采样点数
 
 MAX_PER_RULE_PER_SVG = 6  # 单个 svg 单条规则最多列出几条,其余汇总成一句
 
@@ -184,7 +194,7 @@ class _SvgGeom(HTMLParser):
         if tag == "svg":
             if self._depth == 0:
                 self._cur = {"line": self.getpos()[0], "vb": d.get("viewbox", ""),
-                             "rects": [], "texts": []}
+                             "rects": [], "texts": [], "strokes": []}
                 self._stack = []
             self._depth += 1
         if self._depth == 0:
@@ -203,6 +213,23 @@ class _SvgGeom(HTMLParser):
                     "w": w, "h": h, "line": self.getpos()[0],
                     "fill": d.get("fill", ""), "stroke": d.get("stroke", ""),
                 })
+        elif tag in ("path", "line") and not c["rot"]:
+            # 只看真的画出来的线:没有 stroke 或 stroke:none 的不算
+            st = (d.get("stroke", "") or "").strip().lower()
+            if st and st != "none":
+                if tag == "path":
+                    pts = _path_points(d.get("d", ""))
+                else:
+                    x1, y1 = _num(d.get("x1"), 0.0), _num(d.get("y1"), 0.0)
+                    x2, y2 = _num(d.get("x2"), 0.0), _num(d.get("y2"), 0.0)
+                    pts = [(x1, y1), (x2, y2)] if None not in (x1, y1, x2, y2) else []
+                if len(pts) >= 2:
+                    self._cur["strokes"].append({
+                        "pts": [(x + c["tx"], y + c["ty"]) for x, y in pts],
+                        "line": self.getpos()[0], "tag": tag,
+                        "w": _num(d.get("stroke-width"), 1.0) or 1.0,
+                        "dash": bool((d.get("stroke-dasharray", "") or "").strip()),
+                    })
         elif tag == "text":
             self._text = {"x": _num(d.get("x"), 0.0) + c["tx"],
                           "y": _num(d.get("y"), 0.0) + c["ty"],
@@ -404,6 +431,153 @@ def _rule_text_text(sv, out):
             })
 
 
+def _path_points(d: str):
+    """把 <path d="..."> 采样成折线点列。
+
+    只实现页面里实际用到的指令:M/L/H/V/C/Q/Z 及其相对形式。
+    遇到没实现的指令就整条放弃(返回空),宁可漏报也不要拿错坐标去定罪。
+    """
+    if not d:
+        return []
+    toks = re.findall(r"[MmLlHhVvCcQqZz]|-?\d*\.?\d+(?:[eE][-+]?\d+)?", d)
+    pts, i = [], 0
+    cx = cy = 0.0
+    sx = sy = 0.0
+    cmd = ""
+
+    def nums(k):
+        nonlocal i
+        out = []
+        for _ in range(k):
+            if i >= len(toks) or re.match(r"[A-Za-z]", toks[i]):
+                return None
+            out.append(float(toks[i]))
+            i += 1
+        return out
+
+    while i < len(toks):
+        if re.match(r"[A-Za-z]", toks[i]):
+            cmd = toks[i]
+            i += 1
+            if cmd in "Zz":
+                if pts:
+                    pts.append((sx, sy))
+                cx, cy = sx, sy
+                continue
+        if cmd == "":
+            return []
+        up = cmd.upper()
+        rel = cmd.islower()
+        if up == "M":
+            v = nums(2)
+            if v is None:
+                return []
+            cx, cy = (cx + v[0], cy + v[1]) if rel else (v[0], v[1])
+            sx, sy = cx, cy
+            pts.append((cx, cy))
+            cmd = "l" if rel else "L"          # M 之后的连续坐标按 L 处理
+        elif up == "L":
+            v = nums(2)
+            if v is None:
+                return []
+            cx, cy = (cx + v[0], cy + v[1]) if rel else (v[0], v[1])
+            pts.append((cx, cy))
+        elif up == "H":
+            v = nums(1)
+            if v is None:
+                return []
+            cx = cx + v[0] if rel else v[0]
+            pts.append((cx, cy))
+        elif up == "V":
+            v = nums(1)
+            if v is None:
+                return []
+            cy = cy + v[0] if rel else v[0]
+            pts.append((cx, cy))
+        elif up in ("C", "Q"):
+            k = 6 if up == "C" else 4
+            v = nums(k)
+            if v is None:
+                return []
+            if rel:
+                v = [v[j] + (cx if j % 2 == 0 else cy) for j in range(k)]
+            p0 = (cx, cy)
+            if up == "C":
+                p1, p2, p3 = (v[0], v[1]), (v[2], v[3]), (v[4], v[5])
+                for j in range(1, PT_SAMPLES + 1):
+                    t = j / PT_SAMPLES
+                    m = 1 - t
+                    pts.append((m**3*p0[0] + 3*m*m*t*p1[0] + 3*m*t*t*p2[0] + t**3*p3[0],
+                                m**3*p0[1] + 3*m*m*t*p1[1] + 3*m*t*t*p2[1] + t**3*p3[1]))
+                cx, cy = p3
+            else:
+                p1, p2 = (v[0], v[1]), (v[2], v[3])
+                for j in range(1, PT_SAMPLES + 1):
+                    t = j / PT_SAMPLES
+                    m = 1 - t
+                    pts.append((m*m*p0[0] + 2*m*t*p1[0] + t*t*p2[0],
+                                m*m*p0[1] + 2*m*t*p1[1] + t*t*p2[1]))
+                cx, cy = p2
+        else:
+            return []                          # A/S/T 等没实现,整条放弃
+    return pts
+
+
+def _rule_path_over_text(sv, out):
+    """R6:连线从文字中间穿过去。
+
+    判「穿过」不判「指到」——后者是正常的引线。三个条件都要满足:
+      · 线在文字盒的中间带(左右内缩 16%、上下内缩 22%)里连续走过 ≥0.30em;
+      · 该段之前和之后,线都跑到了盒外(说明是穿越,不是端点停在标签边上);
+      · 文字本身不是被这条线当作端点标注的短标签(靠上面两条自然排除)。
+    """
+    for t in sv["texts"]:
+        if t.get("rot"):
+            continue
+        x0, y0, x1, y1 = _tbox(t)
+        w, h = x1 - x0, y1 - y0
+        if w <= 0 or h <= 0:
+            continue
+        ix0, ix1 = x0 + w * PT_INNER_X, x1 - w * PT_INNER_X
+        iy0, iy1 = y0 + h * PT_INNER_Y, y1 - h * PT_INNER_Y
+        for st in sv["strokes"]:
+            pts = st["pts"]
+            inside = [(ix0 <= x <= ix1 and iy0 <= y <= iy1) for x, y in pts]
+            if not any(inside):
+                continue
+            # 找最长的一段连续「在中间带内」
+            best = cur = None
+            for k, f in enumerate(inside):
+                if f:
+                    cur = k if cur is None else cur
+                    if best is None or (k - cur) > (best[1] - best[0]):
+                        best = (cur, k)
+                else:
+                    cur = None
+            if best is None:
+                continue
+            a, b = best
+            run = abs(pts[b][0] - pts[a][0])
+            runy = abs(pts[b][1] - pts[a][1])
+            if max(run, runy) < PT_MIN_RUN_EM * t["fs"]:
+                continue
+            outside = lambda p: not (x0 - PT_OUT_PAD <= p[0] <= x1 + PT_OUT_PAD
+                                     and y0 - PT_OUT_PAD <= p[1] <= y1 + PT_OUT_PAD)
+            if not (any(outside(p) for p in pts[:a]) and any(outside(p) for p in pts[b + 1:])):
+                continue                      # 端点就停在标签旁边 —— 那是引线,不是穿越
+            out.append({
+                "line": t["line"],
+                "kind": "svg-path-over-text",
+                "msg": "连线从文字中间穿过去:第 %d 行的 <%s> 压过「%s」"
+                       % (st["line"], st["tag"], _clip(t["s"])),
+                "detail": "%s 内,<text>「%s」(字号 %.1f,包围盒 (%.0f,%.0f)-(%.0f,%.0f))"
+                          "被第 %d 行的 <%s>(stroke-width %.1f%s)横穿 %.1f px"
+                          % (_svg_where(sv), _clip(t["s"]), t["fs"], x0, y0, x1, y1,
+                             st["line"], st["tag"], st["w"],
+                             ",虚线" if st["dash"] else "", max(run, runy)),
+            })
+
+
 def _rule_text_clipped(sv, vb, out):
     if not vb:
         return
@@ -464,7 +638,8 @@ def check(path: str, html: str) -> list[dict]:
 
         _mark_containers(sv["rects"], vb)
 
-        for fn in (_rule_rect_overlap, _rule_text_over_rect, _rule_text_spill, _rule_text_text):
+        for fn in (_rule_rect_overlap, _rule_text_over_rect, _rule_text_spill,
+                   _rule_text_text, _rule_path_over_text):
             bucket: list[dict] = []
             fn(sv, bucket)
             issues.extend(_cap(bucket, sv))

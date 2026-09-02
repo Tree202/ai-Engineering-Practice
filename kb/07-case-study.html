@@ -333,13 +333,12 @@ allowed-tools: Read, Write, Glob, WebSearch, WebFetch
     </table>
   </div>
 
-  <div class="callout tip">
-    <span class="label">💡 可选升级：让它跑在分身里</span>
-    <p>如果你的对话经常聊得很长，在前置数据里加一行：</p>
-    <div class="codeblock"><pre><code>context: fork</code></pre></div>
-    <p>整理工作就会在<b>分身</b>里进行：分身能看到完整对话，写文件到磁盘，
-      只把「写了 8 个文件」回传给你，<b>主对话几乎不被消耗</b>
-      （<a href="06-subagent-fork.html#s5">第 06 章第 5 节</a>）。</p>
+  <div class="callout danger">
+    <span class="label">🚫 千万别给它加 <code>context: fork</code></span>
+    <p>看到第 06 章讲「分身」能看完整对话，很容易想给这份 <code>SKILL.md</code> 加一行 <code>context: fork</code> 来省上下文。<b>加了就废了。</b></p>
+    <p>两个都叫 fork，含义相反：技能里的 <code>context: fork</code> 是让技能在<b>隔离的子代理</b>里跑，官方明写「<b>它拿不到你的对话历史</b>」—— 而这个技能全部的活就是读对话。
+      详见<a href="06-subagent-fork.html#s5">第 06 章第 5 节</a>。</p>
+    <p>省上下文靠的是上面第 3 步那条约束：<b>写完一个立刻落盘，不攒到最后一起写</b>。</p>
   </div>
 
   <!-- ============================================================ -->
@@ -357,7 +356,7 @@ allowed-tools: Read, Write, Glob, WebSearch, WebFetch
 &lt;meta name="viewport" content="width=device-width,initial-scale=1"&gt;
 &lt;title&gt;页面标题&lt;/title&gt;
 &lt;style&gt;
-  /* 这里放全部 CSS，见下一节的讲解 */
+  /* 这里放全部 CSS，见第 7、8 节的拆解 */
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;

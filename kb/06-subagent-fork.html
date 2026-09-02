@@ -172,7 +172,7 @@ model: sonnet
       <!-- 上：子代理 -->
       <path d="M176 150 C 230 150, 250 66, 300 66" stroke="var(--muted)" stroke-width="1.8"
             fill="none" stroke-dasharray="5 4" marker-end="url(#a6b)"/>
-      <text x="238" y="94" text-anchor="middle" fill="var(--muted)" font-size="11">只给一段说明</text>
+      <text x="213" y="92" text-anchor="middle" fill="var(--muted)" font-size="11">只给一段说明</text>
 
       <rect x="306" y="24" width="180" height="88" rx="11" fill="var(--surface-2)" stroke="var(--border)"/>
       <text x="396" y="14" text-anchor="middle" fill="var(--muted)" font-size="12.5" font-weight="600">普通子代理</text>
@@ -187,7 +187,7 @@ model: sonnet
       <!-- 下：分身 -->
       <path d="M176 200 C 230 200, 250 262, 300 262" stroke="var(--accent)" stroke-width="2.2"
             fill="none" marker-end="url(#a6)"/>
-      <text x="238" y="256" text-anchor="middle" fill="var(--accent)" font-size="11">整段对话复制过去</text>
+      <text x="238" y="274" text-anchor="middle" fill="var(--accent)" font-size="11">整段对话复制过去</text>
 
       <rect x="306" y="220" width="180" height="88" rx="11" fill="var(--accent-bg)" stroke="var(--accent)"/>
       <text x="396" y="210" text-anchor="middle" fill="var(--accent)" font-size="12.5" font-weight="600">分身</text>
@@ -218,11 +218,11 @@ model: sonnet
       <tbody>
         <tr><td><b>完整对话历史</b></td><td>✅ 继承</td><td>❌ 从零开始</td></tr>
         <tr><td><b>系统提示词</b></td><td>✅ 和主会话相同</td><td>❌ 用它自己定义里的</td></tr>
-        <tr><td><b>工具</b></td><td>✅ 同一套工具池</td><td>❌ 用 <code>tools</code> 字段指定的那些</td></tr>
+        <tr><td><b>工具</b></td><td>✅ 同一套工具池<br><small>(但放到后台跑时会换成更窄的后台工具集)</small></td><td>❌ 用 <code>tools</code> 字段指定的那些</td></tr>
         <tr><td><b>模型</b></td><td>✅ 和主会话相同</td><td>❌ 用 <code>model</code> 字段，或继承</td></tr>
         <tr><td><b>输出风格</b></td><td>✅ 生效</td><td>❌ 不生效</td></tr>
         <tr><td><b>CLAUDE.md</b></td><td>✅ 加载</td><td>✅ 加载（Explore / Plan 除外）</td></tr>
-        <tr><td><b>主对话的自动记忆</b></td><td>❌ 不加载</td><td>❌ 不加载</td></tr>
+        <tr><td><b>主对话的自动记忆</b></td><td>✅ 跟着对话一起继承</td><td>❌ 不加载</td></tr>
         <tr><td><b>提示词缓存</b></td><td>和主会话<b>共享</b></td><td><b>独立</b>的缓存</td></tr>
         <tr><td><b>过程是否回流主对话</b></td><td>❌ 不回流，只回结果</td><td>❌ 不回流，只回结果</td></tr>
       </tbody>
@@ -272,26 +272,39 @@ model: sonnet
   </div>
 
   <!-- ============================================================ -->
-  <h2 id="s5">5. 让技能跑在分身里：<code>context: fork</code></h2>
+  <h2 id="s5">5. 同名不同物：技能里的 <code>context: fork</code></h2>
 
-  <p>更实用的做法：<b>把分身写进技能的配置里</b>，这样每次调用这个技能都自动在分身里跑。</p>
+  <div class="callout danger">
+    <span class="label">⚠️ 先把这件事弄清楚：它不是上面讲的「分身」</span>
+    <p>两个东西都叫 fork，含义<b>正好相反</b>：</p>
+    <ul>
+      <li><b>分身（fork 当前对话）</b>—— 就是前四节讲的那个，<b>继承整段对话</b>。</li>
+      <li><b>SKILL.md 里的 <code>context: fork</code></b> —— 让这个技能<b>在隔离的子代理里跑</b>。官方原话：「技能内容就是驱动该子代理的提示词，<b>它拿不到你的对话历史</b>」。</li>
+    </ul>
+    <p>所以：<b>凡是需要读对话的活，都不能给它加 <code>context: fork</code></b>—— 加了它就什么也看不见了。</p>
+  </div>
+
+  <p>那它适合干什么？适合<b>自己就能独立跑完</b>的活：跑测试、构建、部署、按固定步骤生成一批文件。这类活把它扒到隔离上下文里跑，主对话就不会被它的中间过程塞满。</p>
 
   <div class="codeblock">
-    <div class="cb-title">~/.claude/skills/kb/SKILL.md（片段）</div>
+    <div class="cb-title">~/.claude/skills/deploy/SKILL.md（片段）</div>
     <pre><code>---
-description: 把当前对话整理成初学者中文 HTML 教程
+description: 跑完整测试套件并部署到预发环境
 disable-model-invocation: true
 context: fork
 ---
 
-把本次对话中出现的知识，整理成 HTML 教程……</code></pre>
+1. 跑 pytest
+2. 构建
+3. 推到预发环境</code></pre>
+    <p style="font-size:13px;color:var(--muted);margin-top:6px">注意这份技能的步骤是<b>自包含的</b>—— 不需要知道你刚才聊了什么。这才是 <code>context: fork</code> 的适用场景。</p>
   </div>
 
   <div class="table-wrap">
     <table>
       <thead><tr><th>字段</th><th>作用</th><th>默认</th></tr></thead>
       <tbody>
-        <tr><td><code>context: fork</code></td><td>这个技能在分身里跑</td><td>不写就是在主对话里跑</td></tr>
+        <tr><td><code>context: fork</code></td><td>这个技能在<b>隔离的子代理</b>里跑（<b>读不到对话历史</b>）</td><td>不写就是在主对话里跑，能看到对话</td></tr>
         <tr><td><code>agent</code></td><td>指定用哪种子代理类型</td><td>默认类型</td></tr>
         <tr><td><code>background</code></td><td>设 <code>false</code> = <b>等结果回来</b>再继续这一轮；<br>
           默认 <code>true</code> = 后台跑，你可以继续干别的</td><td><code>true</code>（需 v2.1.218+ 才能设 <code>false</code>）</td></tr>
@@ -300,16 +313,11 @@ context: fork
     </table>
   </div>
 
-  <div class="callout tip">
-    <span class="label">💡 为什么这对「整理对话」特别合适</span>
-    <p>把三件事连起来看：</p>
-    <ol>
-      <li>整理知识<b>必须</b>读完整个对话 → 普通子代理不行，<b>只有分身能做</b></li>
-      <li>生成 8 个 HTML 文件会消耗<b>大量</b>上下文 → 在主对话里做，必定触发压缩</li>
-      <li>分身写文件到<b>磁盘</b>，只把「写了 8 个文件」这句话回传 → <b>主对话几乎没被消耗</b></li>
-    </ol>
-    <p>这正好也印证了<a href="01-prompt-design.html#s4">第 01 章</a>那条原则：
-      <b>让成果尽早离开上下文，进入硬盘。</b></p>
+  <div class="callout warn">
+    <span class="label">⚠️ 反例：「整理本次对话」恰恰不能用它</span>
+    <p>很容易想当然地把 <code>context: fork</code> 加给<a href="07-case-study.html#s4">第 07 章那个 <code>/kb</code> 技能</a>：反正都叫 fork，而且生成一批 HTML 确实很吃上下文。</p>
+    <p><b>加了就废了。</b>那个技能的全部工作是「把<b>本次对话</b>整理成教程」，而 <code>context: fork</code> 恰好把对话历史剥掉 —— 子代理拿到的只有技能正文本身，无米之炊。</p>
+    <p>想省上下文，正确的做法是让它<b>写完一个文件立刻落盘、再写下一个</b>（第 07 章那份 SKILL.md 就是这么写的）—— 这正是<a href="01-prompt-design.html#s4">第 01 章</a>那条原则：<b>让成果尽早离开上下文，进入硬盘。</b></p>
   </div>
 
   <div class="callout warn">

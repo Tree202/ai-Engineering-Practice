@@ -35,7 +35,7 @@
     <ol>
       <li><a href="#s1">输出风格是什么</a></li>
       <li><a href="#s2">先搞懂：系统提示词是什么</a></li>
-      <li><a href="#s3">内置的四种风格</a></li>
+      <li><a href="#s3">内置的五种风格</a></li>
       <li><a href="#s4">怎么切换（⚠️ 老命令已被删除）</a></li>
       <li><a href="#s5">写一个属于你的风格</a></li>
       <li><a href="#s6">keep-coding-instructions：留不留编程指令</a></li>
@@ -151,7 +151,7 @@ keep-coding-instructions: true
   </figure>
 
   <!-- ============================================================ -->
-  <h2 id="s3">3. 内置的四种风格</h2>
+  <h2 id="s3">3. 内置的五种风格</h2>
 
   <div class="table-wrap">
     <table>
@@ -166,6 +166,11 @@ keep-coding-instructions: true
           <td><b>Proactive</b><br>（主动）</td>
           <td>立刻动手，遇到常规决策<b>自己做合理假设</b>而不是停下来问你，倾向行动而非规划</td>
           <td>你信任它、希望少被打断时。<br>注意：它比"自动模式"更激进，<b>但不改变你的权限模式</b>——什么能跑不用问，仍由权限设置说了算</td>
+        </tr>
+        <tr>
+          <td><b>Concise</b><br>（简洁）</td>
+          <td>直接给结果，不写开场白、不旁白自己在干什么，默认把回答压短——但<b>活还是照样干透</b>；你要解释时它照样展开。报错、安全警告、危险操作确认这三类内容<b>不会被压缩</b></td>
+          <td>你已经熟了，只想要结果。<br><small>需 v2.1.237 及以上</small></td>
         </tr>
         <tr>
           <td><b>Explanatory</b><br>（讲解）</td>
@@ -230,13 +235,11 @@ keep-coding-instructions: true
     </li>
   </ol>
 
-  <div class="callout warn">
-    <span class="label">⚠️ 待验证：桌面 App 里 <code>/config</code> 的行为</span>
-    <p>两份官方文档说法不一致：<b>输出风格</b>那页说，在桌面 App 里运行 <code>/config</code> 会
-      <b>打开「设置 &gt; Claude Code」界面</b>，而不是弹出选择菜单；
-      <b>命令参考</b>那页则说 <code>/config</code> 在两端行为一致。</p>
-    <p>建议<b>以你这台机器上的实际表现为准</b>。
-      如果打了 <code>/config</code> 没看到风格菜单，就用上面第 2 种方式直接改文件，这个一定有效。</p>
+  <div class="callout info">
+    <span class="label">💡 桌面 App 里 <code>/config</code> 不弹菜单</span>
+    <p>官方文档写得很明确：在桌面 App 里跑 <code>/config</code>，会<b>打开「设置 &gt; Claude Code」界面</b>，而不是像终端那样弹出选择菜单。
+      所以在桌面 App 里换风格，用上面第 2 种方式：直接写 <code>outputStyle</code> 到设置文件里。</p>
+    <p><small>VS Code 插件又不一样：用 <code>/</code> 命令菜单里的 <b>Output styles</b> 选（需 v2.1.257+），写入的是同一个文件。</small></p>
   </div>
 
   <!-- ============================================================ -->
@@ -414,6 +417,10 @@ keep-coding-instructions: true
           <td><b>刻意设计成回答更长</b>，所以输出 token 会明显增加</td>
         </tr>
         <tr>
+          <td><b>输出</b>（内置 Concise）</td>
+          <td><b>反过来</b>：它的职责就是把回答压短，输出 token 会明显减少</td>
+        </tr>
+        <tr>
           <td><b>输出</b>（你自定义的）</td>
           <td>取决于你写了什么。要求"每个概念配表格 + 例子"，回答自然就长</td>
         </tr>
@@ -437,7 +444,7 @@ keep-coding-instructions: true
       <thead><tr><th>问题</th><th>答案</th></tr></thead>
       <tbody>
         <tr><td>输出风格改什么</td><td>改<b>系统提示词</b> → 影响每一轮的表达方式</td></tr>
-        <tr><td>内置有哪些</td><td>Default / Proactive / Explanatory / Learning</td></tr>
+        <tr><td>内置有哪些</td><td>Default / Proactive / Concise / Explanatory / Learning（共 <b>5</b> 种）</td></tr>
         <tr><td>怎么切换</td><td><code>/config</code> 或改 <code>outputStyle</code> 设置。<b><code>/output-style</code> 已删除</b></td></tr>
         <tr><td>自定义放哪</td><td><code>~/.claude/output-styles/名字.md</code>，文件名即风格名</td></tr>
         <tr><td>最容易忘的字段</td><td><code>keep-coding-instructions: true</code>（还要写代码就必须加）</td></tr>

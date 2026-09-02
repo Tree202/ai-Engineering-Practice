@@ -24,10 +24,10 @@
   <span class="chapter-tag">第 05 章 · 难度 ★★☆</span>
   <h1>该放进哪一层：五种定制方式的分工</h1>
   <p class="lead">
-    到这里你已经学了<b>技能</b>和<b>输出风格</b>。加上这一章的 <b>CLAUDE.md</b>，
+    到这里你已经学了<b>技能</b>（第 02 章）。再加上<b>输出风格</b>（第 04 章；一句话：它改的是系统提示词，影响每一轮的表达方式）和这一章的 <b>CLAUDE.md</b>，
     Claude Code 一共有五种"把话存起来"的方式。<br>
     这一章给你一张决策图：<b>拿到一句需求，一眼看出该放哪。</b><br>
-    前置知识：<a href="02-skill-basics.html">第 02 章</a>、<a href="04-output-style.html">第 04 章</a>。
+    前置知识：<a href="02-skill-basics.html">第 02 章</a>必读；<a href="04-output-style.html">第 04 章</a>读过更好，没读也不影响看懂本章。
   </p>
 
   <div class="toc">
@@ -102,6 +102,7 @@
       CLAUDE.md 给不了这个保证，因为它只是"建议"。</p>
     <p>这时候要用<b>钩子（Hooks）</b>——它在固定的生命周期事件上执行固定的 shell 命令，
       <b>不管 Claude 怎么想都会执行</b>。</p>
+    <p><small>❗ 别和主线说的「钩子」混了：这里指 <b>Claude Code 自己的生命周期钩子</b>（写在 <code>settings.json</code> 里，管的是 Claude 的行为）；主线<a href="../ai-workflow/16-pipeline.html#hook">第 16 页</a>说的「本地钩子一个参数就能绕过」指的是 <b>git 钩子</b>（<code>.git/hooks/</code>，管的是提交）。两套机制，同一个中文词。</small></p>
   </div>
 
   <!-- ============================================================ -->

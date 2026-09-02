@@ -57,7 +57,7 @@
       <tbody>
         <tr><td><code>description</code></td><td><b>最重要</b>。写清"做什么 + 什么时候用"，Claude 靠它决定是否自动加载。省略时会用正文第一段代替</td><td>见下方说明</td></tr>
         <tr><td><code>when_to_use</code></td><td>补充触发场景，比如典型说法、示例请求。会拼接在 <code>description</code> 后面</td><td><code>用户说"整理笔记"时</code></td></tr>
-        <tr><td><code>name</code></td><td>技能列表里显示的名字。<b>不影响你打的命令</b>（命令名来自文件夹名）</td><td><code>知识整理</code></td></tr>
+        <tr><td><code>name</code></td><td>技能列表里显示的名字。个人 / 项目技能里<b>不影响你打的命令</b>（命令名来自文件夹名）；<b>插件技能是例外</b>—— 那里 <code>name</code> 会成为命令名的最后一段（<code>/插件名:name</code>）</td><td><code>知识整理</code></td></tr>
         <tr><td><code>paths</code></td><td>只有在处理匹配这些通配符的文件时，才自动加载该技能</td><td><code>src/**/*.ts</code></td></tr>
       </tbody>
     </table>
@@ -106,12 +106,12 @@
     </table>
   </div>
 
-  <h3>⑤ 子代理与钩子（第 06 章详讲）</h3>
+  <h3>⑤ 子代理与钩子（子代理见<a href="06-subagent-fork.html">第 06 章</a>，钩子见<a href="05-choose-where.html#s3">第 05 章</a>）</h3>
   <div class="table-wrap">
     <table>
       <thead><tr><th>字段</th><th>作用</th></tr></thead>
       <tbody>
-        <tr><td><code>context: fork</code></td><td>在一个「分身」里跑这个技能，不占用主对话</td></tr>
+        <tr><td><code>context: fork</code></td><td>在一个<b>隔离的子代理</b>里跑这个技能，不占用主对话——代价是它<b>读不到对话历史</b>（名字很容易让人误会，见<a href="06-subagent-fork.html#s5">第 06 章第 5 节</a>）</td></tr>
         <tr><td><code>agent</code></td><td>配合 <code>context: fork</code>，指定用哪种子代理</td></tr>
         <tr><td><code>background</code></td><td>只在 <code>context: fork</code> 下有效。设 <code>false</code> 表示等结果回来再继续，默认 <code>true</code>（后台跑）</td></tr>
         <tr><td><code>hooks</code></td><td>调用时注册钩子，之后整个会话都保持</td></tr>
@@ -434,7 +434,7 @@ arguments: [issue, branch]
   <div class="callout tip">
     <span class="label">💡 官方建议</span>
     <p><b><code>SKILL.md</code> 控制在 500 行以内</b>，详细参考资料挪到独立文件。
-      理由见下一节——<code>SKILL.md</code> 一旦加载就<b>整轮会话都占着位置</b>。</p>
+      理由见第 8 节「技能内容生命周期」——<code>SKILL.md</code> 一旦加载就<b>整轮会话都占着位置</b>。</p>
   </div>
 
   <!-- ============================================================ -->
