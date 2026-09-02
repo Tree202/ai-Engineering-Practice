@@ -180,12 +180,29 @@
   <strong>方式一 · 桌面应用(最省事)</strong> &mdash;&mdash; 到 <code>claude.ai/download</code> 下载安装,
   登录后在 <b>Code</b> 标签页里打开你的项目目录。
   <br><br>
-  <strong>方式二 · 命令行</strong>(需要 Node.js):
-<pre style="margin:8px 0"><code>npm install -g @anthropic-ai/claude-code</code></pre>
-  装完在项目目录里打 <code>claude</code> 回车就进去了;第一次会让你登录。
+  <strong>方式二 · 命令行原生安装</strong>(官方标为推荐):
+<pre style="margin:8px 0"><code># macOS / Linux / WSL
+curl -fsSL https://claude.ai/install.sh | bash
+
+# Windows PowerShell
+irm https://claude.ai/install.ps1 | iex
+
+# 或用包管理器:Windows 用 winget,macOS 用 Homebrew
+winget install Anthropic.ClaudeCode
+brew install --cask claude-code</code></pre>
+  装完跑 <code>claude --version</code> 验证,再在项目目录里打 <code>claude</code> 回车就进去了;
+  第一次会让你登录。
+  <br><br>
+  <em>也可以用 npm 装</em>(<code>npm install -g @anthropic-ai/claude-code</code>) —— 它在官方文档里
+  归在「高级选项」下,需要 <strong>Node.js 22+</strong>;但注意那只是<strong>装的时候</strong>要 Node,
+  装完的 <code>claude</code> 本身并不跑 Node。
   <br><br>
   <em>用别的 AI 编程工具也行</em> &mdash;&mdash; 本书的四道防线、七步流程、质量门禁
   跟具体工具无关;只有第 <a class="pg" href="13-claude-code.html">13</a> 页讲的快捷键与菜单是 Claude Code 特有的。
+  <br><br>
+  <em>Windows 上顺带装一个 Git for Windows</em> —— 官方推荐这么做,
+  它能让 Claude Code 用上 Bash 工具(否则只能用 PowerShell);
+  而且第 <a class="pg" href="02-python-setup.html">2</a> 页会告诉你,在 Git Bash 里本书的命令可以直接照抄。
   <br><br>
   <strong>界面会变,以官方文档为准</strong> &mdash;&mdash; 本框只管把你送进门。
 </div>

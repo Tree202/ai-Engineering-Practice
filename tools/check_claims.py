@@ -92,9 +92,7 @@ else:
     t06_ = read(os.path.join(AW, "06-myshop.html"))
     宣称行 = re.search(r"核心三模块合计</strong></td><td><strong>(\d+) 行", t06_)
     check("06 页宣称的核心行数 = 实数", str(核心), 宣称行.group(1) if 宣称行 else "?")
-    t06 = read(os.path.join(AW, "06-myshop.html"))
-    check("06 页含核心 224 口径", True, "224 行" in t06)
-    check("06 页含全量 %d 口径" % 全部, True, ("%d 行" % 全部) in t06)
+    check("06 页含全量 %d 口径" % 全部, True, ("%d 行" % 全部) in t06_)
 
 # 教程侧旧口径残留检查(不依赖 myshop 目录,CI 也跑)
 check("旧口径「18 条测试/18 个用例」残留", 0,
