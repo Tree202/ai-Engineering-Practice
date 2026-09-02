@@ -46,7 +46,7 @@
     }
   }
   *{box-sizing:border-box}
-  html{scroll-behavior:smooth;scroll-padding-top:64px}
+  html{scroll-behavior:smooth;scroll-padding-top:78px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
        font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);
@@ -162,7 +162,7 @@
   <ol>
     <li><a href="#why">一、AI 写代码,会以哪两种方式失控</a></li>
     <li><a href="#four">二、四道「保护你自己」的防线</a></li>
-    <li><a href="#fifth">三、第六件事:自己看改动</a></li>
+    <li><a href="#fifth">三、第五件事:自己看改动</a></li>
     <li><a href="#gate">四、第五道防线:保护所有人</a></li>
     <li><a href="#axis">五、把六件事排到时间轴上</a></li>
     <li><a href="#trap">六、一个几乎所有人都会看漏的地方</a></li>
@@ -173,42 +173,6 @@
 </div>
 
 <!-- ================================================================ -->
-<div class="box key">
-  <b class="t">&#128295; 先把 AI 编程工具装上</b>
-  本书讲的是「跟 AI 协作写代码」,所以你得先有一个。以 <strong>Claude Code</strong> 为例:
-  <br><br>
-  <strong>方式一 · 桌面应用(最省事)</strong> &mdash;&mdash; 到 <code>claude.ai/download</code> 下载安装,
-  登录后在 <b>Code</b> 标签页里打开你的项目目录。
-  <br><br>
-  <strong>方式二 · 命令行原生安装</strong>(官方标为推荐):
-<pre style="margin:8px 0"><code># macOS / Linux / WSL
-curl -fsSL https://claude.ai/install.sh | bash
-
-# Windows PowerShell
-irm https://claude.ai/install.ps1 | iex
-
-# 或用包管理器:Windows 用 winget,macOS 用 Homebrew
-winget install Anthropic.ClaudeCode
-brew install --cask claude-code</code></pre>
-  装完跑 <code>claude --version</code> 验证,再在项目目录里打 <code>claude</code> 回车就进去了;
-  第一次会让你登录。
-  <br><br>
-  <em>也可以用 npm 装</em>(<code>npm install -g @anthropic-ai/claude-code</code>) —— 它在官方文档里
-  归在「高级选项」下,需要 <strong>Node.js 22+</strong>;但注意那只是<strong>装的时候</strong>要 Node,
-  装完的 <code>claude</code> 本身并不跑 Node。
-  <br><br>
-  <em>用别的 AI 编程工具也行</em> &mdash;&mdash; 本书的四道防线、七步流程、质量门禁
-  跟具体工具无关。Claude Code 特有的是三处:第 <a class="pg" href="13-claude-code.html">13</a> 页的快捷键与菜单、
-  第 <a class="pg" href="20-ai-boundary.html">20</a>、<a class="pg" href="21-automation.html">21</a> 页的
-  <code>CLAUDE.md</code> 与 <code>.claude/commands/</code>。换工具的话,这三处要找对应物。
-  <br><br>
-  <em>Windows 上顺带装一个 Git for Windows</em> —— 官方推荐这么做,
-  它能让 Claude Code 用上 Bash 工具(否则只能用 PowerShell);
-  而且第 <a class="pg" href="02-python-setup.html">2</a> 页会告诉你,在 Git Bash 里本书的命令可以直接照抄。
-  <br><br>
-  <strong>界面会变,以官方文档为准</strong> &mdash;&mdash; 本框只管把你送进门。
-</div>
-
 <h2 id="why">一、AI 写代码,会以哪两种方式失控</h2>
 
 <p>先说清楚问题,再谈方法。</p>
@@ -311,7 +275,7 @@ brew install --cask claude-code</code></pre>
     这是<strong>工具层面的限制</strong>,它在这个模式下拿不到修改源文件的权限。这也是它可靠的原因。</p>
     <p><strong>误区 2(这一条我核实后修正过):「这个模式下它什么都不能做」。</strong>
     <strong>它能运行命令去探索代码</strong> —— 就像设计师能进门量尺寸。
-    被限制的只是「编辑源文件」这一件事。第 <a class="pg" href="13-claude-code.html">13</a> 页有官方原文。</p>
+    被限制的只是「编辑源文件」这一件事。第 13 页有官方原文。</p>
   </div></div>
 </div>
 
@@ -344,7 +308,7 @@ brew install --cask claude-code</code></pre>
 <pre><code>做方案的第 1 步。
 改完自己跑检查,有问题自己修到干净。
 做完停下来,等我看过再继续。</code></pre>
-    <p>这里的「跑检查」具体是什么,从第 <a class="pg" href="03-test-basics.html">3</a> 页开始讲。</p>
+    <p>这里的「跑检查」具体是什么,从第 3 页开始讲。</p>
   </div></div>
 
   <div class="step"><div class="n">⑤ 误区</div><div class="c">
@@ -352,7 +316,7 @@ brew install --cask claude-code</code></pre>
     做完再说,它已经进入「我完成了」的状态,这时候让它跑检查,它的动机会变成
     <em>「用最小的改动让红变绿」</em>,而这正是作弊的温床。</p>
     <p><strong>误区 2:「检查全过就等于做对了」。</strong>这是全书反复要拆的一个错觉。
-    第 <a class="pg" href="08-break-it.html">8</a>、<a class="pg" href="09-partial-vs-full.html">9</a>、<a class="pg" href="20-ai-boundary.html">20</a> 页会用真机实验证明它错得有多厉害。</p>
+    第 8、9、20 页会用真机实验证明它错得有多厉害。</p>
   </div></div>
 </div>
 
@@ -389,7 +353,7 @@ brew install --cask claude-code</code></pre>
   </div></div>
 
   <div class="step"><div class="n">⑤ 误区</div><div class="c">
-    <p><strong>误区 1:「有它就不用存档了」。</strong>严重错误。它有五个管不了的死角(第 <a class="pg" href="13-claude-code.html">13</a> 页详列),
+    <p><strong>误区 1:「有它就不用存档了」。</strong>严重错误。它有五个管不了的死角(第 13 页详列),
     比如<strong>它执行过的命令造成的后果,它退不回来</strong>。</p>
     <p><strong>误区 2:「它能精确回到某一次文件修改」。</strong>不能。
     它的最小颗粒度是<strong>你发的每一条消息</strong>,不是每一次改文件。</p>
@@ -436,7 +400,7 @@ brew install --cask claude-code</code></pre>
   </div></div>
 
   <div class="step"><div class="n">④ 例子</div><div class="c">
-    <p>一天的工作大概是这个节奏(命令的具体含义在第 <a class="pg" href="11-git-basics.html">11</a> 页):</p>
+    <p>一天的工作大概是这个节奏(命令的具体含义在第 11 页):</p>
 <pre><code>开工:  开一条新分支,确认工作区是干净的
 第1步做完 → 检查 → 满意 → 存档
 第2步做完 → 检查 → 满意 → 存档
@@ -449,13 +413,13 @@ brew install --cask claude-code</code></pre>
     出事之后你已经没有可退回的点了。</p>
     <p><strong>误区 2:「一天提交一次就够了」。</strong>那你出问题时只能整天回滚。
     <strong>判断标准:一次提交要能用一句话讲清楚。讲不清就说明该拆成两次。</strong></p>
-    <p><strong>误区 3:「它能救回所有东西」。</strong>不能。第 <a class="pg" href="12-git-undo.html">12</a> 页会讲它的死角,
+    <p><strong>误区 3:「它能救回所有东西」。</strong>不能。第 12 页会讲它的死角,
     其中有一个坑会让你误以为「回退失败了」。</p>
   </div></div>
 </div>
 
 <!-- ================================================================ -->
-<h2 id="fifth">三、第六件事:自己看改动</h2>
+<h2 id="fifth">三、第五件事:自己看改动</h2>
 
 <div class="term" data-c="eye">
   <div class="term-h">
@@ -478,7 +442,7 @@ brew install --cask claude-code</code></pre>
   </div></div>
 
   <div class="step"><div class="n">③ 位置</div><div class="c">
-    <p>它<strong>不属于</strong>前面四道防线,是独立的第六件事。而它的重要性排第二(仅次于存档系统)。</p>
+    <p>它<strong>不属于</strong>前面四道防线,是独立的第五件事。而它的重要性排第二(仅次于存档系统)。</p>
     <p>为什么?因为<strong>前四道全都可以交给工具,只有这一道不能</strong>。</p>
   </div></div>
 
@@ -489,7 +453,7 @@ brew install --cask claude-code</code></pre>
     <thead><tr><th style="width:8%">#</th><th>问自己</th></tr></thead>
     <tbody>
     <tr><td>1</td><td>有没有<strong>我没让它改</strong>的文件出现在列表里?</td></tr>
-    <tr><td>2</td><td>它有没有<strong>动检查用的那些文件</strong>?(这条最关键,第 <a class="pg" href="20-ai-boundary.html">20</a> 页解释为什么)</td></tr>
+    <tr><td>2</td><td>它有没有<strong>动检查用的那些文件</strong>?(这条最关键,第 20 页解释为什么)</td></tr>
     <tr><td>3</td><td>有没有它<strong>新建的、我不知道的</strong>文件?</td></tr>
     <tr><td>4</td><td>改动规模和「方案里说的第一步」<strong>对得上吗</strong>?</td></tr>
     </tbody>
@@ -499,14 +463,14 @@ brew install --cask claude-code</code></pre>
 
   <div class="step"><div class="n">⑤ 误区</div><div class="c">
     <p><strong>误区 1:「让 AI 把改动总结给我看就行」。</strong>
-    那等于<strong>让它评价自己的作业</strong>。第 <a class="pg" href="20-ai-boundary.html">20</a> 页有三类问题只有你亲眼看才能发现。</p>
+    那等于<strong>让它评价自己的作业</strong>。第 20 页有三类问题只有你亲眼看才能发现。</p>
     <p><strong>误区 2:「检查全绿就不用看了」。</strong>恰恰相反 ——
     <strong>检查越绿越要看</strong>,因为绿色会让你放松,而绿色偏偏不覆盖那三类问题。</p>
   </div></div>
 </div>
 
 <div class="box trap">
-  <b class="t">漏掉第六件事,后果和漏掉存档不一样</b>
+  <b class="t">漏掉第五件事,后果和漏掉存档不一样</b>
   <div class="tw" style="margin:9px 0 0">
   <table>
   <thead><tr><th style="width:26%">漏掉</th><th>后果</th></tr></thead>
@@ -563,17 +527,17 @@ brew install --cask claude-code</code></pre>
   </div></div>
 
   <div class="step"><div class="n">④ 例子</div><div class="c">
-    <p>本教程第 <a class="pg" href="19-gate-demo.html">19</a> 页会在真机上完整演示这一幕。先给你看结论 ——
+    <p>本教程第 19 页会在真机上完整演示这一幕。先给你看结论 ——
     <strong>拿仓库拥有者的管理员权限强行合并一个检查失败的改动:</strong></p>
 <pre><code>$ gh pr merge 1 --merge --admin
 
 GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</code></pre>
-    <p><strong>被拒了。</strong>(第 <a class="pg" href="19-gate-demo.html">19</a> 页的真机演示开启了 enforce_admins——GitHub 默认并不约束管理员,详见第 <a class="pg" href="19-gate-demo.html">19</a> 页)而同样的检查在本地,多打 12 个字符(指 " --no-verify",含前导空格,详见第 <a class="pg" href="16-pipeline.html">16</a> 页)就能绕过。</p>
+    <p><strong>被拒了。</strong>而同样的检查在本地,多打 12 个字符就能绕过。</p>
   </div></div>
 
   <div class="step"><div class="n">⑤ 误区</div><div class="c">
     <p><strong>误区 1:「门禁越严越好」。</strong>错。门禁太严,团队会想办法绕过它 ——
-    然后它就彻底失效了。阈值该怎么定,第 <a class="pg" href="18-gate-items.html">18</a> 页第七节讲了基线法与棘轮法。</p>
+    然后它就彻底失效了。第 18 页有五条设计原则。</p>
     <p><strong>误区 2:「一个人的项目也要建门禁」。</strong>没必要。
     <strong>门禁解决的是「人会偷懒、会赶时间、会忘」</strong>,一个人时你就是唯一的人,自律够了。
     三个人以上才需要机器守门。</p>
@@ -733,19 +697,10 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
 <p>六件事按「什么时候会出事」排个序,就得到一套可以照着做的流程。</p>
 
 <figure>
-<svg viewBox="0 0 960 600" role="img" aria-label="七步流程的流程图。步骤 4 看完改动后分三支:5a 满意、5b 小问题、5c 方向错了,另有一个兵底。5a 全做完去步骤 7,没做完回步骤 3;5b 回步骤 3;5c 与兵底回步骤 1">
+<svg viewBox="0 0 900 540" role="img" aria-label="七步流程的流程图,含 5a/5b/5c 三个分支">
   <defs>
     <marker id="a2" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
       <polygon points="0 0, 8 3, 0 6" fill="var(--faint)"/>
-    </marker>
-    <marker id="a2g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="var(--ok)"/>
-    </marker>
-    <marker id="a2i" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="var(--info)"/>
-    </marker>
-    <marker id="a2b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
-      <polygon points="0 0, 8 3, 0 6" fill="var(--bad)"/>
     </marker>
   </defs>
   <g class="st" text-anchor="middle" font-size="13">
@@ -789,13 +744,13 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
     <text x="774" y="373" font-size="11" fill="var(--faint)">用存档系统</text>
     <text x="774" y="388" font-size="11" fill="var(--faint)">彻底回到原点</text>
 
-    <rect x="320" y="460" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
-    <text x="450" y="479" font-weight="700" fill="var(--warn)">步骤 7 · 最后总审</text>
-    <text x="450" y="495" font-size="11.5" fill="var(--faint)">跑最贵的那层检查 + 通读全部改动</text>
+    <rect x="320" y="420" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
+    <text x="450" y="439" font-weight="700" fill="var(--warn)">步骤 7 · 最后总审</text>
+    <text x="450" y="455" font-size="11.5" fill="var(--faint)">跑最贵的那层检查 + 通读全部改动</text>
 
-    <rect x="320" y="526" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.4"/>
-    <text x="450" y="545" font-weight="800" fill="var(--warn)">推上去 → 质量门禁</text>
-    <text x="450" y="561" font-size="11.5" fill="var(--faint)">跑在云端,你绕不过 · 第 17–19 页</text>
+    <rect x="320" y="486" width="260" height="44" rx="11" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2.4"/>
+    <text x="450" y="505" font-weight="800" fill="var(--warn)">推上去 → 质量门禁</text>
+    <text x="450" y="521" font-size="11.5" fill="var(--faint)">跑在云端,你绕不过 · 第 17–19 页</text>
   </g>
 
   <g stroke="var(--faint)" stroke-width="1.4" marker-end="url(#a2)" fill="none">
@@ -807,7 +762,7 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
     <path d="M 435 312 L 435 324 L 332 324 L 332 334"/>
     <path d="M 465 312 L 465 324 L 548 324 L 548 334"/>
     <path d="M 490 312 L 490 324 L 774 324 L 774 334"/>
-    <line x1="450" y1="504" x2="450" y2="524"/>
+    <line x1="450" y1="464" x2="450" y2="484"/>
   </g>
 
   <path d="M 18 365 L 8 365 L 8 226 L 316 226" fill="none" stroke="var(--ok)"
@@ -815,24 +770,10 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
   <text x="28" y="295" class="st" font-size="12" fill="var(--ok)" font-weight="700"
         transform="rotate(-90 28 295)">步骤 6 · 循环做下一步</text>
 
-  <path d="M 116 394 L 116 482 L 316 482" fill="none" stroke="var(--ok)"
-        stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a2g)"/>
-  <text x="124" y="474" class="st" font-size="11" fill="var(--ok)" font-weight="700">全做完</text>
-
-  <!-- 5b 小问题 → 回步骤 3(还在这一步,改完再看一遍);在 x=774 处跨过兵底的下行线 -->
-  <path d="M 332 394 L 332 408 L 762 408 Q 774 396 786 408 L 896 408 L 896 226 L 584 226"
-        fill="none" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a2i)"/>
-  <text x="912" y="342" class="st" font-size="11.5" fill="var(--info)" font-weight="700"
-        transform="rotate(-90 912 342)">5b · 改完再看一遍</text>
-
-  <!-- 5c 方向错了 与 兵底 → 都回步骤 1 重新要方案,兵底在 (774,424) 汇入 -->
-  <path d="M 548 394 L 548 424 L 936 424 L 936 98 L 584 98"
-        fill="none" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#a2b)"/>
-  <path d="M 774 394 L 774 424" fill="none" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 4"/>
-  <circle cx="774" cy="424" r="2.8" fill="var(--bad)"/>
-  <text x="742" y="446" class="st" text-anchor="middle" font-size="11.5" fill="var(--bad)" font-weight="700">撤销 / 退档后 → 重新要方案</text>
+  <path d="M 116 394 L 116 410 L 316 410" fill="none" stroke="var(--ok)"
+        stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a2)"/>
 </svg>
-<figcaption>七步流程。步骤 5 有三个分支,取决于你看完改动后的判断 —— <strong>5a 满意</strong>:方案全做完就去步骤 7,没做完就回步骤 3 做下一步;<strong>5b 小问题</strong>也回步骤 3,但它是「还在这一步」;<strong>5c 方向错了</strong>和<strong>兵底</strong>都退回步骤 1 重新要方案,差别只在退多远。最下面那一格才是「别人也绕不过」的</figcaption>
+<figcaption>七步流程。步骤 5 有三个分支,取决于你看完改动后的判断;最下面那一格才是「别人也绕不过」的</figcaption>
 </figure>
 
 <h3>每一步对应哪道防线</h3>
@@ -844,17 +785,17 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
   <th style="width:25%">对应哪道防线</th><th>细节在哪页</th>
 </tr></thead>
 <tbody>
-<tr><td><strong>0</strong></td><td>建安全网</td><td><span style="color:var(--ok)">④ 存档系统</span></td><td>第 <a class="pg" href="11-git-basics.html">11</a> 页</td></tr>
-<tr><td><strong>1</strong></td><td>先要方案,别写代码</td><td><span style="color:var(--plan)">① 先看方案</span></td><td>第 <a class="pg" href="13-claude-code.html">13</a> 页</td></tr>
-<tr><td><strong>2</strong></td><td>读方案 → 提意见 → 批准</td><td><span style="color:var(--plan)">① 先看方案</span></td><td>第 <a class="pg" href="13-claude-code.html">13</a>、<a class="pg" href="14-workflow.html">14</a> 页</td></tr>
+<tr><td><strong>0</strong></td><td>建安全网</td><td><span style="color:var(--ok)">④ 存档系统</span></td><td>第 11 页</td></tr>
+<tr><td><strong>1</strong></td><td>先要方案,别写代码</td><td><span style="color:var(--plan)">① 先看方案</span></td><td>第 13 页</td></tr>
+<tr><td><strong>2</strong></td><td>读方案 → 提意见 → 批准</td><td><span style="color:var(--plan)">① 先看方案</span></td><td>第 13、14 页</td></tr>
 <tr><td><strong>3</strong></td><td>只做第一步,并且自带验收</td><td><span style="color:var(--info)">② 让它自测</span></td><td>第 3–10、14 页</td></tr>
-<tr><td><strong>4</strong></td><td><strong>你自己看改动</strong></td><td><span style="color:var(--warn)">⑥ 你的眼睛</span></td><td>第 <a class="pg" href="11-git-basics.html">11</a>、<a class="pg" href="14-workflow.html">14</a>、<a class="pg" href="20-ai-boundary.html">20</a> 页</td></tr>
-<tr><td><strong>5a</strong></td><td>满意 → 全量检查 → 存档</td><td><span style="color:var(--ok)">④ 存档系统</span></td><td>第 <a class="pg" href="09-partial-vs-full.html">9</a>、<a class="pg" href="11-git-basics.html">11</a> 页</td></tr>
-<tr><td><strong>5b</strong></td><td>小问题 → 直接说</td><td>—(不动用任何撤销)</td><td>第 <a class="pg" href="14-workflow.html">14</a> 页</td></tr>
-<tr><td><strong>5c</strong></td><td>方向错 → 撤销</td><td><span style="color:var(--bad)">③</span> / <span style="color:var(--ok)">④</span></td><td>第 <a class="pg" href="12-git-undo.html">12</a>、<a class="pg" href="13-claude-code.html">13</a> 页</td></tr>
-<tr><td><strong>6</strong></td><td>循环 3–5,直到方案做完</td><td>②④ 反复咬合</td><td>第 <a class="pg" href="14-workflow.html">14</a> 页</td></tr>
-<tr><td><strong>7</strong></td><td>最后总审</td><td>② 的加强版</td><td>第 <a class="pg" href="10-flaky-e2e.html">10</a>、<a class="pg" href="14-workflow.html">14</a> 页</td></tr>
-<tr><td><strong>推上去</strong></td><td>过质量门禁</td><td><span style="color:var(--warn)">⑤ 质量门禁</span></td><td><strong>第 <a class="pg" href="17-quality-gate.html">17</a>–<a class="pg" href="19-gate-demo.html">19</a> 页</strong></td></tr>
+<tr><td><strong>4</strong></td><td><strong>你自己看改动</strong></td><td><span style="color:var(--warn)">⑥ 你的眼睛</span></td><td>第 11、14、20 页</td></tr>
+<tr><td><strong>5a</strong></td><td>满意 → 全量检查 → 存档</td><td><span style="color:var(--ok)">④ 存档系统</span></td><td>第 9、11 页</td></tr>
+<tr><td><strong>5b</strong></td><td>小问题 → 直接说</td><td>—(不动用任何撤销)</td><td>第 14 页</td></tr>
+<tr><td><strong>5c</strong></td><td>方向错 → 撤销</td><td><span style="color:var(--bad)">③</span> / <span style="color:var(--ok)">④</span></td><td>第 12、13 页</td></tr>
+<tr><td><strong>6</strong></td><td>循环 3–5,直到方案做完</td><td>②④ 反复咬合</td><td>第 14 页</td></tr>
+<tr><td><strong>7</strong></td><td>最后总审</td><td>② 的加强版</td><td>第 10、14 页</td></tr>
+<tr><td><strong>推上去</strong></td><td>过质量门禁</td><td><span style="color:var(--warn)">⑤ 质量门禁</span></td><td><strong>第 17–19 页</strong></td></tr>
 </tbody>
 </table>
 </div>
@@ -918,16 +859,16 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
 <table>
 <thead><tr><th style="width:16%">接下来</th><th style="width:28%">讲什么</th><th>为什么排在这个位置</th></tr></thead>
 <tbody>
-<tr><td><strong>第 <a class="pg" href="02-python-setup.html">2</a> 页</strong></td><td>Python 环境</td><td>后面所有例子都要在你电脑上跑起来,先打地基</td></tr>
-<tr><td><strong>第 <a class="pg" href="03-test-basics.html">3</a>–<a class="pg" href="10-flaky-e2e.html">10</a> 页</strong></td><td><span style="color:var(--info)">② 让它自测</span> 的全部细节</td>
+<tr><td><strong>第 2 页</strong></td><td>Python 环境</td><td>后面所有例子都要在你电脑上跑起来,先打地基</td></tr>
+<tr><td><strong>第 3–10 页</strong></td><td><span style="color:var(--info)">② 让它自测</span> 的全部细节</td>
     <td>内容最多的一道 —— 也是唯一「你多写一行提示词,它就多做一轮验证」的</td></tr>
-<tr><td><strong>第 <a class="pg" href="11-git-basics.html">11</a>–<a class="pg" href="12-git-undo.html">12</a> 页</strong></td><td><span style="color:var(--ok)">④ 存档系统</span></td>
+<tr><td><strong>第 11–12 页</strong></td><td><span style="color:var(--ok)">④ 存档系统</span></td>
     <td>放在测试之后,因为很多回退操作要配合检查一起用</td></tr>
-<tr><td><strong>第 <a class="pg" href="13-claude-code.html">13</a> 页</strong></td><td><span style="color:var(--plan)">①</span> 和 <span style="color:var(--bad)">③</span></td>
+<tr><td><strong>第 13 页</strong></td><td><span style="color:var(--plan)">①</span> 和 <span style="color:var(--bad)">③</span></td>
     <td>要先知道存档系统,才能理解「撤销为什么可以省」</td></tr>
-<tr><td><strong>第 <a class="pg" href="14-workflow.html">14</a> 页</strong></td><td>七步流程实战</td><td>汇总页,在真实项目上走一遍</td></tr>
-<tr><td><strong>第 <a class="pg" href="16-pipeline.html">16</a> 页</strong></td><td>流水线基础</td><td><strong>门禁的前置</strong> —— 不懂流水线不可能懂门禁</td></tr>
-<tr><td><strong>第 <a class="pg" href="17-quality-gate.html">17</a>–<a class="pg" href="19-gate-demo.html">19</a> 页</strong></td><td><span style="color:var(--warn)">⑤ 质量门禁</span></td>
+<tr><td><strong>第 14 页</strong></td><td>七步流程实战</td><td>汇总页,在真实项目上走一遍</td></tr>
+<tr><td><strong>第 16 页</strong></td><td>流水线基础</td><td><strong>门禁的前置</strong> —— 不懂流水线不可能懂门禁</td></tr>
+<tr><td><strong>第 17–19 页</strong></td><td><span style="color:var(--warn)">⑤ 质量门禁</span></td>
     <td>本版重点。概念 → 检查什么 → 真机实战</td></tr>
 </tbody>
 </table>
@@ -944,7 +885,7 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
 <tr><td>3</td><td>时间轴</td><td>动手前 / 动手中 / 出事后 / 交给团队时</td></tr>
 <tr><td>4</td><td>「什么时候救你」≠「什么时候操作它」</td><td>只有存档系统这两件事是分开的</td></tr>
 <tr><td>5</td><td>存档系统横跨全程</td><td>其他几道只在自己那一格有效</td></tr>
-<tr><td>6</td><td>第六件事:自己看改动</td><td><strong>唯一不能外包</strong></td></tr>
+<tr><td>6</td><td>第五件事:自己看改动</td><td><strong>唯一不能外包</strong></td></tr>
 <tr><td>7</td><td>七步流程 + 三层撤销阶梯</td><td>六件事按「什么时候会出事」排序的结果</td></tr>
 <tr><td>8</td><td>裁剪规则</td><td>0 / 4 / 5a 不能省,1–2 小任务可省,5c 可省</td></tr>
 </tbody>
@@ -959,7 +900,7 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
 
 <div class="foot">
   <p>第 01 页 / 共 23 页 · 覆盖知识点 1–8 · 难度 ★</p>
-  <p>本页不含需要核实的命令。含 1 处经核实修正:「先看方案模式」下 AI <strong>能</strong>运行命令做探索,只是不能编辑源文件(官方原文见第 <a class="pg" href="13-claude-code.html">13</a> 页)。</p>
+  <p>本页不含需要核实的命令。含 1 处经核实修正:「先看方案模式」下 AI <strong>能</strong>运行命令做探索,只是不能编辑源文件(官方原文见第 13 页)。</p>
 </div>
 
 </div>
@@ -975,6 +916,5 @@ GraphQL: Required status check "三道检查" is failing. (mergePullRequest)</co
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
-<script src="_depmap.js" defer></script>
 </body>
 </html>

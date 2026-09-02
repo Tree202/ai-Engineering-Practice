@@ -33,23 +33,41 @@ OUT = os.path.join(ROOT, "myshop-source.zip")
 
 
 def main() -> int:
-    with zipfile.ZipFile(OUT, "w", zipfile.ZIP_DEFLATED) as z:
-        for rel in 白名单:
-            src = os.path.join(MS, rel.replace("/", os.sep))
-            if not os.path.exists(src):
-                print("缺文件,拒绝打包:", rel)
+    # 先写临时文件,校验通过后才原子改名顶掉旧包。
+    # 旧写法直接写 OUT:少一个文件就 return 1,而那时旧包已经被清空了 ——
+    # 「拒绝打包」实际留下的是一个合法但残缺的短包。第三轮核验指出的。
+    tmp = OUT + ".tmp"
+    try:
+        with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as z:
+            for rel in 白名单:
+                src = os.path.join(MS, rel.replace("/", os.sep))
+                if not os.path.exists(src):
+                    print("缺文件,拒绝打包:", rel)
+                    return 1
+                # 固定时间戳 → 可复现打包:内容不变,重打得到同一个 SHA。
+                # z.write 会把源文件 mtime 写进条目,touch 一下就换哈希,没法对账。
+                zi = zipfile.ZipInfo("myshop/" + rel, date_time=(1980, 1, 1, 0, 0, 0))
+                zi.compress_type = zipfile.ZIP_DEFLATED
+                zi.external_attr = 0o644 << 16
+                # 不钉 create_system 的话,同样的内容在 Linux 上重打会得到
+                # 另一个 SHA(Windows=0 / Unix=3),跨机对账就对不上。
+                zi.create_system = 3
+                with open(src, "rb") as fh:
+                    z.writestr(zi, fh.read())
+        with zipfile.ZipFile(tmp) as z:
+            names = z.namelist()
+            # 不用 assert:python -O 会把 assert 整条删掉,自检就静默消失了。
+            if len(names) != len(白名单):
+                print("条目数不符,拒绝发布:%d != %d" % (len(names), len(白名单)))
                 return 1
-            # 固定时间戳 → 可复现打包:内容不变,重打得到同一个 SHA。
-            # z.write 会把源文件 mtime 写进条目,touch 一下就换哈希,没法对账。
-            zi = zipfile.ZipInfo("myshop/" + rel, date_time=(1980, 1, 1, 0, 0, 0))
-            zi.compress_type = zipfile.ZIP_DEFLATED
-            zi.external_attr = 0o644 << 16
-            with open(src, "rb") as fh:
-                z.writestr(zi, fh.read())
-    with zipfile.ZipFile(OUT) as z:
-        names = z.namelist()
-        assert len(names) == len(白名单), names
-        assert not any(b in n for n in names for b in 禁止), "打进了禁止项"
+            脏 = [n for n in names for b in 禁止 if b in n]
+            if 脏:
+                print("打进了禁止项,拒绝发布:", 脏)
+                return 1
+        os.replace(tmp, OUT)          # 同目录改名,原子;失败时旧包原样保留
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
     h = hashlib.sha256(open(OUT, "rb").read()).hexdigest()
     print("myshop-source.zip:%d 条目 · %d 字节" % (len(白名单), os.path.getsize(OUT)))
     print("SHA-256:", h.upper())

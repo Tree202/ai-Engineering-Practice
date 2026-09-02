@@ -43,6 +43,8 @@ import re
 import sys
 from html.parser import HTMLParser
 
+from _baseline import 基线目录, 已修目录  # noqa: E402
+
 # ---------------------------------------------------------------- 参数
 
 TOL = 8.0          # 端点到最近节点包围盒的容差(px,SVG 用户坐标)
@@ -689,13 +691,20 @@ if __name__ == "__main__":
     except Exception:
         pass
 
-    BAD = "D:/ext.zhaoliuliu3/Desktop/ai-workflow"
-    GOOD = "D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow"
+    BAD = 基线目录()
+    GOOD = 已修目录()
+    坏 = 0
 
     print("### 容差 TOL = %.1f px\n" % TOL)
-    _show("坏样本(应报出 01 页那条悬空边)", os.path.join(BAD, "01-overview.html"))
-    _show("好样本(同一处,应无检出)", os.path.join(GOOD, "01-overview.html"))
-    _show("坏样本 02(本路不负责,预期无检出)", os.path.join(BAD, "02-python-setup.html"))
+    if not BAD:
+        print("(无只读基线,真值对照段跳过 —— 不算通过)")
+        坏 += 1
+    else:
+        坏 += 0 if _show("坏样本(应报出 01 页那条悬空边)",
+                          os.path.join(BAD, "01-overview.html")) == 1 else 1
+        坏 += 0 if _show("好样本(同一处,应无检出)",
+                          os.path.join(GOOD, "01-overview.html")) == 0 else 1
+        _show("坏样本 02(本路不负责,预期无检出)", os.path.join(BAD, "02-python-setup.html"))
 
     print("=" * 78)
     print("全量:%s 下 23 页" % GOOD)
@@ -710,4 +719,4 @@ if __name__ == "__main__":
             for r in res:
                 print("  %-24s L%-5d %s" % (fn, r["line"], r["msg"]))
     print("  总检出数 = %d" % total)
-    sys.exit(0)
+    sys.exit(1 if 坏 else 0)   # 以前硬写 exit(0):真值对不上也报绿

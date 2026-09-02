@@ -29,6 +29,8 @@ import re
 import sys
 from html.parser import HTMLParser
 
+from _baseline import 基线目录, 已修目录  # noqa: E402
+
 KIND = "grid_text"
 
 # ---------------------------------------------------------------- 常量
@@ -451,8 +453,8 @@ def check(path: str, html: str) -> list[dict]:
 
 # ---------------------------------------------------------------- 自测
 
-_BAD_DIR = r"D:/ext.zhaoliuliu3/Desktop/ai-workflow"
-_GOOD_DIR = r"D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow"
+_BAD_DIR = 基线目录()      # 缺基线时为空串,真值对照段会明说跳过
+_GOOD_DIR = 已修目录()
 
 
 def _run(path):
@@ -524,11 +526,15 @@ def _case_test():
 
 def _selftest():
     import os
-    _case_test()
+    坏 = 0 if _case_test() else 1
+    if not _BAD_DIR:
+        print("（无只读基线，真值对照段跳过 —— 不算通过）")
+        return 1
     bad = _show("坏样本", os.path.join(_BAD_DIR, "02-python-setup.html"))
     good = _show("好样本（已修）", os.path.join(_GOOD_DIR, "02-python-setup.html"))
 
     ok = any(".chk" in r["detail"] for r in bad) and not any(".chk" in r["detail"] for r in good)
+    坏 += 0 if ok else 1
     print("=" * 78)
     print(f"真值判定：坏样本报出 .chk li 且好样本不报 -> {'PASS' if ok else 'FAIL'}")
 
@@ -563,8 +569,9 @@ def _selftest():
         if res:
             print(f"  {name:<28} {len(res)}")
     print(f"  旧目录总计 {total_old} 条")
+    return 1 if 坏 else 0
 
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    _selftest()
+    sys.exit(_selftest())   # 以前裸调,打印 FAIL 也退 0

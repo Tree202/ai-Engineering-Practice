@@ -1,6 +1,11 @@
-# 教程仓库自己的门禁 —— 消费三个巡检脚本的退出码。
-# check_layout 需要本机只读基线做真值自检,云端没有,所以 CI 只跑
-# 不依赖基线的两项;版式巡检仍在本机提交前跑(见 变更清单)。
+# 教程仓库自己的门禁 —— 消费巡检脚本的退出码。
+#
+# 四步都在云端跑。此前只跑前两步,注释里给的理由是「check_layout 需要本机
+# 只读基线,云端没有」—— 第三轮核验发现这个理由不成立:脚本本来就有
+# --allow-missing-baseline,真正卡住的是无基线时退出码恒为非零(干净退 2、
+# 有发现退 1),永远拿不到绿灯。现在把两页真值样本随仓库发布
+# (tools/layout_rules/fixtures/,约 100 KB,见该目录 README),
+# 云端也能跑完整的准入自检,版式巡检才算真门禁。
 name: checks
 on: [push, pull_request]
 jobs:
@@ -18,3 +23,11 @@ jobs:
         run: python tools/check_site.py
       - name: 口径巡检
         run: python tools/check_claims.py
+      - name: 版式与结构巡检（含真值自检与终点列变异锁）
+        run: python tools/check_layout.py
+      - name: 六个规则模块各自的自测
+        run: |
+          for f in tools/layout_rules/det_*.py; do
+            echo "--- $f ---"
+            python "$f" > /dev/null || { echo "自测失败:$f"; exit 1; }
+          done

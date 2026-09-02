@@ -32,6 +32,8 @@ import math
 import re
 from html.parser import HTMLParser
 
+from _baseline import 基线目录, 已修目录  # noqa: E402
+
 KEY = "overflow"
 
 # ---------------------------------------------------------------- 常量 / 阈值
@@ -755,8 +757,8 @@ def _one(line, tag, bb, rotated, desc, vb):
 
 # ---------------------------------------------------------------- 自测
 
-BAD_DIR = "D:/ext.zhaoliuliu3/Desktop/ai-workflow"             # 只读,原始(未修)
-GOOD_DIR = "D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow"  # 已修版
+BAD_DIR = 基线目录()     # 只读原版;缺失时为空串,下面的存在性守卫会跳过
+GOOD_DIR = 已修目录()    # 已修版,随仓库走
 
 
 def _read(p):

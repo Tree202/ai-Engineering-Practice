@@ -610,42 +610,47 @@
 <tr><td><strong>只读不敲</strong></td><td style="color:var(--bad)">❌ 最没用的读法。全书有五个「亲手把代码改坏」的实验,不动手等于没读</td></tr>
 <tr><td><strong>边读边敲</strong></td><td style="color:var(--ok)">✅ 推荐。所有代码块都是完整的、可直接复制的,路径写全了,没有省略号</td></tr>
 <tr><td><strong>先跳到第 <a class="pg" href="22-cheatsheet.html">22</a> 页</strong></td><td>如果你只是想查一条命令怎么写</td></tr>
-<tr><td><strong>抄第 <a class="pg" href="22-cheatsheet.html">22</a> 页的提示词模板</strong></td><td style="color:var(--ok)">✅ 每条约束都有原因,第 <a class="pg" href="14-workflow.html">14</a>、<a class="pg" href="20-ai-boundary.html">20</a> 页解释为什么</td></tr>
+<tr><td><strong>抄第 <a class="pg" href="13-claude-code.html">13</a>、<a class="pg" href="14-workflow.html">14</a> 页的提示词模板</strong></td><td style="color:var(--ok)">✅ 每条约束都有原因,第 <a class="pg" href="14-workflow.html">14</a>、<a class="pg" href="20-ai-boundary.html">20</a> 页解释为什么</td></tr>
 </tbody>
 </table>
 </div>
 
 <div class="box good">
-  <b class="t">一件建议先做的事</b>
-  第 <a class="pg" href="02-python-setup.html">2</a> 页会带你在自己电脑上建好练习项目。<strong>先把那一页做完</strong>,后面每页都能立刻验证。
+  <b class="t">两件必须先做的事</b>
+  <strong>① 拿代码</strong> —— 按下面那个框走 A 或 B,把配套项目拿到手。<br>
+  <strong>② 搭环境</strong> —— 进到那个目录,按第 <a class="pg" href="02-python-setup.html">2</a> 页把虚拟环境、三个工具、<code>pyproject.toml</code> 弄好。
   <br><br>
-  项目路径:下一个框里两种方式拿到的都行,全书命令里写作 <code>&lt;你的项目&gt;/myshop</code>。
+  两样都要:第 <a class="pg" href="02-python-setup.html">2</a> 页搭的是<strong>环境</strong>,不产出业务代码;A/B 拿到的是<strong>代码</strong>,不含虚拟环境
+  (<code>.venv/</code> 按惯例不进存档)。齐了之后,从第 <a class="pg" href="06-myshop.html">6</a> 页起每一页都能立刻验证。
+  <br><br>
+  项目路径:全书命令里写作 <code>&lt;你的项目&gt;/myshop</code>。
 </div>
 
 <div class="box key">
   <b class="t">&#128230; 先把配套项目拿到手</b>
-  全书从第 <a class="pg" href="06-myshop.html">6</a> 页起都在这个项目上动手,
+  全书的动手练习都在这个项目上,
   <strong>没它就只能干读</strong>。两条路任选一条:
   <br><br>
   <strong>A · 直接克隆(推荐,自带完整存档历史)</strong>
 <pre style="margin:8px 0"><code>git clone https://github.com/Tree202/myshop-gate-demo.git myshop</code></pre>
   拿到的就是第 <a class="pg" href="19-gate-demo.html">19</a> 页那个真机演示的仓库 &mdash;&mdash;
-  连它的提交历史都是教学资产。<em>还没装 git?macOS 自带;Windows 到 <code>git-scm.com</code> 下载安装包 —— 第 <a class="pg" href="02-python-setup.html">2</a> 页第五节末尾的 Windows 对照框里有详细说明。</em>
+  连它的提交历史都是教学资产。<em>还没装 git?macOS 自带;Windows 到 <code>git-scm.com</code> 下载安装包 —— 第 <a class="pg" href="02-python-setup.html">2</a> 页第二节末尾的 Windows 对照框里有详细说明。</em>
   <br><br>
   <strong>B · 不用 git,下载压缩包</strong>
   在 <code>github.com/Tree202/myshop-gate-demo</code> 页面点绿色的 <b>Code &rarr; Download ZIP</b>,
   解压后把文件夹改名为 <code>myshop</code>。
-  <em>这种方式拿不到存档历史,第 11–12 页需要你自己 <code>git init</code>。</em>
+  <em>这种方式拿不到存档历史,第 11–12 页需要你自己 <code>git init</code>
+  —— 那时屏幕上会是 <code>Initialized empty…</code>;走 A 的人仓库已存在,会是
+  <code>Reinitialized existing…</code>,都正常。</em>
   <br><br>
-  <strong>那第 <a class="pg" href="02-python-setup.html">2</a> 页的「亲手建项目」算什么?</strong>
-  它不是第三条路,是 A/B 之外的<strong>补课</strong>:那一页带你亲手建出
-  虚拟环境、三工具配置、<code>price.py</code> 和第一条测试 ——
-  意义在于<strong>弄懂每个文件为什么在那儿</strong>。
-  但它<strong>建不出完整项目</strong>(没有 <code>order.py</code>、<code>api.py</code>、
-  <code>web.py</code> 及其对应测试),所以第 <a class="pg" href="06-myshop.html">6</a> 页那个
-  <code>17 passed</code> 基线<strong>仍需要你先走 A 或 B</strong>。
+  <strong>那第 <a class="pg" href="02-python-setup.html">2</a> 页算什么?</strong>
+  它搭的是<strong>环境</strong>,不是代码 —— 那一页不会建出 <code>price.py</code>、
+  <code>order.py</code> 这些业务文件(它自己也说了,那些第 <a class="pg" href="06-myshop.html">6</a> 页才真的建),
+  代码只能靠 A 或 B 拿;而 A/B 拿到的又没有 <code>.venv</code>。
+  所以不是二选一:<strong>先走 A/B 拿代码,再在拿到的目录里走第 <a class="pg" href="02-python-setup.html">2</a> 页</strong>
+  (第 <a class="pg" href="02-python-setup.html">2</a> 页里 <code>mkdir</code>、<code>touch</code> 那几步遇到已存在的文件,跳过就行)。
   <br><br>
-  拿到之后怎么验证它是好的:第 <a class="pg" href="06-myshop.html">6</a> 页第七节。
+  两样都齐了怎么验证:第 <a class="pg" href="06-myshop.html">6</a> 页第七节。
 </div>
 
 <div class="box trap">

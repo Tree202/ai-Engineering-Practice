@@ -35,6 +35,8 @@ import re
 import sys
 from pathlib import Path
 
+from _baseline import 基线目录, 已修目录  # noqa: E402
+
 # --------------------------------------------------------------------------
 # 基础正则
 # --------------------------------------------------------------------------
@@ -415,8 +417,9 @@ def check(path: str, html: str) -> list[dict]:
 # 自测
 # --------------------------------------------------------------------------
 
-BAD_DIR = Path(r"D:/ext.zhaoliuliu3/Desktop/ai-workflow")          # 只读!
-GOOD_DIR = Path(r"D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow")
+_b = 基线目录()
+BAD_DIR = Path(_b) if _b else None      # 只读!缺失时为 None
+GOOD_DIR = Path(已修目录())
 
 
 def _run_file(p: Path) -> list[dict]:
@@ -457,7 +460,8 @@ FIXTURE = """<!doctype html><html><body>
 </body></html>"""
 
 
-def _mutation_tests() -> None:
+def _mutation_tests() -> int:
+    坏 = 0
     """在**真实页面**上做内存内变异,证明规则不是只对玩具夹具有效。
     只读原文件,绝不写回。"""
     src = (GOOD_DIR / "01-overview.html").read_text(encoding="utf-8", errors="replace")
@@ -478,6 +482,7 @@ def _mutation_tests() -> None:
     ]
     for title, mutated, want in cases:
         hits = [r for r in check("<mutated 01-overview>", mutated) if r["kind"] == want]
+        坏 += 0 if hits else 1
         flag = "命中" if hits else "!! 没报出来 !!"
         print(f"  [{flag}] {title}")
         for r in hits[:2]:
@@ -486,15 +491,19 @@ def _mutation_tests() -> None:
     cap_src = (GOOD_DIR / "19-gate-demo.html").read_text(encoding="utf-8", errors="replace")
     mutated = cap_src.replace("<figcaption>六幕证据链", "<figcaption>八幕证据链", 1)
     hits = [r for r in check("<mutated 19>", mutated) if r["kind"] == "fig-count"]
+    坏 += 0 if hits else 1
     print(f"  [{'命中' if hits else '!! 没报出来 !!'}] 把图注「六幕证据链」改成「八幕证据链」")
     for r in hits:
         print(f"           L{r['line']} [{r['kind']}] {r['msg']}")
     # 反向:原文不该报
     back = [r for r in check("<orig 19>", cap_src) if r["kind"] == "fig-count"]
+    坏 += 0 if not back else 1
     print(f"  [{'正确沉默' if not back else '!! 误报 !!'}] 原版 19-gate-demo 图注「六幕」")
+    return 坏
 
 
-def _selftest() -> None:
+def _selftest() -> int:
+    坏 = 0
     try:
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
@@ -503,22 +512,32 @@ def _selftest() -> None:
     print("=" * 74)
     print("0) 合成夹具 —— 验证每条规则都会响")
     print("=" * 74)
-    for r in check("<fixture>", FIXTURE):
+    _fx = check("<fixture>", FIXTURE)
+    for r in _fx:
         print(f"    L{r['line']:<4} [{r['kind']}] {r['msg']}")
+    # 夹具里埋了重复 id、悬空引用、类型不匹配、缺图注 —— 一条都不报,
+    # 说明 check() 已经废了(哪怕它「零问题」跑得飞快)。
+    坏 += 0 if len(_fx) >= 4 else 1
+    print(f"    合成夹具检出 {len(_fx)} 条(至少应有 4 条)"
+          f"{'' if len(_fx) >= 4 else '  <== 失败'}")
 
     print()
     print("=" * 74)
     print("0b) 真实页面变异测试 —— 证明规则在真markup上也能响")
     print("=" * 74)
-    _mutation_tests()
+    坏 += _mutation_tests()
 
     print()
     print("=" * 74)
     print("1) 真值样本对照(缺陷 A:01-overview 七步图缺回程边 / 缺陷 B:02 的 grid 图注)")
     print("=" * 74)
-    for name in ("01-overview.html", "02-python-setup.html"):
-        _report(f"坏样本 {name}", BAD_DIR / name)
-        _report(f"好样本 {name}", GOOD_DIR / name)
+    if BAD_DIR is None:
+        print("  (无只读基线,真值对照段跳过 —— 不算通过)")
+        坏 += 1
+    else:
+        for name in ("01-overview.html", "02-python-setup.html"):
+            _report(f"坏样本 {name}", BAD_DIR / name)
+            _report(f"好样本 {name}", GOOD_DIR / name)
 
     print()
     print("=" * 74)
@@ -543,7 +562,7 @@ def _selftest() -> None:
     print("3) 旧版全书(只读对照)")
     print("=" * 74)
     tot2 = 0
-    old = sorted(p for p in BAD_DIR.glob("*.html") if p.name[0].isdigit())
+    old = sorted(p for p in BAD_DIR.glob("*.html") if p.name[0].isdigit()) if BAD_DIR else []
     for p in old:
         res = _run_file(p)
         tot2 += len(res)
@@ -552,7 +571,8 @@ def _selftest() -> None:
             for r in res:
                 print(f"    L{r['line']:<5} [{r['kind']}] {r['msg']}")
     print(f"\n  页数 = {len(old)},总检出 = {tot2}")
+    return 1 if 坏 else 0
 
 
 if __name__ == "__main__":
-    _selftest()
+    sys.exit(_selftest())

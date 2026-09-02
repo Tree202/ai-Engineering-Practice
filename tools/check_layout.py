@@ -126,7 +126,13 @@ def _终点列(html: str, line, detail: str) -> bool:
         if not 节点:
             return False
         最右 = max(n[0] for n in 节点)
-        同列 = [n for n in 节点 if abs(n[0] - 最右) <= 12]
+        最右左 = min(n[0] - n[1] for n in 节点 if abs(n[0] - 最右) <= 12)
+        # 「同列」必须左右两边都对齐 —— 只比右边缘的旧写法有个洞:
+        # 01 页 L585 那张图里一条通栏色带(x=60 w=816, 右缘 876)会和
+        # 真正的右列节点(x=722 w=156, 右缘 878)算成同列,凑足 2 个,
+        # 于是单个真断开的节点被豁免。第三轮对抗核验拉出来的。
+        同列 = [n for n in 节点
+                if abs(n[0] - 最右) <= 12 and abs((n[0] - n[1]) - 最右左) <= 12]
         return abs(x2 - 最右) <= 12 and len(同列) >= 2
     return False
 
@@ -209,10 +215,13 @@ def 真值自检(原版: str, 已修: str) -> int:
     print("真值自检(原版必须报、已修版必须不报)")
     print("=" * 62)
     坏 = 0
-    for 文件, 规则名, 说明 in [
-        ("01-overview.html", "dangling_node", "七步图 5b/5c/兜底 没有出边"),
-        ("01-overview.html", "dangling_edge", "箭头停在步骤 7 方框外"),
-        ("02-python-setup.html", "grid_text", ".chk 清单竖排"),
+    # 期望值写死成**定值**而不是 n0 > 0。旧写法只要“报了至少一条”就算过,
+    # 那么收窄规则一旦把三条里的「兜底」吃掉,剩下 2 > 0 依旧绿灯 ——
+    # 等于对放松性回归零守护。第三轮对抗核验指出的。
+    for 文件, 规则名, 期望, 说明 in [
+        ("01-overview.html", "dangling_node", 3, "七步图 5b/5c/兜底 没有出边"),
+        ("01-overview.html", "dangling_edge", 1, "箭头停在步骤 7 方框外"),
+        ("02-python-setup.html", "grid_text", 7, ".chk 清单竖排"),
     ]:
         p0, p1 = os.path.join(原版, 文件), os.path.join(已修, 文件)
         if not (os.path.exists(p0) and os.path.exists(p1)):
@@ -220,20 +229,55 @@ def 真值自检(原版: str, 已修: str) -> int:
             continue
         n0 = len([x for x in 扫一个文件(p0) if x.get("rule") == 规则名])
         n1 = len([x for x in 扫一个文件(p1) if x.get("rule") == 规则名])
-        ok = n0 > 0 and n1 == 0
+        ok = n0 == 期望 and n1 == 0
         坏 += 0 if ok else 1
-        print("  %s  %-24s 原版 %d 条 / 已修版 %d 条" % ("通过" if ok else "失败!!", 说明, n0, n1))
+        print("  %s  %-24s 原版 %d 条(期望 %d) / 已修版 %d 条"
+              % ("通过" if ok else "失败!!", 说明, n0, 期望, n1))
+
+    # 阳性对照:这两张左右流向的图本就不该报。它们随仓库走,
+    # 不依赖只读基线 —— 终点列判据如果被收得太紧,这两条会先发作。
+    _kb = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "kb")
+    for 文件, 说明 in [("05-choose-where.html", "kb/05 决策树右列 4 个答案终点"),
+                    ("06-subagent-fork.html", "kb/06 右列 2 个回传终点")]:
+        p = os.path.join(_kb, 文件)
+        if not os.path.exists(p):
+            print("  跳过 %-22s (缺样本)" % 说明)
+            continue
+        m = len([x for x in 扫一个文件(p) if x.get("rule") == "dangling_node"])
+        坏 += 0 if m == 0 else 1
+        print("  %s  %-24s 应为 0 条 / 实际 %d 条" % ("通过" if m == 0 else "失败!!", 说明, m))
+
+    # 变异锁:给真值样本那张图注入一条**右缘贴齐画布的通栏矩形**,缺陷必须照样报满。
+    # 判据一旦退回「只比右边缘」,通栏矩形就会和右列节点凑成「同列 2 个」,
+    # 把「兜底」整条吞掉(实测 3 → 2)。这条锁就是防这个的 —— 只在内存里改,不写盘。
+    p0 = os.path.join(原版, "01-overview.html")
+    if not os.path.exists(p0):
+        print("  跳过  终点列变异锁              (缺样本)")
+    else:
+        h = io.open(p0, encoding="utf-8", errors="replace").read()
+        i = h.find("兜底")
+        a, b = h.rfind("<svg", 0, i), h.find("</svg>", i)
+        seg = h[a:b]
+        右缘 = max(float(g[0]) + float(g[2]) for g in _节点.findall(seg))
+        毒 = '<rect x="40" y="8" width="%.0f" height="26" rx="6" fill="none" stroke="#888"/>' % (右缘 - 40)
+        import det_dangling_node as _d
+        h2 = h[:b] + 毒 + h[b:]
+        got = _d.check(p0, h2) or []
+        m = len(收窄("dangling_node", p0, h2, got))
+        坏 += 0 if m == 3 else 1
+        print("  %s  %-24s 注入通栏矩形后仍应 3 条 / 实际 %d 条"
+              % ("通过" if m == 3 else "失败!!", "终点列变异锁", m))
+
     print()
     return 坏
 
 
 def _猜基线():
-    """基线目录是只读原件,不随仓库发布。按约定找:
-    仓库同级的 ai-workflow/ → 环境变量 AIWF_BASELINE → 都没有则由主流程报错退 2。
-    此前这里写死作者机器的绝对路径,换台机器必然找不到。"""
-    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    cand = os.path.join(os.path.dirname(_root), "ai-workflow")
-    return cand if os.path.isdir(cand) else ""
+    """基线目录(只读原件)的查找顺序见 layout_rules/_baseline.py。
+    AIWF_BASELINE → 仓库同级 ai-workflow/ → 随仓库发布的 fixtures 快照。
+    第三个候选是第三轮新加的 —— 有了它,云端也能跑真值自检。"""
+    import _baseline
+    return _baseline.基线目录()
 
 
 if __name__ == "__main__":
@@ -271,4 +315,4 @@ if __name__ == "__main__":
         sys.exit(1)
     if n:
         sys.exit(1)          # 巡检发现问题也要非零退出,否则不能当门禁用
-    sys.exit(2 if 缺基线 else 0)
+    sys.exit(2 if 缺基线 else 0)   # 无基线只能给 2:没自检的「0 个问题」不可信

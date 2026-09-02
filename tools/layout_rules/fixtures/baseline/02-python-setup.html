@@ -19,7 +19,7 @@
     --ink:#16181F;--soft:#464B59;--faint:#767C8C;--rule:#DFE2EA;--rule2:#C3C9D6;--accent:#2E4A7D;--accent-soft:#E8EDF6;--code:#F0F2F7;
     --ok:#2C7A4B;--ok-soft:#E6F4EB;--warn:#96700F;--warn-soft:#FBF2DC;--bad:#A8452F;--bad-soft:#FBEAE5;
     --info:#1F6B65;--info-soft:#E2F2F0;--plan:#5B4A94;--plan-soft:#EEE9F8;}}
-  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:64px}
+  *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:78px}
   body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.8;-webkit-font-smoothing:antialiased}
   .nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--rule)}
   .nav-in{max-width:1140px;margin:0 auto;padding:9px 22px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -85,8 +85,8 @@
   .step .c>:first-child{margin-top:0}.step .c>:last-child{margin-bottom:0}
   @media(max-width:560px){.step{grid-template-columns:1fr;gap:3px}.step .n{padding-top:0}}
   .chk{list-style:none;padding-left:0}
-  .chk li{position:relative;padding-left:26px;margin:9px 0}
-  .chk li::before{content:"\2610";position:absolute;left:0;top:0;font-family:var(--mono);color:var(--faint);font-size:17px;line-height:inherit}
+  .chk li{display:grid;grid-template-columns:26px 1fr;gap:8px;margin:9px 0}
+  .chk li::before{content:"\2610";font-family:var(--mono);color:var(--faint);font-size:17px}
   @media(max-width:640px){.wrap{padding:26px 15px 70px}h1{font-size:25px}h2{font-size:20px}h3{font-size:17px}
     pre{font-size:12px}.term{padding:2px 15px 17px}}
 </style>
@@ -108,7 +108,7 @@
   </div>
 </div></div>
 <div class="wrap">
-<span class="kicker">第 02 页 · 难度 ★ · 前置:第 <a class="pg" href="01-overview.html">01</a> 页</span>
+<span class="kicker">第 02 页 · 难度 ★ · 前置:第 01 页</span>
 <h1>Python 环境从零开始</h1>
 <p class="lede">
 这一页把地基打好。做完之后你会有一个能跑的练习项目,后面每一页的例子都能立刻在你自己电脑上验证。
@@ -119,7 +119,7 @@
   <b class="t">这一页要花你多久</b>
   纯敲命令约 <strong>10 分钟</strong>(装工具要等 25 秒左右)。连着读讲解约 <strong>40 分钟</strong>。
   <br><br>
-  <strong>强烈建议边读边敲。</strong>第 <a class="pg" href="08-break-it.html">8</a> 页有五个亲手实验,全靠这一页建的项目。
+  <strong>强烈建议边读边敲。</strong>第 8 页有五个亲手实验,全靠这一页建的项目。
 </div>
 
 <div class="toc">
@@ -144,15 +144,6 @@
 <p>把下面这条整个复制粘贴进去,回车:</p>
 
 <pre><code>python3 --version; git --version; which python3</code></pre>
-
-<div class="box trap">
-  <b class="t">&#9888; Windows 读者:这条命令要换一下</b>
-  PowerShell 里<strong>没有 <code>which</code></strong>,直接跑会报「无法识别」。换成:
-<pre style="margin:8px 0"><code>python --version; git --version; (Get-Command python).Source</code></pre>
-  注意两处不同:Windows 上是 <code>python</code> 而不是 <code>python3</code>;
-  <code>which</code> 对应 <code>Get-Command</code>。
-  <em>完整对照见本页第二节末尾那个 Windows 框。</em>
-</div>
 
 <h4>你应该看到类似这样的东西</h4>
 
@@ -200,14 +191,14 @@ git version 2.39.5 (Apple Git-154)
   </div></div>
 
   <div class="step"><div class="n">&#9314; 位置</div><div class="c">
-    <p>它是<strong>所有后续操作的前置</strong>。第 <a class="pg" href="03-test-basics.html">3</a> 页的测试工具、第 <a class="pg" href="04-static-check.html">4</a> 页的检查工具,全装进它里面。</p>
+    <p>它是<strong>所有后续操作的前置</strong>。第 3 页的测试工具、第 4 页的检查工具,全装进它里面。</p>
     <p>它和「系统 Python」是<strong>并列关系</strong> —— 两个互不干扰的 Python,你选择用哪个。</p>
   </div></div>
 
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
-    <p>先建项目文件夹并进去(把 <code>&lt;你的项目&gt;</code> 换成你自己放代码的目录):</p>
-<pre><code>mkdir -p &lt;你的项目&gt;/myshop</code></pre>
-<pre><code>cd &lt;你的项目&gt;/myshop</code></pre>
+    <p>先建项目文件夹并进去:</p>
+<pre><code>mkdir -p /Users/daijie27/Desktop/claude_data/learn_claude/myshop</code></pre>
+<pre><code>cd /Users/daijie27/Desktop/claude_data/learn_claude/myshop</code></pre>
     <p>然后建虚拟环境:</p>
 <pre><code>python3 -m venv .venv</code></pre>
     <p>这条命令没有任何输出,<strong>没输出就是成功了</strong>。检查一下:</p>
@@ -223,7 +214,7 @@ git version 2.39.5 (Apple Git-154)
     <p><strong>误区 1:「我直接装包不行吗」。</strong>不建议。往系统 Python 里装东西可能污染系统环境,
     迟早和别的项目打架。新版 macOS 甚至会直接拒绝你。</p>
     <p><strong>误区 2:「<code>.venv</code> 要提交到存档里」。</strong>绝对不要。
-    它有<strong>几千个文件、几十 MB</strong>,而且随时能重新生成。第 <a class="pg" href="11-git-basics.html">11</a> 页会教你怎么让存档系统忽略它。</p>
+    它有<strong>几千个文件、几十 MB</strong>,而且随时能重新生成。第 11 页会教你怎么让存档系统忽略它。</p>
   </div></div>
 </div>
 
@@ -256,27 +247,7 @@ git version 2.39.5 (Apple Git-154)
   然后开始「修」一个根本不存在的问题。
   <br><br>
   <strong>所以:凡是要告诉 AI 的命令,一律写成 <code>.venv/bin/python -m xxx</code> 这种全路径形式。</strong>
-  这一条会在第 <a class="pg" href="21-automation.html">21</a> 页变成一份配置文件里的硬性规定。
-</div>
-
-<div class="box note">
-  <b class="t">Windows 读者对照(集中在这里,记住这五条)</b>
-  &#9312; <code>.venv/bin/python</code> &rarr; <code>.venv\Scripts\python.exe</code>(全书所有 <code>.venv/bin/</code> 同理替换)。
-  <br><br>
-  &#9313; 激活命令:PowerShell 用 <code>.\.venv\Scripts\Activate.ps1</code>,CMD 用 <code>.venv\Scripts\activate.bat</code> —— 但本书原则是写全路径、不依赖激活,Windows 同样适用。
-  <br><br>
-  &#9314; <strong>命令连接符 <code>&amp;&amp;</code></strong>:本书很多命令写成
-  <code>A &amp;&amp; B</code>(A 成功才跑 B)。<strong>Windows PowerShell 5.1（系统自带那个）不支持 <code>&amp;&amp;</code></strong>,
-  会直接报语法错误。三条出路:<b>分两行分别跑</b>(最稳)、用 <code>;</code> 连接
-  (不管前一条成不成功都会跑后一条)、或装 <b>PowerShell 7</b>(<code>pwsh</code>,支持 <code>&amp;&amp;</code>)。
-  <br><br>
-  &#9315; <strong>没装 git 的话</strong>:macOS 自带;Windows 到 <code>git-scm.com</code> 下载安装包,
-  一路下一步即可(它会顺带装上 Git Bash —— 在那个终端里 <code>&amp;&amp;</code> 和 <code>which</code> 都能用,
-  想完全照书上的命令敲就用它)。
-  <br><br>
-  &#9316; <code>touch</code> &rarr; <code>New-Item -ItemType File</code>,<code>mkdir -p</code> &rarr; <code>mkdir</code>(PowerShell 自动递归)。
-  <br><br>
-  另:终端中文乱码时先执行 <code>$env:PYTHONUTF8="1"</code>。
+  这一条会在第 21 页变成一份配置文件里的硬性规定。
 </div>
 
 <h4>装了却说找不到?一条命令诊断</h4>
@@ -317,9 +288,9 @@ Installing collected packages: typing_extensions, tomli, ruff, pygments,
 <table>
 <thead><tr><th style="width:14%">工具</th><th style="width:22%">中文叫法</th><th style="width:26%">干什么</th><th>哪一页细讲</th></tr></thead>
 <tbody>
-<tr><td><code>pytest</code></td><td>测试运行器</td><td>执行你写的测试,告诉你哪条过了哪条挂了</td><td>第 <a class="pg" href="03-test-basics.html">3</a> 页</td></tr>
-<tr><td><code>mypy</code></td><td>类型检查器</td><td><strong>不运行代码</strong>,只检查「类型对不对」。秒级,覆盖 100% 代码</td><td>第 <a class="pg" href="04-static-check.html">4</a> 页</td></tr>
-<tr><td><code>ruff</code></td><td>代码检查器</td><td>抓未使用的变量、import 顺序、常见 bug 陷阱。极快</td><td>第 <a class="pg" href="04-static-check.html">4</a> 页</td></tr>
+<tr><td><code>pytest</code></td><td>测试运行器</td><td>执行你写的测试,告诉你哪条过了哪条挂了</td><td>第 3 页</td></tr>
+<tr><td><code>mypy</code></td><td>类型检查器</td><td><strong>不运行代码</strong>,只检查「类型对不对」。秒级,覆盖 100% 代码</td><td>第 4 页</td></tr>
+<tr><td><code>ruff</code></td><td>代码检查器</td><td>抓未使用的变量、import 顺序、常见 bug 陷阱。极快</td><td>第 4 页</td></tr>
 </tbody>
 </table>
 </div>
@@ -379,16 +350,14 @@ ruff 0.16.3</pre>
   Python 虽然没有内置的统一入口,但你可以<strong>自己造一个</strong> ——
   在项目里放一个说明文件,把这三条命令写死在里面,让 AI 每次自动读到。
   <br><br>
-  <strong>第 <a class="pg" href="21-automation.html">21</a> 页会完整教这件事。</strong>现在只需知道:这不是无法弥补的缺陷,而是需要你手动补上这一环。
+  <strong>第 21 页会完整教这件事。</strong>现在只需知道:这不是无法弥补的缺陷,而是需要你手动补上这一环。
 </div>
 
 <h2 id="config">五、一个文件配好三个工具</h2>
 
 <p>在项目根目录建一个叫 <code>pyproject.toml</code> 的文件。<strong>这一个文件同时是三个工具的配置文件。</strong></p>
 
-<p>在 myshop 项目根目录执行:</p>
-
-<pre><code>touch pyproject.toml</code></pre>
+<pre><code>touch /Users/daijie27/Desktop/claude_data/learn_claude/myshop/pyproject.toml</code></pre>
 
 <p>用任何编辑器打开它,把下面的内容整个粘进去:</p>
 
@@ -436,7 +405,7 @@ select = ["E", "F", "I", "B"]</code></pre>
 <tr><td><code>testpaths</code></td><td>告诉 pytest「只去这个文件夹找测试」,不然它会扫整个项目包括 <code>.venv</code>,很慢</td></tr>
 <tr><td><code>pythonpath</code></td><td><strong>本页最重要的一行</strong>,下一节专门讲</td></tr>
 <tr><td><code>addopts</code></td><td>每次跑测试默认带上的参数。<code>-v</code> = 每条测试单独打一行</td></tr>
-<tr><td><code>python_files</code> / <code>python_functions</code></td><td>什么样的文件名/函数名才算测试。第 <a class="pg" href="03-test-basics.html">3</a> 页细讲</td></tr>
+<tr><td><code>python_files</code> / <code>python_functions</code></td><td>什么样的文件名/函数名才算测试。第 3 页细讲</td></tr>
 <tr><td><code>files</code>(mypy)</td><td>mypy 默认检查哪些文件夹,这样你敲 <code>mypy</code> 就不用带参数</td></tr>
 <tr><td><code>strict</code></td><td>把 mypy 的严格程度开到最高</td></tr>
 <tr><td><code>overrides</code></td><td>对某些包放宽要求。这里是因为后面会写一个用到 <code>playwright</code> 的示例文件但不装它</td></tr>
@@ -452,7 +421,7 @@ select = ["E", "F", "I", "B"]</code></pre>
   <br><br>
   实测把 <code>strict</code> 拼成 <code>strictt</code>:
   <pre style="margin:9px 0"><code>pyproject.toml: [mypy]: Unrecognized option: strictt = True
-Success: no issues found in 10 source files</code></pre>
+Success: no issues found in 8 source files</code></pre>
   <p style="margin:9px 0 0"><strong>严格模式根本没开,但它报的是 Success。</strong>你会以为检查通过了,其实检查压根没开。</p>
   <p style="margin:9px 0 0"><strong>习惯:改完配置跑一次,看输出里有没有 <code>Unrecognized option</code> 这行。</strong></p>
 </div>
@@ -475,9 +444,9 @@ Success: no issues found in 10 source files</code></pre>
 
 <h3>坑长什么样</h3>
 
-<p>假设你的项目结构是这样(第 <a class="pg" href="06-myshop.html">6</a> 页会真的建起来):</p>
+<p>假设你的项目结构是这样(第 6 页会真的建起来):</p>
 
-<pre><code>myshop/                  &larr; 项目根目录
+<pre><code>/Users/daijie27/Desktop/claude_data/learn_claude/myshop/
 &#9500;&#9472;&#9472; myshop/              &larr; 你的代码放这里
 &#9474;   &#9492;&#9472;&#9472; price.py
 &#9492;&#9472;&#9472; tests/               &larr; 测试放这里
@@ -592,10 +561,7 @@ Success: no issues found in 10 source files</code></pre>
 </table>
 </div>
 
-<p>在 myshop 项目根目录执行 —— 先把目录建出来,touch 才不会报错:</p>
-
-<pre><code>mkdir -p myshop tests/e2e</code></pre>
-<pre><code>touch myshop/__init__.py</code></pre>
+<pre><code>touch /Users/daijie27/Desktop/claude_data/learn_claude/myshop/myshop/__init__.py</code></pre>
 
 <h3>概念 2:<code>conftest.py</code> —— pytest 自动加载的工具箱</h3>
 
@@ -617,7 +583,7 @@ Success: no issues found in 10 source files</code></pre>
     <p>三个用途,按重要性排:</p>
     <ol>
       <li><strong>放共享的「准备工作」</strong>(下一个概念讲这是什么)—— 最常见</li>
-      <li>放改变 pytest 行为的钩子函数(进阶,本教程只在第 <a class="pg" href="18-gate-items.html">18</a> 页用一次)</li>
+      <li>放改变 pytest 行为的钩子函数(进阶,本教程只在第 18 页用一次)</li>
       <li><strong>副作用</strong>:把自己所在的文件夹加进搜索路径 —— 这就是上一节第 &#9314; 种解法的原理</li>
     </ol>
   </div></div>
@@ -665,7 +631,7 @@ Success: no issues found in 10 source files</code></pre>
   </div></div>
 
   <div class="step"><div class="n">&#9314; 位置</div><div class="c">
-    <p>它是<strong>测试三段式里「准备」那一段的实现方式</strong>(三段式在第 <a class="pg" href="03-test-basics.html">3</a> 页讲)。</p>
+    <p>它是<strong>测试三段式里「准备」那一段的实现方式</strong>(三段式在第 3 页讲)。</p>
     <p>它和 <code>conftest.py</code> 是<strong>配合关系</strong>:写在 <code>conftest.py</code> 里的准备工作,
     整个文件夹的测试都能用。</p>
   </div></div>
@@ -742,7 +708,6 @@ def 服务器():
   <pre style="margin:9px 0 0"><code>test_naming.py::test_normal              PASSED
 test_naming.py::testnounderscore         PASSED   &larr; 没下划线也被收集
 test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收集</code></pre>
-  <p style="margin:9px 0 0">注意:上面的演示基于 pytest 的默认配置。你在本页第五节写入的 <code>pyproject.toml</code> 已把规则收窄为 <code>test_*</code> 前缀,照那份配置跑,<code>testnounderscore</code> 不会被收集(<code>Testing</code> 类那行仍成立,因为 <code>python_classes</code> 没有被覆盖)。</p>
 </div>
 
 <div class="box trap">
@@ -770,8 +735,6 @@ test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收
 </div>
 
 <h2 id="py39">八、关于 Python 3.9 的两个提醒</h2>
-
-<p>先说一个背景:Python 3.9 已于 2025 年 10 月结束官方支持,新装环境请用当前稳定版。本教程代码按 3.9+ 兼容语法书写,在新版 Python 上同样可跑 —— 下面两个提醒对新版本读者仍然有用。</p>
 
 <h3>提醒 1:新语法不能用</h3>
 
@@ -842,20 +805,18 @@ test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收
 <h2 id="done">九、验收清单</h2>
 
 <ul class="chk">
-  <li>项目文件夹 <code>myshop</code>(项目根目录)存在</li>
+  <li>项目文件夹存在:<code>/Users/daijie27/Desktop/claude_data/learn_claude/myshop</code></li>
   <li>里面有 <code>.venv</code> 文件夹</li>
   <li><code>.venv/bin/python --version</code> 能打印出版本号</li>
   <li>三个工具都装上了(pytest / mypy / ruff 都能 <code>--version</code>)</li>
-  <li>项目根目录有 <code>pyproject.toml</code>,内容是第五节那一份(做到第 <a class="pg" href="18-gate-items.html">18</a> 页还会往里追加 markers 段)</li>
+  <li>项目根目录有 <code>pyproject.toml</code>,内容是第五节那一份</li>
   <li><code>myshop/__init__.py</code> 存在(可以是空文件)</li>
   <li>你知道为什么要写 <code>.venv/bin/python -m xxx</code> 而不是直接写 <code>pytest</code></li>
 </ul>
 
 <h4>一条命令验收全部</h4>
 
-<p>在 myshop 项目根目录执行:</p>
-
-<pre><code>ls -a && .venv/bin/python -m pytest --version && .venv/bin/python -m mypy --version && .venv/bin/python -m ruff --version</code></pre>
+<pre><code>cd /Users/daijie27/Desktop/claude_data/learn_claude/myshop && ls -a && .venv/bin/python -m pytest --version && .venv/bin/python -m mypy --version && .venv/bin/python -m ruff --version</code></pre>
 
 <h3>本页知识点回顾</h3>
 
@@ -868,7 +829,7 @@ test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收
 <tr><td>11</td><td>激活 vs 全路径</td><td>激活只在当前窗口有效;全路径永远对</td></tr>
 <tr><td>12</td><td><strong>AI 不继承激活状态</strong></td><td>所以给 AI 的命令一律写全路径</td></tr>
 <tr><td>13</td><td>诊断命令</td><td><code>which python; which pytest</code></td></tr>
-<tr><td>14</td><td><strong>Python 没有统一命令入口</strong></td><td>靠配置文件手动补,第 <a class="pg" href="21-automation.html">21</a> 页讲</td></tr>
+<tr><td>14</td><td><strong>Python 没有统一命令入口</strong></td><td>靠配置文件手动补,第 21 页讲</td></tr>
 <tr><td>15</td><td>pyproject.toml</td><td>一个文件配好三个工具</td></tr>
 <tr><td>16</td><td><code>pythonpath = ["."]</code></td><td>解决头号劝退坑,需 pytest &ge; 7.0</td></tr>
 <tr><td>17</td><td><code>__init__.py</code></td><td>源码包要建;tests 默认不要</td></tr>
@@ -878,12 +839,14 @@ test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收
 <tr><td>31</td><td>&#128260; 参数名必须一字不差</td><td>pytest 靠名字找;写错报「找不到这个 fixture」,不是「参数错误」</td></tr>
 <tr><td>35</td><td><strong><code>yield</code> 把准备和收尾分开</strong></td><td>之前 = 准备,那一行 = 交出去,之后 = 收尾</td></tr>
 <tr><td>36</td><td>收尾<strong>不管成功失败都执行</strong></td><td>否则一条测试失败,服务器就一直开着,后面全乱</td></tr>
-<tr><td>37</td><td>&#128260; <strong>pytest 的发现规则</strong></td><td>是 <code>test</code> 前缀不是 <code>test_</code>;测试类不能有 <code>__init__</code>,否则 &#9888; 静默跳过(默认值;本页配置已收窄为 <code>test_*</code>)</td></tr>
+<tr><td>37</td><td>&#128260; <strong>pytest 的发现规则</strong></td><td>是 <code>test</code> 前缀不是 <code>test_</code>;测试类不能有 <code>__init__</code>,否则 &#9888; 静默跳过</td></tr>
 <tr><td>19</td><td>退出码 2 vs 5</td><td>2 = import 挂了;5 = 一条都没收集到</td></tr>
 <tr><td>20</td><td>&#9888; mypy 拼错键只警告</td><td>改完配置要看有没有 <code>Unrecognized option</code></td></tr>
 <tr><td>21</td><td>&#128260; ruff 的 UP 规则</td><td>关键不是别加 UP,是<strong>别漏 target-version</strong></td></tr>
 <tr><td>22</td><td>Python 3.9 的限制</td><td>不能用 <code>str | None</code>;能用 <code>dict[str,Any]</code></td></tr>
 <tr><td>23</td><td>&#128260; <code>strict</code> 已含 <code>check_untyped_defs</code></td><td>防 AI 漏写标注靠的是 <code>disallow_untyped_defs</code></td></tr>
+<tr><td>29–31</td><td>pytest 发现规则</td><td>&#128260; <code>test</code> 前缀(不带下划线);测试类不能有 <code>__init__</code></td></tr>
+<tr><td>35–37</td><td>fixture 与 yield</td><td>参数位置写名字;yield 前后 = 准备/收尾</td></tr>
 </tbody>
 </table>
 </div>
@@ -911,6 +874,5 @@ test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
-<script src="_depmap.js" defer></script>
 </body>
 </html>

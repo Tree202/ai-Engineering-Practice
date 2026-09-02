@@ -27,7 +27,10 @@ from __future__ import annotations
 
 import os
 import re
+import sys
 from html.parser import HTMLParser
+
+from _baseline import 基线目录, 已修目录  # noqa: E402
 
 # ---------------------------------------------------------------- 可调阈值 ---
 
@@ -573,19 +576,27 @@ def _mutation_test(good_dir):
 
 
 def _selftest():
+    坏 = 0
     print("=== 1) 合成样本(必须报) ===")
     for r in check("synth_bad.html", _SYNTH_BAD):
         print("      L%-5d %-22s %s" % (r["line"], r["kind"], r["msg"]))
         print("            detail: %s" % r["detail"])
+    坏 += 0 if len(check("synth_bad.html", _SYNTH_BAD)) else 1
     print("=== 2) 合成好样本(必须零报) ===")
-    print("      %d 条" % len(check("synth_ok.html", _SYNTH_OK)))
+    _ok_n = len(check("synth_ok.html", _SYNTH_OK))
+    坏 += 0 if _ok_n == 0 else 1
+    print("      %d 条%s" % (_ok_n, "" if _ok_n == 0 else "  <== 失败"))
 
-    bad_dir = "D:/ext.zhaoliuliu3/Desktop/ai-workflow"
-    good_dir = "D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow"
+    bad_dir = 基线目录()
+    good_dir = 已修目录()
 
     print("=== 3) 真值样本:坏样本(只读) ===")
+    if not bad_dir:
+        print("  (无只读基线,跳过 —— 不算通过)")
+        坏 += 1
     for n in ("01-overview.html", "02-python-setup.html"):
-        _run("坏", os.path.join(bad_dir, n))
+        if bad_dir:
+            _run("坏", os.path.join(bad_dir, n))
     print("=== 4) 真值样本:已修版 ===")
     for n in ("01-overview.html", "02-python-setup.html"):
         _run("好", os.path.join(good_dir, n))
@@ -593,7 +604,7 @@ def _selftest():
     print("=== 5) 灵敏度验证:把真实页面改坏(只改内存,不写盘) ===")
     _mutation_test(good_dir)
 
-    for label, d in (("坏 · 全站", bad_dir), ("已修 · 全站", good_dir)):
+    for label, d in [x for x in (("坏 · 全站", bad_dir), ("已修 · 全站", good_dir)) if x[1]]:
         print("=== 全站扫描:%s ===" % d)
         total = 0
         try:
@@ -605,7 +616,8 @@ def _selftest():
             res = _run(label, os.path.join(d, n))
             total += len(res)
         print("  ---- %s 共 %d 页,总检出 %d 条 ----" % (label, len(names), total))
+    return 1 if 坏 else 0
 
 
 if __name__ == "__main__":
-    _selftest()
+    sys.exit(_selftest())

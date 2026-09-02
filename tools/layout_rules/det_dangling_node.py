@@ -37,6 +37,8 @@ from __future__ import annotations
 
 import html as _html
 import os
+
+from _baseline import 样本, 基线目录, 已修目录  # noqa: E402
 import re
 import sys
 
@@ -433,21 +435,23 @@ def _run(p: str):
 
 
 def _selftest():
-    bad = r"D:/ext.zhaoliuliu3/Desktop/ai-workflow/01-overview.html"
-    good = r"D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow/01-overview.html"
+    bad, good = 样本("01-overview.html")
+    坏 = 0
 
-    for tag, p in (("坏样本", bad), ("好样本(已修)", good)):
-        print(f"\n===== {tag}: {p}")
-        if not os.path.exists(p):
-            print("  (文件不存在,跳过)")
+    for tag, p, 期望 in (("坏样本", bad, 3), ("好样本(已修)", good, 0)):
+        print(f"\n===== {tag}: {p or '(无基线)'}")
+        if not (p and os.path.exists(p)):
+            print("  (样本不在,跳过真值段 —— 不当作通过)")
             continue
         res = _run(p)
-        print(f"  检出 {len(res)} 条")
+        坏 += 0 if len(res) == 期望 else 1
+        print(f"  检出 {len(res)} 条(期望 {期望})"
+              f"{'' if len(res) == 期望 else '  <== 失败'}")
         for r in res:
             print(f"  L{r['line']:>5}  [{r['kind']}] {r['msg']}")
             print(f"         {r['detail']}")
 
-    book = r"D:/ext.zhaoliuliu3/Desktop/claude_AI/ai-workflow"
+    book = 已修目录()
     if os.path.isdir(book):
         print(f"\n===== 全书扫描: {book}")
         total = 0
@@ -460,6 +464,7 @@ def _selftest():
                 for r in res:
                     print(f"  {fn}:{r['line']}  {r['msg']}")
         print(f"  23 页合计检出 {total} 条")
+    return 1 if 坏 else 0
 
 
 if __name__ == "__main__":
@@ -467,4 +472,4 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8")
     except Exception:
         pass
-    _selftest()
+    sys.exit(_selftest())
