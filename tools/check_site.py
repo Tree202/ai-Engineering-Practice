@@ -6,6 +6,11 @@ _v1/ 历史页单独报告,不计入正式页的错误统计。
 """
 
 import sys
+
+try:  # Windows 默认 cp1252 控制台下,中文输出会直接崩
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 from html.parser import HTMLParser
 from pathlib import Path
 

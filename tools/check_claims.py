@@ -78,19 +78,25 @@ if not os.path.isdir(MS):
 else:
     条 = sum(len(re.findall(r"^def test_", read(f), re.M))
             for f in glob.glob(os.path.join(MS, "tests", "**", "*.py"), recursive=True))
-    check("myshop def test_ 总数", 19, 条)
+    # 不写死字面量:期望值由实数产出,测试真增减时不用改检查器。
+    # 只查「声称全项目总数」的那两处 —— 全书还有「5 条测试」
+    # 「7 个用例」这类分层小计,它们是另一回事,不能一并拿去对。
+    for 页, 模式 in [("09-partial-vs-full.html", r"它有 (\d+) 条测试"),
+                    ("17-quality-gate.html", r"只有 (\d+) 个用例")]:
+        m_ = re.search(模式, read(os.path.join(AW, 页)))
+        check("%s 页宣称的总测试数 = 实数" % 页[:2], str(条), m_.group(1) if m_ else "?")
 
     核心 = sum(len(io.open(os.path.join(MS, "myshop", f + ".py"), encoding="utf-8").readlines())
               for f in ("price", "order", "api"))
     全部 = 核心 + len(io.open(os.path.join(MS, "myshop", "web.py"), encoding="utf-8").readlines())
-    check("核心三模块行数(教程写 224)", 224, 核心)
+    t06_ = read(os.path.join(AW, "06-myshop.html"))
+    宣称行 = re.search(r"核心三模块合计</strong></td><td><strong>(\d+) 行", t06_)
+    check("06 页宣称的核心行数 = 实数", str(核心), 宣称行.group(1) if 宣称行 else "?")
     t06 = read(os.path.join(AW, "06-myshop.html"))
     check("06 页含核心 224 口径", True, "224 行" in t06)
     check("06 页含全量 %d 口径" % 全部, True, ("%d 行" % 全部) in t06)
 
-# 教程侧对测试数的引用(不依赖 myshop 目录,CI 也跑)
-for 页, 词 in [("09-partial-vs-full.html", "19 条测试"), ("17-quality-gate.html", "19 个用例")]:
-    check("%s 引用测试数" % 页[:2], 1, len(re.findall(词, read(os.path.join(AW, 页)))))
+# 教程侧旧口径残留检查(不依赖 myshop 目录,CI 也跑)
 check("旧口径「18 条测试/18 个用例」残留", 0,
       sum(len(re.findall(r"18 (?:条测试|个用例)", read(p))) for p in pages()))
 

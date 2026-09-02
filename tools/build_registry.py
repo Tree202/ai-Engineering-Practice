@@ -325,15 +325,20 @@ MAINT = """## 六、维护建议
 """
 A(MAINT)
 
-out = os.path.join(ROOT, "references", "sources.md")
-# 注意:必须读 git HEAD 里那份原件,不能读 out 本身 —— 否则重跑会把上一版登记表整个吞成附录
-orig = os.path.join(SCRATCH, "sources_v21_orig.md")
-old = io.open(orig, encoding="utf-8").read() if os.path.exists(orig) else ""
-# 保留原有的「本次修正依据」小表,附在末尾
-keep = ""
-if "## 工具版本" in old:
-    keep = "\n---\n\n## 附:v2.1 那轮修正所依据的来源\n\n" + old.split("# 本次修正依据的来源登记", 1)[-1].split("\n", 2)[-1]
-io.open(out, "w", encoding="utf-8", newline="\n").write("\n".join(L) + keep)
-print("已写入 %s" % out)
-print("  登记条目 %d 条 · 高风险 %d 条 · 类别归一为 %d 类" % (len(items), len(high), len(by_kind)))
-print("  文件大小 %d 字节" % os.path.getsize(out))
+def main():
+    out = os.path.join(ROOT, "references", "sources.md")
+    # 注意:必须读 git HEAD 里那份原件,不能读 out 本身 —— 否则重跑会把上一版登记表整个吞成附录
+    orig = os.path.join(SCRATCH, "sources_v21_orig.md")
+    old = io.open(orig, encoding="utf-8").read() if os.path.exists(orig) else ""
+    # 保留原有的「本次修正依据」小表,附在末尾
+    keep = ""
+    if "## 工具版本" in old:
+        keep = "\n---\n\n## 附:v2.1 那轮修正所依据的来源\n\n" + old.split("# 本次修正依据的来源登记", 1)[-1].split("\n", 2)[-1]
+    io.open(out, "w", encoding="utf-8", newline="\n").write("\n".join(L) + keep)
+    print("已写入 %s" % out)
+    print("  登记条目 %d 条 · 高风险 %d 条 · 类别归一为 %d 类" % (len(items), len(high), len(by_kind)))
+    print("  文件大小 %d 字节" % os.path.getsize(out))
+
+
+if __name__ == "__main__":
+    main()

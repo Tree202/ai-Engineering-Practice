@@ -186,10 +186,19 @@ def 真值自检(原版: str, 已修: str) -> int:
     return 坏
 
 
+def _猜基线():
+    """基线目录是只读原件,不随仓库发布。按约定找:
+    仓库同级的 ai-workflow/ → 环境变量 AIWF_BASELINE → 都没有则由主流程报错退 2。
+    此前这里写死作者机器的绝对路径,换台机器必然找不到。"""
+    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    cand = os.path.join(os.path.dirname(_root), "ai-workflow")
+    return cand if os.path.isdir(cand) else ""
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="版式与结构巡检")
     ap.add_argument("--dir", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "ai-workflow"))
-    ap.add_argument("--baseline", default=r"D:\ext.zhaoliuliu3\Desktop\ai-workflow",
+    ap.add_argument("--baseline", default=os.environ.get("AIWF_BASELINE") or _猜基线(),
                     help="只读原版目录,用于真值自检")
     ap.add_argument("--allow-missing-baseline", action="store_true",
                     help="基线不存在时继续巡检(退出码仍会标记未自检)")
