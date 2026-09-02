@@ -94,6 +94,43 @@ def _在导航图内(段, line) -> bool:
     return False
 
 
+_节点 = re.compile(r'<rect[^>]*?x="([\d.]+)"[^>]*?y="([\d.]+)"[^>]*?width="([\d.]+)"[^>]*?height="([\d.]+)"')
+
+
+def _终点列(html: str, line, detail: str) -> bool:
+    """左右流向的图里,终点在最右一列 —— 而 dangling_node 的「终点=最下一排」
+    判据假设自上而下,对这类图必然误报。
+
+    证据(第三轮用户发现 kb/06 文字溢出、顺带把 kb 纳入巡检后暴露):
+      · kb/05 决策树:右列 x=596~708 共 4 个节点,全是答案终点
+      · kb/06:右列 x=562~722 共 2 个「只回传最终结果」,都是终点
+      · 而 01 页原版真值样本里的「兜底」虽也在最右,那一列**只有它自己**
+
+    所以判据是:节点位于最右一列,且**该列有 2 个以上节点**。
+    单独一个节点在最右不算 —— 那正是真值样本要抓的漏画回程边。
+    """
+    import re as _re
+    m = _re.search(r"x=([\d.]+) y=([\d.]+) w=([\d.]+) h=([\d.]+)", detail or "")
+    if not m:
+        return False
+    x2 = float(m.group(1)) + float(m.group(3))
+    段 = _导航图行段(html)
+    for 起, 止, _ in 段:
+        if not (起 <= (line or 0) <= 止):
+            continue
+        a = html.find("<svg", sum(len(x) + 1 for x in html.split(chr(10))[:起 - 1]) - 1)
+        b = html.find("</svg>", a)
+        节点 = [(float(g[0]) + float(g[2]), float(g[2]), float(g[3]))
+                for g in _节点.findall(html[a:b])]
+        节点 = [n for n in 节点 if n[1] >= 34 and n[2] >= 20]
+        if not 节点:
+            return False
+        最右 = max(n[0] for n in 节点)
+        同列 = [n for n in 节点 if abs(n[0] - 最右) <= 12]
+        return abs(x2 - 最右) <= 12 and len(同列) >= 2
+    return False
+
+
 def 收窄(rule: str, path: str, html: str, items: list) -> list:
     out = []
     for it in items:
@@ -101,6 +138,10 @@ def 收窄(rule: str, path: str, html: str, items: list) -> list:
 
         # ① 导航图/依赖图豁免「无出边」判据 —— 见 _导航图行段 的说明
         if rule == "dangling_node" and _在导航图内(_导航图行段(html), it.get("line")):
+            continue
+
+        # ①b 左右流向的图:最右一列若有 2 个以上节点,那是终点列 —— 见 _终点列
+        if rule == "dangling_node" and _终点列(html, it.get("line"), it.get("detail", "")):
             continue
 
         # ② grid_text 只报「轨道写死的 grid」。
@@ -218,6 +259,12 @@ if __name__ == "__main__":
 
     n = 扫目录(目标, "正式页")
     # _v1/ 是历史页,按设计不参与巡检(六个规则模块内部也各自过滤了它)
+
+    # 姊妹课 kb/ 也有手写 SVG,此前从未被版式巡检覆盖 ——
+    # 用户肉眼在 kb/06 发现一处文字溢出节点框,才暴露这个盲区。
+    _kb = os.path.join(os.path.dirname(目标), "kb")
+    if os.path.isdir(_kb):
+        n += 扫目录(_kb, "姊妹课")
 
     if 自检失败:
         print("真值自检未通过 —— 规则可能被改坏了,先修规则再看结果。")
