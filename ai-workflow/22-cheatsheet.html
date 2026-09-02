@@ -243,7 +243,7 @@ python3 -m venv .venv
 .venv/bin/python -m pytest -v                       # 每条用例一行
 .venv/bin/python -m pytest tests/test_price.py      # 只跑一个文件
 .venv/bin/python -m pytest -k "价格"                 # 名字里含"价格"的
-.venv/bin/python -m pytest -m p0                    # 只跑 P0 标记的
+.venv/bin/python -m pytest -m p0                    # 只跑 P0 标记的(未打标时收集 0 条、退出码 5,见第 18 页)
 .venv/bin/python -m pytest -x                       # 第一条挂了就停
 .venv/bin/python -m pytest --lf                     # 只重跑上次挂的
 .venv/bin/python -m pytest -s                       # 让 print 显示出来
@@ -440,7 +440,7 @@ git clean -fdn          # &#128293; 第 12 页口诀「先 n 后 f」:-n = 只�
 <tr style="background:var(--warn-soft)"><td>抖动率</td><td>&lt; 1%</td><td style="color:var(--warn)">告警</td>
     <td><strong>检查点必须是定时任务</strong></td></tr>
 <tr style="background:var(--warn-soft)"><td>重复代码率</td><td>&lt; 3%</td><td style="color:var(--warn)">告警</td><td>&mdash;</td></tr>
-<tr style="background:var(--warn-soft)"><td>中低危问题</td><td>不增长(棘轮)</td><td style="color:var(--warn)">告警</td><td>要存历史基线(第 18 页)</td></tr>
+<tr style="background:var(--warn-soft)"><td>中低危问题</td><td>不增长(棘轮)</td><td style="color:var(--warn)">告警</td><td>要存历史基线(第 <a class="pg" href="18-gate-items.html">18</a> 页)</td></tr>
 </tbody>
 </table>
 </div>
@@ -561,7 +561,7 @@ gh api repos/&lt;账号&gt;/&lt;仓库&gt;/branches/main/protection</code></pre>
 <tr><td>三段式</td><td>Arrange-Act-Assert</td><td><a href="03-test-basics.html">03</a></td><td>准备 / 执行 / 断言</td></tr>
 <tr><td>断言</td><td>assert</td><td><a href="03-test-basics.html">03</a></td><td>「我期望它等于……」</td></tr>
 <tr><td>夹具</td><td>fixture</td><td><a href="07-four-layers-code.html">07</a></td><td>测试的共用准备工作</td></tr>
-<tr><td>替身</td><td>mock / stub</td><td><a href="07-four-layers-code.html">07</a></td><td>用假的顶替真依赖</td></tr>
+<tr><td>替身</td><td>mock / stub</td><td><a href="20-ai-boundary.html">20</a></td><td>用假的顶替真依赖</td></tr>
 <tr><td>暂存区</td><td>staging area</td><td><a href="11-git-basics.html">11</a></td><td>超市结账的传送带</td></tr>
 <tr><td>存档 / 提交</td><td>commit</td><td><a href="11-git-basics.html">11</a></td><td>一次结账</td></tr>
 <tr><td>合并请求</td><td>pull request</td><td><a href="16-pipeline.html">16</a></td><td>「请把我这个分支合进主干」</td></tr>

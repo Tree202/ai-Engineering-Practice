@@ -296,10 +296,12 @@ pytest -q</code></pre>
 <p>myshop 里就有一条真实的跳过 —— 你在第 <a class="pg" href="10-flaky-e2e.html">10</a> 页见过:</p>
 
 <div class="term-box">
-  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真机输出</div>
-<pre><span class="c-cmd">$ .venv/bin/python -m pytest -q</span>
-<span class="c-ok">.................</span><span class="c-warn">s</span>                                        [100%]
-<span class="c-ok">17 passed</span>, <span class="c-warn">1 skipped</span> in 3.66s
+  <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真机输出(Windows 重录;本书配置下 -q 输出就是按文件分行,无匿名点串)</div>
+<pre><span class="c-cmd">$ .venv\Scripts\python.exe -m pytest -q</span>
+<span class="c-ok">tests\test_api.py .......</span>                                                [ 41%]
+<span class="c-ok">tests\test_order.py .....</span>                                                [ 70%]
+<span class="c-ok">tests\test_price.py .....</span>                                                [100%]
+<span class="c-ok">17 passed</span>, <span class="c-warn">1 skipped</span> in 3.90s
                 <span class="c-dim">&uarr; 这个 1 是端到端用例,因为没装浏览器驱动被跳过</span></pre>
 </div>
 
@@ -631,7 +633,7 @@ pytest -q</code></pre>
 
 <h2 id="mini">九、给小项目的最小可用配置</h2>
 
-<p>把这一页的结论收成一份可以直接抄的配置。<strong>适用于个人项目和小团队:</strong></p>
+<p>把这一页的结论收成一份可以直接抄的配置(唯一前提:门禁 3 需要你已按第二节打好 p0 标记)。<strong>适用于个人项目和小团队:</strong></p>
 
 <pre><code># 文件:&lt;你的项目&gt;/.github/workflows/ci.yml
 
@@ -645,6 +647,7 @@ on:
 jobs:
   gate:
     name: 三道检查            # 这个名字要和合并保护规则里填的一字不差
+                              # (建规则时是三道;后来加到四道,名字故意不改 —— 改名会和已绑定的保护规则脱钩)
     runs-on: ubuntu-latest
 
     steps:
@@ -663,6 +666,8 @@ jobs:
         run: mypy
 
       # ===== 硬门禁 3:P0 用例必须 100% =====
+      # 前提:先按本页第二节打好 p0 标记并在 pyproject 注册 markers;
+      # 没打标时 pytest 收集 0 条,以退出码 5 直接变红
       - name: 门禁 3 · P0 核心用例
         run: pytest -m p0 -q
 

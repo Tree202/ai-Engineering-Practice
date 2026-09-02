@@ -79,12 +79,6 @@ model: sonnet
 
 你是一位资深代码审查员，从质量和安全角度审查代码。</code></pre>
         </div>
-
-  <div class="callout warn">
-    <span class="label">⚠️ 分身里的改动，一键撤销救不回来</span>
-    <p><b>后台跑的 fork 技能写的文件，撤销菜单还原不了</b>（官方限制，详见主线<a href="../ai-workflow/13-claude-code.html">第 13 页</a>的撤销死角清单；只有前台跑的能还原）。</p>
-    <p>所以让带 <code>context: fork</code> 的技能批量写文件之前，<b>先 <code>git add -A &amp;&amp; git commit -m "动手前存档"</code> 一次</b>——安全网要在动手前就位，不是出事后。</p>
-  </div>
       </dd>
 
       <dt><span class="n">5</span>常见误区</dt>
@@ -315,6 +309,12 @@ context: fork
     </ol>
     <p>这正好也印证了<a href="01-prompt-design.html#s4">第 01 章</a>那条原则：
       <b>让成果尽早离开上下文，进入硬盘。</b></p>
+  </div>
+
+  <div class="callout warn">
+    <span class="label">⚠️ 分身里的改动，一键撤销救不回来</span>
+    <p><b>后台跑的 fork 技能写的文件，撤销菜单还原不了</b>（官方限制，详见主线<a href="../ai-workflow/13-claude-code.html">第 13 页</a>的撤销死角清单；只有前台跑的能还原）。</p>
+    <p>所以让带 <code>context: fork</code> 的技能批量写文件之前，<b>先 <code>git add -A &amp;&amp; git commit -m "动手前存档"</code> 一次</b>——安全网要在动手前就位，不是出事后。</p>
   </div>
 
   <!-- ============================================================ -->

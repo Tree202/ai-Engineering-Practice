@@ -39,7 +39,13 @@ def main() -> int:
             if not os.path.exists(src):
                 print("缺文件,拒绝打包:", rel)
                 return 1
-            z.write(src, "myshop/" + rel)
+            # 固定时间戳 → 可复现打包:内容不变,重打得到同一个 SHA。
+            # z.write 会把源文件 mtime 写进条目,touch 一下就换哈希,没法对账。
+            zi = zipfile.ZipInfo("myshop/" + rel, date_time=(1980, 1, 1, 0, 0, 0))
+            zi.compress_type = zipfile.ZIP_DEFLATED
+            zi.external_attr = 0o644 << 16
+            with open(src, "rb") as fh:
+                z.writestr(zi, fh.read())
     with zipfile.ZipFile(OUT) as z:
         names = z.namelist()
         assert len(names) == len(白名单), names
