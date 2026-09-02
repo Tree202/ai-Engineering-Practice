@@ -306,6 +306,7 @@ class SvgScan(HTMLParser):
 
     def reset_state(self):
         self.svgs: list[dict] = []        # {"line":int, "nodes":[], "edges":[]}
+        self.parse_errors: list = []      # 逐元素解析失败:不吞掉,由 check() 报出去
         self._cur = None
         self._svg_depth = 0
         self._skip_depth = 0
@@ -380,8 +381,13 @@ class SvgScan(HTMLParser):
 
         try:
             self._emit(tag, attrs, line, mat, props, c)
-        except Exception:
-            pass
+        except Exception as exc:
+            # 以前这里是 except Exception: pass —— 单个元素解析失败就**静默变成
+            # 「这个元素不存在」**,于是本该被判为悬空的那条边可能因为端点节点没被
+            # 收进来而检测不到:检查器不报错,也不报缺陷,只是少看了东西。
+            # 这正是这一族缺陷的形态,所以不再吞掉,而是记下来、当成一条检出报出去。
+            # 仍然不往上抛:一个畸形元素不该让整篇文档扫不下去。
+            self.parse_errors.append((line, tag, "%s: %s" % (type(exc).__name__, exc)))
 
     def _emit(self, tag, attrs, line, mat, props, c):
         # ------- 节点
@@ -552,6 +558,16 @@ def check(path: str, html: str) -> list[dict]:
         raise  # 让驱动层的「规则异常」兜底可见,别把解析失败伪装成零检出
 
     out: list[dict] = []
+    # 解析失败先报出来 —— 一个元素没被收进来,意味着这一轮少看了东西,
+    # 「零检出」在这种情况下不代表没问题。
+    for line, tag, err in p.parse_errors:
+        out.append({
+            "line": line, "kind": "svg-parse-error",
+            "msg": "解析 <%s> 失败,这个元素没被算进来:%s" % (tag, err),
+            "detail": "少收一个元素可能让本该判为悬空的边检测不到 —— "
+                      "这一轮的「零检出」不可信,先修这里。",
+        })
+
     for si, svg in enumerate(p.svgs, 1):
         nodes = svg["nodes"]
         edges = svg["edges"]
