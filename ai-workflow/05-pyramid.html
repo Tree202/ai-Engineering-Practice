@@ -293,12 +293,12 @@
   <td>要真的建数据库、写入、再读出来</td>
 </tr>
 <tr>
-  <td>&#9313; 接口测试</td><td>7 条</td>
-  <td style="color:var(--bad)"><strong>3.64 秒</strong></td><td><strong>&asymp;180&times;</strong></td>
+  <td>&#9314; 接口测试</td><td>7 条</td>
+  <td style="color:var(--bad)"><strong>3.64 秒</strong></td><td><strong>&asymp;180&times;</strong><br><span style="font-size:11px;color:var(--faint)">对上一层 0.02 秒</span></td>
   <td>每条都要<strong>启动一个服务器再关掉</strong></td>
 </tr>
 <tr>
-  <td>&#9314; E2E</td><td>&mdash;</td>
+  <td>&#9315; E2E</td><td>&mdash;</td>
   <td style="color:var(--bad)"><strong>10 秒+ / 条</strong></td><td>1000&times;+</td>
   <td>要开真浏览器,还要等页面加载、动画播完</td>
 </tr>
@@ -308,7 +308,7 @@
 
 <div class="box key">
   <b class="t">这组数字比任何说教都有力</b>
-  <strong>集成层 0.02 秒 vs 接口层 3.64 秒,差约 180 倍（本项目本机实测值,不可外推到其他项目）。</strong>
+  <strong>集成层 0.02 秒 vs 接口层 3.64 秒,差约 180 倍(本项目本机实测值,不可外推到其他项目)。</strong>
   而单元测试那 5 条快到运行器都测不出耗时,直接显示 <code>0.00s</code>。
   <br><br>
   <strong>而且慢的原因出人意料</strong> —— 不是网络慢,是每条测试都要<strong>启动和关闭一个服务器</strong>。
@@ -322,8 +322,8 @@
 <thead><tr><th style="width:22%">什么时候</th><th style="width:34%">跑哪几层</th><th>为什么</th></tr></thead>
 <tbody>
 <tr><td><strong>每改一小块</strong></td><td>&#9450; + &#9312;</td><td>加起来不到 0.3 秒,可以无限次跑</td></tr>
-<tr><td><strong>准备存档前</strong></td><td>&#9450; + &#9312; + &#9313; 全量</td><td>3.7 秒,一天跑几十次也无所谓</td></tr>
-<tr><td><strong>整个任务做完</strong></td><td>加上 &#9314;</td><td>十几分钟,所以只跑一次</td></tr>
+<tr><td><strong>准备存档前</strong></td><td>&#9450; + &#9312; + &#9313; + &#9314; 全量</td><td>3.7 秒,一天跑几十次也无所谓</td></tr>
+<tr><td><strong>整个任务做完</strong></td><td>加上 &#9315;</td><td>十几分钟,所以只跑一次</td></tr>
 </tbody>
 </table>
 </div>

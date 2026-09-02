@@ -585,7 +585,7 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 </div>
 
 <div class="box note">
-  <b class="t">这也证明了「换连接读回来」技巧（第 <a class="pg" href="05-pyramid.html">5</a> 页给结论,第 <a class="pg" href="07-four-layers-code.html">7</a> 页给代码）的价值</b>
+  <b class="t">这也证明了「换连接读回来」技巧(第 <a class="pg" href="05-pyramid.html">5</a> 页给结论,第 <a class="pg" href="07-four-layers-code.html">7</a> 页给代码)的价值</b>
   如果那条测试当初图省事,在<strong>同一个连接</strong>里查询,<strong>它会全绿</strong> ——
   因为同连接里没提交的数据照样读得到。
   <br><br>
@@ -595,7 +595,7 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 <div class="box note">
   <b class="t">附注:装上浏览器驱动之后,五次实验长什么样(Windows 实测)</b>
   配套项目含一个最小网页(<code>web.py</code>,第 <a class="pg" href="06-myshop.html">6</a> 页),
-  装上 playwright 后那条 E2E 不再跳过:基线变成 <code>19 passed</code>(两条 E2E 真跑)。本页五次实验在 Windows 上重跑的新数字:
+  装上 playwright 后 E2E 文件不再整体跳过:基线变成 <code>19 passed</code>(两条 E2E 真跑)。本页五次实验在 Windows 上重跑的新数字:
   <br><br>
   <span style="font-family:var(--mono);font-size:12.5px">
   &#9312; 3 failed, 2 passed(只跑 test_price,不变)&nbsp;·&nbsp;
@@ -708,7 +708,7 @@ FAILED tests/test_order.py::test_下两单会拿到两个不同的订单号 - as
 
 <div class="box key">
   <b class="t">注意最后一行</b>
-  <strong>实验④ 里（在 AI 已篡改测试的场景下）,全量测试救不了你</strong> —— 因为纵深防御把问题掩盖了,上面两层都是绿的。
+  <strong>实验④ 里(在 AI 已篡改测试的场景下),全量测试救不了你</strong> —— 因为纵深防御把问题掩盖了,上面两层都是绿的。
   <br><br>
   <strong>唯一能发现的,是你亲眼看见 <code>tests/</code> 出现在改动列表里。</strong>
   <br><br>

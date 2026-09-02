@@ -445,8 +445,7 @@ def check(path: str, html: str) -> list[dict]:
         p.feed(html)
         p.close()
     except Exception:
-        # 解析炸了就当没检出,绝不误报
-        return []
+        raise  # 让驱动层的「规则异常」兜底可见,别把解析失败伪装成零检出
 
     issues: list[dict] = []
     for sv in p.svgs:

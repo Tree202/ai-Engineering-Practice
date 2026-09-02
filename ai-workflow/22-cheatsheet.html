@@ -199,7 +199,7 @@
 <div class="tw">
 <table>
 <thead><tr>
-  <th style="width:5%">#</th><th style="width:18%">防线</th><th style="width:14%">在哪一层</th>
+  <th style="width:5%">#</th><th style="width:18%">事项</th><th style="width:14%">在哪一层</th>
   <th style="width:14%">能不能绕过</th><th style="width:14%">能不能外包</th><th>详见</th>
 </tr></thead>
 <tbody>
@@ -391,7 +391,7 @@ git commit --no-verify -m "说明"</code></pre>
 <div class="box trap">
   <b class="t">用第 3、4 级之前,先跑一遍「预演」</b>
 <pre style="margin:8px 0 0"><code>git status              # 先看清楚现在到底有哪些改动
-git clean -nd           # &#128293; -n = 只打印会删哪些,不真删
+git clean -fdn          # &#128293; 第 12 页口诀「先 n 后 f」:-n = 只打印会删哪些,不真删
 </code></pre>
   <p style="margin:8px 0 0"><strong><code>git clean</code> 删掉的东西没有任何地方能找回来</strong> ——
   它删的正是「还没进过存档系统」的文件。<strong>先 <code>-nd</code> 看一眼,再 <code>-fd</code> 动手。</strong></p>
@@ -429,7 +429,7 @@ git clean -nd           # &#128293; -n = 只打印会删哪些,不真删
 <tr style="background:var(--ok-soft)"><td>严重安全问题</td><td style="color:var(--bad)"><strong>= 0</strong></td>
     <td style="color:var(--bad)">阻断</td><td>不是「总数 = 0」</td></tr>
 
-<tr style="background:var(--warn-soft)"><td rowspan="6" style="vertical-align:middle;font-weight:800;color:var(--warn)">阈<br>值</td>
+<tr style="background:var(--warn-soft)"><td rowspan="7" style="vertical-align:middle;font-weight:800;color:var(--warn)">阈<br>值</td>
     <td>全量通过率</td><td>&ge; 95%</td><td style="color:var(--bad)">阻断</td><td>留 5% 给抖动</td></tr>
 <tr style="background:var(--warn-soft)"><td><strong>增量</strong>覆盖率</td><td>&ge; 80%</td>
     <td style="color:var(--warn)">降级告警</td><td><strong>「本次改动行」,不是全量</strong></td></tr>
@@ -440,6 +440,7 @@ git clean -nd           # &#128293; -n = 只打印会删哪些,不真删
 <tr style="background:var(--warn-soft)"><td>抖动率</td><td>&lt; 1%</td><td style="color:var(--warn)">告警</td>
     <td><strong>检查点必须是定时任务</strong></td></tr>
 <tr style="background:var(--warn-soft)"><td>重复代码率</td><td>&lt; 3%</td><td style="color:var(--warn)">告警</td><td>&mdash;</td></tr>
+<tr style="background:var(--warn-soft)"><td>中低危问题</td><td>不增长(棘轮)</td><td style="color:var(--warn)">告警</td><td>要存历史基线(第 18 页)</td></tr>
 </tbody>
 </table>
 </div>

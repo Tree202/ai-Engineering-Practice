@@ -673,7 +673,7 @@ def check(path: str, html: str) -> list[dict]:
         parser.feed(html)
         parser.close()
     except Exception:
-        return []
+        raise  # 让驱动层的「规则异常」兜底可见,别把解析失败伪装成零检出
 
     return _judge(parser, vbs)
 

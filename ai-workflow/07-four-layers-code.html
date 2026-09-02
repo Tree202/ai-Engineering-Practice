@@ -435,7 +435,7 @@ pytest: SyntaxError: bytes can only contain ASCII literal characters</span></pre
 
 <div class="box key">
   <b class="t">答案出人意料:慢的不是网络</b>
-  实测:7 条接口测试 <strong>3.64 秒</strong>,5 条集成测试只要 <strong>0.02 秒</strong>（本项目本机实测值,不可外推到其他项目）。
+  实测:7 条接口测试 <strong>3.64 秒</strong>,5 条集成测试只要 <strong>0.02 秒</strong>(本项目本机实测值,不可外推到其他项目)。
   <br><br>
   <strong>慢的是每条测试都要「启动和关闭一个服务器」</strong> ——
   而关闭操作内部有一个固定的等待间隔。7 条测试就是 7 次启动 + 7 次关闭。
@@ -488,7 +488,7 @@ pytest: SyntaxError: bytes can only contain ASCII literal characters</span></pre
 
 <h2 id="l4">五、第 &#9315; 层:E2E</h2>
 
-<p><strong>真实代码 · 没装浏览器驱动时整个文件跳过,装上就真跑 · 准备段:要开一个真浏览器</strong> · 项目文件中另有一条不用 fixture 的「写法二」测试,原理相同</p>
+<p><strong>真实代码 · 没装浏览器驱动时整个文件跳过,装上就真跑 · 准备段:要开一个真浏览器</strong> · 项目文件中另有一条不用 fixture 的「写法二」测试,原理相同；服务器由 <code>tests/e2e/conftest.py</code> 自动起停并隔离数据库</p>
 
 <pre><code># 文件:tests/e2e/test_checkout_e2e.py
 """第 4 层:E2E 测试(金字塔最顶上,数量最少、最慢、最容易「假失败」)。
@@ -509,13 +509,16 @@ pytest.importorskip(
     reason="E2E 需要:pip install pytest-playwright 然后 playwright install chromium",
 )
 
+# 写法一的 page fixture 由 pytest-playwright 提供 —— 只装 playwright 不装它,
+# 上面那条守不住,所以真实文件里还有第二道:
+pytest.importorskip("pytest_playwright", reason="写法一的 page fixture 需要它")
+
 from playwright.sync_api import Page, expect   # noqa: E402
 
-首页 = "http://127.0.0.1:8000"
 
-
-def test_用户可以从首页一路下单成功(page: Page) -&gt; None:
-    page.goto(首页)
+def test_用户可以从首页一路下单成功(page: Page, 商店服务器: str) -&gt; None:
+    # 地址从 conftest 的夹具拿 —— 端口只在那一处定义,这里不写死
+    page.goto(商店服务器)
 
     # 按「用户看得见的东西」定位,而不是按内部的类名 ——
     # 类名改个字测试就挂了,按钮上的字改了才是真的改了功能
@@ -537,7 +540,9 @@ def test_用户可以从首页一路下单成功(page: Page) -&gt; None:
 <tr>
   <td><strong>导不到就跳过</strong></td>
   <td>没装浏览器工具的人跑测试时,输出是干净的 <code>1 skipped</code> 而不是一屏错误。
-      <strong>这样别人复制你的项目也不会看到一片红。</strong></td>
+      <strong>这样别人复制你的项目也不会看到一片红。</strong>
+      注意要守两道:只守 playwright 不守 pytest-playwright 的话,模块导入成功、
+      测试却会报 fixture not found 而不是跳过</td>
 </tr>
 <tr>
   <td><strong>按「看得见的东西」定位</strong></td>

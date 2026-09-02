@@ -11,7 +11,7 @@
 
     两处都是原版就有的,而且都靠肉眼才发现。这个文件就是补这个洞。
 
-六条规则,全部拿已知缺陷做过真值验证:
+六条规则(真值验证覆盖:3 条拿已知缺陷做门禁、1 条合成变异、2 条无真值,见 layout_rules/README):
     dangling_node   SVG 里有入边、没出边的非终止节点        ← 抓缺陷一
     dangling_edge   箭头指向空处(端点附近没有任何节点)      ← 抓缺陷一的另一面
     grid_text       grid/flex 容器里混有裸文本节点           ← 抓缺陷二
@@ -19,7 +19,7 @@
     collision       文字压在别的方框上、方框互相重叠
     refs            url(#id) 指向不存在的 marker、重复 id
 
-准入门槛(每条规则都过了):
+准入门槛(适用于有真值样本的三条):
     在只读原版上**必须**报出对应缺陷,在已修版上**必须**不报。
     做不到这一点的规则等于没写。
 
@@ -32,6 +32,11 @@ import io
 import os
 import re
 import sys
+
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "layout_rules"))
 

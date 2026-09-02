@@ -547,7 +547,7 @@ def check(path: str, html: str) -> list[dict]:
         p.feed(html)
         p.close()
     except Exception:
-        raise  # 让驱动层的「规则异常」兕底可见,别把解析失败伪装成零检出
+        raise  # 让驱动层的「规则异常」兜底可见,别把解析失败伪装成零检出
 
     out: list[dict] = []
     for si, svg in enumerate(p.svgs, 1):

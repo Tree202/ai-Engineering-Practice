@@ -217,6 +217,7 @@
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
     <p>在 myshop 里,用标记给用例分级:</p>
 <pre><code># 文件:&lt;你的项目&gt;/myshop/pyproject.toml
+# ↓ 在你已有的 [tool.pytest.ini_options] 块里追加 markers,别整块替换(会丢 testpaths/addopts 等)
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

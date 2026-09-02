@@ -212,11 +212,9 @@
 
 add("3", 5)      # 运行时才会炸</code></pre>
     <p>加上类型标注之后,检查器就能提前发现:</p>
-<pre><code>def add(a: int, b: int) -&gt; int:
-    return a + b
-
-add("3", 5)      # mypy 直接报错,代码根本不用运行</code></pre>
-    <p>它骂人长这样(<strong>真实输出</strong>):</p>
+<pre><code>def total_text(cents: int) -&gt; str:
+    return cents        # 想返回文字,却返回了数字 —— mypy 直接报错,代码根本不用运行</code></pre>
+    <p>它骂人长这样(<strong>真实输出</strong>;演示文件 <code>_demo_bad.py</code> 不随项目分发,想复现就自建一个把上面两行写进去,行号以你自己的文件为准):</p>
     <div class="term-box">
       <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; mypy 真实报错格式</div>
 <pre><span class="c-bad">myshop/_demo_bad.py:6: error: Incompatible return value type (got "int", expected "str")  [return-value]</span>

@@ -1,0 +1,20 @@
+# 教程仓库自己的门禁 —— 消费三个巡检脚本的退出码。
+# check_layout 需要本机只读基线做真值自检,云端没有,所以 CI 只跑
+# 不依赖基线的两项;版式巡检仍在本机提交前跑(见 变更清单)。
+name: checks
+on: [push, pull_request]
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: 链接与结构巡检
+        run: python tools/check_site.py
+      - name: 口径巡检
+        run: python tools/check_claims.py
