@@ -145,6 +145,15 @@
 
 <pre><code>python3 --version; git --version; which python3</code></pre>
 
+<div class="box trap">
+  <b class="t">&#9888; Windows 读者:这条命令要换一下</b>
+  PowerShell 里<strong>没有 <code>which</code></strong>,直接跑会报「无法识别」。换成:
+<pre style="margin:8px 0"><code>python --version; git --version; (Get-Command python).Source</code></pre>
+  注意两处不同:Windows 上是 <code>python</code> 而不是 <code>python3</code>;
+  <code>which</code> 对应 <code>Get-Command</code>。
+  <em>完整对照见本页第五节末尾那个 Windows 框。</em>
+</div>
+
 <h4>你应该看到类似这样的东西</h4>
 
 <div class="term-box">
@@ -256,7 +265,16 @@ git version 2.39.5 (Apple Git-154)
   <br><br>
   &#9313; 激活命令:PowerShell 用 <code>.\.venv\Scripts\Activate.ps1</code>,CMD 用 <code>.venv\Scripts\activate.bat</code> —— 但本书原则是写全路径、不依赖激活,Windows 同样适用。
   <br><br>
-  &#9314; <code>touch</code> &rarr; <code>New-Item -ItemType File</code>,<code>mkdir -p</code> &rarr; <code>mkdir</code>(PowerShell 自动递归)。
+  &#9314; <strong>命令连接符 <code>&amp;&amp;</code></strong>:本书很多命令写成
+  <code>A &amp;&amp; B</code>(A 成功才跑 B)。<strong>Windows PowerShell 5.1（系统自带那个）不支持 <code>&amp;&amp;</code></strong>,
+  会直接报语法错误。三条出路:<b>分两行分别跑</b>(最稳)、用 <code>;</code> 连接
+  (不管前一条成不成功都会跑后一条)、或装 <b>PowerShell 7</b>(<code>pwsh</code>,支持 <code>&amp;&amp;</code>)。
+  <br><br>
+  &#9315; <strong>没装 git 的话</strong>:macOS 自带;Windows 到 <code>git-scm.com</code> 下载安装包,
+  一路下一步即可(它会顺带装上 Git Bash —— 在那个终端里 <code>&amp;&amp;</code> 和 <code>which</code> 都能用,
+  想完全照书上的命令敲就用它)。
+  <br><br>
+  &#9316; <code>touch</code> &rarr; <code>New-Item -ItemType File</code>,<code>mkdir -p</code> &rarr; <code>mkdir</code>(PowerShell 自动递归)。
   <br><br>
   另:终端中文乱码时先执行 <code>$env:PYTHONUTF8="1"</code>。
 </div>

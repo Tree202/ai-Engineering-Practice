@@ -115,6 +115,20 @@
 结论会推翻你几个直觉 —— 包括「红得越多问题越严重」。
 </p>
 
+<div class="box note">
+  <b class="t">本页会用到一条还没教的命令</b>
+  每次实验后要把代码改回去,用的是 <code>git checkout -- .</code>
+  —— 意思是「把当前目录下所有改动丢掉,回到上一次存档的样子」。
+  <br><br>
+  <strong>现在照抄就行,不用懂原理</strong>。它属于存档系统,
+  第 <a class="pg" href="11-git-basics.html">11</a>、<a class="pg" href="12-git-undo.html">12</a> 页会从头讲。
+  <em>(它删不掉新建的文件 —— 本页五次实验都只改现有文件,不受影响;
+  那个坑是第 12 页的头号主题。)</em>
+  <br><br>
+  要是你用压缩包拿的项目、还没建过存档,先在项目根目录跑一次:
+<pre style="margin:8px 0"><code>git init && git add -A && git commit -m "实验前的干净状态"</code></pre>
+</div>
+
 <div class="toc">
   <strong style="display:block;margin-bottom:9px;font-size:14px;">本页目录</strong>
   <ol>
