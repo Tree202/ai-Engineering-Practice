@@ -111,7 +111,7 @@
 <span class="kicker">第 06 页 · 难度 ★★ · 前置:第 <a class="pg" href="02-python-setup.html">02</a>、<a class="pg" href="05-pyramid.html">05</a> 页</span>
 <h1>练习项目 myshop 解剖</h1>
 <p class="lede">
-一个假商店(核心三模块 224 行)。它不是拿来卖咖啡的,是拿来<strong>亲手摸一遍「为什么测试要分层」</strong>的实验台。
+一个假商店(核心三模块 240 行)。它不是拿来卖咖啡的,是拿来<strong>亲手摸一遍「为什么测试要分层」</strong>的实验台。
 后面第 <a class="pg" href="07-four-layers-code.html">7</a>、<a class="pg" href="08-break-it.html">8</a>、<a class="pg" href="09-partial-vs-full.html">9</a> 页的所有实验都在它身上做。
 </p>
 
@@ -174,9 +174,9 @@
 <tbody>
 <tr><td><code>myshop/price.py</code></td><td>18</td><td>纯算数,把分变成元</td></tr>
 <tr><td><code>myshop/order.py</code></td><td>108</td><td>算总价 + 记到账本(数据库)里</td></tr>
-<tr><td><code>myshop/api.py</code></td><td>98</td><td>把网络请求翻译成函数调用</td></tr>
-<tr><td><code>myshop/web.py</code></td><td>150</td><td>最小下单网页,给第 4 层 E2E 点的(不参与三层依赖链)</td></tr>
-<tr><td colspan="2"><strong>核心三模块合计</strong></td><td><strong>224 行(含网页层 374 行)</strong></td></tr>
+<tr><td><code>myshop/api.py</code></td><td>114</td><td>把网络请求翻译成函数调用</td></tr>
+<tr><td><code>myshop/web.py</code></td><td>158</td><td>最小下单网页,给第 4 层 E2E 点的(不参与三层依赖链)</td></tr>
+<tr><td colspan="2"><strong>核心三模块合计</strong></td><td><strong>240 行(含网页层 398 行)</strong></td></tr>
 </tbody>
 </table>
 </div>
@@ -196,7 +196,7 @@
     <rect x="40" y="30" width="210" height="72" rx="12" fill="var(--bad-soft)" stroke="var(--bad)" stroke-width="1.6"/>
     <text x="145" y="56" font-size="14" font-weight="800" fill="var(--bad)" text-anchor="middle">api.py</text>
     <text x="145" y="76" font-size="11.5" fill="var(--soft)" text-anchor="middle">服务员 &mdash; 只接单和报菜名</text>
-    <text x="145" y="93" font-size="11" fill="var(--faint)" text-anchor="middle">98 行</text>
+    <text x="145" y="93" font-size="11" fill="var(--faint)" text-anchor="middle">114 行</text>
 
     <rect x="40" y="150" width="210" height="72" rx="12" fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="1.6"/>
     <text x="145" y="176" font-size="14" font-weight="800" fill="var(--warn)" text-anchor="middle">order.py</text>
@@ -678,7 +678,7 @@ tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>
 <thead><tr><th style="width:8%">#</th><th style="width:34%">知识点</th><th>一句话</th></tr></thead>
 <tbody>
 <tr><td>59</td><td>为什么要练习项目</td><td>测试这件事不动手学不会</td></tr>
-<tr><td>60</td><td>三层 = 服务员/厨师长/计算器</td><td>224 行,一眼看完</td></tr>
+<tr><td>60</td><td>三层 = 服务员/厨师长/计算器</td><td>240 行,一眼看完</td></tr>
 <tr><td>61</td><td><strong>依赖方向单向</strong></td><td>api &rarr; order &rarr; price,没有反向箭头</td></tr>
 <tr><td>62</td><td>纯函数</td><td>不碰数据库/网络/时间/全局变量</td></tr>
 <tr><td>63</td><td><code>divmod</code> 与补零</td><td>没有 <code>:02d</code>,5 分会显示成 <code>¥0.5</code></td></tr>

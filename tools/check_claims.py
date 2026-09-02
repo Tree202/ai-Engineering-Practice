@@ -63,8 +63,16 @@ t00 = read(os.path.join(AW, "00-index.html"))
 check("00 页总数 = 页脚合计", str(合计), 表[3] if len(表) > 3 else "?")
 check("00 页 A 组", str(A组), 表[0] if 表 else "?")
 check("00 页 B 组", str(B组), 表[1] if len(表) > 1 else "?")
-for m in re.finditer(r'href="(\d\d)-[a-z-]+\.html">(?:(?!</a>).)*?含 (\d+) 处修正', t00, re.S):
-    pg, n = m.group(1), int(m.group(2))
+# 先数一遍卡片,再逐张比对。
+# 为什么要单独数:下面是个 re.finditer 循环 —— 00 页的标记一旦改动导致正则零匹配,
+# 循环体一次都不执行、一条断言都不产生,脚本照样打印「全部口径一致」并退出 0。
+# 那正是「检查器静默变成空操作,而门禁报绿」的教科书形态,而且它就藏在一个
+# 专门用来防口径漂移的脚本里。所以:卡片数必须等于有页脚的页数,少一张就是错。
+卡片 = [(m.group(1), int(m.group(2))) for m in
+        re.finditer(r'href="(\d\d)-[a-z-]+\.html">(?:(?!</a>).)*?含 (\d+) 处修正', t00, re.S)]
+check("00 页至少匹配到一张修正卡片", True, len(卡片) > 0)
+check("卡片指向的页都有页脚", [], sorted({p for p, _ in 卡片} - set(页脚)))
+for pg, n in 卡片:
     if pg in 页脚:
         check("00 页卡片 %s" % pg, 页脚[pg], n)
 check("「%d 处发现有误」出现次数" % 合计, 2, len(re.findall(r"%d 处发现有误" % 合计, t00)))
