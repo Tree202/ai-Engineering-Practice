@@ -10,5 +10,6 @@
     b.forEach(function(x){x.addEventListener('click',function(){p(x.dataset.set)})});
   })();
 </script>
+<script src="_cmdos.js" defer></script>
 </body>
 </html>
