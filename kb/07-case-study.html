@@ -519,10 +519,13 @@ btns[i].setAttribute('aria-pressed', String(btns[i].dataset.themeSet === pref));
   </div>
   <div class="codeblock">
     <pre><code>/* CSS：被标记的按钮变成高亮 */
-.theme-switch button[aria-pressed="true"]{ background:var(--accent); color:#fff; }</code></pre>
+.theme-switch button[aria-pressed="true"]{ background:var(--accent); color:var(--bg); }</code></pre>
   </div>
   <p>用 <code>aria-pressed</code> 而不是自定义的 class，<b>顺带把无障碍也做了</b>——
     读屏软件能读出"这个按钮是按下状态"。</p>
+  <p>文字颜色写 <code>var(--bg)</code> 而不是写死 <code>#fff</code>：深色主题的强调色是<b>浅</b>橙，
+    白字压上去对比度只有 <b>2.4:1</b>，远低于可读性标准要求的 4.5。用背景色当文字色，
+    两个主题都自动达标——<b>凡是颜色，尽量用变量而不是写死</b>。</p>
 
   <!-- ============================================================ -->
   <h2 id="s8">8. 拆解：代码块一键复制</h2>

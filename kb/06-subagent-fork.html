@@ -37,7 +37,7 @@
       <li><a href="#s2">分身是什么</a></li>
       <li><a href="#s3">一张表看清两者区别</a></li>
       <li><a href="#s4">怎么用分身：/subtask</a></li>
-      <li><a href="#s5">让技能跑在分身里：context: fork</a></li>
+      <li><a href="#s5">同名不同物：技能里的 context: fork</a></li>
       <li><a href="#s6">分身模式要不要手动开</a></li>
       <li><a href="#s7">怎么定义一个自己的子代理</a></li>
       <li><a href="#s8">什么时候用哪个</a></li>
@@ -448,7 +448,7 @@ context: fork
         <tr><td>分身</td><td><b>继承完整对话</b>的子代理，过程不回流主对话</td></tr>
         <tr><td>一句话区分</td><td>子代理=双向隔离，分身=单向隔离</td></tr>
         <tr><td>怎么发起分身</td><td><code>/subtask 要干的事</code>（v2.1.212+；更早叫 <code>/fork</code>）</td></tr>
-        <tr><td>让技能跑在分身里</td><td>前置数据加 <code>context: fork</code></td></tr>
+        <tr><td>技能里的 <code>context: fork</code></td><td><b>不是分身</b>：让技能在<b>隔离子代理</b>里跑，<b>读不到对话历史</b></td></tr>
         <tr><td>要手动开吗</td><td>交互式会话 v2.1.232+ 默认开；<code>-p</code> 模式要 <code>CLAUDE_CODE_FORK_SUBAGENT=1</code></td></tr>
         <tr><td>输出风格</td><td>对子代理<b>无效</b>，对分身<b>有效</b></td></tr>
       </tbody>
