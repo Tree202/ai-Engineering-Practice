@@ -144,7 +144,7 @@
 </tr>
 <tr>
   <td><code>@</code></td><td><strong>文件引用</strong></td>
-  <td>把某个文件或目录的内容读进上下文</td>
+  <td>把某个<strong>文件</strong>的完整内容读进上下文。<strong>引用目录只带回该目录的文件清单,不含文件内容</strong>(官方原话:Directory references show file listings, not contents)。<br><small>另:用 <code>@</code> 引文件时,会连带把该文件所在目录及各级父目录的 <code>CLAUDE.md</code> 一起加进上下文。</small></td>
 </tr>
 <tr>
   <td><code>/</code></td><td><strong>斜杠命令</strong></td>
@@ -192,6 +192,7 @@
 <div class="box note">
   <b class="t"><code>@</code> 的用法</b>
 <pre style="margin:9px 0 0"><code>读一下 @myshop/ 和 @tests/,搞清楚现状</code></pre>
+  <p style="margin:9px 0 0;font-size:13.5px;color:var(--faint)">❗ 这两个引用是<strong>目录</strong>,只会把「这两个目录里有哪些文件」带进上下文,<strong>不包含代码本身</strong>。它拿到清单后会自己去读需要的文件——想直接把代码塞进去,得点名到具体文件,如 <code>@myshop/price.py</code>。</p>
   <p style="margin:9px 0 0">比你手动复制粘贴代码方便得多,也比让它自己猜文件在哪可靠得多。
   <br>它在配置文件里还有一个进阶用法(在 CLAUDE.md 里导入其他文件),见姊妹课 <a href="../kb/05-choose-where.html#s4">知识库第 05 章第 4 节</a>。</p>
 </div>

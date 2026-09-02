@@ -474,9 +474,18 @@
 
 <div class="box key">
   <b class="t">开头那个 <code>!</code> 是这一步的全部价值</b>
-  它让命令<strong>直接执行、不经过模型</strong>,输出直接进你的眼睛。
+  它让命令<strong>直接执行</strong> —— 不经模型解释、不需它批准,你看到的就是 shell 的原始输出。
   <br><br>
   如果你让 AI 去跑再讲给你听,就等于<strong>让它评价自己的作业</strong>。
+  <br><br>
+  <strong>⚠️ 默认行为变了,这一步要多做一件事。</strong>
+  从 <strong>v2.1.186</strong> 起,<code>!</code> 命令的输出落进会话后,
+  <strong>Claude 会自动对它发表意见</strong>
+  (官方原话:Claude responds to the command output automatically once it lands in the transcript)
+  —— 那恰恰就是本步要避开的事。
+  <br>想要回「输出只进你的眼睛」,在 <code>settings.json</code> 里加一行
+  <code>"respondToBashCommands": false</code>。
+  <br><small>不加也能跑 —— 只是你得<strong>先自己看完 diff 再看它的点评</strong>,别把它的点评当成你自己看过了。</small>
 </div>
 
 <h3>带着这四个问题看</h3>
