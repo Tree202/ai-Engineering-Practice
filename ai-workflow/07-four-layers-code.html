@@ -231,6 +231,7 @@ def test_下单会把总价算对并且带上价格文案(tmp_path: Path) -&gt; 
     assert 订单["total_text"] == "¥25.00"
 
 
+@pytest.mark.p0  # 第 18 页:P0 = 挂了就是生产事故的那一条链路
 def test_订单真的落盘了_换个连接还读得到(tmp_path: Path) -&gt; None:
     数据库 = str(tmp_path / "test.db")
 
@@ -578,7 +579,7 @@ tests/test_order.py .....                                       [ 70%]
 tests/test_price.py .....                                       [100%]
 
 <span class="c-dim">=========================== short test summary info ============================</span>
-<span class="c-warn">SKIPPED [1] tests/e2e/test_checkout_e2e.py:23: E2E 需要:pip install pytest-playwright &amp;&amp; playwright install chromium</span>
+<span class="c-warn">SKIPPED [1] tests/e2e/test_checkout_e2e.py:28: E2E 需要:pip install pytest-playwright &amp;&amp; playwright install chromium</span>
 <span class="c-ok">======================== 17 passed, 1 skipped in 3.66s =========================</span></pre>
 </div>
 

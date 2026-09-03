@@ -2,10 +2,20 @@
    命令样式开关 —— 一键把可复制的命令改写成 Windows 形式。
 
    为什么需要它:
-     全书 23 页共 164 个可复制命令块,里面 72 处是 macOS/Linux 专用写法
+     全书 23 页共 166 个可复制命令块,其中 59 个会被本脚本真的改写
      (`.venv/bin/python`、`&&`、`touch`、`which`…)。Windows 读者要么
      一路手动换算,要么回第 2 页翻对照表。第 2 页那张表仍是权威说明,
      这个开关只是省掉来回翻的功夫。
+
+   上面那两个数怎么数出来的(可复算,别再凭印象改):
+     把本文件的 chainAnd/toWin 原样取出来,对 23 页每一个 <pre><code> 块的
+     文本节点回放一遍 —— 凡有一个文本节点被 toWin 改动,这一块就记一次。
+     166 块里:59 块被改写;3 块因含 heredoc/shebang 整块跳过(见下面「边界」);
+     其余是本来就跨平台通用的命令,或页面自己给出的 PowerShell 版本(06 页那两条)。
+     行级命中共 93 处 —— `.venv/bin/python` 47、`&&` 35、`python3` 3、
+     `which` / `touch` / `mkdir -p` 各 2、`VAR=值` 前缀与 `ls -a` 各 1。
+     上一版这里写的「72 处」既不是块数、也不是命中数,任何数法都对不上。
+     动了页面里的命令,就要重跑一遍这个数法再改这里。
 
    为什么不是在页面里并排写两份:
      并排会让正文体量接近翻倍,违背「读起来不累」这条底线。
@@ -34,10 +44,12 @@
 
   var WARN =
     '<b>已切到 Windows 写法。</b>本页可复制的命令已按第 ' +
-    '<a class="pg" href="02-python-setup.html#venv">2</a> 页第二节那张对照表改写:' +
+    '<a class="pg" href="02-python-setup.html#venv">2</a> 页第二节那张对照表改写,共八条:' +
     '<code>.venv/bin/python</code>→<code>.venv\\Scripts\\python.exe</code>、' +
     '<code>python3</code>→<code>python</code>、<code>which</code>→<code>Get-Command</code>、' +
     '<code>touch</code>→<code>New-Item</code>、<code>mkdir -p</code>→<code>mkdir</code>、' +
+    '<code>ls -a</code>→<code>ls -Force</code>、' +
+    '<code>VAR=值 命令</code>→<code>$env:VAR=&#39;值&#39;; 命令</code>、' +
     '<code>A &amp;&amp; B</code>→<code>A; if ($?) { B }</code>。' +
     '<br><b>为什么不是简单拆成两行</b>:<code>&amp;&amp;</code> 的意思是「前一条成功才跑下一条」。' +
     '本书有十几条形如 <code>cd &lt;你的项目&gt;/myshop &amp;&amp; git clean -fd</code> 的命令 —— ' +
@@ -90,6 +102,9 @@
     return indent + parts[0].replace(/^\s*/, '') + '; if ($?) { ' + tail + ' }';
   }
 
+  /* 八条改写规则:下面七条是行内替换,第八条是 chainAnd 的 && 重写。
+     横幅、第 2 页第二节那个对照框、这里 —— 三处口径必须一致。
+     上一版三处分别写成 6 / 5 / 7 三个数,就是漏了这一步。 */
   function toWin(t) {
     return t.split('\n').map(function (L) {
       /* bash 的 `VAR=值 命令` 前缀,PowerShell 要写成 `$env:VAR='值'; 命令` */

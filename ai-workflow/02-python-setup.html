@@ -261,7 +261,7 @@ git version 2.39.5 (Apple Git-154)
 
 <div class="box note">
   <b class="t">Windows 读者对照(集中在这里,记住这五条)</b>
-  <p style="margin:0 0 10px"><em>不想每条手动换算?</em>每页右上角有个 <b>macOS/Linux ｜ Windows</b> 开关(有命令的页面才出现),一键把可复制的命令改写成 Windows 写法;这张表仍是权威说明。</p>
+  <p style="margin:0 0 10px"><em>不想每条手动换算?</em>每页右上角有个 <b>macOS/Linux ｜ Windows</b> 开关(有命令的页面才出现),一键把可复制的命令改写成 Windows 写法;这张表仍是权威说明。开关一共改写<strong>八条规则</strong>,下面的 &#9312;&#9314;&#9316; 三条把八条全部覆盖了。</p>
   &#9312; <code>.venv/bin/python</code> &rarr; <code>.venv\Scripts\python.exe</code>(全书所有 <code>.venv/bin/</code> 同理替换)。
   <br><br>
   &#9313; 激活命令:PowerShell 用 <code>.\.venv\Scripts\Activate.ps1</code>,CMD 用 <code>.venv\Scripts\activate.bat</code> —— 但本书原则是写全路径、不依赖激活,Windows 同样适用。
@@ -279,7 +279,10 @@ git version 2.39.5 (Apple Git-154)
   一路下一步即可(它会顺带装上 Git Bash —— 在那个终端里 <code>&amp;&amp;</code> 和 <code>which</code> 都能用,
   想完全照书上的命令敲就用它)。
   <br><br>
-  &#9316; <code>touch</code> &rarr; <code>New-Item -ItemType File</code>,<code>mkdir -p</code> &rarr; <code>mkdir</code>(PowerShell 自动递归)。
+  &#9316; <strong>其余六条小命令对照</strong>(开关会自动替换):<code>touch</code> &rarr; <code>New-Item -ItemType File</code>、<code>mkdir -p</code> &rarr; <code>mkdir</code>(PowerShell 自动递归)、
+  <code>python3</code> &rarr; <code>python</code>、<code>which</code> &rarr; <code>Get-Command</code>、<code>ls -a</code> &rarr; <code>ls -Force</code>、
+  <code>VAR=值 命令</code> 这种<strong>行内前缀</strong> &rarr; <code>$env:VAR='值'; 命令</code> ——
+  PowerShell <strong>没有</strong> bash 那种行内前缀写法,照抄不是风格问题,是<strong>解析错误</strong>。
   <br><br>
   另:终端中文乱码时先执行 <code>$env:PYTHONUTF8="1"</code>。
 </div>
@@ -412,7 +415,7 @@ addopts = "-v --strict-markers"
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 markers = [                  # &larr; 第 18 页会用到;--strict-markers 要求先注册再用
-  "p0: 核心用例，挂了就不能合并",
+  "p0: 核心链路,挂了就是生产事故",
 ]
 
 # ---------------- mypy:类型检查 ----------------
@@ -854,7 +857,7 @@ test_naming.py::Testing::test_inner2     PASSED   &larr; class Testing 也被收
   <li>里面有 <code>.venv</code> 文件夹</li>
   <li><code>.venv/bin/python --version</code> 能打印出版本号</li>
   <li>三个工具都装上了(pytest / mypy / ruff 都能 <code>--version</code>)</li>
-  <li>项目根目录有 <code>pyproject.toml</code>,内容是第五节那一份(做到第 <a class="pg" href="18-gate-items.html">18</a> 页还会往里追加 markers 段)</li>
+  <li>项目根目录有 <code>pyproject.toml</code>,内容是第五节那一份(<strong>里面已经含</strong>第 <a class="pg" href="18-gate-items.html">18</a> 页要用的 <code>markers</code> 段,到那一页<strong>不用再加一遍</strong> —— TOML 里重复键是错误)</li>
   <li><code>myshop/__init__.py</code> 存在(可以是空文件)</li>
   <li>你知道为什么要写 <code>.venv/bin/python -m xxx</code> 而不是直接写 <code>pytest</code></li>
 </ul>

@@ -217,7 +217,9 @@
   <div class="step"><div class="n">&#9315; 例子</div><div class="c">
     <p>在 myshop 里,用标记给用例分级:</p>
 <pre><code># 文件:&lt;你的项目&gt;/myshop/pyproject.toml
-# ↓ 在你已有的 [tool.pytest.ini_options] 块里追加 markers,别整块替换(会丢 testpaths/addopts 等)
+# ↓ 第 2 页第五节那份配置里已经有这一段了,这里再贴一次只是给你看它长什么样。
+# 你的文件里要是还没有,就在已有的 [tool.pytest.ini_options] 块里追加,别整块替换
+# (会丢 testpaths/addopts 等);已经有了就别再加一遍 —— TOML 里重复键是错误。
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
@@ -301,8 +303,8 @@ pytest -q</code></pre>
 <span class="c-ok">tests\test_api.py .......</span>                                                [ 41%]
 <span class="c-ok">tests\test_order.py .....</span>                                                [ 70%]
 <span class="c-ok">tests\test_price.py .....</span>                                                [100%]
-<span class="c-ok">17 passed</span>, <span class="c-warn">1 skipped</span> in 3.90s
-                <span class="c-dim">&uarr; 这个 1 是端到端用例,因为没装浏览器驱动被跳过</span></pre>
+<span class="c-ok">======================== 17 passed</span>, <span class="c-warn">1 skipped</span><span class="c-ok"> in 3.89s ========================</span>
+                                         <span class="c-dim">&uarr; 这个 1 是端到端用例,因为没装浏览器驱动被跳过</span></pre>
 </div>
 
 <div class="box note">

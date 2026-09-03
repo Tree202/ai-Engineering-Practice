@@ -243,8 +243,8 @@
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; &#128293; 同一台机器,同一份坏代码</div>
-<pre><span class="c-cmd">$ git commit --no-verify -m "feat: 货币符号改成美元"</span>
-[feat/broken-price a1c9e34] feat: 货币符号改成美元
+<pre><span class="c-cmd">$ git commit --no-verify -m 'feat: 货币符号改成 $(这是个 bug,门禁应该拦住)'</span>
+[feat/broken-price fb4094e] feat: 货币符号改成 $(这是个 bug,门禁应该拦住)
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 <span class="c-dim"># 注意:上面那个三道检查的框,一行都没打印</span>
@@ -256,7 +256,7 @@
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 推送并开合并请求</div>
 <pre><span class="c-cmd">$ git push -u origin feat/broken-price</span>
-<span class="c-cmd">$ gh pr create --title "改货币符号" --body "把 ¥ 改成 $"</span>
+<span class="c-cmd">$ gh pr create --title "把货币符号改成 $" --body "把 ¥ 改成 $"</span>
 https://github.com/&lt;账号&gt;/myshop-gate-demo/pull/1
 
 <span class="c-dim"># 等云端跑完(27 秒),看状态:</span>
@@ -290,8 +290,8 @@ NAME        STATE
 <span class="c-cmd">$ gh pr view 1 --json mergeStateStatus -q .mergeStateStatus</span>
 <span class="c-ok">CLEAN</span>          <span class="c-dim">&larr; 从 BLOCKED 变成 CLEAN</span>
 
-<span class="c-cmd">$ gh pr merge 1 --squash</span>
-<span class="c-ok">&#10004; Squashed and merged pull request &lt;你的账号&gt;/myshop-gate-demo#1 (改货币符号)</span></pre>
+<span class="c-cmd">$ gh pr merge 1 --merge</span>
+<span class="c-ok">&#10004; Merged pull request &lt;你的账号&gt;/myshop-gate-demo#1 (把货币符号改成 $)</span></pre>
 </div>
 
 <div class="box key">
@@ -370,7 +370,7 @@ JSON</code></pre>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; &#128293; 仓库所有者尝试强制合并</div>
-<pre><span class="c-cmd">$ gh pr merge 1 --squash --admin</span>
+<pre><span class="c-cmd">$ gh pr merge 1 --merge --admin</span>
 
 <span class="c-bad">failed to merge pull request: GraphQL: Required status check
 "三道检查" is failing (mergePullRequest)</span>
@@ -608,6 +608,7 @@ mergeStateStatus = BLOCKED     &larr; "但门禁没过,不让合"</code></pre>
   <p>第 19 页 / 共 23 页 · 覆盖知识点 199–207 · 难度 &#9733;&#9733;&#9733;&#9733; · <b style="color:var(--bad)">全书重点 3/3</b></p>
   <p><strong>本页所有终端输出均为真机原样抄录</strong>,包括第六节那次<strong>我自己的错误诊断</strong>。
   实验在真实公开仓库上完成,合并请求 #1 已合并。凭据全程未经手,使用系统钥匙串中的命令行登录态。</p>
+  <p><strong>2026-09-03 复核并改正三处</strong>(此前与仓库真实历史不符):第 2 幕的提交哈希原写 <code>a1c9e34</code>,那个对象在仓库里不存在,真实那条是 <code>fb4094e</code>,提交说明也一并改回;第 6 幕原写 <code>--squash</code>,而 <code>git log --merges</code> 显示留下的是<strong>双亲合并提交</strong> <code>afa3103</code>(<code>Merge pull request #1 from &lt;你的账号&gt;/feat/broken-price</code>)——是普通合并、不是压缩合并;合并请求标题原写「改货币符号」,真实是「把货币符号改成 $」。三处都可以在配套仓库里用 <code>git log</code> 复算。</p>
 </div>
 </div>
 <script>

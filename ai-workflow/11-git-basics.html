@@ -407,7 +407,10 @@ ENV/
 
 # ---- 本地数据库 ----
 *.sqlite3
-myshop.db          # 本项目跑测试会生成它
+# 下面这条是本项目跑测试会生成的文件。
+# 注意:.gitignore 只认「整行以 # 开头」的注释 —— 写成 `myshop.db  # 说明`
+# 会被当成一个带空格和井号的文件名,那样它根本不会被忽略。
+myshop.db
 
 # ---- 编辑器 ----
 .idea/</code></pre>
@@ -570,11 +573,11 @@ myshop.db          # 本项目跑测试会生成它
 
 <h2 id="commit">七、存档</h2>
 
-<pre><code>cd &lt;你的项目&gt;/myshop && git commit -m "feat: 第1步 price 支持满减计算"</code></pre>
+<pre><code>git commit -m "feat: 第1步 读取分数"</code></pre>
 
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
-<pre>[main b27d579] feat: 第1步 price 支持满减计算
+<pre>[main 74412a5] feat: 第1步 读取分数
  1 file changed, 2 insertions(+)</pre>
 </div>
 

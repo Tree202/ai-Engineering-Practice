@@ -155,7 +155,7 @@
 &#9500;&#9472;&#9472; .gitignore                   不存档黑名单(第 11 页讲)
 &#9500;&#9472;&#9472; README.md
 &#9500;&#9472;&#9472; myshop/                      &larr;&larr; 源代码
-&#9474;   &#9500;&#9472;&#9472; __init__.py              标志「这是一个包」,空文件
+&#9474;   &#9500;&#9472;&#9472; __init__.py              标志「这是一个包」,本项目里是一行说明文字
 &#9474;   &#9500;&#9472;&#9472; price.py                 算价格(纯函数,不碰任何外部东西)
 &#9474;   &#9500;&#9472;&#9472; order.py                 下单(调用 price + 写数据库)
 &#9474;   &#9500;&#9472;&#9472; api.py                   网络接口(把请求翻译成函数调用)
@@ -601,6 +601,20 @@ tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>
 <pre>{"id": 1, "item": "咖啡", "qty": 2, "total_cents": 2500, "total_text": "¥25.00"}</pre>
 </div>
 
+<div class="box note">
+  <b class="t">&#128187; Windows 读者:<code>curl</code> 是那个开关唯一换算不了的命令</b>
+  PowerShell 5.1 里 <code>curl</code> 是 <code>Invoke-WebRequest</code> 的<strong>别名</strong>,参数完全不同 &mdash;&mdash;
+  <code>-X</code> 会直接报参数绑定失败。等价写法(在 PowerShell 5.1 上对着这个接口实跑过):
+<pre style="margin:9px 0 0"><code>Invoke-RestMethod -Uri http://127.0.0.1:8000/orders -Method Post -ContentType 'application/json; charset=utf-8' -Body '{"item":"咖啡","unit_cents":1250,"qty":2}'</code></pre>
+  <p style="margin:9px 0 0"><strong><code>charset=utf-8</code> 不能省。</strong>不带它,PowerShell 5.1 会按 latin-1 编请求体,
+  服务端收到的 <code>item</code> 变成 <code>??</code> &mdash;&mdash; 而接口<strong>照样返回成功</strong>。
+  又一次「<strong>不是报错,是悄悄给你一个错的结果</strong>」。</p>
+  <p style="margin:9px 0 0">另:<code>Invoke-RestMethod</code> 会把 JSON <strong>解析成对象</strong>,
+  所以它打印的不是上面那一行,而是 <code>id&nbsp;: 1</code> 这样的逐行清单。想看原样的 JSON 行就换
+  <code>(Invoke-WebRequest -UseBasicParsing -Uri &hellip; -Body &hellip;).Content</code> &mdash;&mdash;
+  <code>-UseBasicParsing</code> 在 5.1 上不能省。</p>
+</div>
+
 <p>再试一个畸形请求:</p>
 
 <pre><code>curl -s -w " &lt;- HTTP %{http_code}\n" -X POST http://127.0.0.1:8000/orders -d '{坏JSON'</code></pre>
@@ -608,6 +622,13 @@ tests/test_price.py::test_负数要报错 <span class="c-ok">PASSED</span>
 <div class="term-box">
   <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp; 真实输出</div>
 <pre>{"error": "请求体不是合法的 JSON"} <span class="c-ok">&lt;- HTTP 400</span></pre>
+</div>
+
+<div class="box note">
+  <b class="t">&#128187; Windows 读者:同一个畸形请求</b>
+  400 在 PowerShell 5.1 里是<strong>抛异常</strong>,不是正常返回 &mdash;&mdash; 不接住的话你只看到一片红,
+  看不到服务端给的那句 <code>error</code>。等价写法(实跑过,输出与上面那行逐字相同):
+<pre style="margin:9px 0 0"><code>try { Invoke-RestMethod -Uri http://127.0.0.1:8000/orders -Method Post -Body '{坏JSON' } catch { "$($_.ErrorDetails.Message) &lt;- HTTP $([int]$_.Exception.Response.StatusCode)" }</code></pre>
 </div>
 
 <p><strong>400 而不是 500</strong> —— 这正是上面那个「解析放在 <code>try</code> 里面」的效果。</p>

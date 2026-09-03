@@ -669,11 +669,11 @@
 | 二、第 1 幕:本地钩子拦住了 | 改坏 price.py 后 `git commit` 触发本地钩子,三道检查中 pytest 未通过,输出 `8 failed, 9 passed, 1 skipped`,提交被拒(git log 仍是上一条) | 实测数字 / 输出 | 真机终端原样抄录 | — | 中 |
 | 二、第 2 幕:12 个字符绕过 | `git commit --no-verify -m "..."` 成功提交,且三道检查的输出框「一行都没打印」—— `--no-verify` 让 git 压根不执行钩子 | 命令行为 | 真机终端原样抄录 | — | 低 |
 | 二、第 3–4 幕:推上去,云端拦住 | `gh pr checks 1` 输出 `三道检查 fail 27s`;`gh pr view 1 --json mergeStateStatus -q .mergeStateStatus` 返回 `BLOCKED` | 第三方服务 / 库 | 真机终端原样抄录 | — | 高 |
-| 二、第 6 幕:修好才放行 | 改回 ¥ 并推送后 `gh pr checks 1` 显示 `pass 24s`,mergeStateStatus 从 `BLOCKED` 变成 `CLEAN`,`gh pr merge 1 --squash` 输出「Squashed and merged pull request #1」 | 第三方服务 / 库 | 真机终端原样抄录 | — | 高 |
+| 二、第 6 幕:修好才放行 | 改回 ¥ 并推送后 `gh pr checks 1` 显示 `pass 24s`,mergeStateStatus 从 `BLOCKED` 变成 `CLEAN`,`gh pr merge 1 --merge` 输出「Merged pull request …#1(把货币符号改成 $)」 | 第三方服务 / 库 | 真机终端原样抄录(2026-09-03 改正:原登记为 `--squash` / 「Squashed and merged」/ 标题「改货币符号」,与仓库真实历史相反 —— `git log --merges` 显示留下的是双亲合并提交 `afa3103`) | — | 高 |
 | 三、怎么配分支保护规则 · 代码块 | 用 `gh api -X PUT repos/<账号>/<仓库>/branches/main/protection --input -` 提交 JSON,字段含 `required_status_checks.strict`、`required_status_checks.contexts`、`en | 第三方服务 / 库 | 真机执行 | — | 高 |
 | 三、字段表 | `contexts` 是必须通过的检查名单,名字要和流水线里 `name:` 一字不差;`strict: true` 表示要求分支先同步主干最新代码再合 | 第三方服务 / 库 | 未标注(实验中使用) | — | 高 |
 | 三、box trap「🔥 名字对不上」 | 🔥 `contexts` 里填的必须是 job 的 `name:` 而不是 job 的 id(示例中 `gate` 是 id、`三道检查` 才是要填的);填错的后果不是报错而是永久等待,且「没有任何错误信息告诉你为什么」 | 第三方服务 / 库 | 未标注(与第 18 页配置呼应) | 🔥 重点强调(非修正) | 高 |
-| 四、🔥 连管理员也绕不过 | 🔥 `gh pr merge 1 --squash --admin` 失败,报错原文 `failed to merge pull request: GraphQL: Required status check "三道检查" is failing (mergePullRequest)`,`echo $ | 第三方服务 / 库 | 真机终端原样抄录 | 🔥 重点强调(非修正) | 高 |
+| 四、🔥 连管理员也绕不过 | 🔥 `gh pr merge 1 --merge --admin` 失败,报错原文 `failed to merge pull request: GraphQL: Required status check "三道检查" is failing (mergePullRequest)`,`echo $ | 第三方服务 / 库 | 真机终端原样抄录 | 🔥 重点强调(非修正) | 高 |
 | 四、box key + 对照表(回顾 202) | 🔥 `enforce_admins` 的默认值是 `false`,即默认管理员可以强制合并、门禁对管理员形同虚设;`--admin` 这次跳不过的唯一原因是规则里写了 `enforce_admins: true` | 第三方服务 / 库 | 真机验证(第 22 页称「两条都是真机验证过的」 | 🔥 重点强调(非修正) | 高 |
 | 四、box note「注意错误信息的来源」 | 报错里出现 `GraphQL` 说明这次拒绝发生在服务端而不是本地工具替你挡的 | 第三方服务 / 库 | 自述推断 | — | 中 |
 | 五、两个环境,同一个结论 · 对比表 | 本地是 macOS(darwin),云端流水线是 Linux | 实测数字 / 输出 | 真机实测 | — | 中 |
@@ -905,11 +905,11 @@ Playwright 官方文档逐条取原文;判「过期」必须给出官方原句�
 | 19 | 测试运行器(pytest):本地 8.4.2,云端 9.1.1(教程称「差 1 个大版本」) | 版本号 | 高 —— pytest 版本号变化快,9.1.1 是否已发布/存在需核 | 仍成立 |
 | 19 | 实验在一个真实公开仓库 `myshop-gate-demo` 上完成,门禁用第 18 页第九节 ci.yml 的三道检查版,任务名 `三道检查`,主干开启保护且「管理员同样受限」 | 第三方服务 / 库 | 高 —— 仓库与平台配置可随时变化,外部无法复现验证 | 无法外部核实 |
 | 19 | `gh pr checks 1` 输出 `三道检查 fail 27s`;`gh pr view 1 --json mergeStateStatus -q .mergeStateStatus` 返回 `BLOCKED` | 第三方服务 / 库 | 高 —— gh 输出格式与字段随版本变,27s 是一次性数字 | 仍成立 |
-| 19 | 改回 ¥ 并推送后 `gh pr checks 1` 显示 `pass 24s`,mergeStateStatus 从 `BLOCKED` 变成 `CLEAN`,`gh pr merge 1 --squash` 输出「Squashed and merged p | 第三方服务 / 库 | 高 —— CLI 输出文案与耗时都易变 | **已过期,已改正** |
+| 19 | 改回 ¥ 并推送后 `gh pr checks 1` 显示 `pass 24s`,mergeStateStatus 从 `BLOCKED` 变成 `CLEAN`,`gh pr merge 1 --merge` 输出「Merged pull request …#1」 | 第三方服务 / 库 | 高 —— CLI 输出文案与耗时都易变 | **已过期,已改正**;2026-09-03 再改一次:合并方式原写 `--squash`,真实是普通合并(merge commit `afa3103`) |
 | 19 | 用 `gh api -X PUT repos/<账号>/<仓库>/branches/main/protection --input -` 提交 JSON,字段含 `required_status_checks.strict`、`required_status_ | 第三方服务 / 库 | 高 —— GitHub 分支保护 API 正被 rulesets 取代,字段可能弃用 | 仍成立 |
 | 19 | `contexts` 是必须通过的检查名单,名字要和流水线里 `name:` 一字不差;`strict: true` 表示要求分支先同步主干最新代码再合 | 第三方服务 / 库 | 高 —— 平台字段语义可变 | 仍成立 |
 | 19 | 🔥 `contexts` 里填的必须是 job 的 `name:` 而不是 job 的 id(示例中 `gate` 是 id、`三道检查` 才是要填的);填错的后果不是报错而是永久等待,且「没有任何错误信息告诉你为什么」 | 第三方服务 / 库 | 高 —— GitHub 对未上报必需检查的处理策略可变 | 仍成立 |
-| 19 | 🔥 `gh pr merge 1 --squash --admin` 失败,报错原文 `failed to merge pull request: GraphQL: Required status check "三道检查" is failing (mergeP | 第三方服务 / 库 | 高 —— 报错文案由 GitHub 服务端决定,随时可改 | 无法外部核实 |
+| 19 | 🔥 `gh pr merge 1 --merge --admin` 失败,报错原文 `failed to merge pull request: GraphQL: Required status check "三道检查" is failing (mergeP | 第三方服务 / 库 | 高 —— 报错文案由 GitHub 服务端决定,随时可改 | 无法外部核实 |
 | 19 | 🔥 `enforce_admins` 的默认值是 `false`,即默认管理员可以强制合并、门禁对管理员形同虚设;`--admin` 这次跳不过的唯一原因是规则里写了 `enforce_admins: true` | 第三方服务 / 库 | 高 —— 平台默认值与新 rulesets 模型下的等价字段可能不同 | 仍成立 |
 | 19 | `mergeable` 只回答「代码本身能不能合」,典型取值 `MERGEABLE` / `CONFLICTING`,完全不管门禁 | 第三方服务 / 库 | 高 —— API 字段取值与语义可变 | 仍成立 |
 | 19 | `mergeStateStatus` 取值:`CLEAN`(全绿可合)、`BLOCKED`(被保护规则挡住)、`BEHIND`(落后主干,对应 strict: true)、`UNSTABLE`(有检查红了但不是必需的 = 降级告警)、`DIRTY`(有代码冲突 | 第三方服务 / 库 | 高 —— 枚举值集合可能增删 | 仍成立 |
