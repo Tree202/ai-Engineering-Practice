@@ -222,8 +222,8 @@
     <polygon points="288,186 552,186 604,268 236,268" fill="var(--info-soft)" stroke="var(--info)" stroke-width="1.6"/>
     <polygon points="236,270 604,270 656,352 184,352" fill="var(--ok-soft)" stroke="var(--ok)" stroke-width="1.6"/>
 
-    <text x="420" y="76"  font-size="14" font-weight="800" fill="var(--bad)"  text-anchor="middle">&#9314; E2E / 系统</text>
-    <text x="420" y="150" font-size="14" font-weight="800" fill="var(--warn)" text-anchor="middle">&#9313; 集成 / 接口</text>
+    <text x="420" y="76"  font-size="14" font-weight="800" fill="var(--bad)"  text-anchor="middle">&#9315; E2E / 系统</text>
+    <text x="420" y="150" font-size="14" font-weight="800" fill="var(--warn)" text-anchor="middle">&#9313;&#9314; 集成 / 接口</text>
     <text x="420" y="234" font-size="14" font-weight="800" fill="var(--info)" text-anchor="middle">&#9312; 单元 / 组件</text>
     <text x="420" y="316" font-size="14" font-weight="800" fill="var(--ok)"   text-anchor="middle">&#9450; 静态检查</text>
 
@@ -359,12 +359,12 @@
   <td><strong>不重复测第 &#9312; 层测过的边界值</strong>。不走网络,直接调函数</td>
 </tr>
 <tr>
-  <td><strong>&#9313; 接口</strong></td>
+  <td><strong>&#9314; 接口</strong></td>
   <td>真的启动服务器、真的发请求,检查<strong>状态码和返回结构</strong> —— 也就是「契约」</td>
   <td>不测页面长什么样。也不再重复测价格进位这种细节</td>
 </tr>
 <tr>
-  <td><strong>&#9314; E2E</strong></td>
+  <td><strong>&#9315; E2E</strong></td>
   <td>像真人一样开浏览器走完整流程。<strong>只测最值钱的那一两条主路径</strong></td>
   <td>不测每种错误分支、不测文案细节 —— 那些用下面三层测,又快又稳</td>
 </tr>

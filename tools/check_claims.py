@@ -117,6 +117,15 @@ def run_checks(root=None):
         t06_ = read(os.path.join(AW, "06-myshop.html"))
         宣称行 = re.search(r"核心三模块合计</strong></td><td><strong>(\d+) 行", t06_)
         check("06 页宣称的核心行数 = 实数", str(核心), 宣称行.group(1) if 宣称行 else "?")
+        # 00 页那张 06 卡片也写了同一组行数。上面只核了「06 页 = 磁盘」,
+        # 于是 00 页卡片停在旧数(224/150)时这个脚本照样全绿 —— 2026-09-03 复核抓到的。
+        # 同一个事实有几处落点,就得核几处。
+        卡片行 = re.search(r"三个核心源码文件共 (\d+) 行[^<]*?另有 (\d+) 行网页层", t00)
+        check("00 页 06 卡片的核心行数 = 06 页", str(核心),
+              卡片行.group(1) if 卡片行 else "?")
+        check("00 页 06 卡片的网页层行数 = 实数",
+              str(len(io.open(os.path.join(MS, "myshop", "web.py"), encoding="utf-8").readlines())),
+              卡片行.group(2) if 卡片行 else "?")
         check("06 页含全量 %d 口径" % 全部, True, ("%d 行" % 全部) in t06_)
 
     # 教程侧旧口径残留检查(不依赖 myshop 目录,CI 也跑)

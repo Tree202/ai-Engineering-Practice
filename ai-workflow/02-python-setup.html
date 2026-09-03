@@ -407,6 +407,9 @@ pythonpath = ["."]           # &larr; 救命的一行,见第六节
 addopts = "-v --strict-markers"
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
+markers = [                  # &larr; 第 18 页会用到;--strict-markers 要求先注册再用
+  "p0: 核心用例，挂了就不能合并",
+]
 
 # ---------------- mypy:类型检查 ----------------
 [tool.mypy]
@@ -570,7 +573,7 @@ Success: no issues found in 10 source files</code></pre>
   </tbody>
   </table>
   </div>
-  <p style="margin:9px 0 0">怎么看退出码:跑完命令后立刻敲 <code>echo $?</code>。</p>
+  <p style="margin:9px 0 0">怎么看退出码:跑完命令后立刻敲 <code>echo $?</code>。<br><strong>Windows PowerShell 不能用这个</strong> —— 那里的 <code>$?</code> 只是个布尔值(True/False),拿不到上面表里那些 0–5 的数字。PowerShell 里要敲 <code>$LASTEXITCODE</code>。</p>
 </div>
 
 <h2 id="five">七、五个你一定会撞上的概念</h2>
@@ -618,7 +621,7 @@ Success: no issues found in 10 source files</code></pre>
     <p>三个用途,按重要性排:</p>
     <ol>
       <li><strong>放共享的「准备工作」</strong>(下一个概念讲这是什么)—— 最常见</li>
-      <li>放改变 pytest 行为的钩子函数(进阶,本教程只在第 <a class="pg" href="18-gate-items.html">18</a> 页用一次)</li>
+      <li>放改变 pytest 行为的钩子函数(进阶,本书不展开讲)</li>
       <li><strong>副作用</strong>:把自己所在的文件夹加进搜索路径 —— 这就是上一节第 &#9314; 种解法的原理</li>
     </ol>
   </div></div>

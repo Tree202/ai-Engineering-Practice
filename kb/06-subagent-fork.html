@@ -218,7 +218,7 @@ model: sonnet
       <tbody>
         <tr><td><b>完整对话历史</b></td><td>✅ 继承</td><td>❌ 从零开始</td></tr>
         <tr><td><b>系统提示词</b></td><td>✅ 和主会话相同</td><td>❌ 用它自己定义里的</td></tr>
-        <tr><td><b>工具</b></td><td>✅ 同一套工具池<br><small>(但放到后台跑时会换成更窄的后台工具集)</small></td><td>❌ 用 <code>tools</code> 字段指定的那些</td></tr>
+        <tr><td><b>工具</b></td><td>✅ 同一套工具池<br><small>(官方对「fork 当前对话」的子代理<b>豁免</b>了后台工具集的收窄;被收窄的是技能里 <code>context: fork</code> 那种子代理)</small></td><td>❌ 用 <code>tools</code> 字段指定的那些</td></tr>
         <tr><td><b>模型</b></td><td>✅ 和主会话相同</td><td>❌ 用 <code>model</code> 字段，或继承</td></tr>
         <tr><td><b>输出风格</b></td><td>✅ 生效</td><td>❌ 不生效</td></tr>
         <tr><td><b>CLAUDE.md</b></td><td>✅ 加载</td><td>✅ 加载（Explore / Plan 除外）</td></tr>

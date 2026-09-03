@@ -558,7 +558,7 @@ def test_用户可以从首页一路下单成功(page: Page, 商店服务器: st
 
 <div class="box note">
   <b class="t">&#128260; 经核实修正:那个「自动等待」的官方叫法</b>
-  很多教程管它叫「web-first assertions」。<strong>官方在动作侧的术语是 auto-waiting</strong>,有专门文档页(<code>/python/docs/actionability</code>);而「web-first assertions」<strong>并没被废弃</strong> —— 它今天仍出现在官方 Python 文档的 Handles 页与 v1.18 发行说明里。两个词指的不是同一件事:前者是<strong>断言会重试</strong>,后者是<strong>动作前会等元素可操作</strong>。
+  很多教程管它叫「web-first assertions」。<strong>官方在动作侧的术语是 auto-waiting</strong>,有专门文档页(<code>/python/docs/actionability</code>);而「web-first assertions」<strong>并没被废弃</strong> —— 它今天仍出现在官方 Python 文档的 Handles 页与 v1.18 发行说明里。两个词指的不是同一件事:<strong>auto-waiting 是动作前会等元素可操作</strong>,<strong>web-first assertions 是断言会重试</strong>。
   <br><br>
   官方用词是:<strong>动作侧叫「自动等待(auto-waiting)」</strong>,有专门的文档页;
   断言侧的表述是「断言会等待直到条件满足」,<strong>默认超时 5 秒</strong>。

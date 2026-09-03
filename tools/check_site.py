@@ -208,6 +208,13 @@ def main() -> int:
         kb_order = [q.name for q in kb_pages if q.name[:2].isdigit()]
         n += scan_dir(kb, "姊妹课", kb_pages, id_index, required=True,
                       nav_order=kb_order, require_index_link=False)
+    else:
+        # required=True 原来被 kb.exists() 整个包住:删掉 kb/ 里的文件会报错,
+        # 但把**整个目录**移走反而静默跳过,8 页凭空退出巡检还报绿。
+        # index.html 那一支本来就是这么写的(有 else),这里漏了。
+        print("[姊妹课] 目录不存在 -> 1 个问题")
+        print("  ! kb/ 整个目录不见了")
+        n += 1
 
     old = root / "legacy-v1"
     if old.exists():

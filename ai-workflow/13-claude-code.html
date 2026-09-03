@@ -397,7 +397,7 @@
   <strong>你正在输入的那段话</strong>拉进默认文本编辑器去写 —— 要写长指令时,
   比在终端里一行行敲舒服得多。
   <br><br>
-  <strong>注意它改的不是计划,是你的输入。</strong>想把 Claude 上一条回复(比如刚出的那份计划)
+  <strong>注意分清两个场景</strong>:在普通输入框里按,打开的是<strong>你正在输入的内容</strong>;而在<strong>计划审批提示</strong>上按,打开的是<strong>计划本身</strong>,可以直接改完再让它继续(官方原话:open the proposed plan in your default text editor and edit it directly)。想把 Claude 上一条回复(比如刚出的那份计划)
   一起带进编辑器当参照,得先在 <code>/config</code> 里打开
   <b>Show last response in external editor</b>;但那段内容是以 <code>#</code> 注释形式垫在
   你的输入上方的,<strong>保存时会被剥掉</strong> —— 你能照着它写,不能直接改它。
@@ -573,7 +573,7 @@
   <td><code>Esc Esc</code></td>
   <td>空输入框 = 打开撤销菜单;<strong>有文字时第一次先清空</strong>(按 ↑ 可恢复)</td>
 </tr>
-<tr><td><code>Ctrl + G</code><br><small>= <code>Ctrl+X Ctrl+E</code></small></td><td><strong>把你正在输入的内容拉进默认编辑器写</strong>(不是改计划)</td></tr>
+<tr><td><code>Ctrl + G</code><br><small>= <code>Ctrl+X Ctrl+E</code></small></td><td><strong>把你正在输入的内容拉进默认编辑器写</strong>;在计划审批提示上按则是打开<strong>计划本身</strong>直接改</td></tr>
 <tr><td><code>Alt + M</code></td><td>Windows 上某些终端里,代替 <code>Shift+Tab</code></td></tr>
 </tbody>
 </table>
@@ -593,11 +593,11 @@
 <tr><td>134</td><td>前提校验</td><td>「搞清楚现状」防的是方案建在幻觉上</td></tr>
 <tr><td>135</td><td>审方案四件事</td><td>方向 / 范围 / 步子 / 幻觉</td></tr>
 <tr><td>136</td><td><code>Esc Esc</code> 的两种行为</td><td>取决于输入框空不空</td></tr>
-<tr><td>137</td><td>&#9888; 撤销的五个死角</td><td>命令后果、存档状态、后台任务、手改、已发请求</td></tr>
+<tr><td>137</td><td>&#9888; 撤销的五个死角</td><td>命令后果、子代理的编辑、你手改的文件、符号/硬链接、外部状态(存档与已发请求)</td></tr>
 <tr><td>138</td><td>三个限制</td><td>粒度是每条消息 / 100 个 / 30 天</td></tr>
 <tr><td>139</td><td>撤销 vs 存档</td><td><strong>零食 vs 主食</strong></td></tr>
 <tr><td>140</td><td><code>/review</code> 等命令</td><td><code>--fix</code> 的改动撤销救不回</td></tr>
-<tr><td>141</td><td><code>Ctrl+G</code></td><td>把<strong>你的输入</strong>拉进编辑器写</td></tr>
+<tr><td>141</td><td><code>Ctrl+G</code></td><td>普通输入框:把<strong>你的输入</strong>拉进编辑器;计划审批提示:把<strong>计划</strong>拉进编辑器直接改</td></tr>
 <tr><td>142</td><td><code>/clear</code> vs <code>/compact</code></td><td>一次存档打完 = 一次 <code>/clear</code></td></tr>
 </tbody>
 </table>

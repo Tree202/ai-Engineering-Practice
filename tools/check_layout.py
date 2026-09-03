@@ -201,6 +201,12 @@ def 扫目录(d: str, 标签: str):
             print("  L%-5s [%s] %s" % (it.get("line"), it.get("rule"), it.get("msg", "")))
             if it.get("detail"):
                 print("        %s" % str(it["detail"])[:180])
+    if not 页:
+        # 目录不存在或没有 HTML —— glob 返回空且不抛异常,六条规则全部空转,
+        # 打印「检查 0 页 -> 0 个问题」然后报绿。把目录改个名就是静默空操作。
+        print("\n[%s] 一个页面都没扫到 -> 1 个问题" % 标签)
+        print("  ! 目录不存在或没有 HTML:%s" % d)
+        return 1
     print("\n[%s] 检查 %d 页 -> %d 个问题" % (标签, len(页), 合计))
     return 合计
 
@@ -225,7 +231,11 @@ def 真值自检(原版: str, 已修: str) -> int:
     ]:
         p0, p1 = os.path.join(原版, 文件), os.path.join(已修, 文件)
         if not (os.path.exists(p0) and os.path.exists(p1)):
-            print("  跳过 %-22s (缺样本)" % 说明)
+            # 以前这里只 continue,不累加 坏 —— 于是「样本找不到」和「样本全过」
+            # 退出码一模一样。真值门槛的全部意义就是「没核过就不许报绿」,
+            # 跳过却算通过,等于把这层门槛自己拆了。2026-09-03 复核抓到。
+            print("  失败!!  跳过 %-18s (缺样本 —— 没核过就不算通过)" % 说明)
+            坏 += 1
             continue
         n0 = len([x for x in 扫一个文件(p0) if x.get("rule") == 规则名])
         n1 = len([x for x in 扫一个文件(p1) if x.get("rule") == 规则名])

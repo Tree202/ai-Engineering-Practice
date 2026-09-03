@@ -99,9 +99,21 @@ def run_checks(ms):
         # 判据必须锚在行首的 run: 且工具名紧跟其后 —— 写成 run:.*\bmypy\b 会把
         # `run: pip install pytest mypy ruff` 那一行也算上,于是**把门禁整步删掉都测不出来**。
         # 这是变异验证当场抓到的:删掉 mypy 那一步,旧判据照样报绿。
-        for 工具 in ("ruff", "mypy", "pytest"):
-            跑了 = bool(re.search(r"^\s*run:\s*(?:python\s+-m\s+)?%s\b" % 工具, y, re.M))
-            check("CI 里真的把 %s 当门禁跑" % 工具, True, 跑了)
+        #
+        # 还要再锚一层「命令形状」:只查工具名的话,把 `ruff check .` 换成
+        # `ruff --version` 照样报绿 —— 门禁形同虚设却全是绿灯。所以每个工具都要求
+        # 它后面跟的是**真的在检查**的那个形态,并显式排除 --version / --help。
+        # 这条是 2026-09-03 外部评审指出的。
+        形状 = {
+            "ruff": r"ruff\s+check\b",          # ruff check .
+            "mypy": r"mypy\s*(?:$|[^-\s])",      # mypy 或 mypy <路径>,但不是 mypy --version
+            "pytest": r"pytest\b(?!\s*--(?:version|help))",
+        }
+        for 工具, 形 in 形状.items():
+            行 = [L for L in y.split("\n")
+                 if re.match(r"^\s*(?:-\s+)?run:\s*(?:python\s+-m\s+)?%s\b" % 工具, L)]
+            真查 = any(re.search(形, L) and not re.search(r"--(?:version|help)\b", L) for L in 行)
+            check("CI 里真的把 %s 当门禁跑(不是 --version)" % 工具, True, 真查)
 
     # ---------- 5. 四层测试文件都在 ----------
     for rel in ("myshop/price.py", "myshop/order.py", "myshop/api.py", "myshop/web.py",

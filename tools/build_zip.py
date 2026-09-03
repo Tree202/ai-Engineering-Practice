@@ -5,7 +5,16 @@
 下载的人拿不到第 4 层。此后 zip 一律由本脚本产出,白名单就是清单,
 少一个文件直接报错,不会静默缺件。
 
-用法:  python tools/build_zip.py
+用法:
+    python tools/build_zip.py            重打
+    python tools/build_zip.py --check    只校验,不写盘;发布物与 myshop/ 不一致就退 1
+
+为什么需要 --check:
+    2026-09-03 的全量复核发现,这个脚本要防的事故**又发生了一次** ——
+    myshop 那边修完 Windows 问题(README 三处语法错误、两处编码崩溃)之后,
+    zip 没跟着重打,14 个条目里 4 个过期(README.md / ci.yml / api.py / web.py)。
+    读者按 index.html 那条路径拿到的,是修 Windows **之前**的版本。
+    只有「重打」而没有「校验」,就只能靠人记得跑;有了 --check 才能挂进门禁。
 """
 
 import hashlib
@@ -32,7 +41,48 @@ OUT = os.path.join(ROOT, "myshop-source.zip")
 禁止 = (".venv", "__pycache__", ".git/", ".db", ".pytest_cache", ".mypy_cache", ".ruff_cache")
 
 
+def check_zip() -> int:
+    """只读校验:zip 里每个条目的内容,是否与 myshop/ 磁盘上的当前文件逐字节相同。
+
+    这是门禁调用的入口 —— 它不写盘,只回答一个问题:
+    「读者现在下载到的那个包,是不是仓库的当前状态?」
+    """
+    if not os.path.exists(OUT):
+        print("发布物不存在:", OUT)
+        return 1
+    坏 = []
+    with zipfile.ZipFile(OUT) as z:
+        names = set(z.namelist())
+        期望 = {"myshop/" + rel for rel in 白名单}
+        缺 = sorted(期望 - names)
+        多 = sorted(names - 期望)
+        for x in 缺:
+            坏.append("zip 里缺条目:%s" % x)
+        for x in 多:
+            坏.append("zip 里多了条目:%s" % x)
+        for rel in 白名单:
+            名 = "myshop/" + rel
+            src = os.path.join(MS, rel.replace("/", os.sep))
+            if 名 not in names or not os.path.exists(src):
+                continue
+            a = hashlib.sha256(z.read(名)).hexdigest()
+            b = hashlib.sha256(open(src, "rb").read()).hexdigest()
+            if a != b:
+                坏.append("内容不一致:%s(zip %d 字节 / 磁盘 %d 字节)"
+                          % (rel, z.getinfo(名).file_size, os.path.getsize(src)))
+    if 坏:
+        print("发布物已与 myshop/ 漂移 %d 处:" % len(坏))
+        for x in 坏:
+            print("  !", x)
+        print("跑 python tools/build_zip.py 重打。")
+        return 1
+    print("发布物与 myshop/ 一致(%d 条目)。" % len(白名单))
+    return 0
+
+
 def main() -> int:
+    if "--check" in sys.argv[1:]:
+        return check_zip()
     # 先写临时文件,校验通过后才原子改名顶掉旧包。
     # 旧写法直接写 OUT:少一个文件就 return 1,而那时旧包已经被清空了 ——
     # 「拒绝打包」实际留下的是一个合法但残缺的短包。第三轮核验指出的。

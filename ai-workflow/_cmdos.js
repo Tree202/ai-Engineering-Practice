@@ -38,30 +38,56 @@
     '<code>.venv/bin/python</code>→<code>.venv\\Scripts\\python.exe</code>、' +
     '<code>python3</code>→<code>python</code>、<code>which</code>→<code>Get-Command</code>、' +
     '<code>touch</code>→<code>New-Item</code>、<code>mkdir -p</code>→<code>mkdir</code>、' +
-    '<code>&amp;&amp;</code> 拆成两行。' +
-    '<br><b>注意拆行后语义变了</b>:<code>&amp;&amp;</code> 是「前一条成功才跑下一条」,' +
-    '而分两行是「不管成不成都跑」—— 想保留原语义,用 PowerShell 7 或 Git Bash。' +
-    '<br>两类内容<b>不改写</b>:终端框里的「真实输出」(那是 macOS 上的实测记录);' +
-    '以及写进文件的 shell 脚本(git 钩子、heredoc)—— Windows 上 Git 会用 Git Bash 跑它们,原样就是对的。';
+    '<code>A &amp;&amp; B</code>→<code>A; if ($?) { B }</code>。' +
+    '<br><b>为什么不是简单拆成两行</b>:<code>&amp;&amp;</code> 的意思是「前一条成功才跑下一条」。' +
+    '本书有十几条形如 <code>cd &lt;你的项目&gt;/myshop &amp;&amp; git clean -fd</code> 的命令 —— ' +
+    '要是拆成两行,<code>cd</code> 万一失败(路径打错、还没克隆),' +
+    '<b>后面那条破坏性命令就会在你当前所在的目录里执行</b>。' +
+    '<code>if ($?)</code> 正是 PowerShell 5.1 里「前一条成功才跑」的写法,语义与 <code>&amp;&amp;</code> 一致。' +
+    '<br><b>三类内容不改写</b>:终端框里的「真实输出」(macOS 上的实测记录);' +
+    '写进文件的 shell 脚本(git 钩子、heredoc —— Windows 上 Git 会用 Git Bash 跑,原样就对);' +
+    '以及 <code>curl</code> 这类<b>没有等价单命令</b>的调用(PowerShell 5.1 里 <code>curl</code> 是 ' +
+    '<code>Invoke-WebRequest</code> 的别名,参数完全不同 —— 页面里另给 PowerShell 版本)。';
 
-  /* && 拆行,但要避开字符串里的 &&。
-     例如 reason="pip install pytest-playwright && playwright install chromium"
-     是一段 Python 字符串,拆了就把代码改坏了。 */
-  function splitAnd(line) {
-    var out = '', dq = 0, sq = 0;
+  /* A && B  ->  A; if ($?) { B }
+
+     为什么不是简单拆成两行(上一版就是那么干的,那是个安全缺陷):
+       && 的语义是「前一条成功才跑下一条」。本书有 12 条形如
+         cd <你的项目>/myshop && git clean -fd
+       的命令。拆成两行后,cd 失败(路径打错、还没克隆)时,
+       git clean -fd 会在**读者当前所在的任意目录**里执行。
+       对 git reset --hard / git clean / git checkout -- . 这三类,后果不可逆。
+     if ($?) 是 PowerShell 5.1 里等价的「上一条成功才继续」,语义与 && 一致。
+
+     仍然要避开字符串里的 &&:
+       reason="pip install pytest-playwright && playwright install chromium"
+     是一段 Python 字符串,动了就把代码改坏。 */
+  function chainAnd(line) {
+    var parts = [], cur = '', dq = 0, sq = 0;
     for (var k = 0; k < line.length; k++) {
       var c = line[k];
       if (c === '"') dq ^= 1;
       else if (c === "'") sq ^= 1;
       if (!dq && !sq && c === '&' && line[k + 1] === '&') {
-        out = out.replace(/\s+$/, '') + '\n';
+        parts.push(cur.replace(/\s+$/, ''));
+        cur = '';
         k++;
         while (line[k + 1] === ' ') k++;
         continue;
       }
-      out += c;
+      cur += c;
     }
-    return out;
+    parts.push(cur);
+    if (parts.length < 2) return line;
+
+    /* 保留原缩进,右结合嵌套成 A; if ($?) { B; if ($?) { C } } */
+    var indent = (parts[0].match(/^\s*/) || [''])[0];
+    var rest = parts.slice(1).map(function (x) { return x.replace(/^\s*/, ''); });
+    var tail = rest[rest.length - 1];
+    for (var j = rest.length - 2; j >= 0; j--) {
+      tail = rest[j] + '; if ($?) { ' + tail + ' }';
+    }
+    return indent + parts[0].replace(/^\s*/, '') + '; if ($?) { ' + tail + ' }';
   }
 
   function toWin(t) {
@@ -74,7 +100,7 @@
            .replace(/(^|\s)touch(\s+)/g, '$1New-Item -ItemType File$2')
            .replace(/mkdir -p /g, 'mkdir ')
            .replace(/(^|\s)ls -a(?=\s|$)/g, '$1ls -Force');
-      return splitAnd(L);
+      return chainAnd(L);
     }).join('\n');
   }
 

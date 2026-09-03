@@ -441,7 +441,10 @@ def _selftest():
     for tag, p, 期望 in (("坏样本", bad, 3), ("好样本(已修)", good, 0)):
         print(f"\n===== {tag}: {p or '(无基线)'}")
         if not (p and os.path.exists(p)):
+            # 打印了「不当作通过」却不累加 坏,返回值仍是 0 —— 话说了,没做到。
+            # layout_rules/README 那句承诺也就成了空的。2026-09-03 复核抓到。
             print("  (样本不在,跳过真值段 —— 不当作通过)")
+            坏 += 1
             continue
         res = _run(p)
         坏 += 0 if len(res) == 期望 else 1

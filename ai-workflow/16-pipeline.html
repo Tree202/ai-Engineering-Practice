@@ -250,7 +250,7 @@
 <table>
 <thead><tr><th style="width:7%">关卡</th><th style="width:14%">在哪</th><th style="width:28%">谁触发</th><th>能不能跳过</th></tr></thead>
 <tbody>
-<tr><td><strong>&#9312;</strong></td><td>本地</td><td>你打字(编辑器自动)</td><td>自动的,想跳也跳不掉</td></tr>
+<tr><td><strong>&#9312;</strong></td><td>本地</td><td>你打字(编辑器自动)</td><td>能跳 —— 关掉编辑器的自动检查即可(默认开着,所以平时感觉不到)</td></tr>
 <tr><td><strong>&#9313;</strong></td><td>本地</td><td>你 / AI 敲命令</td><td>能,你不跑就不跑</td></tr>
 <tr><td><strong>&#9314;</strong></td><td>本地</td><td>存档时(提交钩子)</td><td style="color:var(--warn)"><strong>能</strong> —— 加一个参数就绕过</td></tr>
 <tr><td><strong>&#9315;</strong></td><td>本地</td><td>推送时(推送钩子)</td><td style="color:var(--warn)"><strong>能</strong> —— 同上</td></tr>
@@ -314,7 +314,7 @@
 </div>
 
 <h2 id="hook">四、本地钩子(git hooks):能被一个参数绕过</h2>
-<p style="color:var(--faint);font-size:13.5px;margin:-4px 0 10px">这一节说的是 <strong>git 钩子</strong>(放在 <code>.git/hooks/</code>,管提交)。Claude Code 自己还有一套同名的<strong>生命周期钩子</strong>(写在 <code>settings.json</code> 里,管 Claude 的行为),见姊妹课 <a href="../kb/05-choose-where.html#s3">知识库第 05 章</a> —— 两套机制,同一个词。</p>
+<p style="color:var(--faint);font-size:13.5px;margin:-4px 0 10px">这一节说的是 <strong>git 钩子</strong>(放在 <code>.git/hooks/</code>,管提交)。Claude Code 自己还有一套同名的<strong>生命周期钩子</strong>(写在 <code>settings.json</code> 里,管 Claude 的行为),见姊妹课 <a href="../kb/05-choose-where.html#s1">知识库第 05 章第 1 节</a> —— 两套机制,同一个词。</p>
 
 <div class="term">
   <div class="term-h"><span class="zh">提交钩子</span><span class="en">pre-commit hook</span><span class="badge">本地</span></div>
@@ -606,7 +606,7 @@ jobs:
 <tr><td>163</td><td><strong>为什么跑两遍</strong></td><td>本地为「快」,云端为「不可绕过」</td></tr>
 <tr><td>164</td><td>&#128293; 一个参数绕过本地钩子</td><td>真机实测:检查框根本没打印</td></tr>
 <tr><td>165</td><td>「在我机器上是好的」</td><td>云端是唯一的权威裁判</td></tr>
-<tr><td>166</td><td>&#128293; <strong>两个环境结论一致</strong></td><td>darwin/3.9.6 vs Linux/3.12.13,一字不差</td></tr>
+<tr><td>166</td><td>&#128293; <strong>两个环境结论一致</strong></td><td>darwin/3.9.6 vs Linux/3.12.x,一字不差</td></tr>
 <tr><td>167</td><td>&#128260; 钩子管理框架</td><td>钩子标识符已更名,老写法是遗留别名</td></tr>
 <tr><td>168</td><td>手写钩子</td><td>返回 0 放行,非 0 拦下;<strong>钩子不进版本控制</strong></td></tr>
 <tr><td>169</td><td><strong>快速失败</strong></td><td>便宜的先跑,像机场安检</td></tr>

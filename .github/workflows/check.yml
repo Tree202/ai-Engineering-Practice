@@ -1,6 +1,6 @@
 # 教程仓库自己的门禁 —— 消费巡检脚本的退出码。
 #
-# 五步都在云端跑。曾经只跑前两步,注释里给的理由是「check_layout 需要本机
+# 两个作业都在云端跑:site 五步 + cross-repo 三步。曾经只跑前两步,注释里给的理由是「check_layout 需要本机
 # 只读基线,云端没有」—— 第三轮核验发现这个理由不成立:脚本本来就有
 # --allow-missing-baseline,真正卡住的是无基线时退出码恒为非零(干净退 2、
 # 有发现退 1),永远拿不到绿灯。现在把两页真值样本随仓库发布
@@ -56,7 +56,14 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
-      - name: 取配套项目（公开仓库，只读）
-        run: git clone --depth 1 https://github.com/Tree202/myshop-gate-demo.git _myshop
+      # 钉住提交而不是取当时的 main：同一个教程提交必须每次都得到同样的结论。
+      # 取 main 的话，myshop 那边一改，昨天绿的提交今天就可能红 —— 那不叫门禁。
+      - name: 取配套项目（公开仓库，只读，钉在 tools/myshop.pin）
+        run: |
+          git clone --filter=blob:none --no-checkout https://github.com/Tree202/myshop-gate-demo.git _myshop
+          cd _myshop
+          git checkout "$(grep -v '^#' ../tools/myshop.pin | tr -d '[:space:]')"
       - name: 教程 ↔ 配套项目一致性
         run: python tools/check_crossrepo.py _myshop
+      - name: 发布物与配套项目一致（myshop-source.zip 不许漂移）
+        run: python tools/build_zip.py --check
