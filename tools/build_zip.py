@@ -41,12 +41,22 @@ OUT = os.path.join(ROOT, "myshop-source.zip")
 禁止 = (".venv", "__pycache__", ".git/", ".db", ".pytest_cache", ".mypy_cache", ".ruff_cache")
 
 
-def check_zip() -> int:
+def check_zip(ms: str = None) -> int:
     """只读校验:zip 里每个条目的内容,是否与 myshop/ 磁盘上的当前文件逐字节相同。
 
     这是门禁调用的入口 —— 它不写盘,只回答一个问题:
     「读者现在下载到的那个包,是不是仓库的当前状态?」
     """
+    # myshop/ 被 .gitignore,CI 的 checkout 里根本没有它 —— 所以要能从命令行
+    # 指到 clone 下来的那一份。**目录不在就退 2,不许静默说「一致」**:
+    # 第一版没有这个分支,CI 里每个文件都 os.path.exists() 为假、全部 continue,
+    # 最后打印「发布物与 myshop/ 一致」退 0 —— 我在修「静默报绿」这一族的过程中,
+    # 又新造了一个同族缺陷。2026-09-03 加完门禁当场自查发现。
+    ms = ms or MS
+    if not os.path.isdir(ms):
+        print("找不到配套项目目录,无法校验发布物:", ms)
+        print("CI 里请传 clone 下来的那一份:python tools/build_zip.py --check _myshop")
+        return 2
     if not os.path.exists(OUT):
         print("发布物不存在:", OUT)
         return 1
@@ -62,8 +72,11 @@ def check_zip() -> int:
             坏.append("zip 里多了条目:%s" % x)
         for rel in 白名单:
             名 = "myshop/" + rel
-            src = os.path.join(MS, rel.replace("/", os.sep))
-            if 名 not in names or not os.path.exists(src):
+            src = os.path.join(ms, rel.replace("/", os.sep))
+            if not os.path.exists(src):
+                坏.append("配套项目里缺文件:%s" % rel)
+                continue
+            if 名 not in names:
                 continue
             a = hashlib.sha256(z.read(名)).hexdigest()
             b = hashlib.sha256(open(src, "rb").read()).hexdigest()
@@ -82,7 +95,8 @@ def check_zip() -> int:
 
 def main() -> int:
     if "--check" in sys.argv[1:]:
-        return check_zip()
+        其余 = [a for a in sys.argv[1:] if a != "--check"]
+        return check_zip(其余[0] if 其余 else None)
     # 先写临时文件,校验通过后才原子改名顶掉旧包。
     # 旧写法直接写 OUT:少一个文件就 return 1,而那时旧包已经被清空了 ——
     # 「拒绝打包」实际留下的是一个合法但残缺的短包。第三轮核验指出的。

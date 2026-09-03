@@ -66,4 +66,4 @@ jobs:
       - name: 教程 ↔ 配套项目一致性
         run: python tools/check_crossrepo.py _myshop
       - name: 发布物与配套项目一致（myshop-source.zip 不许漂移）
-        run: python tools/build_zip.py --check
+        run: python tools/build_zip.py --check _myshop
