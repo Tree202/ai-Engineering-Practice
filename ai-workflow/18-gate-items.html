@@ -644,11 +644,20 @@ on:
     branches: [main]
   pull_request:
 
+# 下面两段 + job 里的 timeout-minutes 是「加了没代价」的三样,不需要权衡,直接抄:
+permissions:
+  contents: read           # 令牌只读。万一某个 action 被投毒,它能干的事就少得多
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true # 同一分支连推三次,自动取消前两条,不白跑
+
 jobs:
   gate:
     name: 三道检查            # 这个名字要和合并保护规则里填的一字不差
                               # (建规则时是三道;后来加到四道,名字故意不改 —— 改名会和已绑定的保护规则脱钩)
     runs-on: ubuntu-latest
+    timeout-minutes: 10      # 卡住的任务默认能跑六小时,早点掐掉
 
     steps:
       - uses: actions/checkout@v7
@@ -712,9 +721,8 @@ jobs:
   </div>
   <p style="margin:9px 0 0"><strong>四条硬门禁,零个阈值需要拍板,十分钟配完。这就是「先上硬门禁」的意思。</strong></p>
   <p style="margin:9px 0 0"><em>另有三样是「加了没代价」的,所以不在上表里</em> ——
-  <code>permissions: contents: read</code>(令牌只读)、<code>concurrency</code>(同分支新推送自动取消旧的)、
-  <code>timeout-minutes</code>(卡住的任务默认能跑六小时)。这三样不需要权衡,直接加进配置就行;
-  本书配套项目的 <code>ci.yml</code> 已经带上了。</p>
+  <code>permissions: contents: read</code>、<code>concurrency</code>、<code>timeout-minutes</code> —— 它们不需要权衡,所以<strong>已经写进上面那份配置里了</strong>;
+  本书配套项目的 <code>ci.yml</code> 带着同样三行,第 <a class="pg" href="19-gate-demo.html">19</a> 页那个真机演示跑的就是它。</p>
 </div>
 
 <h3>本页知识点回顾</h3>

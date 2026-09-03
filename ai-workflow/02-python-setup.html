@@ -268,8 +268,12 @@ git version 2.39.5 (Apple Git-154)
   <br><br>
   &#9314; <strong>命令连接符 <code>&amp;&amp;</code></strong>:本书很多命令写成
   <code>A &amp;&amp; B</code>(A 成功才跑 B)。<strong>Windows PowerShell 5.1（系统自带那个）不支持 <code>&amp;&amp;</code></strong>,
-  会直接报语法错误。三条出路:<b>分两行分别跑</b>(最稳)、用 <code>;</code> 连接
-  (不管前一条成不成功都会跑后一条)、或装 <b>PowerShell 7</b>(<code>pwsh</code>,支持 <code>&amp;&amp;</code>)。
+  会直接报语法错误。<strong>等价写法是 <code>A; if ($?) { B }</code></strong> —— <code>$?</code> 是「上一条成功了没有」,语义和 <code>&amp;&amp;</code> 完全一样;
+  三条命令就嵌套:<code>A; if ($?) { B; if ($?) { C } }</code>。
+  装了 <b>PowerShell 7</b>(<code>pwsh</code>)则直接支持 <code>&amp;&amp;</code>,不用换写法。
+  <br><strong>&#9888; 别图省事拆成两行,也别只用 <code>;</code> 连</strong> —— 那都变成「不管前一条成不成都跑」。
+  本书里有 <code>cd &lt;你的项目&gt;/myshop &amp;&amp; git reset --hard HEAD</code> 这样的命令,
+  <code>cd</code> 一旦失败(路径打错、还没克隆),后面那条<strong>就在你当前所在的目录里执行</strong>。
   <br><br>
   &#9315; <strong>没装 git 的话</strong>:macOS 自带;Windows 到 <code>git-scm.com</code> 下载安装包,
   一路下一步即可(它会顺带装上 Git Bash —— 在那个终端里 <code>&amp;&amp;</code> 和 <code>which</code> 都能用,
