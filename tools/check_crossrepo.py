@@ -115,6 +115,64 @@ def run_checks(ms):
             真查 = any(re.search(形, L) and not re.search(r"--(?:version|help)\b", L) for L in 行)
             check("CI 里真的把 %s 当门禁跑(不是 --version)" % 工具, True, 真查)
 
+    # ---------- 4b. 第 18 页第九节那份 YAML ↔ 真实 ci.yml 的骨架 ----------
+    # 为什么要有这一节:上面第 3、4 节只查了任务名和三条门禁命令,
+    # 而第 18 页第九节是「可以直接抄」的完整配置 —— 读者抄下来的那份,
+    # 应该和第 19 页真机演示跑的那份是同一个骨架。
+    #
+    # 这个洞是用户问「教程跟上了吗」时暴露的:给真实 ci.yml 加了
+    # permissions / concurrency / timeout-minutes 之后,第 18 页那份三样都没有,
+    # 而所有工具都报绿 —— 因为在此之前没有任何东西在比这两份配置。
+    #
+    # 只比**骨架**,不比逐字。两边刻意不同的地方有两处,都不该报:
+    #   · 第 18 页多一道「门禁 3 · P0 核心用例」(第 19 页用「三道检查版」这个限定语说明了)
+    #   · step 的 name 措辞不同(教程「门禁 1 · 代码规范」,真实「门禁 1 · ruff 代码规范」)
+    t18 = read(os.path.join(AW, "18-gate-items.html"))
+    m18 = re.search(r"# 文件:&lt;你的项目&gt;/\.github/workflows/ci\.yml(.*?)</code></pre>",
+                    t18, re.S)
+    if not m18:
+        check("第 18 页第九节还能找到那份 ci.yml", True, False)
+    else:
+        y18 = (m18.group(1).replace("&lt;", "<").replace("&gt;", ">")
+               .replace("&amp;", "&").replace("&quot;", '"'))
+        y18 = re.sub(r"<[^>]+>", "", y18)
+
+        def 骨架(文本):
+            """抽出配置的骨架事实;先去掉行尾注释,再逐项取值。"""
+            净 = "\n".join(re.sub(r"\s+#.*$", "", L) for L in 文本.split("\n"))
+            取 = lambda p, g=1: (re.search(p, 净, re.M).group(g)
+                                 if re.search(p, 净, re.M) else None)
+            return {
+                "顶层键": tuple(sorted(set(re.findall(r"^([a-z_-]+):", 净, re.M)))),
+                "令牌只读": bool(re.search(r"^permissions:\s*$\n\s*contents:\s*read\s*$", 净, re.M)),
+                "并发取消": bool(re.search(r"^concurrency:", 净, re.M))
+                            and bool(re.search(r"cancel-in-progress:\s*true", 净)),
+                "并发分组": bool(re.search(r"group:\s*\$\{\{\s*github\.workflow\s*\}\}", 净)),
+                "超时分钟": 取(r"^\s{4}timeout-minutes:\s*(\d+)"),
+                "任务名": 取(r"^\s{4}name:\s*(.+?)\s*$"),
+                "跑在": 取(r"^\s{4}runs-on:\s*(\S+)"),
+                "触发": (bool(re.search(r"^\s*push:", 净, re.M)),
+                        bool(re.search(r"^\s*pull_request:", 净, re.M)),
+                        bool(re.search(r"branches:\s*\[main\]", 净))),
+                "动作版本": tuple(sorted(re.findall(r"uses:\s*(actions/[\w-]+@[\w.]+)", 净))),
+                "Python": 取(r"python-version:\s*'?([\d.]+)'?"),
+                "装的工具": tuple(sorted((取(r"run:\s*pip install\s+(.+?)\s*$") or "").split())),
+                "门禁命令": tuple(re.findall(
+                    r"^\s*run:\s*((?:ruff check|mypy|pytest)\b.*?)\s*$", 净, re.M)),
+            }
+
+        教程侧, 真实侧 = 骨架(y18), 骨架(y)
+        for 键 in ("顶层键", "令牌只读", "并发取消", "并发分组", "超时分钟",
+                  "任务名", "跑在", "触发", "动作版本", "Python", "装的工具"):
+            check("18 页配置 ↔ 真实 ci.yml:%s" % 键, 真实侧[键], 教程侧[键])
+
+        # 门禁命令:真实那份跑的每一条,第 18 页都必须有;
+        # 反过来第 18 页允许多出来的,只有那道刻意的 P0。
+        check("18 页没漏掉真实门禁跑的命令", [],
+              [c for c in 真实侧["门禁命令"] if c not in 教程侧["门禁命令"]])
+        check("18 页比真实多出来的 = 只有那道 P0", ["pytest -m p0 -q"],
+              [c for c in 教程侧["门禁命令"] if c not in 真实侧["门禁命令"]])
+
     # ---------- 5. 四层测试文件都在 ----------
     for rel in ("myshop/price.py", "myshop/order.py", "myshop/api.py", "myshop/web.py",
                 "tests/test_price.py", "tests/test_order.py", "tests/test_api.py",
