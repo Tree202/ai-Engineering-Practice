@@ -20,10 +20,12 @@
 """
 
 import glob
+import html
 import io
 import os
 import re
 import sys
+import tomllib
 
 try:
     sys.stdout.reconfigure(encoding="utf-8")
@@ -37,6 +39,93 @@ AW = os.path.join(ROOT, "ai-workflow")
 def read(p):
     with io.open(p, encoding="utf-8", errors="replace") as fh:
         return fh.read()
+
+
+def 检查照抄的配置(ms, check):
+    """第 6 节单独成函数,是为了让 `tools/tests` 能拿合成夹具直接调用它。
+
+    写在 run_checks 里的话,想测它就得把 1–5 节的夹具全造一遍 —— 结果就是
+    「不好测」变成「不测」。本仓库栽在「检查器自己没人测」上不止一次,
+    所以这里宁可多一层函数。check 是打印兼记账的回调,由调用方传进来。
+    """
+    # ---------- 6. 教程里那两份「照抄进项目」的配置 ↔ 真实文件 ----------
+    # 为什么要有这一节:第 2 页第五节的 pyproject.toml 写着「把下面的内容**整个粘进去**」,
+    # 第 11 页第四节的 .gitignore 写着「在项目根目录建 .gitignore」—— 两份都是
+    # **读者会照抄成项目文件**的东西,却一直没有任何东西在比它们。
+    # 2026-09-03 那次人肉全量比对,一口气从这个缺口里挖出四处不一致(「待修清单」C3/C4):
+    # 教程更新过 .gitignore 四处、项目没跟;项目的 pyproject 多两段教程没有的配置。
+    #
+    # 比的是**语义**,不是逐字:
+    #   · pyproject 两边各用 tomllib 解析一遍,比展平后的键值 ——
+    #     注释怎么写、键怎么排、缩进几格,都不该报(教程那份的注释是去术语化过的)。
+    #   · .gitignore 没有解析器,就比「去掉注释与空行之后的模式序列」。
+    #     **按序**比:`!` 反向放行必须排在对应忽略规则之后,顺序在这里是有意义的。
+    def 取代码块(页, 关键词):
+        """取出该页里唯一同时含全部关键词的 <pre><code> 块,反转义后返回纯文本。
+
+        命中 0 个或 2 个以上都返回 None —— 让调用方报成失败。
+        「正则没匹配到就当没问题」是本仓库修过好几轮的那一族缺陷。"""
+        块 = re.findall(r"<pre[^>]*>\s*<code[^>]*>(.*?)</code>\s*</pre>",
+                       read(os.path.join(AW, 页)), re.S)
+        中 = [b for b in 块 if all(k in b for k in 关键词)]
+        if len(中) != 1:
+            return None
+        return html.unescape(re.sub(r"<[^>]*>", "", 中[0]))
+
+    def 展平(d, 前=""):
+        出 = {}
+        for k, v in d.items():
+            键 = 前 + "." + k if 前 else k
+            if isinstance(v, dict):
+                出.update(展平(v, 键))
+            else:
+                出[键] = v
+        return 出
+
+    # --- 6a. pyproject.toml(第 2 页第五节 ↔ 项目根)---
+    教程份 = 取代码块("02-python-setup.html",
+                    ["[project]", "[tool.pytest.ini_options]", "[tool.ruff]"])
+    真实份 = os.path.join(ms, "pyproject.toml")
+    if 教程份 is None:
+        check("02 页第五节还能找到那份 pyproject.toml", True, False)
+    elif not os.path.isfile(真实份):
+        check("配套项目有 pyproject.toml", True, False)
+    else:
+        try:
+            教, 实 = 展平(tomllib.loads(教程份)), 展平(tomllib.loads(read(真实份)))
+        except tomllib.TOMLDecodeError as e:
+            check("两份 pyproject.toml 都解析得动", True, "解析失败:%s" % e)
+        else:
+            check("02 页 pyproject 没漏掉真实文件里的配置项", [],
+                  sorted(k for k in 实 if k not in 教))
+            check("02 页 pyproject 没多出真实文件没有的配置项", [],
+                  sorted(k for k in 教 if k not in 实))
+            check("02 页 pyproject 每个配置项的值都与真实文件相同", [],
+                  sorted(k for k in set(教) & set(实) if 教[k] != 实[k]))
+
+    # --- 6b. .gitignore(第 11 页第四节 ↔ 项目根)---
+    教程份 = 取代码块("11-git-basics.html", ["__pycache__/", ".ruff_cache/"])
+    真实份 = os.path.join(ms, ".gitignore")
+    if 教程份 is None:
+        check("11 页第四节还能找到那份 .gitignore", True, False)
+    elif not os.path.isfile(真实份):
+        check("配套项目有 .gitignore", True, False)
+    else:
+        def 模式序列(文本):
+            return [L.strip() for L in 文本.split("\n")
+                    if L.strip() and not L.strip().startswith("#")]
+
+        教, 实 = 模式序列(教程份), 模式序列(read(真实份))
+        check("11 页 .gitignore 的模式序列 = 真实文件", 实, 教)
+
+        # 行尾注释是**失效写法**:.gitignore 只认「整行以 # 开头」的注释,
+        # `myshop.db  # 本项目跑测试会生成它` 会被当成一个带空格和井号的**文件名**,
+        # 那条忽略规则等于白写。2026-09-04 在临时仓库实测定罪 ——
+        # 教程那一份原来就是这么写的,而 myshop.db 真的没被忽略(git status 里是 ??)。
+        # 两侧都查:任何一侧写回去,这里都要红。
+        for 侧, 行们 in (("11 页那份", 教), ("真实 .gitignore", 实)):
+            check("%s 里没有行尾注释(那是失效写法)" % 侧, [],
+                  [L for L in 行们 if re.search(r"\s#", L)])
 
 
 def run_checks(ms):
@@ -172,6 +261,8 @@ def run_checks(ms):
               [c for c in 真实侧["门禁命令"] if c not in 教程侧["门禁命令"]])
         check("18 页比真实多出来的 = 只有那道 P0", ["pytest -m p0 -q"],
               [c for c in 教程侧["门禁命令"] if c not in 真实侧["门禁命令"]])
+
+    检查照抄的配置(ms, check)
 
     # ---------- 5. 四层测试文件都在 ----------
     for rel in ("myshop/price.py", "myshop/order.py", "myshop/api.py", "myshop/web.py",

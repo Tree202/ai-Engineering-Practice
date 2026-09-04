@@ -1,6 +1,6 @@
 # 教程仓库自己的门禁 —— 消费巡检脚本的退出码。
 #
-# 两个作业都在云端跑:site 五步 + cross-repo 三步。曾经只跑前两步,注释里给的理由是「check_layout 需要本机
+# 两个作业都在云端跑:site 六步 + cross-repo 三步。曾经只跑前两步,注释里给的理由是「check_layout 需要本机
 # 只读基线,云端没有」—— 第三轮核验发现这个理由不成立:脚本本来就有
 # --allow-missing-baseline,真正卡住的是无基线时退出码恒为非零(干净退 2、
 # 有发现退 1),永远拿不到绿灯。现在把两页真值样本随仓库发布
@@ -12,6 +12,10 @@
 #   「检查器静默变成空操作、门禁照样报绿」——把 ai-workflow/ 改个名就能拿到
 #   RESULT: PASS。绿灯只证明「这次没报错」,不证明「检查器还在干活」。
 #   合成夹具测试就是用来证明后者的:测试在修复前的版本上必须红。
+#
+# 指纹巡检那一步(第五步)补的是另一个洞:.gitattributes 写着「字节必须与变更清单里的
+#   SHA-256 一致」,而在 2026-09-04 之前没有任何东西在核它 —— 那一轮改完 14 个成品
+#   文件,表里 15 行全部还是旧指纹,七道门禁照样全绿。写明的契约 + 零门禁 = 静默烂掉。
 name: checks
 on: [push, pull_request]
 permissions:
@@ -40,6 +44,8 @@ jobs:
             echo "--- $f ---"
             python "$f" > /dev/null || { echo "自测失败:$f"; exit 1; }
           done
+      - name: 指纹登记表（变更清单附录 SHA-256 ↔ 磁盘字节）
+        run: python tools/check_fingerprints.py
       - name: 检查器自己的测试（合成夹具）
         run: python -m unittest discover -s tools/tests -p 'test_*.py' -v
 
