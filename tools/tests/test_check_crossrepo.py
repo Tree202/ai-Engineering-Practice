@@ -203,5 +203,183 @@ testpaths = ["tests"]
         self.assertIn("两份 pyproject.toml 都解析得动", 失败项(记))
 
 
+HELPER = '''"""模块 docstring。"""
+
+import pytest
+
+
+@pytest.mark.p0
+def test_甲(x: int) -> None:
+    """函数 docstring。"""
+    # 一句注释
+    assert x == 1
+
+
+def test_乙() -> None:
+    assert True
+'''
+
+
+class 代码块夹具:
+    """假的 ai-workflow/(几页 HTML)+ 假的 myshop/(几个真文件)。"""
+
+    def __init__(self, 目录, 页面, 文件):
+        self.dir = Path(目录)
+        aw, ms = self.dir / "aw", self.dir / "ms"
+        aw.mkdir(parents=True, exist_ok=True)
+        for 名, 内容 in 页面.items():
+            (aw / 名).write_text(内容, encoding="utf-8")
+        for rel, 内容 in 文件.items():
+            p = ms / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(内容, encoding="utf-8")
+        self.aw, self.ms = str(aw), str(ms)
+
+
+def 代码块页(头, 体):
+    return "<html><pre><code>" + 头 + "\n" + body_escape(体) + "</code></pre></html>"
+
+
+def body_escape(s):
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def 跑块(f, 哪个="块"):
+    记 = []
+
+    def check(名, 期望, 实际):
+        记.append((名, 期望, 实际, 期望 == 实际))
+
+    旧 = cr.AW
+    cr.AW = f.aw
+    try:
+        (cr.检查照抄的代码块 if 哪个 == "块" else cr.检查跳过行的行号)(f.ms, check)
+    finally:
+        cr.AW = 旧
+    return 记
+
+
+class TestCodeBlocks(unittest.TestCase):
+    """第 7 节:教程贴出来的「文件」 ↔ 配套项目里的真文件。"""
+
+    def test_一致时不报(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/t.py", HELPER)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertTrue(记)
+        self.assertEqual([], 失败项(记), 记)
+
+    def test_少一行可执行代码要报(self):
+        """C2 的回归锁:07 页那块当年就是少了一行 @pytest.mark.p0。"""
+        with tempfile.TemporaryDirectory() as d:
+            少 = HELPER.replace("@pytest.mark.p0\n", "")
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/t.py", 少)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertTrue(any("逐行相等" in n for n in 失败项(记)), 失败项(记))
+
+    def test_注释与docstring不同不该报(self):
+        with tempfile.TemporaryDirectory() as d:
+            改 = (HELPER.replace('"""模块 docstring。"""', '"""换个说法。"""')
+                       .replace("# 一句注释", "# 完全不同的注释")
+                       .replace('"""函数 docstring。"""', '"""去术语化的说法。"""'))
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/t.py", 改)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertEqual([], 失败项(记), 记)
+
+    def test_节选里出现真实文件没有的代码要报(self):
+        """探路时真抓到过:07 页 test_api 节选把类型标注删了,于是不是子序列。"""
+        with tempfile.TemporaryDirectory() as d:
+            改 = HELPER.replace("def test_甲(x: int) -> None:", "def test_甲(x):")
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/t.py (节选)", 改)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertTrue(any("按序" in n for n in 失败项(记)), 失败项(记))
+
+    def test_节选少东西不报(self):
+        with tempfile.TemporaryDirectory() as d:
+            少 = HELPER.replace("def test_乙() -> None:\n    assert True\n", "")
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/t.py (节选)", 少)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertEqual([], 失败项(记), 记)
+
+    def test_diff块不当文件比(self):
+        with tempfile.TemporaryDirectory() as d:
+            diff = "- return 1\n+ return 2\n"
+            f = 代码块夹具(d, {"08-x.html": 代码块页("# 文件:tests/t.py", diff)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        # diff 块不比对,但「扫到了代码块」那条仍要通过
+        self.assertEqual([], 失败项(记), 记)
+
+    def test_找不到真实文件要报(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/查无此人.py", HELPER)},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertTrue(any("找得到" in n for n in 失败项(记)), 失败项(记))
+
+    def test_解析失败要报而不是崩(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = 代码块夹具(d, {"07-x.html": 代码块页("# 文件:tests/t.py", "def 坏(:\n")},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertTrue(any("解析得动" in n for n in 失败项(记)), 失败项(记))
+
+    def test_一块都没扫到要报(self):
+        """头行写法一改、正则失配,旧写法会一声不吭地全绿。"""
+        with tempfile.TemporaryDirectory() as d:
+            f = 代码块夹具(d, {"07-x.html": "<html>没有任何代码块</html>"},
+                          {"tests/t.py": HELPER})
+            记 = 跑块(f)
+        self.assertTrue(any("扫到了" in n for n in 失败项(记)), 失败项(记))
+
+
+E2E = '''import pytest
+
+# 这一行是注释,里面故意写了 importorskip 这个词
+pytest.importorskip(
+    "playwright.sync_api",
+    reason="E2E 需要",
+)
+'''
+
+
+class TestSkipLineNo(unittest.TestCase):
+    """第 7b 节:SKIPPED 行号 ↔ importorskip 的真实行号。"""
+
+    def 造(self, d, 行号):
+        return 代码块夹具(
+            d,
+            {"07-x.html": "<html><pre>SKIPPED [1] tests/e2e/test_checkout_e2e.py:%d: E2E</pre></html>" % 行号},
+            {"tests/e2e/test_checkout_e2e.py": E2E})
+
+    def test_行号对时不报(self):
+        with tempfile.TemporaryDirectory() as d:
+            记 = 跑块(self.造(d, 4), "行号")      # ast:调用起于第 4 行
+        self.assertEqual([], 失败项(记), 记)
+
+    def test_行号过期要报(self):
+        """C1 的回归锁:教程写 :23,而真实早就挪到 :28 了。"""
+        with tempfile.TemporaryDirectory() as d:
+            记 = 跑块(self.造(d, 23), "行号")
+        self.assertTrue(失败项(记), 记)
+
+    def test_不能被含关键词的注释骗走(self):
+        """陷阱:第 3 行是含 importorskip 字样的注释,grep|head -1 会数成 3。"""
+        with tempfile.TemporaryDirectory() as d:
+            记 = 跑块(self.造(d, 3), "行号")
+        self.assertTrue(失败项(记), "被注释那行骗走了")
+
+    def test_真实文件缺失要报(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = 代码块夹具(d, {"07-x.html": "<html></html>"}, {"别的.py": "x = 1\n"})
+            记 = 跑块(f, "行号")
+        self.assertTrue(失败项(记), 记)
+
+
 if __name__ == "__main__":
     unittest.main()

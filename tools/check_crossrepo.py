@@ -19,6 +19,7 @@
 退出码:0 = 一致;1 = 有不一致;2 = 找不到配套项目(不当作通过)。
 """
 
+import ast
 import glob
 import html
 import io
@@ -126,6 +127,150 @@ def 检查照抄的配置(ms, check):
         for 侧, 行们 in (("11 页那份", 教), ("真实 .gitignore", 实)):
             check("%s 里没有行尾注释(那是失效写法)" % 侧, [],
                   [L for L in 行们 if re.search(r"\s#", L)])
+
+
+# 教程里贴代码的两条惯例(第 7 节靠它们判断):
+#   · 块的第一行写 `# 文件:<路径>`
+#   · 只摘一部分时,在那一行的路径后面加限定语(「节选」「略」「片段」)
+# 于是:**没有限定语 = 这一块声称它就是那个文件**。第 7 节就按这个字面意思查。
+限定语 = ("节选", "略", "片段")
+文件头 = "# 文件"
+
+
+def 可执行行(源码):
+    """只留可执行代码。
+
+    注释由 ast 天然丢掉;docstring 显式摘掉;最后用 ast.unparse 重新生成,
+    顺带把换行、缩进、括号位置这些格式差异也抹平。
+    **教程那份的注释与 docstring 是刻意去术语化过的,不该报** ——
+    去掉它们之后剩下的东西不一样,才是真的漂移。
+    """
+    树 = ast.parse(源码)
+    for 节点 in ast.walk(树):
+        if isinstance(节点, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            体 = getattr(节点, "body", None)
+            if (体 and isinstance(体[0], ast.Expr)
+                    and isinstance(体[0].value, ast.Constant)
+                    and isinstance(体[0].value.value, str)):
+                节点.body = 体[1:] or [ast.Pass()]
+    return [L for L in ast.unparse(树).split("\n") if L.strip()]
+
+
+def 是有序子序列(小, 大):
+    it = iter(大)
+    return all(any(x == y for y in it) for x in 小)
+
+
+def 代码块们(页文本):
+    """产出该页所有 `# 文件:` 打头的 <pre><code> 块:(头行, 正文)。"""
+    for b in re.findall(r"<pre[^>]*>\s*<code[^>]*>(.*?)</code>\s*</pre>", 页文本, re.S):
+        txt = html.unescape(re.sub(r"<[^>]*>", "", b)).lstrip("\n")
+        头 = txt.split("\n", 1)[0]
+        if 头.startswith(文件头):
+            yield 头, (txt.split("\n", 1)[1] if "\n" in txt else "")
+
+
+def 解析路径(头):
+    """从头行里抠出相对配套项目根的路径;抠不出来返回 None(调用方报失败)。"""
+    m = re.search(r"([\w./<>\-]+\.(?:py|toml|yml|md))", 头)
+    if not m:
+        return None
+    p = re.sub(r"^(<你的项目>|项目根目录下的 |项目根目录)/?", "", m.group(1))
+    return p
+
+
+def 检查照抄的代码块(ms, check):
+    """第 7 节:教程里贴出来的那些「文件」,和配套项目里的真文件是不是一回事。
+
+    v2.6 的 C1/C2 正是从这个缺口漏出去的 —— 07 页那块 test_order.py 少了一行
+    `@pytest.mark.p0`(唯一的可执行代码差异),而它上面的 lede 写着「把四个测试文件的
+    **完整代码**摊开」。没有任何东西在比,所以躺了不知道多少轮。
+
+    两条判据:
+      · 每一块(含节选)都必须是真实文件可执行行的**有序子序列** ——
+        节选里出现真实文件没有的代码,就是漂移。
+      · **没有限定语**的块还必须**逐行相等** —— 它声称自己就是那个文件。
+
+    不比的两类,都会明着打印出来、计入统计,不做静默跳过:
+      · diff 块(正文里有 `- ` / `+ ` 开头的行):那是「把这行改成那行」的演示,不是文件
+      · 非 .py:pyproject.toml 与 ci.yml 由第 6 节和第 4b 节各自负责;
+        CLAUDE.md / step.md 在配套项目里根本不存在
+    """
+    统计 = {"比对": 0, "diff": 0, "非py": 0}
+    for 页 in sorted(f for f in os.listdir(AW) if re.match(r"^\d\d-.*\.html$", f)):
+        for 头, 正文 in 代码块们(read(os.path.join(AW, 页))):
+            标 = "%s 的 `%s`" % (页[:2], 头[len(文件头):].lstrip(":: ")[:46])
+            p = 解析路径(头)
+            if p is None:
+                check("%s 的头行能抠出文件路径" % 标, True, False)
+                continue
+            if not p.endswith(".py"):
+                统计["非py"] += 1
+                continue
+            if any(re.match(r"^[-+] ", L) for L in 正文.split("\n")):
+                统计["diff"] += 1
+                continue
+            真 = next((os.path.join(ms, c.replace("/", os.sep))
+                      for c in (p, re.sub(r"^myshop/", "", p))
+                      if os.path.isfile(os.path.join(ms, c.replace("/", os.sep)))), None)
+            if 真 is None:
+                check("%s 在配套项目里找得到" % 标, True, False)
+                continue
+            try:
+                教, 实 = 可执行行(正文), 可执行行(read(真))
+            except SyntaxError as e:
+                check("%s 两侧都解析得动" % 标, True, "解析失败:%s" % e)
+                continue
+            统计["比对"] += 1
+            check("%s 的可执行行都在真实文件里(按序)" % 标, True, 是有序子序列(教, 实))
+            if not any(k in 头 for k in 限定语):
+                # 只报差异行,不要把整份文件塞进 CI 日志 —— 第一版那么干,
+                # 一块 33 行的文件就刷掉大半屏,真出问题反而找不着。
+                差 = []
+                for i in range(max(len(教), len(实))):
+                    a = 教[i] if i < len(教) else "(教程到此为止)"
+                    b = 实[i] if i < len(实) else "(真实文件到此为止)"
+                    if a != b:
+                        差.append("第%d行 教程=%r 真实=%r" % (i + 1, a, b))
+                check("%s 没有限定语,就必须与真实文件逐行相等" % 标, [], 差[:3])
+
+    # 一块都没扫到 = 头行写法变了、或正则失配。**这种时候不许报绿。**
+    check("扫到了带 `%s` 的代码块" % 文件头, True, sum(统计.values()) > 0)
+    print("  (第 7 节:逐行比对 %d 块,diff 块 %d 不比,非 py %d 由别的节负责)"
+          % (统计["比对"], 统计["diff"], 统计["非py"]))
+
+
+def 检查跳过行的行号(ms, check):
+    """第 7b 节:教程里那条 `SKIPPED [1] tests/e2e/test_checkout_e2e.py:NN` 的行号。
+
+    v2.6 的 C1:教程写 `:23`,而 PR #6 给 docstring 补 Windows 路径后,
+    那个 `pytest.importorskip(` 早就挪到了第 28 行。框上标着「真实输出」,
+    却没有任何东西在核这个数 —— 只能靠人肉比对发现。
+
+    陷阱记在这里:文件里第 26 行是一句**含 "importorskip" 字样的注释**,
+    用 `grep | head -1` 会数成 26。所以这里用 ast 取调用节点的 lineno。
+    """
+    rel = os.path.join("tests", "e2e", "test_checkout_e2e.py")
+    真 = os.path.join(ms, rel)
+    if not os.path.isfile(真):
+        check("配套项目有 tests/e2e/test_checkout_e2e.py", True, False)
+        return
+    行号 = None
+    for 节点 in ast.walk(ast.parse(read(真))):
+        if (isinstance(节点, ast.Call) and isinstance(节点.func, ast.Attribute)
+                and 节点.func.attr == "importorskip"):
+            行号 = 节点.lineno if 行号 is None else min(行号, 节点.lineno)
+    if 行号 is None:
+        check("test_checkout_e2e.py 里找得到 importorskip 调用", True, False)
+        return
+
+    引用 = []
+    for 页 in sorted(f for f in os.listdir(AW) if re.match(r"^\d\d-.*\.html$", f)):
+        for m in re.finditer(r"test_checkout_e2e\.py:(\d+)", read(os.path.join(AW, 页))):
+            引用.append((页[:2], int(m.group(1))))
+    check("教程里引用的 SKIPPED 行号 = importorskip 的真实行号(ast 实测 %d)" % 行号,
+          [], [(页, n) for 页, n in 引用 if n != 行号])
+    print("  (第 7b 节:全书 %d 处引用了那个行号)" % len(引用))
 
 
 def run_checks(ms):
@@ -263,6 +408,9 @@ def run_checks(ms):
               [c for c in 教程侧["门禁命令"] if c not in 真实侧["门禁命令"]])
 
     检查照抄的配置(ms, check)
+
+    检查照抄的代码块(ms, check)
+    检查跳过行的行号(ms, check)
 
     # ---------- 5. 四层测试文件都在 ----------
     for rel in ("myshop/price.py", "myshop/order.py", "myshop/api.py", "myshop/web.py",

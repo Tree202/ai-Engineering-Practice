@@ -342,7 +342,12 @@ def 服务器(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -&gt; Iterator[st
     线程.join(timeout=5)
 
 
-def 发请求(url, method, payload=None, raw_body=None):
+def 发请求(
+    url: str,
+    method: str,
+    payload: Any = None,
+    raw_body: Optional[bytes] = None,
+) -&gt; Tuple[int, Dict[str, Any]]:
     """一个小助手:发一个请求,返回 (状态码, 解析好的数据)。"""
     if raw_body is not None:
         data = raw_body
